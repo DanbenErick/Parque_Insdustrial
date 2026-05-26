@@ -102,7 +102,7 @@ function App() {
           <button onClick={() => setIsMobileMenuOpen(true)} className="p-1 hover:bg-white/10 rounded-lg transition-colors">
             <span className="material-symbols-outlined text-[28px]">menu</span>
           </button>
-          <span className="font-headline-sm font-bold text-primary-fixed">Jicamarca</span>
+          <img src="/logo.png" alt="Jicamarca Logo" className="h-8 w-auto object-contain" />
         </div>
         <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center font-bold text-on-primary">
           AD
@@ -119,9 +119,9 @@ function App() {
 
       {/* SideNavBar */}
       <aside className={`fixed left-0 top-0 h-full w-[280px] md:w-[240px] border-r border-outline-variant flex flex-col p-md gap-sm z-50 bg-surface-dim text-white shadow-2xl transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-        <div className="mb-lg px-xs flex justify-between items-center">
+        <div className="mb-lg px-xs flex justify-between items-start">
           <div>
-            <h1 className="font-headline-sm text-headline-sm font-bold text-primary-fixed">Parque Industrial Jicamarca</h1>
+            <img src="/logo.png" alt="Parque Industrial Jicamarca" className="h-12 w-auto object-contain mb-2 bg-white rounded p-1" />
             <p className="font-body-sm text-body-sm text-white/60">Gestión Industrial</p>
           </div>
           <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden p-2 text-white/70 hover:bg-white/10 rounded-lg">

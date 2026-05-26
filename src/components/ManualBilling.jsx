@@ -275,7 +275,6 @@ const ManualBilling = () => {
           </div>
 
         </div>
-      </div>
     </main>
   );
 };

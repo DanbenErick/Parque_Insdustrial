@@ -61,8 +61,9 @@ const Login = ({ onLogin }) => {
         </section>
 
         {/* Right Side: Login Form */}
-        <section className="p-lg md:p-xl flex flex-col justify-center bg-surface-container-lowest z-10">
-          <div className="mb-xl">
+        <section className="p-lg md:p-xl flex flex-col justify-center bg-surface-container-lowest z-10 relative">
+          <div className="mb-xl text-center md:text-left flex flex-col md:block items-center">
+            <img src="/logo.png" alt="Parque Industrial Jicamarca Logo" className="h-14 w-auto object-contain mb-lg" />
             <h2 className="font-headline-md text-headline-md text-on-surface mb-xs">Acceso al Portal</h2>
             <p className="font-body-sm text-body-sm text-on-surface-variant">Ingrese sus credenciales para continuar al panel de control de Parque Industrial Jicamarca.</p>
           </div>
