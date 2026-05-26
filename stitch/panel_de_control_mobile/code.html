@@ -1,0 +1,346 @@
+<!DOCTYPE html><html class="light" lang="es"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>EnergiCore Peru - Mobile Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-bright": "#f7f9fb",
+                        "primary-fixed-dim": "#6cd3f7",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#191c1e",
+                        "on-primary-fixed": "#001f28",
+                        "on-tertiary-fixed": "#2a1700",
+                        "on-primary-fixed-variant": "#004e61",
+                        "secondary": "#565e74",
+                        "tertiary-container": "#a36700",
+                        "secondary-container": "#dae2fd",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-surface": "#191c1e",
+                        "inverse-surface": "#2d3133",
+                        "inverse-on-surface": "#eff1f3",
+                        "background": "#f7f9fb",
+                        "on-secondary-container": "#5c647a",
+                        "surface-container-high": "#e6e8ea",
+                        "tertiary-fixed-dim": "#ffb95f",
+                        "on-secondary-fixed": "#131b2e",
+                        "outline": "#6e797e",
+                        "surface-dim": "#d8dadc",
+                        "primary": "#00647c",
+                        "tertiary-fixed": "#ffddb8",
+                        "on-surface-variant": "#3e484d",
+                        "surface-container": "#eceef0",
+                        "surface-variant": "#e0e3e5",
+                        "surface-tint": "#006780",
+                        "error-container": "#ffdad6",
+                        "secondary-fixed": "#dae2fd",
+                        "outline-variant": "#bdc8ce",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "on-error": "#ffffff",
+                        "on-primary-container": "#fafdff",
+                        "primary-container": "#007f9d",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#b7eaff",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#e0e3e5",
+                        "on-tertiary": "#ffffff",
+                        "inverse-primary": "#6cd3f7",
+                        "error": "#ba1a1a",
+                        "tertiary": "#825100",
+                        "surface": "#f7f9fb",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#f2f4f6",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "on-tertiary-container": "#fffbff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "md": "16px",
+                        "lg": "24px",
+                        "margin-mobile": "16px",
+                        "sm": "8px",
+                        "gutter": "16px",
+                        "xs": "4px",
+                        "margin-desktop": "32px",
+                        "xl": "32px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-md": ["Hanken Grotesk"],
+                        "label-caps": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "data-mono": ["JetBrains Mono"],
+                        "display": ["Hanken Grotesk"],
+                        "headline-sm": ["Hanken Grotesk"],
+                        "body-sm": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "data-mono": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            background-color: #f7f9fb;
+            font-family: 'Hanken Grotesk', sans-serif;
+        }
+        .bento-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+<!-- TopNavBar -->
+<header class="bg-surface dark:bg-surface-dim border-b border-outline-variant dark:border-outline flex justify-between items-center w-full px-lg h-16 fixed top-0 z-50">
+<div class="flex items-center gap-sm">
+<span class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">Parque Industrial Jicamarca</span>
+</div>
+<div class="flex items-center gap-md">
+<button class="text-on-surface-variant hover:bg-surface-container-low transition-colors cursor-pointer active:opacity-80 p-xs">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-on-surface-variant hover:bg-surface-container-low transition-colors cursor-pointer active:opacity-80 p-xs">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-variant overflow-hidden border border-outline-variant">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A professional headshot of a corporate energy engineer wearing a modern dark navy suit, captured against a clean, high-tech industrial office background. The lighting is bright and high-key, emphasizing a clean light-mode aesthetic. The style is professional and crisp, with a cool-toned corporate color palette of blues and greys." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOHSC5yWaDBDWj44OARIimKUpJvtJpVn9CJfWnh5AX4kX9AP7bZzfoPHOfvMnbIFCSlo4QpN3XunnrFxrR1UkhaIgO6Us0byNw8fpc5SBny1uHgiTAf5Jj7KBKqJ8lm3-Qp6HVbwEJey9g8JGK90ZJ-EwMUJC0BUqVzSdHMg6sbyA26naPn2mOvGppoJF9HAxxt91HDeHs0EcwPkPi2b-FFynlTkX_j_WVC6bSscbQPaTzxJ9VQq405qfRoR0kA8Fsx01YOWl7v_I">
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="flex-1 mt-16 mb-20 px-margin-mobile pt-lg pb-md space-y-lg">
+<!-- Welcome Section -->
+<section>
+<h1 class="font-headline-lg text-headline-lg text-on-surface mb-xs">Panel Principal</h1>
+<p class="font-body-md text-body-md text-on-surface-variant">Estado operativo: <span class="text-primary font-semibold">Óptimo</span></p>
+</section>
+<!-- KPI Bento Grid (Mobile Friendly) -->
+<section class="grid grid-cols-2 gap-md">
+<!-- Consumo Total -->
+<div class="col-span-2 bg-surface-container-lowest border border-outline-variant p-md flex flex-col justify-between">
+<div>
+<div class="flex justify-between items-start mb-sm">
+<span class="font-label-caps text-label-caps text-on-surface-variant">CONSUMO TOTAL</span>
+<span class="material-symbols-outlined text-primary" data-icon="bolt">bolt</span>
+</div>
+<div class="flex items-baseline gap-xs">
+<span class="font-display text-[32px] leading-tight font-bold text-on-surface">1,248.5</span>
+<span class="font-data-mono text-data-mono text-on-surface-variant">kWh</span>
+</div>
+</div>
+<div class="mt-md flex items-center gap-xs">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="trending_up">trending_up</span>
+<span class="font-body-sm text-body-sm text-primary">+4.2% vs mes anterior</span>
+</div>
+</div>
+<!-- Pagos Pendientes -->
+<div class="bg-surface-container-lowest border border-outline-variant p-md">
+<div class="flex justify-between items-start mb-sm">
+<span class="font-label-caps text-label-caps text-on-surface-variant">PAGOS</span>
+<span class="material-symbols-outlined text-tertiary" data-icon="payments">payments</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface">S/ 450.00</div>
+<div class="font-body-sm text-body-sm text-on-error mt-xs bg-error-container/20 px-xs py-[2px] inline-block">Vence en 2d</div>
+</div>
+<!-- Estado Sistema -->
+<div class="bg-surface-container-lowest border border-outline-variant p-md">
+<div class="flex justify-between items-start mb-sm">
+<span class="font-label-caps text-label-caps text-on-surface-variant">SISTEMA</span>
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="font-headline-sm text-headline-sm text-on-surface">ACTIVO</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant mt-xs">Uptime 99.9%</div>
+</div>
+</section>
+<!-- Simplified Chart -->
+<section class="bg-surface-container-lowest border border-outline-variant p-md">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Consumo Diario</h3>
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="more_vert">more_vert</span>
+</div>
+<!-- Mock Chart -->
+<div class="h-32 flex items-end justify-between gap-xs px-xs">
+<div class="w-full bg-primary/20 h-1/2"></div>
+<div class="w-full bg-primary/20 h-3/4"></div>
+<div class="w-full bg-primary/20 h-1/2"></div>
+<div class="w-full bg-primary/20 h-2/3"></div>
+<div class="w-full bg-primary h-full"></div>
+<div class="w-full bg-primary/20 h-1/3"></div>
+<div class="w-full bg-primary/20 h-1/2"></div>
+</div>
+<div class="flex justify-between mt-sm">
+<span class="font-data-mono text-[10px] text-on-surface-variant">LUN</span>
+<span class="font-data-mono text-[10px] text-on-surface-variant">MAR</span>
+<span class="font-data-mono text-[10px] text-on-surface-variant">MIE</span>
+<span class="font-data-mono text-[10px] text-on-surface-variant">JUE</span>
+<span class="font-data-mono text-[10px] text-primary font-bold">VIE</span>
+<span class="font-data-mono text-[10px] text-on-surface-variant">SAB</span>
+<span class="font-data-mono text-[10px] text-on-surface-variant">DOM</span>
+</div>
+</section>
+<!-- Recent Activity List -->
+<section class="bg-surface-container-lowest border border-outline-variant">
+<div class="p-md border-b border-outline-variant">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Actividades Recientes</h3>
+</div>
+<div class="divide-y divide-outline-variant">
+<!-- Activity 1 -->
+<div class="p-md flex items-center gap-md">
+<div class="w-10 h-10 bg-secondary-container flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-on-secondary-container" data-icon="factory">factory</span>
+</div>
+<div class="flex-1">
+<div class="font-body-md text-body-md text-on-surface font-semibold">Pico de carga: Sector A</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Hace 15 minutos</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</div>
+<!-- Activity 2 -->
+<div class="p-md flex items-center gap-md">
+<div class="w-10 h-10 bg-surface-variant flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="update">update</span>
+</div>
+<div class="flex-1">
+<div class="font-body-md text-body-md text-on-surface font-semibold">Mantenimiento preventivo</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Hoy, 08:30 AM</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</div>
+<!-- Activity 3 -->
+<div class="p-md flex items-center gap-md">
+<div class="w-10 h-10 bg-tertiary-fixed flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-on-tertiary-fixed-variant" data-icon="receipt_long">receipt_long</span>
+</div>
+<div class="flex-1">
+<div class="font-body-md text-body-md text-on-surface font-semibold">Nueva factura generada</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant">Ayer, 18:45 PM</div>
+</div>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<button class="w-full py-md font-body-md text-body-md text-primary font-semibold hover:bg-surface-container-low transition-colors">
+                Ver todo el historial
+            </button>
+</section>
+<!-- Quick Actions Grid -->
+<section>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant mb-md">ACCIONES RÁPIDAS</h3>
+<div class="grid grid-cols-4 gap-sm">
+<div class="flex flex-col items-center gap-xs">
+<div class="w-full aspect-square bg-surface-container-highest flex items-center justify-center rounded-xl cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-primary" data-icon="receipt">receipt</span>
+</div>
+<span class="font-body-sm text-[10px] text-center">Facturas</span>
+</div>
+<div class="flex flex-col items-center gap-xs">
+<div class="w-full aspect-square bg-surface-container-highest flex items-center justify-center rounded-xl cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-primary" data-icon="engineering">engineering</span>
+</div>
+<span class="font-body-sm text-[10px] text-center">Soporte</span>
+</div>
+<div class="flex flex-col items-center gap-xs">
+<div class="w-full aspect-square bg-surface-container-highest flex items-center justify-center rounded-xl cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-primary" data-icon="analytics">analytics</span>
+</div>
+<span class="font-body-sm text-[10px] text-center">Exportar</span>
+</div>
+<div class="flex flex-col items-center gap-xs">
+<div class="w-full aspect-square bg-surface-container-highest flex items-center justify-center rounded-xl cursor-pointer active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-primary" data-icon="add">add</span>
+</div>
+<span class="font-body-sm text-[10px] text-center">Equipo</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Footer Status -->
+<footer class="bg-surface-container-highest dark:bg-inverse-surface text-on-surface-variant dark:text-inverse-on-surface font-data-mono text-data-mono flex justify-between items-center px-lg py-xs w-full fixed bottom-16 z-40 border-t border-outline-variant">
+<span class="">Parque Industrial Jicamarca v1.2.4</span>
+<div class="flex gap-md">
+<span class="">Server: Online</span>
+<span class="">24ms</span>
+</div>
+</footer>
+<!-- BottomNavBar (The Shell) -->
+<nav class="fixed bottom-0 left-0 right-0 h-16 bg-surface-container-low dark:bg-surface-container-lowest border-t border-outline-variant flex justify-around items-center z-50">
+<!-- Tab 1: Panel Principal (Active) -->
+<div class="flex flex-col items-center justify-center gap-[2px] px-md py-xs bg-secondary-container text-on-secondary-container font-semibold rounded-lg transition-all duration-200 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-caps text-[10px]">Panel</span>
+</div>
+<!-- Tab 2: Usuarios y Roles -->
+<div class="flex flex-col items-center justify-center gap-[2px] px-md py-xs text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all duration-200 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined" data-icon="manage_accounts">manage_accounts</span>
+<span class="font-label-caps text-[10px]">Usuarios</span>
+</div>
+<!-- Tab 3: Sectores y Equipos -->
+<div class="flex flex-col items-center justify-center gap-[2px] px-md py-xs text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all duration-200 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined" data-icon="factory">factory</span>
+<span class="font-label-caps text-[10px]">Sectores</span>
+</div>
+<!-- Tab 4: Reportes -->
+<div class="flex flex-col items-center justify-center gap-[2px] px-md py-xs text-on-surface-variant hover:bg-surface-variant rounded-lg transition-all duration-200 ease-in-out cursor-pointer">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="font-label-caps text-[10px]">Reportes</span>
+</div>
+</nav>
+<!-- FAB (Contextual for Dashboard) -->
+<div class="fixed bottom-32 right-6 z-40">
+<button class="w-14 h-14 bg-primary text-on-primary rounded-xl shadow-lg flex items-center justify-center active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-3xl" data-icon="bolt">bolt</span>
+</button>
+</div>
+<script>
+        // Micro-interaction for the FAB
+        const fab = document.querySelector('button .material-symbols-outlined[data-icon="bolt"]');
+        if (fab) {
+            setInterval(() => {
+                fab.classList.toggle('opacity-80');
+            }, 1000);
+        }
+
+        // Ripple-like effect for cards on touch
+        document.querySelectorAll('.bg-surface-container-lowest').forEach(card => {
+            card.addEventListener('touchstart', () => {
+                card.style.backgroundColor = 'rgba(0,0,0,0.02)';
+            });
+            card.addEventListener('touchend', () => {
+                card.style.backgroundColor = '';
+            });
+        });
+    </script>
+
+
+</body></html>

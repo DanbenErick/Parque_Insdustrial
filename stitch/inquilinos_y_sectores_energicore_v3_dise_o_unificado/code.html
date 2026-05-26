@@ -1,0 +1,519 @@
+<!DOCTYPE html><html class="light" lang="es"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Sectores y Miembros | Parque Industrial Jicamarca</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#b7eaff",
+                    "on-surface-variant": "#3e484d",
+                    "surface-tint": "#006780",
+                    "inverse-on-surface": "#eff1f3",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#007f9d",
+                    "on-tertiary-fixed": "#2a1700",
+                    "surface": "#f7f9fb",
+                    "error": "#ba1a1a",
+                    "secondary-fixed-dim": "#bec6e0",
+                    "inverse-surface": "#2d3133",
+                    "background": "#f7f9fb",
+                    "on-primary": "#ffffff",
+                    "on-primary-container": "#fafdff",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "outline-variant": "#bdc8ce",
+                    "surface-variant": "#e0e3e5",
+                    "on-surface": "#191c1e",
+                    "surface-bright": "#f7f9fb",
+                    "tertiary": "#825100",
+                    "surface-container-highest": "#e0e3e5",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "surface-container-high": "#e6e8ea",
+                    "inverse-primary": "#6cd3f7",
+                    "on-secondary-fixed": "#131b2e",
+                    "surface-container": "#eceef0",
+                    "secondary": "#565e74",
+                    "error-container": "#ffdad6",
+                    "primary": "#00647c",
+                    "on-primary-fixed": "#001f28",
+                    "tertiary-container": "#a36700",
+                    "secondary-container": "#dae2fd",
+                    "secondary-fixed": "#dae2fd",
+                    "tertiary-fixed": "#ffddb8",
+                    "surface-container-low": "#f2f4f6",
+                    "on-primary-fixed-variant": "#004e61",
+                    "outline": "#6e797e",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "on-secondary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#191c1e",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-container": "#fffbff",
+                    "primary-fixed-dim": "#6cd3f7",
+                    "on-background": "#191c1e",
+                    "on-secondary-container": "#5c647a",
+                    "on-error": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "md": "16px",
+                    "margin-mobile": "16px",
+                    "gutter": "16px",
+                    "lg": "24px",
+                    "margin-desktop": "32px",
+                    "unit": "4px",
+                    "xs": "4px",
+                    "xl": "32px",
+                    "sm": "8px"
+            },
+            "fontFamily": {
+                    "body-sm": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "headline-md": ["Hanken Grotesk"],
+                    "label-caps": ["Hanken Grotesk"],
+                    "data-mono": ["JetBrains Mono"],
+                    "display": ["Hanken Grotesk"],
+                    "headline-sm": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "data-mono": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .zebra-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background font-body-md text-on-surface antialiased flex">
+<!-- SideNavBar - High Contrast -->
+<aside class="fixed left-0 top-0 h-full w-[240px] border-r border-outline-variant flex flex-col p-md gap-sm z-50 bg-surface-dim text-white shadow-2xl">
+<div class="mb-lg px-xs">
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary-fixed flex items-center gap-2"><span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">factory</span>\n            Parque Industrial Jicamarca\n        </h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-white/60">Gestión Industrial</p>
+</div>
+<nav class="flex flex-col gap-xs flex-grow">
+<a class="flex items-center gap-md px-md py-sm text-white/70 hover:bg-white/10 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Panel de Control</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm bg-primary text-on-primary font-semibold rounded-lg transition-all shadow-lg" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">factory</span>
+<span class="font-body-md text-body-md">Miembros y Sectores</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-white/70 hover:bg-white/10 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-body-md text-body-md">Facturación</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-white/70 hover:bg-white/10 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-body-md text-body-md">Pagos Recibidos</span>
+</a>
+</nav>
+<div class="mt-auto pt-md border-t border-white/10 flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-primary-fixed-dim flex items-center justify-center text-on-primary-fixed font-bold text-xs">OP</div>
+<div class="flex flex-col overflow-hidden">
+<span class="font-body-sm text-body-sm font-semibold truncate">Operador de Planta</span>
+<span class="text-[10px] text-white/50 uppercase tracking-wider">Admin Nivel 1</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-[240px] w-full min-h-screen flex flex-col bg-surface">
+<!-- TopNavBar -->
+<header class="sticky top-0 z-40 bg-surface/80 backdrop-blur-md flex justify-between items-center w-full px-lg h-16 border-b border-outline-variant">
+<div class="flex items-center gap-lg flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-lg pl-xl pr-md py-sm font-body-sm focus:ring-1 focus:ring-primary outline-none" placeholder="Buscar miembro o nave..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container-low transition-colors rounded-full text-on-surface-variant">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container-low transition-colors rounded-full text-on-surface-variant">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<button class="flex items-center gap-xs px-md py-sm bg-primary text-on-primary font-semibold rounded-lg hover:opacity-90 transition-all shadow-md ml-md">
+<span class="material-symbols-outlined text-sm">add</span>
+<span class="font-bold">Registrar Nuevo Miembro</span>
+</button>
+</div>
+</header>
+<div class="p-lg space-y-lg max-w-[1600px] mx-auto w-full">
+<!-- Header & Top Controls -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-md">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface font-bold">Mapa de Sectores y Miembros</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Visualización en tiempo real de la ocupación y consumo industrial.</p>
+</div>
+<div class="flex flex-wrap gap-md">
+<div class="space-y-xs">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Filtrar por Sector</label>
+<div class="relative">
+<select class="min-w-[180px] bg-white border border-outline-variant rounded-md px-md py-sm font-body-sm focus:border-primary outline-none appearance-none pr-xl">
+<option>Todos los Sectores</option>
+<option>Logística</option>
+<option>Manufactura</option>
+<option>Frío</option>
+</select>
+<span class="material-symbols-outlined absolute right-sm top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+<div class="space-y-xs">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Estado Ocupación</label>
+<div class="relative">
+<select class="min-w-[180px] bg-white border border-outline-variant rounded-md px-md py-sm font-body-sm focus:border-primary outline-none appearance-none pr-xl">
+<option>Cualquier estado</option>
+<option>Ocupado</option>
+<option>Disponible</option>
+<option>Mantenimiento</option>
+</select>
+<span class="material-symbols-outlined absolute right-sm top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Industrial Grid Map (Bento) -->
+<div class="bg-white border border-outline-variant rounded-xl p-lg grid grid-cols-12 gap-lg shadow-sm">
+<!-- Sector A: Alimentos / Frío -->
+<div class="col-span-12 lg:col-span-8 space-y-md">
+<div class="flex items-center gap-2 pb-sm border-b border-outline-variant/30">
+<span class="material-symbols-outlined text-primary text-sm">ac_unit</span>
+<span class="font-label-caps text-label-caps tracking-[0.1em] text-on-surface-variant uppercase">Sector A: Alimentos &amp; Frío</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-4 gap-md">
+<!-- Nave A1 -->
+<div class="col-span-1 bg-surface-container-low border border-outline-variant hover:border-primary transition-all rounded-lg p-md group cursor-pointer relative overflow-hidden">
+<div class="absolute top-2 right-2">
+<span class="material-symbols-outlined text-[16px] text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<p class="font-data-mono text-[10px] text-primary/70">NAVE A1</p>
+<p class="font-body-md font-bold text-on-surface mt-1">Alimentos Lima</p>
+<div class="mt-xl flex items-center justify-between">
+<span class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-bold uppercase">Frío</span>
+<span class="font-data-mono text-xs text-on-surface-variant">1.2 MW/h</span>
+</div>
+</div>
+<!-- Nave A2 -->
+<div class="col-span-1 bg-surface-container-low border border-outline-variant hover:border-primary transition-all rounded-lg p-md group cursor-pointer">
+<p class="font-data-mono text-[10px] text-primary/70">NAVE A2</p>
+<p class="font-body-md font-bold text-on-surface mt-1">Agroexport SAC</p>
+<div class="mt-xl flex items-center justify-between">
+<span class="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-bold uppercase">Frío</span>
+<span class="font-data-mono text-xs text-on-surface-variant">0.9 MW/h</span>
+</div>
+</div>
+<!-- Nave A3-4 Empty -->
+<div class="col-span-1 sm:col-span-2 bg-surface-container border border-dashed border-outline-variant rounded-lg p-md flex flex-col items-center justify-center group hover:bg-surface-variant/20 transition-all">
+<p class="font-data-mono text-[10px] text-on-surface-variant/50">NAVE A3 - A4</p>
+<p class="font-body-sm text-on-surface-variant italic">Espacio Disponible</p>
+<button class="mt-2 text-xs font-bold text-primary hover:underline">ASIGNAR</button>
+</div>
+<!-- Nave A5 -->
+<div class="col-span-1 sm:col-span-2 bg-surface-container-low border border-outline-variant hover:border-primary transition-all rounded-lg p-md">
+<p class="font-data-mono text-[10px] text-primary/70">NAVE A5 (MEZANINE)</p>
+<p class="font-body-md font-bold text-on-surface mt-1">Logística Inversa S.A.</p>
+<div class="mt-xl flex items-center justify-between">
+<span class="text-[10px] bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-bold uppercase">Logística</span>
+<span class="font-data-mono text-xs text-on-surface-variant">0.4 MW/h</span>
+</div>
+</div>
+<!-- Nave A6 -->
+<div class="col-span-1 sm:col-span-2 bg-surface-container-low border border-outline-variant hover:border-primary transition-all rounded-lg p-md">
+<p class="font-data-mono text-[10px] text-primary/70">NAVE A6</p>
+<p class="font-body-md font-bold text-on-surface mt-1">Distribuidora Norte</p>
+<div class="mt-xl flex items-center justify-between">
+<span class="text-[10px] bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-bold uppercase">Logística</span>
+<span class="font-data-mono text-xs text-on-surface-variant">0.7 MW/h</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Sector B: Manufactura -->
+<div class="col-span-12 lg:col-span-4 space-y-md">
+<div class="flex items-center gap-2 pb-sm border-b border-outline-variant/30">
+<span class="material-symbols-outlined text-tertiary text-sm">precision_manufacturing</span>
+<span class="font-label-caps text-label-caps tracking-[0.1em] text-on-surface-variant uppercase">Sector B: Manufactura</span>
+</div>
+<div class="grid grid-cols-1 gap-md">
+<!-- Nave B1 -->
+<div class="bg-surface-container-low border border-tertiary/20 hover:border-tertiary transition-all rounded-lg p-md min-h-[160px] flex flex-col justify-between">
+<div>
+<p class="font-data-mono text-[10px] text-tertiary/70">NAVE B1 (FULL)</p>
+<p class="font-body-md font-bold text-on-surface mt-1">Metalmecánica Perú</p>
+<p class="text-[11px] text-on-surface-variant mt-1">Actividad: Fundición y ensamble</p>
+</div>
+<div class="flex items-center justify-between mt-4">
+<span class="text-[10px] bg-tertiary-container/10 text-tertiary px-2 py-0.5 rounded font-bold uppercase">Manufactura</span>
+<div class="flex items-end gap-1">
+<span class="font-data-mono text-xl text-tertiary font-bold">4.8</span>
+<span class="text-[10px] text-tertiary/70 mb-1">MW/h</span>
+</div>
+</div>
+</div>
+<!-- Nave B2 Alert -->
+<div class="bg-error-container/10 border border-error/30 rounded-lg p-md flex flex-col justify-between min-h-[120px]">
+<div>
+<div class="flex justify-between items-start">
+<p class="font-data-mono text-[10px] text-error/70">NAVE B2</p>
+<span class="bg-error text-on-error text-[10px] px-2 rounded-full font-bold animate-pulse">ALERTA</span>
+</div>
+<p class="font-body-md font-bold text-on-surface mt-1">Textiles del Sur</p>
+</div>
+<div class="mt-4 flex flex-col gap-1">
+<div class="flex justify-between items-center">
+<span class="text-[10px] text-error font-semibold uppercase">Exceso detectado</span>
+<span class="font-data-mono text-xs text-error font-bold">+15%</span>
+</div>
+<div class="w-full h-1 bg-error/10 rounded-full overflow-hidden">
+<div class="bg-error h-full w-[85%]"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Active Members Table - Clean Pattern -->
+<section class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-md">
+<div class="p-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<h4 class="font-headline-sm text-headline-sm text-on-surface font-bold">Miembros Activos</h4>
+<div class="flex gap-md items-center">
+<span class="text-xs text-on-surface-variant">Mostrando 4 de 18 miembros activos</span>
+<div class="flex gap-1">
+<button class="w-8 h-8 flex items-center justify-center hover:bg-surface-container transition-colors rounded text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center hover:bg-surface-container transition-colors rounded text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">filter_list</span>
+</button>
+</div>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left zebra-table border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-caps text-[11px] uppercase tracking-wider">
+<th class="px-lg py-sm font-bold">Nombre de Empresa</th>
+<th class="px-lg py-sm font-bold">ID Nave</th>
+<th class="px-lg py-sm font-bold">Tipo de Actividad</th>
+<th class="px-lg py-sm font-bold">Consumo Mes (MW/h)</th>
+<th class="px-lg py-sm font-bold">Estado Pago</th>
+<th class="px-lg py-sm text-right">Acciones</th>
+</tr>
+</thead>
+<tbody class="text-body-sm">
+<!-- Row 1 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="w-9 h-9 rounded bg-primary-container/20 flex items-center justify-center text-primary font-bold text-xs">AL</div>
+<span class="font-semibold text-on-surface">Alimentos Lima S.A.</span>
+</div>
+</td>
+<td class="px-lg py-md font-data-mono text-on-surface-variant">A-001</td>
+<td class="px-lg py-md">
+<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-[11px] font-bold uppercase">Frío</span>
+</td>
+<td class="px-lg py-md font-data-mono font-semibold">1,245.80</td>
+<td class="px-lg py-md">
+<span class="flex items-center gap-2 text-[12px] text-green-600 font-semibold">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    Al día
+                                </span>
+</td>
+<td class="px-lg py-md text-right">
+<button class="w-8 h-8 flex items-center justify-center ml-auto hover:bg-surface-variant rounded-full text-primary transition-all opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="w-9 h-9 rounded bg-tertiary-container/20 flex items-center justify-center text-tertiary font-bold text-xs">MP</div>
+<span class="font-semibold text-on-surface">Metalmecánica Perú</span>
+</div>
+</td>
+<td class="px-lg py-md font-data-mono text-on-surface-variant">B-001</td>
+<td class="px-lg py-md">
+<span class="bg-tertiary-container/20 text-tertiary px-3 py-1 rounded-full text-[11px] font-bold uppercase">Manufactura</span>
+</td>
+<td class="px-lg py-md font-data-mono font-semibold">4,812.30</td>
+<td class="px-lg py-md">
+<span class="flex items-center gap-2 text-[12px] text-green-600 font-semibold">
+<span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                                    Al día
+                                </span>
+</td>
+<td class="px-lg py-md text-right">
+<button class="w-8 h-8 flex items-center justify-center ml-auto hover:bg-surface-variant rounded-full text-primary transition-all opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="w-9 h-9 rounded bg-secondary-container/20 flex items-center justify-center text-on-secondary-container font-bold text-xs">LI</div>
+<span class="font-semibold text-on-surface">Logística Inversa S.A.</span>
+</div>
+</td>
+<td class="px-lg py-md font-data-mono text-on-surface-variant">A-005</td>
+<td class="px-lg py-md">
+<span class="bg-secondary-container text-on-secondary-container px-3 py-1 rounded-full text-[11px] font-bold uppercase">Logística</span>
+</td>
+<td class="px-lg py-md font-data-mono font-semibold">420.15</td>
+<td class="px-lg py-md">
+<span class="flex items-center gap-2 text-[12px] text-tertiary font-semibold">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+                                    Pendiente
+                                </span>
+</td>
+<td class="px-lg py-md text-right">
+<button class="w-8 h-8 flex items-center justify-center ml-auto hover:bg-surface-variant rounded-full text-primary transition-all opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors group">
+<td class="px-lg py-md">
+<div class="flex items-center gap-md">
+<div class="w-9 h-9 rounded bg-error-container/20 flex items-center justify-center text-error font-bold text-xs">TS</div>
+<span class="font-semibold text-on-surface">Textiles del Sur</span>
+</div>
+</td>
+<td class="px-lg py-md font-data-mono text-on-surface-variant">B-002</td>
+<td class="px-lg py-md">
+<span class="bg-tertiary-container/20 text-tertiary px-3 py-1 rounded-full text-[11px] font-bold uppercase">Manufactura</span>
+</td>
+<td class="px-lg py-md font-data-mono font-semibold">2,105.40</td>
+<td class="px-lg py-md">
+<span class="flex items-center gap-2 text-[12px] text-error font-bold uppercase tracking-wider">
+<span class="material-symbols-outlined text-[16px]">error</span>
+                                    Vencido
+                                </span>
+</td>
+<td class="px-lg py-md text-right">
+<button class="w-8 h-8 flex items-center justify-center ml-auto hover:bg-surface-variant rounded-full text-primary transition-all opacity-0 group-hover:opacity-100">
+<span class="material-symbols-outlined">visibility</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-md border-t border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+<span class="text-xs text-on-surface-variant">Mostrando 4 de 18 miembros activos</span>
+<div class="flex gap-xs">
+<button class="p-xs hover:bg-surface-container-low border border-outline-variant rounded disabled:opacity-50"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+<button class="px-sm py-xs bg-primary text-on-primary text-xs font-bold rounded">1</button>
+<button class="px-sm py-xs hover:bg-surface-container-low text-xs rounded">2</button>
+<button class="px-sm py-xs hover:bg-surface-container-low text-xs rounded">3</button>
+<button class="p-xs hover:bg-surface-container-low border border-outline-variant rounded"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+</div>
+</div>
+</section>
+</div>
+<!-- Footer -->
+<footer class="mt-auto bg-surface-container-highest flex justify-between items-center px-lg py-sm w-full border-t border-outline-variant">
+<div class="flex gap-lg items-center">
+<span class="font-label-caps text-[10px] text-on-surface-variant tracking-wider uppercase">© 2024 Parque Industrial Jicamarca</span>
+<div class="flex gap-md">
+<span class="font-data-mono text-on-surface-variant/70 text-[10px]">Estado del Servidor: Activo</span>
+<span class="font-data-mono text-on-surface-variant/70 text-[10px]">Latencia: 24ms</span>
+</div>
+</div>
+<div class="flex gap-lg">
+<a class="font-data-mono text-[10px] text-on-surface-variant hover:text-primary transition-colors" href="#">Soporte Técnico</a>
+<a class="font-data-mono text-[10px] text-on-surface-variant hover:text-primary transition-colors" href="#">Documentación API</a>
+</div>
+</footer>
+</main>
+<!-- Interactive Tooltip Overlay -->
+<div class="fixed pointer-events-none bg-inverse-surface text-inverse-on-surface px-md py-sm rounded-lg text-body-sm shadow-xl z-[100] border border-outline hidden" id="map-tooltip" style="left: 671px; top: 508px;">
+<div class="flex flex-col gap-1">
+<span class="font-data-mono text-primary-fixed-dim text-[10px]" id="tooltip-nave">NAVE A6</span>
+<span class="font-bold" id="tooltip-company">Distribuidora Norte</span>
+<span class="text-white/60 text-[11px]" id="tooltip-stats">Consumo Actual: 0.7 MW/h</span>
+</div>
+</div>
+<script>
+    // Interaction for the Map Tooltip
+    const mapItems = document.querySelectorAll('.grid-cols-4 > div, .grid-cols-1 > div');
+    const tooltip = document.getElementById('map-tooltip');
+    
+    mapItems.forEach(item => {
+        item.addEventListener('mouseenter', (e) => {
+            const nave = item.querySelector('.font-data-mono')?.innerText;
+            const company = item.querySelector('.font-body-md')?.innerText;
+            const statsElement = item.querySelector('.mt-xl span:last-child, .mt-4 span:last-child');
+            const stats = statsElement?.innerText;
+
+            if (!nave || !company) return;
+
+            document.getElementById('tooltip-nave').innerText = nave;
+            document.getElementById('tooltip-company').innerText = company;
+            document.getElementById('tooltip-stats').innerText = stats ? `Consumo Actual: ${stats}` : 'Estado: Disponible';
+
+            tooltip.classList.remove('hidden');
+        });
+
+        item.addEventListener('mousemove', (e) => {
+            tooltip.style.left = (e.clientX + 15) + 'px';
+            tooltip.style.top = (e.clientY + 15) + 'px';
+        });
+
+        item.addEventListener('mouseleave', () => {
+            tooltip.classList.add('hidden');
+        });
+    });
+</script>
+
+
+
+
+
+
+</body></html>

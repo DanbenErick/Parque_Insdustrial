@@ -1,0 +1,367 @@
+<!DOCTYPE html><html class="light" lang="es"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container": "#eceef0",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f2f4f6",
+                        "on-primary-fixed": "#001f28",
+                        "surface-container-high": "#e6e8ea",
+                        "background": "#f7f9fb",
+                        "on-tertiary-fixed-variant": "#653e00",
+                        "on-tertiary-fixed": "#2a1700",
+                        "surface-dim": "#d8dadc",
+                        "tertiary-container": "#a36700",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#6cd3f7",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#fffbff",
+                        "on-primary-fixed-variant": "#004e61",
+                        "tertiary": "#825100",
+                        "primary-fixed": "#b7eaff",
+                        "on-background": "#191c1e",
+                        "inverse-surface": "#2d3133",
+                        "on-primary-container": "#fafdff",
+                        "surface-tint": "#006780",
+                        "surface-container-highest": "#e0e3e5",
+                        "primary-fixed-dim": "#6cd3f7",
+                        "on-secondary-fixed": "#131b2e",
+                        "on-secondary": "#ffffff",
+                        "surface-variant": "#e0e3e5",
+                        "secondary": "#565e74",
+                        "primary-container": "#007f9d",
+                        "on-secondary-fixed-variant": "#3f465c",
+                        "primary": "#00647c",
+                        "outline-variant": "#bdc8ce",
+                        "on-secondary-container": "#5c647a",
+                        "outline": "#6e797e",
+                        "on-error-container": "#93000a",
+                        "surface-bright": "#f7f9fb",
+                        "secondary-fixed": "#dae2fd",
+                        "surface": "#f7f9fb",
+                        "on-surface": "#191c1e",
+                        "tertiary-fixed": "#ffddb8",
+                        "secondary-fixed-dim": "#bec6e0",
+                        "on-surface-variant": "#3e484d",
+                        "secondary-container": "#dae2fd",
+                        "inverse-on-surface": "#eff1f3",
+                        "on-primary": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb95f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "sm": "8px",
+                        "md": "16px",
+                        "xs": "4px",
+                        "unit": "4px",
+                        "lg": "24px",
+                        "margin-mobile": "16px",
+                        "gutter": "16px",
+                        "xl": "32px",
+                        "margin-desktop": "32px"
+                    },
+                    "fontFamily": {
+                        "data-mono": ["JetBrains Mono"],
+                        "label-caps": ["Hanken Grotesk"],
+                        "headline-lg": ["Hanken Grotesk"],
+                        "body-md": ["Hanken Grotesk"],
+                        "headline-sm": ["Hanken Grotesk"],
+                        "body-sm": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "headline-md": ["Hanken Grotesk"],
+                        "display": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "data-mono": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #f7f9fb; font-family: 'Hanken Grotesk', sans-serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .receipt-container { max-width: 900px; margin: 0 auto; }
+        .data-grid-zebra tr:nth-child(even) { background-color: #f8fafc; }
+        .print-hidden { @media print { display: none; } }
+    </style>
+</head>
+<body class="text-on-surface">
+<!-- Sidebar Navigation -->
+<aside class="fixed left-0 top-0 h-full w-[240px] bg-inverse-surface flex flex-col py-lg border-r border-outline-variant">
+<div class="px-md mb-xl">
+<h1 class="text-headline-md font-headline-md font-bold text-primary-fixed">Parque Industrial Jicamarca</h1>
+<p class="font-body-md text-body-md text-surface-variant opacity-70">Gestión Industrial</p>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center text-surface-variant font-body-md pl-5 py-3 hover:bg-on-surface-variant hover:text-surface-bright transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">dashboard</span> Panel de Control
+            </a>
+<a class="flex items-center text-surface-variant font-body-md pl-5 py-3 hover:bg-on-surface-variant hover:text-surface-bright transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">factory</span> Inquilinos y Sectores
+            </a>
+<a class="flex items-center text-primary-fixed-dim font-bold border-l-4 border-primary-fixed-dim pl-4 py-3 opacity-90 transition-all duration-150" href="#">
+<span class="material-symbols-outlined mr-3">receipt_long</span> Facturación
+            </a>
+<a class="flex items-center text-surface-variant font-body-md pl-5 py-3 hover:bg-on-surface-variant hover:text-surface-bright transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">payments</span> Pagos Recibidos
+            </a>
+</nav>
+<div class="mt-auto pt-lg border-t border-outline/20">
+<a class="flex items-center text-surface-variant font-body-md pl-5 py-3 hover:bg-on-surface-variant hover:text-surface-bright transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">settings</span> Configuración
+            </a>
+<a class="flex items-center text-surface-variant font-body-md pl-5 py-3 hover:bg-on-surface-variant hover:text-surface-bright transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">contact_support</span> Soporte
+            </a>
+</div>
+</aside>
+<!-- Top App Bar -->
+<header class="flex justify-between items-center h-16 ml-[240px] px-lg w-[calc(100%-240px)] fixed top-0 bg-surface border-b border-outline-variant z-10">
+<div class="flex items-center gap-md">
+<span class="font-label-caps text-label-caps text-on-surface-variant">RECIBO / DETALLE</span>
+<span class="h-4 w-[1px] bg-outline-variant"></span>
+<h2 class="font-headline-sm text-headline-sm text-primary">N° 2024-00892</h2>
+</div>
+<div class="flex items-center gap-md">
+<div class="relative">
+<input class="bg-surface-container-low border border-outline-variant rounded-lg px-md py-xs text-body-sm w-64 focus:ring-2 focus:ring-primary focus:border-transparent outline-none" placeholder="Buscar inquilino..." type="text">
+<span class="material-symbols-outlined absolute right-2 top-1.5 text-on-surface-variant text-[20px]">search</span>
+</div>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">notifications</span>
+<div class="h-8 w-8 rounded-full bg-primary-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container text-[20px]">account_circle</span>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-[240px] mt-16 p-xl pb-32">
+<div class="receipt-container space-y-lg">
+<!-- Actions Toolbar (Sticky/Top) -->
+<div class="flex justify-between items-center bg-white p-md rounded-xl border border-outline-variant shadow-sm print-hidden">
+<button class="flex items-center text-secondary hover:text-primary transition-colors font-label-caps text-label-caps" onclick="window.history.back()">
+<span class="material-symbols-outlined mr-xs">arrow_back</span> REGRESAR
+                </button>
+<div class="flex gap-md">
+<button class="flex items-center px-md py-sm border border-outline-variant rounded-lg text-secondary hover:bg-surface-container-low transition-colors font-body-sm">
+<span class="material-symbols-outlined mr-sm">mail</span> Enviar por Correo
+                    </button>
+<button class="flex items-center px-md py-sm border border-outline-variant rounded-lg text-secondary hover:bg-surface-container-low transition-colors font-body-sm" onclick="window.print()">
+<span class="material-symbols-outlined mr-sm">print</span> Imprimir
+                    </button>
+<button class="flex items-center px-md py-sm bg-primary text-on-primary rounded-lg hover:opacity-90 transition-all font-body-sm">
+<span class="material-symbols-outlined mr-sm">picture_as_pdf</span> Descargar PDF
+                    </button>
+</div>
+</div>
+<!-- Receipt Document -->
+<div class="bg-white border border-outline-variant shadow-sm rounded-lg overflow-hidden" id="receipt-document">
+<!-- Document Header -->
+<div class="p-xl border-b border-outline-variant flex justify-between items-start">
+<div class="space-y-sm">
+<div class="flex items-center gap-md">
+<div class="w-16 h-16 bg-inverse-surface flex items-center justify-center rounded-lg">
+<span class="material-symbols-outlined text-primary-fixed text-[40px]">factory</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md text-on-surface">Parque Industrial Jicamarca S.A.</h3>
+<p class="text-body-sm text-on-surface-variant">RUC: 20456789123 | Av. Industrial 450, Lima</p>
+</div>
+</div>
+<div class="pt-md">
+<h4 class="font-label-caps text-label-caps text-primary">DATOS DEL INQUILINO</h4>
+<p class="font-headline-sm text-headline-sm">Corporación Textil del Norte S.A.C.</p>
+<div class="grid grid-cols-2 gap-x-xl gap-y-xs mt-xs">
+<p class="text-body-sm text-on-surface-variant">RUC: <span class="text-on-surface font-medium">20123456789</span></p>
+<p class="text-body-sm text-on-surface-variant">Nave / Sector: <span class="text-on-surface font-medium">Lote B-22 / Sector 4</span></p>
+<p class="text-body-sm text-on-surface-variant">Mes de Facturación: <span class="text-on-surface font-medium">Agosto 2024</span></p>
+<p class="text-body-sm text-on-surface-variant">Vencimiento: <span class="text-on-surface font-medium">15 Sep 2024</span></p>
+</div>
+</div>
+</div>
+<div class="text-right space-y-xs">
+<div class="bg-surface-container-high px-md py-sm rounded-lg inline-block">
+<span class="block font-label-caps text-label-caps text-on-surface-variant text-center">TOTAL A PAGAR</span>
+<span class="block font-headline-lg text-headline-lg text-primary" style="transition: opacity 2s ease-in-out; opacity: 0.8;">S/ 4,892.50</span>
+</div>
+<p class="text-body-sm text-error font-medium">ESTADO: PENDIENTE</p>
+</div>
+</div>
+<!-- Consumption Breakdown Grid -->
+<div class="p-xl grid grid-cols-1 md:grid-cols-3 gap-xl bg-surface-container-lowest">
+<!-- Meter Readings -->
+<div class="md:col-span-2">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-md">DETALLE DE LECTURAS (MEDIDOR 0921-X)</h4>
+<div class="grid grid-cols-2 gap-md">
+<div class="p-md bg-white border border-outline-variant rounded-lg">
+<span class="text-body-sm text-on-surface-variant block mb-xs">Lectura Anterior (01/08)</span>
+<span class="font-data-mono text-data-mono text-xl text-on-surface">12,450.00 <span class="text-xs font-sans text-on-surface-variant">MW/h</span></span>
+</div>
+<div class="p-md bg-white border border-outline-variant rounded-lg">
+<span class="text-body-sm text-on-surface-variant block mb-xs">Lectura Actual (31/08)</span>
+<span class="font-data-mono text-data-mono text-xl text-on-surface">13,215.40 <span class="text-xs font-sans text-on-surface-variant">MW/h</span></span>
+</div>
+</div>
+<div class="mt-md p-md bg-primary-container/10 border border-primary-container/20 rounded-lg flex justify-between items-center">
+<div>
+<span class="text-body-sm text-primary font-bold block">CONSUMO TOTAL DEL PERIODO</span>
+<span class="text-body-md text-primary">Incremento de 6.2% respecto al mes anterior</span>
+</div>
+<div class="text-right">
+<span class="font-display text-headline-lg text-primary">765.40</span>
+<span class="text-body-sm text-primary font-bold">MW/h</span>
+</div>
+</div>
+</div>
+<!-- Consumption Trend Mini-Chart Simulation -->
+<div class="bg-white border border-outline-variant rounded-lg p-md flex flex-col">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-md">TENDENCIA 6 MESES</h4>
+<div class="flex-1 flex items-end justify-between gap-1 px-sm">
+<div class="w-full bg-outline-variant rounded-t" style="height: 40%"></div>
+<div class="w-full bg-outline-variant rounded-t" style="height: 55%"></div>
+<div class="w-full bg-outline-variant rounded-t" style="height: 45%"></div>
+<div class="w-full bg-outline-variant rounded-t" style="height: 70%"></div>
+<div class="w-full bg-outline-variant rounded-t" style="height: 85%"></div>
+<div class="w-full bg-primary rounded-t" style="height: 95%"></div>
+</div>
+<div class="flex justify-between mt-sm text-[10px] text-on-surface-variant font-label-caps">
+<span class="">MAR</span><span class="">ABR</span><span class="">MAY</span><span class="">JUN</span><span class="">JUL</span><span class="text-primary font-bold">AGO</span>
+</div>
+</div>
+</div>
+<!-- Billing Concepts Table -->
+<div class="px-xl py-lg">
+<h4 class="font-label-caps text-label-caps text-on-surface-variant mb-md">CONCEPTOS DE FACTURACIÓN</h4>
+<table class="w-full text-left border-collapse data-grid-zebra">
+<thead>
+<tr class="border-b border-outline-variant">
+<th class="py-sm font-label-caps text-label-caps text-on-surface-variant">Descripción</th>
+<th class="py-sm font-label-caps text-label-caps text-on-surface-variant text-right">Cant/Unid</th>
+<th class="py-sm font-label-caps text-label-caps text-on-surface-variant text-right">Precio Unit.</th>
+<th class="py-sm font-label-caps text-label-caps text-on-surface-variant text-right">Importe (S/)</th>
+</tr>
+</thead>
+<tbody class="text-body-sm">
+<tr>
+<td class="py-md">Consumo Energía Activa (Baja Tensión)</td>
+<td class="py-md text-right font-data-mono">765.40 MW/h</td>
+<td class="py-md text-right font-data-mono">5.120</td>
+<td class="py-md text-right font-data-mono">3,918.85</td>
+</tr>
+<tr>
+<td class="py-md">Cargo Fijo Mensual</td>
+<td class="py-md text-right font-data-mono">1.00</td>
+<td class="py-md text-right font-data-mono">45.00</td>
+<td class="py-md text-right font-data-mono">45.00</td>
+</tr>
+<tr>
+<td class="py-md">Mantenimiento de Red e Infraestructura</td>
+<td class="py-md text-right font-data-mono">1.00</td>
+<td class="py-md text-right font-data-mono">182.00</td>
+<td class="py-md text-right font-data-mono">182.00</td>
+</tr>
+<tr>
+<td class="py-md">Alumbrado Público Prorrateado</td>
+<td class="py-md text-right font-data-mono">1.00</td>
+<td class="py-md text-right font-data-mono">2.50</td>
+<td class="py-md text-right font-data-mono">2.50</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Footer Summary and QR -->
+<div class="p-xl border-t border-outline-variant flex flex-col md:flex-row gap-xl items-center bg-surface-container-low/50">
+<div class="flex-1 flex gap-lg">
+<div class="bg-white p-sm border border-outline-variant rounded-lg shadow-sm">
+<img alt="Código QR para validación y pago" class="w-24 h-24" data-alt="A clean, high-contrast digital QR code centered on a crisp white square background. The image style is clinical and professional, reflecting an industrial financial document. Lighting is perfectly even with no shadows, emphasizing functional clarity and reliability. The aesthetic is modern corporate, strictly adhering to a light-mode theme with surgical precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAZULI3v9OW89TTD2zWkLabknHYLLoUDQlaCZrRxH10EAzqSxUCmNhbG34p-3yMAB9c9gLrIV099ppECqnroqjyg9_4VIpjCzLXaemYWfIynJGd3GBiRgsZ0FOd8GPWOfvIAURdaOeD2LfByPQXq7Q1RYB0FiiuMWTQZhEMiKiC4owi3FKbHFvMwIqCqT5nwT522rQQNrboWL_eXFBPz79TeVjn2QiBJASlIAFhujwcE8PTdeCWarsVqIVVmK5QSWVSO0vOcFMMtj8">
+</div>
+<div class="max-w-xs">
+<h5 class="font-label-caps text-label-caps text-on-surface-variant">VALIDACIÓN DIGITAL</h5>
+<p class="text-body-sm text-on-surface-variant mt-xs">Escanee este código para validar la autenticidad del recibo o realizar el pago directo vía App PI Jicamarca.</p>
+<p class="text-[10px] font-data-mono text-outline mt-sm">HASH: 8f2a1c9e3b7d5f0a4e6c8b2d1a3f5e7g9h0i1j2k</p>
+</div>
+</div>
+<div class="w-full md:w-64 space-y-xs">
+<div class="flex justify-between text-body-sm">
+<span class="text-on-surface-variant">Subtotal:</span>
+<span class="font-data-mono">S/ 4,148.35</span>
+</div>
+<div class="flex justify-between text-body-sm">
+<span class="text-on-surface-variant">IGV (18%):</span>
+<span class="font-data-mono">S/ 744.15</span>
+</div>
+<div class="flex justify-between pt-sm border-t border-outline-variant">
+<span class="font-bold text-on-surface">TOTAL:</span>
+<span class="font-headline-sm text-primary">S/ 4,892.50</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Notice / Disclaimer -->
+<div class="bg-tertiary-container/10 border-l-4 border-tertiary p-md flex items-start gap-md print-hidden">
+<span class="material-symbols-outlined text-tertiary">warning</span>
+<p class="text-body-sm text-on-tertiary-fixed-variant">
+<strong>Aviso importante:</strong> Si el pago no se registra antes de la fecha de vencimiento (15 Sep 2024), se procederá al corte preventivo del suministro de acuerdo al reglamento interno del Parque Industrial. Evite recargos por mora.
+                </p>
+</div>
+</div>
+</main>
+<!-- Footer Shell -->
+<footer class="flex justify-between items-center ml-[240px] px-lg py-md w-[calc(100%-240px)] fixed bottom-0 bg-surface-container-low border-t border-outline-variant z-10 print-hidden">
+<div class="flex items-center gap-md">
+<span class="font-label-caps text-label-caps font-bold text-on-surface">Parque Industrial Jicamarca</span>
+<span class="text-body-sm text-secondary">© 2024 Parque Industrial Jicamarca</span>
+</div>
+<div class="flex gap-lg">
+<a class="text-body-sm text-on-surface-variant hover:text-primary underline transition-all duration-200" href="#">Estado del Servidor: Operativo</a>
+<a class="text-body-sm text-on-surface-variant hover:text-primary underline transition-all duration-200" href="#">Soporte Técnico</a>
+<a class="text-body-sm text-on-surface-variant hover:text-primary underline transition-all duration-200" href="#">Documentación</a>
+</div>
+</footer>
+<script>
+        // Simple micro-interactions for buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => btn.classList.add('scale-95'));
+            btn.addEventListener('mouseup', () => btn.classList.remove('scale-95'));
+            btn.addEventListener('mouseleave', () => btn.classList.remove('scale-95'));
+        });
+
+        // Background atmosphere effect: Subtle subtle pulse on the primary total
+        const totalAmount = document.querySelector('.text-primary.text-headline-lg');
+        if (totalAmount) {
+            setInterval(() => {
+                totalAmount.style.transition = 'opacity 2s ease-in-out';
+                totalAmount.style.opacity = '0.8';
+                setTimeout(() => {
+                    totalAmount.style.opacity = '1';
+                }, 2000);
+            }, 4000);
+        }
+    </script>
+
+
+</body></html>

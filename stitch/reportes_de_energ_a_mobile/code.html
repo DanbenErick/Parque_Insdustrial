@@ -1,0 +1,342 @@
+<!DOCTYPE html><html lang="es"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Reportes de Energía - PI Jicamarca</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+        body {
+            font-family: 'Hanken+Grotesk', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .chart-container {
+            position: relative;
+            height: 200px;
+            width: 100%;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #bdc8ce;
+            border-radius: 10px;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "tertiary-container": "#a36700",
+                      "on-secondary-container": "#5c647a",
+                      "surface-bright": "#f7f9fb",
+                      "tertiary": "#825100",
+                      "secondary-container": "#dae2fd",
+                      "primary": "#00647c",
+                      "outline": "#6e797e",
+                      "on-tertiary-fixed": "#2a1700",
+                      "surface": "#f7f9fb",
+                      "surface-dim": "#d8dadc",
+                      "surface-container": "#eceef0",
+                      "on-primary-container": "#fafdff",
+                      "inverse-surface": "#2d3133",
+                      "on-tertiary-container": "#fffbff",
+                      "on-background": "#191c1e",
+                      "error": "#ba1a1a",
+                      "inverse-on-surface": "#eff1f3",
+                      "primary-fixed-dim": "#6cd3f7",
+                      "surface-container-lowest": "#ffffff",
+                      "on-primary-fixed": "#001f28",
+                      "on-tertiary-fixed-variant": "#653e00",
+                      "on-surface": "#191c1e",
+                      "surface-variant": "#e0e3e5",
+                      "on-tertiary": "#ffffff",
+                      "primary-container": "#007f9d",
+                      "on-secondary-fixed": "#131b2e",
+                      "error-container": "#ffdad6",
+                      "surface-container-highest": "#e0e3e5",
+                      "on-secondary-fixed-variant": "#3f465c",
+                      "surface-container-high": "#e6e8ea",
+                      "on-surface-variant": "#3e484d",
+                      "background": "#f7f9fb",
+                      "tertiary-fixed-dim": "#ffb95f",
+                      "primary-fixed": "#b7eaff",
+                      "on-primary-fixed-variant": "#004e61",
+                      "on-secondary": "#ffffff",
+                      "tertiary-fixed": "#ffddb8",
+                      "secondary-fixed-dim": "#bec6e0",
+                      "secondary-fixed": "#dae2fd",
+                      "surface-container-low": "#f2f4f6",
+                      "secondary": "#565e74",
+                      "on-primary": "#ffffff",
+                      "outline-variant": "#bdc8ce",
+                      "surface-tint": "#006780",
+                      "on-error": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "inverse-primary": "#6cd3f7"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.125rem",
+                      "lg": "0.25rem",
+                      "xl": "0.5rem",
+                      "full": "0.75rem"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "lg": "24px",
+                      "gutter": "16px",
+                      "sm": "8px",
+                      "md": "16px",
+                      "xs": "4px",
+                      "margin-desktop": "32px",
+                      "margin-mobile": "16px",
+                      "xl": "32px"
+              },
+              "fontFamily": {
+                      "headline-lg": ["Hanken Grotesk"],
+                      "body-sm": ["Hanken Grotesk"],
+                      "label-caps": ["Hanken Grotesk"],
+                      "data-mono": ["JetBrains Mono"],
+                      "body-md": ["Hanken Grotesk"],
+                      "headline-md": ["Hanken Grotesk"],
+                      "display": ["Hanken Grotesk"],
+                      "headline-sm": ["Hanken Grotesk"],
+                      "body-lg": ["Hanken Grotesk"]
+              },
+              "fontSize": {
+                      "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                      "data-mono": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                      "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                      "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                      "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+      </script>
+</head>
+<body class="bg-background text-on-surface min-h-screen pb-20">
+<!-- Top Navigation Bar -->
+<header class="bg-surface sticky top-0 z-50 border-b border-outline-variant flex justify-between items-center w-full px-lg h-16">
+<div class="flex items-center gap-sm">
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary">Parque Industrial Jicamarca</h1>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80 transition-colors hover:bg-surface-container-low p-xs rounded-full">notifications</span>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer active:opacity-80 transition-colors hover:bg-surface-container-low p-xs rounded-full">settings</span>
+<div class="w-8 h-8 rounded-full bg-primary/10 overflow-hidden border border-outline-variant">
+<img alt="User Profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFbPfEeZmH9LGqhP7DiTycRNBqeUdqoXpogJOqiqnPOTutciBxZfk1ITvUx4_lUy2QgHbrG6W4mlzodku1zsxHfQmqKEzfi0uhbe6BH0dbuMrzHGVSMA1Kztl1rbMF6AOxjK_CbCGydJc0VbB6xMpP4bO_-5NND_DEukffPoqVUV9x0ccOHAw0Do76F4Z_-WJOmsElkZRdKxrVpX1l_k0AjTjTKYjOuql8PpsO7kDi-Al2O3OrzNkRGu9zdsxazK4XjDzspz3VYxQ">
+</div>
+</div>
+</header>
+<main class="px-md py-lg space-y-lg max-w-md mx-auto">
+<!-- Header Section -->
+<section>
+<h2 class="font-headline-md text-headline-md text-on-surface">Reportes de Energía</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Visualización de consumo industrial por sector.</p>
+</section>
+<!-- Filters Section -->
+<section class="flex gap-sm overflow-x-auto pb-sm custom-scrollbar">
+<button class="flex-shrink-0 px-md py-xs rounded-full bg-primary text-on-primary-container font-semibold border-b-2 border-primary transition-all duration-200" id="monthBtn">
+<span class="font-body-md text-body-md">Mes</span>
+</button>
+<button class="flex-shrink-0 px-md py-xs rounded-full text-on-surface-variant hover:bg-surface-variant transition-all duration-200" id="yearBtn">
+<span class="font-body-md text-body-md">Año</span>
+</button>
+<div class="ml-auto flex items-center bg-surface-container border border-outline-variant rounded-lg px-sm">
+<span class="material-symbols-outlined text-on-surface-variant text-[20px]">calendar_today</span>
+<span class="font-data-mono text-data-mono ml-xs">Octubre 2023</span>
+</div>
+</section>
+<!-- Summary Metric Card -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md shadow-sm">
+<div class="flex justify-between items-start mb-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Consumo Total</span>
+<span class="flex items-center text-primary-fixed-dim bg-primary px-xs rounded-sm">
+<span class="material-symbols-outlined text-[14px]">trending_down</span>
+<span class="font-data-mono text-[10px] ml-xs">4.2%</span>
+</span>
+</div>
+<div class="flex items-baseline gap-xs">
+<span class="font-display text-display text-primary">124.8</span>
+<span class="font-headline-sm text-headline-sm text-on-surface-variant">MWh</span>
+</div>
+<div class="mt-md pt-md border-t border-outline-variant flex justify-between items-center">
+<div class="flex items-center gap-xs">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Meta: 130 MWh</span>
+</div>
+<span class="font-body-sm text-body-sm text-primary font-semibold">Bajo el objetivo</span>
+</div>
+</section>
+<!-- Bar Chart Visualization -->
+<section class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md overflow-hidden">
+<div class="flex justify-between items-center mb-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Histórico Mensual</h3>
+<span class="material-symbols-outlined text-on-surface-variant">bar_chart</span>
+</div>
+<div class="flex items-end justify-between h-40 gap-xs px-xs">
+<!-- Bar Item 1 -->
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full bg-surface-variant rounded-t-sm h-[40%] group-hover:bg-primary/40 transition-colors"></div>
+<span class="font-label-caps text-[10px] mt-xs text-on-surface-variant">L</span>
+</div>
+<!-- Bar Item 2 -->
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full bg-surface-variant rounded-t-sm h-[65%] group-hover:bg-primary/40 transition-colors"></div>
+<span class="font-label-caps text-[10px] mt-xs text-on-surface-variant">M</span>
+</div>
+<!-- Bar Item 3 -->
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full bg-surface-variant rounded-t-sm h-[50%] group-hover:bg-primary/40 transition-colors"></div>
+<span class="font-label-caps text-[10px] mt-xs text-on-surface-variant">X</span>
+</div>
+<!-- Bar Item 4 -->
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full bg-primary rounded-t-sm h-[90%] transition-colors relative">
+<div class="absolute -top-6 left-1/2 -translate-x-1/2 bg-inverse-surface text-inverse-on-surface px-xs py-[2px] rounded text-[10px] font-data-mono">42k</div>
+</div>
+<span class="font-label-caps text-[10px] mt-xs text-primary font-bold">J</span>
+</div>
+<!-- Bar Item 5 -->
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full bg-surface-variant rounded-t-sm h-[60%] group-hover:bg-primary/40 transition-colors"></div>
+<span class="font-label-caps text-[10px] mt-xs text-on-surface-variant">V</span>
+</div>
+<!-- Bar Item 6 -->
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full bg-surface-variant rounded-t-sm h-[30%] group-hover:bg-primary/40 transition-colors"></div>
+<span class="font-label-caps text-[10px] mt-xs text-on-surface-variant">S</span>
+</div>
+<!-- Bar Item 7 -->
+<div class="flex flex-col items-center flex-1 group">
+<div class="w-full bg-surface-variant rounded-t-sm h-[20%] group-hover:bg-primary/40 transition-colors"></div>
+<span class="font-label-caps text-[10px] mt-xs text-on-surface-variant">D</span>
+</div>
+</div>
+</section>
+<!-- Sector Breakdown (Bento Style) -->
+<section class="space-y-md">
+<h3 class="font-headline-sm text-headline-sm text-on-surface">Desglose por Sectores</h3>
+<div class="grid grid-cols-1 gap-md">
+<!-- Sector A -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-secondary-container flex items-center justify-center text-on-secondary-container">
+<span class="material-symbols-outlined">precision_manufacturing</span>
+</div>
+<div>
+<p class="font-body-md text-body-md font-bold">Nave A</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Maquinaria Pesada</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-data-mono text-data-mono font-bold text-primary">52,400 <span class="text-[10px]">kWh</span></p>
+<p class="text-[12px] text-error font-medium flex items-center justify-end">
+<span class="material-symbols-outlined text-[14px]">arrow_drop_up</span> 2.1%
+                        </p>
+</div>
+</div>
+<!-- Sector B -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-tertiary-fixed flex items-center justify-center text-on-tertiary-fixed-variant">
+<span class="material-symbols-outlined">ac_unit</span>
+</div>
+<div>
+<p class="font-body-md text-body-md font-bold">Nave B</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Climatización</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-data-mono text-data-mono font-bold text-primary">38,120 <span class="text-[10px]">kWh</span></p>
+<p class="text-[12px] text-primary-container font-medium flex items-center justify-end">
+<span class="material-symbols-outlined text-[14px]">arrow_drop_down</span> 8.4%
+                        </p>
+</div>
+</div>
+<!-- Sector C -->
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex items-center justify-between">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined">lightbulb</span>
+</div>
+<div>
+<p class="font-body-md text-body-md font-bold">Nave C</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Iluminación / Oficinas</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-data-mono text-data-mono font-bold text-primary">34,280 <span class="text-[10px]">kWh</span></p>
+<p class="text-[12px] text-on-surface-variant font-medium flex items-center justify-end">
+                             -- 0%
+                        </p>
+</div>
+</div>
+</div>
+</section>
+<!-- Industrial Environment Visualization -->
+<section class="rounded-xl overflow-hidden relative h-32 border border-outline-variant">
+<img alt="Fondo Industrial Parque Industrial Jicamarca" class="w-full h-full object-cover grayscale brightness-50" data-alt="A cinematic, wide-angle shot of a high-tech Peruvian industrial plant interior at PI Jicamarca. The scene features clean geometric lines, polished concrete floors, and humming electrical panels with glowing LED indicators in shades of cyan and navy blue. Soft morning light filters through high windows, creating a professional and controlled atmosphere. The aesthetic is modern corporate industrial with a focus on sustainable energy management and technical precision." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD7U82S36Dtw24TmR5Tifg1ruP0nO6S3gjP3CoL2u3XtcO7ocjAxADTstZZEGn64IFfiazAlnKa6qIMyw7gXvUOZt4m8zvlyAlidtljT7gelxNU8GdX5_6D-HqJGE_kIf7Ff0F3hzXdZfM_6fdPUEgJWRnC3-bbMaEj9c5nsxMbNbdI8i6ebS_JwqNkbpB62Qi185b5NX7rUOldkAnriqfgO9mf63t_0vC9EKtB8LoOPn_F3MXT9CasaHNKG1aiwLnYSiaphglW1_U">
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-md">
+<span class="font-label-caps text-label-caps text-surface-variant">OPERACIÓN JICAMARCA</span>
+<span class="font-body-sm text-body-sm text-surface-bright/80 italic">Eficiencia energética en tiempo real</span>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar (Mobile) -->
+<nav class="fixed bottom-0 left-0 right-0 bg-surface border-t border-outline-variant h-16 flex items-center justify-around px-md z-50">
+<a class="flex flex-col items-center gap-xs text-on-surface-variant transition-colors active:opacity-80" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px] font-medium">Panel</span>
+</a>
+<a class="flex flex-col items-center gap-xs text-on-surface-variant transition-colors active:opacity-80" href="#">
+<span class="material-symbols-outlined">factory</span>
+<span class="text-[10px] font-medium">Sectores</span>
+</a>
+<a class="flex flex-col items-center gap-xs text-primary transition-colors active:opacity-80" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">monitoring</span>
+<span class="text-[10px] font-bold">Reportes</span>
+</a>
+<a class="flex flex-col items-center gap-xs text-on-surface-variant transition-colors active:opacity-80" href="#">
+<span class="material-symbols-outlined">manage_accounts</span>
+<span class="text-[10px] font-medium">Perfil</span>
+</a>
+</nav>
+<!-- Footer System Text -->
+<footer class="bg-surface-container-highest flex justify-between items-center px-lg py-xs w-full mb-16">
+<p class="font-data-mono text-[10px] text-on-surface-variant">Parque Industrial Jicamarca v1.2.4</p>
+<div class="flex gap-md">
+<p class="font-data-mono text-[10px] text-on-surface-variant">Parque Industrial Jicamarca v1.2.4</p>
+<p class="font-data-mono text-[10px] text-on-surface-variant">24ms</p>
+</div>
+</footer>
+<script>
+        // Simple Interaction Logic for switching periods
+        const monthBtn = document.getElementById('monthBtn');
+        const yearBtn = document.getElementById('yearBtn');
+
+        function setActive(active, inactive) {
+            active.classList.add('bg-primary', 'text-on-primary-container', 'font-semibold', 'border-b-2', 'border-primary');
+            active.classList.remove('text-on-surface-variant', 'hover:bg-surface-variant');
+            
+            inactive.classList.remove('bg-primary', 'text-on-primary-container', 'font-semibold', 'border-b-2', 'border-primary');
+            inactive.classList.add('text-on-surface-variant', 'hover:bg-surface-variant');
+        }
+
+        monthBtn.addEventListener('click', () => setActive(monthBtn, yearBtn));
+        yearBtn.addEventListener('click', () => setActive(yearBtn, monthBtn));
+    </script>
+
+
+</body></html>

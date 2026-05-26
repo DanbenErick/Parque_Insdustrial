@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container-low": "#f2f4f6",
+                    "secondary": "#565e74",
+                    "inverse-on-surface": "#eff1f3",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "on-error": "#ffffff",
+                    "surface-bright": "#f7f9fb",
+                    "primary-fixed": "#b7eaff",
+                    "on-primary": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "inverse-surface": "#2d3133",
+                    "secondary-fixed-dim": "#bec6e0",
+                    "on-surface": "#191c1e",
+                    "on-error-container": "#93000a",
+                    "secondary-fixed": "#dae2fd",
+                    "tertiary-container": "#a36700",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "surface-container": "#eceef0",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "surface-container-high": "#e6e8ea",
+                    "primary": "#00647c",
+                    "surface": "#f7f9fb",
+                    "on-tertiary-fixed": "#2a1700",
+                    "error": "#ba1a1a",
+                    "on-background": "#191c1e",
+                    "surface-variant": "#e0e3e5",
+                    "outline": "#6e797e",
+                    "surface-container-lowest": "#ffffff",
+                    "on-primary-fixed": "#001f28",
+                    "primary-fixed-dim": "#6cd3f7",
+                    "on-secondary-fixed": "#131b2e",
+                    "error-container": "#ffdad6",
+                    "primary-container": "#007f9d",
+                    "on-tertiary": "#ffffff",
+                    "background": "#f7f9fb",
+                    "inverse-primary": "#6cd3f7",
+                    "on-primary-fixed-variant": "#004e61",
+                    "outline-variant": "#bdc8ce",
+                    "surface-dim": "#d8dadc",
+                    "on-tertiary-container": "#fffbff",
+                    "tertiary-fixed": "#ffddb8",
+                    "on-secondary-container": "#5c647a",
+                    "tertiary": "#825100",
+                    "on-primary-container": "#fafdff",
+                    "surface-tint": "#006780",
+                    "surface-container-highest": "#e0e3e5",
+                    "secondary-container": "#dae2fd",
+                    "on-surface-variant": "#3e484d"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "sm": "8px",
+                    "gutter": "16px",
+                    "xl": "32px",
+                    "md": "16px",
+                    "unit": "4px",
+                    "margin-mobile": "16px",
+                    "xs": "4px",
+                    "margin-desktop": "32px",
+                    "lg": "24px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Hanken Grotesk"],
+                    "label-caps": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"],
+                    "data-mono": ["JetBrains Mono"],
+                    "body-sm": ["Hanken Grotesk"],
+                    "display": ["Hanken Grotesk"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "headline-sm": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "data-mono": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-sm-mobile": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "label-caps-mobile": ["10px", {"lineHeight": "14px", "letterSpacing": "0.05em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        body {
+            font-family: 'Hanken Grotesk', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="bg-surface-container-lowest dark:bg-surface-dim docked full-width top-0 z-40 border-b border-outline-variant dark:border-outline flex justify-between items-center w-full px-margin-mobile h-16 sticky">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim" data-icon="factory">factory</span>
+<h1 class="font-headline-sm-mobile text-headline-sm-mobile font-bold text-primary dark:text-primary-fixed-dim">Jicamarca Industrial</h1>
+</div>
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center overflow-hidden">
+<img alt="Profile Admin" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChgN_tgN2rQNTAbLs4FOAAVC5RYBvY_bb5hE7yPE956DQd0KIPiXhJyhsm-fmbtNcMVIvLI71Cev4BSBBFI8ik_QKF2-m_musa78r93dib9JGxTwJAHxgxw7yHjWA8IhnbJJIr1OAW9FCzBm7KEpK0SopU_d65fkbcPClXyd9enyQ6WqXmXr5sU8F_Vny4mmpeExvrGpof5ZcxjQivmWLiFY3n8q8hKZviqWwVa32tci7NUc0zHFnjY4Y5PYmcU4bOm4pE2Bc6L6Y"/>
+</div>
+</header>
+<main class="px-margin-mobile pt-6 space-y-6">
+<!-- Dashboard Summary Bento -->
+<div class="grid grid-cols-2 gap-4">
+<div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1">USUARIOS TOTALES</span>
+<div class="flex items-end justify-between">
+<span class="font-data-mono text-headline-lg text-primary">124</span>
+<span class="material-symbols-outlined text-primary opacity-20" data-icon="group" style="font-size: 32px;">group</span>
+</div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl shadow-sm">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant mb-1">PENDIENTES</span>
+<div class="flex items-end justify-between">
+<span class="font-data-mono text-headline-lg text-tertiary">08</span>
+<span class="material-symbols-outlined text-tertiary opacity-20" data-icon="pending_actions" style="font-size: 32px;">pending_actions</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Management Header -->
+<div class="flex flex-col gap-2">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Gestión de Usuarios</h2>
+<div class="flex gap-2">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" data-icon="search">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-lowest border border-outline-variant rounded-full text-body-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all" placeholder="Buscar usuario..." type="text"/>
+</div>
+<button class="bg-primary text-on-primary p-2 rounded-xl flex items-center justify-center active:scale-95 duration-150">
+<span class="material-symbols-outlined" data-icon="person_add">person_add</span>
+</button>
+</div>
+</div>
+<!-- User List (Technical List Design) -->
+<div class="space-y-3">
+<!-- User Card 1 -->
+<div class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm hover:border-primary transition-colors duration-200">
+<div class="p-md flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-bold border border-outline-variant">
+                        RC
+                    </div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="font-headline-sm text-body-md font-semibold text-on-surface">Ricardo Caceres</h3>
+<span class="bg-primary-container text-on-primary-fixed-variant font-label-caps text-[10px] px-2 py-0.5 rounded-full">ADMIN</span>
+</div>
+<p class="font-body-sm text-on-surface-variant mb-2">r.caceres@jicamarca.pe</p>
+<div class="flex flex-wrap gap-2">
+<div class="flex items-center gap-1 bg-surface-container text-on-secondary-container px-2 py-1 rounded text-[11px] font-medium border border-outline-variant">
+<span class="material-symbols-outlined text-[14px]" data-icon="precision_manufacturing">precision_manufacturing</span>
+                                Planta A1
+                            </div>
+<div class="flex items-center gap-1 bg-surface-container text-on-secondary-container px-2 py-1 rounded text-[11px] font-medium border border-outline-variant">
+<span class="material-symbols-outlined text-[14px]" data-icon="bolt">bolt</span>
+                                Eléctrico
+                            </div>
+</div>
+</div>
+</div>
+<!-- Action Bar -->
+<div class="flex border-t border-outline-variant bg-surface-bright">
+<button class="flex-1 py-3 flex items-center justify-center gap-2 text-on-surface-variant hover:bg-surface-container-high transition-colors active:bg-surface-container-highest border-r border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="edit">edit</span>
+<span class="font-label-caps text-[11px]">EDITAR</span>
+</button>
+<button class="flex-1 py-3 flex items-center justify-center gap-2 text-on-surface-variant hover:bg-surface-container-high transition-colors active:bg-surface-container-highest border-r border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="vpn_key">vpn_key</span>
+<span class="font-label-caps text-[11px]">LLAVES</span>
+</button>
+<button class="flex-1 py-3 flex items-center justify-center gap-2 text-error hover:bg-error-container/20 transition-colors active:bg-error-container/40">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span>
+<span class="font-label-caps text-[11px]">ELIMINAR</span>
+</button>
+</div>
+</div>
+<!-- User Card 2 -->
+<div class="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm hover:border-primary transition-colors duration-200">
+<div class="p-md flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center text-primary font-bold border border-outline-variant">
+                        MS
+                    </div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="font-headline-sm text-body-md font-semibold text-on-surface">Mariana Solis</h3>
+<span class="bg-secondary-container text-on-secondary-container font-label-caps text-[10px] px-2 py-0.5 rounded-full">OPERADOR</span>
+</div>
+<p class="font-body-sm text-on-surface-variant mb-2">m.solis@jicamarca.pe</p>
+<div class="flex flex-wrap gap-2">
+<div class="flex items-center gap-1 bg-surface-container text-on-secondary-container px-2 py-1 rounded text-[11px] font-medium border border-outline-variant">
+<span class="material-symbols-outlined text-[14px]" data-icon="warehouse">warehouse</span>
+                                Logística
+                            </div>
+</div>
+</div>
+</div>
+<div class="flex border-t border-outline-variant bg-surface-bright">
+<button class="flex-1 py-3 flex items-center justify-center gap-2 text-on-surface-variant border-r border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="edit">edit</span>
+<span class="font-label-caps text-[11px]">EDITAR</span>
+</button>
+<button class="flex-1 py-3 flex items-center justify-center gap-2 text-on-surface-variant border-r border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="vpn_key">vpn_key</span>
+<span class="font-label-caps text-[11px]">LLAVES</span>
+</button>
+<button class="flex-1 py-3 flex items-center justify-center gap-2 text-error">
+<span class="material-symbols-outlined text-[18px]" data-icon="delete">delete</span>
+<span class="font-label-caps text-[11px]">ELIMINAR</span>
+</button>
+</div>
+</div>
+<!-- User Card 3 (Pending) -->
+<div class="bg-white border border-tertiary/30 rounded-xl overflow-hidden shadow-sm bg-tertiary-container/5">
+<div class="p-md flex items-start gap-4">
+<div class="w-10 h-10 rounded-full bg-tertiary-fixed-dim flex items-center justify-center text-on-tertiary-fixed font-bold border border-tertiary">
+                        JA
+                    </div>
+<div class="flex-1">
+<div class="flex justify-between items-start">
+<h3 class="font-headline-sm text-body-md font-semibold text-on-surface">Jorge Alva</h3>
+<span class="bg-tertiary-container text-on-tertiary-container font-label-caps text-[10px] px-2 py-0.5 rounded-full">INVITADO</span>
+</div>
+<p class="font-body-sm text-on-surface-variant mb-2">j.alva@externo.com</p>
+<div class="flex items-center gap-2 text-tertiary">
+<span class="material-symbols-outlined text-[16px]" data-icon="warning" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span class="font-body-sm text-[12px] font-semibold">Pendiente de verificación</span>
+</div>
+</div>
+</div>
+<div class="flex border-t border-outline-variant bg-surface-bright">
+<button class="flex-1 py-3 flex items-center justify-center gap-2 text-on-surface-variant border-r border-outline-variant">
+<span class="material-symbols-outlined text-[18px]" data-icon="edit">edit</span>
+<span class="font-label-caps text-[11px]">REVISAR</span>
+</button>
+<button class="flex-1 py-3 flex items-center justify-center gap-2 text-error">
+<span class="material-symbols-outlined text-[18px]" data-icon="cancel">cancel</span>
+<span class="font-label-caps text-[11px]">RECHAZAR</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-surface-container-lowest dark:bg-surface-dim border-t border-outline-variant dark:border-outline">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="font-label-caps text-[10px] mt-1">TABLERO</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="receipt_long">receipt_long</span>
+<span class="font-label-caps text-[10px] mt-1">FACTURAS</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-secondary-container dark:bg-on-secondary-fixed-variant text-on-secondary-container dark:text-secondary-fixed rounded-xl px-4 py-1 active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="group" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-label-caps text-[10px] mt-1">USUARIOS</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant py-1 hover:bg-surface-container-high transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span class="font-label-caps text-[10px] mt-1">AJUSTES</span>
+</a>
+</nav>
+<script>
+        // Simple touch feedback for interactive elements
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('touchstart', function() {
+                this.classList.add('opacity-70');
+            });
+            el.addEventListener('touchend', function() {
+                this.classList.remove('opacity-70');
+            });
+        });
+
+        // Add scanline effect overlay for industrial look
+        const scanline = document.createElement('div');
+        scanline.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.02) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.01), rgba(0, 255, 0, 0.005), rgba(0, 0, 255, 0.01));
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+            z-index: 100;
+        `;
+        document.body.appendChild(scanline);
+    </script>
+</body></html>

@@ -1,0 +1,502 @@
+<!DOCTYPE html><html class="light" lang="es"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Facturación por Miembro | Parque Industrial Jicamarca</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed": "#b7eaff",
+                    "on-surface-variant": "#3e484d",
+                    "surface-tint": "#006780",
+                    "inverse-on-surface": "#eff1f3",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-container": "#007f9d",
+                    "on-tertiary-fixed": "#2a1700",
+                    "surface": "#f7f9fb",
+                    "error": "#ba1a1a",
+                    "secondary-fixed-dim": "#bec6e0",
+                    "inverse-surface": "#2d3133",
+                    "background": "#f7f9fb",
+                    "on-primary": "#ffffff",
+                    "on-primary-container": "#fafdff",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "outline-variant": "#bdc8ce",
+                    "surface-variant": "#e0e3e5",
+                    "on-surface": "#191c1e",
+                    "surface-bright": "#f7f9fb",
+                    "tertiary": "#825100",
+                    "surface-container-highest": "#e0e3e5",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "surface-container-high": "#e6e8ea",
+                    "inverse-primary": "#6cd3f7",
+                    "on-secondary-fixed": "#131b2e",
+                    "surface-container": "#eceef0",
+                    "secondary": "#565e74",
+                    "error-container": "#ffdad6",
+                    "primary": "#00647c",
+                    "on-primary-fixed": "#001f28",
+                    "tertiary-container": "#a36700",
+                    "secondary-container": "#dae2fd",
+                    "secondary-fixed": "#dae2fd",
+                    "tertiary-fixed": "#ffddb8",
+                    "surface-container-low": "#f2f4f6",
+                    "on-primary-fixed-variant": "#004e61",
+                    "outline": "#6e797e",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "on-secondary": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "surface-dim": "#191c1e",
+                    "on-tertiary": "#ffffff",
+                    "on-tertiary-container": "#fffbff",
+                    "primary-fixed-dim": "#6cd3f7",
+                    "on-background": "#191c1e",
+                    "on-secondary-container": "#5c647a",
+                    "on-error": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "md": "16px",
+                    "margin-mobile": "16px",
+                    "gutter": "16px",
+                    "lg": "24px",
+                    "margin-desktop": "32px",
+                    "unit": "4px",
+                    "xs": "4px",
+                    "xl": "32px",
+                    "sm": "8px"
+            },
+            "fontFamily": {
+                    "body-sm": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "headline-md": ["Hanken Grotesk"],
+                    "label-caps": ["Hanken Grotesk"],
+                    "data-mono": ["JetBrains Mono"],
+                    "display": ["Hanken Grotesk"],
+                    "headline-sm": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "data-mono": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .zebra-table tr:nth-child(even) {
+            background-color: #f8fafc;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background font-body-md text-on-surface antialiased flex">
+<!-- SideNavBar - High Contrast -->
+<aside class="fixed left-0 top-0 h-full w-[240px] border-r border-outline-variant flex flex-col p-md gap-sm z-50 bg-surface-dim text-white shadow-2xl">
+<div class="mb-lg px-xs">
+<h1 class="font-headline-sm text-headline-sm font-bold text-primary-fixed">Parque Industrial Jicamarca</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-white/60">Gestión de Inmuebles</p>
+</div>
+<nav class="flex flex-col gap-xs flex-grow">
+<a class="flex items-center gap-md px-md py-sm text-white/70 hover:bg-white/10 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Panel de Control</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-white/70 hover:bg-white/10 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-md text-body-md">Inquilinos y Miembros</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm bg-primary text-on-primary font-semibold rounded-lg transition-all shadow-lg" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-body-md text-body-md">Facturación y Consumo</span>
+</a>
+<a class="flex items-center gap-md px-md py-sm text-white/70 hover:bg-white/10 rounded-lg transition-all" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<span class="font-body-md text-body-md">Pagos Recibidos</span>
+</a>
+</nav>
+<div class="mt-auto pt-md border-t border-white/10 flex items-center gap-sm">
+<div class="w-8 h-8 rounded-full bg-primary-fixed-dim flex items-center justify-center text-on-primary-fixed font-bold text-xs">AD</div>
+<div class="flex flex-col overflow-hidden">
+<span class="font-body-sm text-body-sm font-semibold truncate">Administrador Sede</span>
+<span class="text-[10px] text-white/50">C.C. Lima Global</span>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-[240px] w-full min-h-screen flex flex-col bg-surface">
+<!-- TopNavBar -->
+<header class="sticky top-0 z-40 bg-surface/80 backdrop-blur-md flex justify-between items-center w-full px-lg h-16 border-b border-outline-variant">
+<div class="flex items-center gap-lg flex-1">
+<div class="relative w-full max-w-md">
+<span class="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-low border-none rounded-lg pl-xl pr-md py-sm font-body-sm focus:ring-1 focus:ring-primary outline-none" placeholder="Buscar por nombre de inquilino o local..." type="text">
+</div>
+</div>
+<div class="flex items-center gap-md">
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container-low transition-colors rounded-full text-on-surface-variant">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center hover:bg-surface-container-low transition-colors rounded-full text-on-surface-variant">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</header>
+<div class="p-lg space-y-lg max-w-[1600px] mx-auto w-full">
+<!-- Header & Export Actions -->
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-md">
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-bold">Reporte de Facturación y Consumo</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Resumen detallado de costos eléctricos distribuidos por miembro/inquilino.</p>
+</div>
+<div class="flex gap-sm">
+<button class="flex items-center gap-xs px-md py-sm border border-outline text-on-surface font-semibold rounded-lg hover:bg-surface-container-low transition-all"><span class="material-symbols-outlined text-sm">download</span>
+<span class="font-bold">Exportar Excel</span></button>
+<button class="flex items-center gap-xs px-md py-sm bg-primary text-on-primary font-semibold rounded-lg hover:opacity-90 transition-all shadow-md"><span class="material-symbols-outlined text-sm">print</span>
+<span class="font-bold">Imprimir Recibos</span></button>
+</div>
+</div>
+<!-- Filters Bar -->
+<div class="bg-white border border-outline-variant rounded-lg p-md grid grid-cols-1 md:grid-cols-4 gap-md shadow-sm">
+<div class="space-y-xs">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Mes de Facturación</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">calendar_month</span>
+<select class="w-full bg-surface border border-outline-variant rounded-md pl-xl pr-md py-sm font-body-sm focus:border-primary outline-none appearance-none">
+<option>Octubre 2023</option>
+<option>Septiembre 2023</option>
+<option>Agosto 2023</option>
+</select>
+</div>
+</div>
+<div class="space-y-xs">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Tipo de Miembro</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">category</span>
+<select class="w-full bg-surface border border-outline-variant rounded-md pl-xl pr-md py-sm font-body-sm focus:border-primary outline-none appearance-none">
+<option>Todos</option>
+<option>Comercial</option>
+<option>Industrial</option>
+<option>Oficinas</option>
+</select>
+</div>
+</div>
+<div class="space-y-xs">
+<label class="font-label-caps text-label-caps text-on-surface-variant">Estado de Pago</label>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant text-sm">payments</span>
+<select class="w-full bg-surface border border-outline-variant rounded-md pl-xl pr-md py-sm font-body-sm focus:border-primary outline-none appearance-none">
+<option>Todos los estados</option>
+<option>Pendiente</option>
+<option>Pagado</option>
+<option>Vencido</option>
+</select>
+</div>
+</div>
+<div class="flex items-end">
+<button class="w-full py-sm bg-surface-container-high hover:bg-surface-variant text-on-surface font-semibold rounded-md transition-all">Aplicar Filtros</button>
+</div>
+</div>
+<!-- KPI Cards -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-md">
+<div class="bg-white border border-outline-variant rounded-lg p-md shadow-sm">
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-xs">Consumo Total</p>
+<h3 class="font-data-mono text-headline-md text-primary font-bold">124.5 <span class="text-body-md">MWh</span></h3>
+<p class="text-[10px] text-on-surface-variant mt-sm">Mismo periodo mes anterior: 121.2 MWh</p>
+</div>
+<div class="bg-white border border-outline-variant rounded-lg p-md shadow-sm">
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-xs">Monto a Facturar</p>
+<h3 class="font-data-mono text-headline-md text-on-surface font-bold">S/ 482,190</h3>
+<p class="text-[10px] text-on-surface-variant mt-sm">Incluye IGV y Cargos Fijos</p>
+</div>
+<div class="bg-white border border-outline-variant rounded-lg p-md shadow-sm">
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-xs">Promedio por Miembro</p>
+<h3 class="font-data-mono text-headline-md text-on-surface font-bold">S/ 12,054</h3>
+<p class="text-[10px] text-on-surface-variant mt-sm">Basado en 40 miembros activos</p>
+</div>
+<div class="bg-white border border-outline-variant rounded-lg p-md shadow-sm">
+<p class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-xs">Recaudación</p>
+<div class="flex items-center gap-md mt-xs">
+<h3 class="font-data-mono text-headline-md text-on-surface font-bold">65%</h3>
+<div class="flex-grow bg-surface-variant h-2 rounded-full overflow-hidden">
+<div class="bg-primary h-full w-[65%]"></div>
+</div>
+</div>
+<p class="text-[10px] text-on-surface-variant mt-sm">26 de 40 miembros han pagado</p>
+</div>
+</div>
+<!-- Comparison & Distribution -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+<!-- Bar Chart: Comparativa de Consumo -->
+<div class="lg:col-span-2 bg-white border border-outline-variant rounded-lg p-md flex flex-col h-[400px] shadow-md">
+<div class="flex justify-between items-center mb-lg">
+<h4 class="font-headline-sm text-headline-sm">Comparativa de Consumo por Miembro</h4>
+<span class="text-xs text-on-surface-variant">Top 8 Consumidores (kWh)</span>
+</div>
+<div class="flex-grow flex flex-col gap-sm">
+<!-- Member Rows -->
+<div class="flex items-center gap-md">
+<span class="w-32 text-xs font-semibold truncate">Supermercado Metro</span>
+<div class="flex-grow bg-surface-variant h-6 rounded-sm overflow-hidden relative">
+<div class="bg-primary h-full w-[95%]"></div>
+<span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-white font-bold">28,450 kWh</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<span class="w-32 text-xs font-semibold truncate">Cineplanet</span>
+<div class="flex-grow bg-surface-variant h-6 rounded-sm overflow-hidden relative">
+<div class="bg-primary h-full w-[80%]"></div>
+<span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-white font-bold">24,120 kWh</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<span class="w-32 text-xs font-semibold truncate">Gimnasio SmartFit</span>
+<div class="flex-grow bg-surface-variant h-6 rounded-sm overflow-hidden relative">
+<div class="bg-primary h-full w-[65%]"></div>
+<span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-white font-bold">19,800 kWh</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<span class="w-32 text-xs font-semibold truncate">Tiendas Ripley</span>
+<div class="flex-grow bg-surface-variant h-6 rounded-sm overflow-hidden relative">
+<div class="bg-primary h-full w-[60%]"></div>
+<span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-white font-bold">18,250 kWh</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<span class="w-32 text-xs font-semibold truncate">Restaurante Tanta</span>
+<div class="flex-grow bg-surface-variant h-6 rounded-sm overflow-hidden relative">
+<div class="bg-primary h-full w-[45%]"></div>
+<span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-white font-bold">13,600 kWh</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<span class="w-32 text-xs font-semibold truncate">Banco de Crédito</span>
+<div class="flex-grow bg-surface-variant h-6 rounded-sm overflow-hidden relative">
+<div class="bg-primary h-full w-[30%]"></div>
+<span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-white font-bold">9,100 kWh</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<span class="w-32 text-xs font-semibold truncate">Saga Falabella</span>
+<div class="flex-grow bg-surface-variant h-6 rounded-sm overflow-hidden relative">
+<div class="bg-primary h-full w-[25%]"></div>
+<span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-white font-bold">7,800 kWh</span>
+</div>
+</div>
+<div class="flex items-center gap-md">
+<span class="w-32 text-xs font-semibold truncate">Farmacias Inkafarma</span>
+<div class="flex-grow bg-surface-variant h-6 rounded-sm overflow-hidden relative">
+<div class="bg-primary h-full w-[15%]"></div>
+<span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-on-surface-variant font-bold">4,500 kWh</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Donut Chart: Consumo por Inquilino -->
+<div class="bg-white border border-outline-variant rounded-lg p-md flex flex-col h-[400px] shadow-md">
+<h4 class="font-headline-sm text-headline-sm mb-lg">Consumo por Inquilino</h4>
+<div class="flex-grow flex items-center justify-center relative">
+<!-- Donut Chart Simulation -->
+<div class="w-48 h-48 rounded-full border-[20px] border-surface-container-highest relative flex items-center justify-center">
+<div class="absolute inset-[-20px] rounded-full border-[20px] border-primary border-r-transparent border-b-transparent rotate-12"></div>
+<div class="absolute inset-[-20px] rounded-full border-[20px] border-secondary border-t-transparent border-l-transparent -rotate-45"></div>
+<div class="text-center">
+<span class="font-data-mono text-headline-md">Oct</span>
+<p class="text-[10px] text-on-surface-variant font-label-caps uppercase">Facturación</p>
+</div>
+</div>
+</div>
+<div class="space-y-sm mt-md">
+<div class="flex justify-between items-center text-sm">
+<div class="flex items-center gap-xs">
+<div class="w-2 h-2 rounded-full bg-primary"></div>
+<span class="">Anclas / Mayores</span>
+</div>
+<span class="font-data-mono">54%</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<div class="flex items-center gap-xs">
+<div class="w-2 h-2 rounded-full bg-secondary"></div>
+<span class="">Locales Menores</span>
+</div>
+<span class="font-data-mono">31%</span>
+</div>
+<div class="flex justify-between items-center text-sm">
+<div class="flex items-center gap-xs">
+<div class="w-2 h-2 rounded-full bg-surface-container-highest"></div>
+<span class="">Áreas Comunes</span>
+</div>
+<span class="font-data-mono">15%</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Detailed Table: Desglose de Facturación -->
+<div class="bg-white border border-outline-variant rounded-lg overflow-hidden shadow-md">
+<div class="p-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<h4 class="font-headline-sm text-headline-sm">Desglose de Facturación por Miembro</h4>
+<div class="flex gap-md items-center">
+<span class="text-xs text-on-surface-variant">Mostrando 40 miembros</span>
+<button class="material-symbols-outlined text-on-surface-variant">filter_list</button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left zebra-table border-collapse">
+<thead>
+<tr class="bg-surface-container-low text-on-surface-variant font-label-caps text-[11px] uppercase tracking-wider">
+<th class="px-md py-sm">Miembro / Local</th>
+<th class="px-md py-sm">Medidor ID</th>
+<th class="px-md py-sm">Consumo (kWh)</th>
+<th class="px-md py-sm">Monto Neto (S/)</th>
+<th class="px-md py-sm">IGV (18%)</th>
+<th class="px-md py-sm font-bold">Total Factura (S/)</th>
+<th class="px-md py-sm">Estado</th>
+<th class="px-md py-sm text-right">Acciones</th>
+</tr>
+</thead>
+<tbody class="text-body-sm">
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<td class="px-md py-sm">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Supermercado Metro</span>
+<span class="text-[10px] text-on-surface-variant">Local L-101 (Ancla)</span>
+</div>
+</td>
+<td class="px-md py-sm font-data-mono text-xs">MED-889021</td>
+<td class="px-md py-sm font-data-mono">28,450</td>
+<td class="px-md py-sm font-data-mono">92,462.50</td>
+<td class="px-md py-sm font-data-mono">16,643.25</td>
+<td class="px-md py-sm font-data-mono font-bold">109,105.75</td>
+<td class="px-md py-sm">
+<span class="px-xs py-[2px] bg-green-100 text-green-700 rounded-sm text-[10px] font-bold">PAGADO</span>
+</td>
+<td class="px-md py-sm text-right">
+<button class="text-primary hover:underline text-xs font-bold mr-md">Ver Recibo</button>
+<button class="material-symbols-outlined text-on-surface-variant">more_vert</button>
+</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<td class="px-md py-sm">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Cineplanet</span>
+<span class="text-[10px] text-on-surface-variant">Local L-402 (Ocio)</span>
+</div>
+</td>
+<td class="px-md py-sm font-data-mono text-xs">MED-110293</td>
+<td class="px-md py-sm font-data-mono">24,120</td>
+<td class="px-md py-sm font-data-mono">78,390.00</td>
+<td class="px-md py-sm font-data-mono">14,110.20</td>
+<td class="px-md py-sm font-data-mono font-bold">92,500.20</td>
+<td class="px-md py-sm">
+<span class="px-xs py-[2px] bg-yellow-100 text-yellow-700 rounded-sm text-[10px] font-bold">PENDIENTE</span>
+</td>
+<td class="px-md py-sm text-right">
+<button class="text-primary hover:underline text-xs font-bold mr-md">Recordar</button>
+<button class="material-symbols-outlined text-on-surface-variant">more_vert</button>
+</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<td class="px-md py-sm">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Gimnasio SmartFit</span>
+<span class="text-[10px] text-on-surface-variant">Local L-215 (Servicios)</span>
+</div>
+</td>
+<td class="px-md py-sm font-data-mono text-xs">MED-445012</td>
+<td class="px-md py-sm font-data-mono">19,800</td>
+<td class="px-md py-sm font-data-mono">64,350.00</td>
+<td class="px-md py-sm font-data-mono">11,583.00</td>
+<td class="px-md py-sm font-data-mono font-bold">75,933.00</td>
+<td class="px-md py-sm">
+<span class="px-xs py-[2px] bg-green-100 text-green-700 rounded-sm text-[10px] font-bold">PAGADO</span>
+</td>
+<td class="px-md py-sm text-right">
+<button class="text-primary hover:underline text-xs font-bold mr-md">Ver Recibo</button>
+<button class="material-symbols-outlined text-on-surface-variant">more_vert</button>
+</td>
+</tr>
+<tr class="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
+<td class="px-md py-sm">
+<div class="flex flex-col">
+<span class="font-semibold text-on-surface">Tiendas Ripley</span>
+<span class="text-[10px] text-on-surface-variant">Local L-110 (Tienda)</span>
+</div>
+</td>
+<td class="px-md py-sm font-data-mono text-xs">MED-889045</td>
+<td class="px-md py-sm font-data-mono">18,250</td>
+<td class="px-md py-sm font-data-mono">59,312.50</td>
+<td class="px-md py-sm font-data-mono">10,676.25</td>
+<td class="px-md py-sm font-data-mono font-bold">69,988.75</td>
+<td class="px-md py-sm">
+<span class="px-xs py-[2px] bg-red-100 text-red-700 rounded-sm text-[10px] font-bold">VENCIDO</span>
+</td>
+<td class="px-md py-sm text-right">
+<button class="text-error hover:underline text-xs font-bold mr-md">Notificar Mora</button>
+<button class="material-symbols-outlined text-on-surface-variant">more_vert</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-md border-t border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+<span class="text-xs text-on-surface-variant">Página 1 de 4</span>
+<div class="flex gap-xs">
+<button class="p-xs hover:bg-surface-container-low border border-outline-variant rounded"><span class="material-symbols-outlined text-sm">chevron_left</span></button>
+<button class="px-sm py-xs bg-primary text-on-primary text-xs font-bold rounded">1</button>
+<button class="px-sm py-xs hover:bg-surface-container-low text-xs rounded">2</button>
+<button class="px-sm py-xs hover:bg-surface-container-low text-xs rounded">3</button>
+<button class="p-xs hover:bg-surface-container-low border border-outline-variant rounded"><span class="material-symbols-outlined text-sm">chevron_right</span></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer -->
+<footer class="mt-auto bg-surface-container-highest flex justify-between items-center px-lg py-xs w-full border-t border-outline-variant">
+<div class="flex gap-lg items-center">
+<span class="font-label-caps text-label-caps text-on-surface-variant">Parque Industrial Jicamarca Billing Module v2.0.1</span>
+<div class="flex gap-md">
+<span class="font-data-mono text-data-mono text-on-surface-variant/70 text-[10px]">Cierre de mes: 31 Oct</span>
+<span class="font-data-mono text-data-mono text-on-surface-variant/70 text-[10px]">Tasa Cambio: S/ 3.75</span>
+</div>
+</div>
+<div class="text-[10px] text-on-surface-variant italic">
+                Sincronizado con SUNAT hace 15 minutos
+            </div>
+</footer>
+</main>
+
+
+</body></html>

@@ -1,0 +1,272 @@
+<!DOCTYPE html><html class="light" lang="es"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-bright": "#f7f9fb",
+                    "primary-fixed-dim": "#6cd3f7",
+                    "on-secondary": "#ffffff",
+                    "on-background": "#191c1e",
+                    "on-primary-fixed": "#001f28",
+                    "on-tertiary-fixed": "#2a1700",
+                    "on-primary-fixed-variant": "#004e61",
+                    "secondary": "#565e74",
+                    "tertiary-container": "#a36700",
+                    "secondary-container": "#dae2fd",
+                    "secondary-fixed-dim": "#bec6e0",
+                    "on-surface": "#191c1e",
+                    "inverse-surface": "#2d3133",
+                    "inverse-on-surface": "#eff1f3",
+                    "background": "#f7f9fb",
+                    "on-secondary-container": "#5c647a",
+                    "surface-container-high": "#e6e8ea",
+                    "tertiary-fixed-dim": "#ffb95f",
+                    "on-secondary-fixed": "#131b2e",
+                    "outline": "#6e797e",
+                    "surface-dim": "#d8dadc",
+                    "primary": "#00647c",
+                    "tertiary-fixed": "#ffddb8",
+                    "on-surface-variant": "#3e484d",
+                    "surface-container": "#eceef0",
+                    "surface-variant": "#e0e3e5",
+                    "surface-tint": "#006780",
+                    "error-container": "#ffdad6",
+                    "secondary-fixed": "#dae2fd",
+                    "outline-variant": "#bdc8ce",
+                    "on-secondary-fixed-variant": "#3f465c",
+                    "on-error": "#ffffff",
+                    "on-primary-container": "#fafdff",
+                    "primary-container": "#007f9d",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed": "#b7eaff",
+                    "on-error-container": "#93000a",
+                    "surface-container-highest": "#e0e3e5",
+                    "on-tertiary": "#ffffff",
+                    "inverse-primary": "#6cd3f7",
+                    "error": "#ba1a1a",
+                    "tertiary": "#825100",
+                    "surface": "#f7f9fb",
+                    "on-primary": "#ffffff",
+                    "surface-container-low": "#f2f4f6",
+                    "on-tertiary-fixed-variant": "#653e00",
+                    "on-tertiary-container": "#fffbff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "md": "16px",
+                    "lg": "24px",
+                    "margin-mobile": "16px",
+                    "sm": "8px",
+                    "gutter": "16px",
+                    "xs": "4px",
+                    "margin-desktop": "32px",
+                    "xl": "32px",
+                    "unit": "4px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Hanken Grotesk"],
+                    "label-caps": ["Hanken Grotesk"],
+                    "body-md": ["Hanken Grotesk"],
+                    "headline-lg": ["Hanken Grotesk"],
+                    "data-mono": ["JetBrains Mono"],
+                    "display": ["Hanken Grotesk"],
+                    "headline-sm": ["Hanken Grotesk"],
+                    "body-sm": ["Hanken Grotesk"],
+                    "body-lg": ["Hanken Grotesk"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "data-mono": ["14px", {"lineHeight": "20px", "fontWeight": "500"}],
+                    "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-nav-item {
+            background-color: #dae2fd;
+            color: #5c647a;
+            font-weight: 600;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-surface-bright text-on-surface font-body-md min-h-screen pb-20">
+<!-- Top Navigation Shell -->
+<header class="flex justify-between items-center w-full px-lg h-16 bg-surface border-b border-outline-variant fixed top-0 z-50">
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Parque Industrial Jicamarca</h1>
+<div class="flex gap-sm">
+<button class="material-symbols-outlined text-primary cursor-pointer active:opacity-80 p-sm hover:bg-surface-container-low transition-colors rounded-full" data-icon="notifications">notifications</button>
+<button class="material-symbols-outlined text-primary cursor-pointer active:opacity-80 p-sm hover:bg-surface-container-low transition-colors rounded-full" data-icon="settings">settings</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="pt-20 px-margin-mobile">
+<!-- Search and Filter Header -->
+<section class="mb-lg">
+<div class="flex flex-col gap-sm">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Miembros y Sectores</h2>
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full pl-10 pr-md py-sm bg-surface-container-lowest border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary outline-none text-body-sm font-body-sm transition-all" placeholder="Buscar por nombre o sector..." type="text">
+</div>
+<div class="flex gap-xs overflow-x-auto no-scrollbar py-xs">
+<span class="bg-secondary-container text-on-secondary-container px-md py-xs rounded-full text-label-caps font-label-caps whitespace-nowrap">Todos</span>
+<span class="bg-surface-container-high text-on-surface-variant px-md py-xs rounded-full text-label-caps font-label-caps whitespace-nowrap">Nave A</span>
+<span class="bg-surface-container-high text-on-surface-variant px-md py-xs rounded-full text-label-caps font-label-caps whitespace-nowrap">Nave B</span>
+<span class="bg-surface-container-high text-on-surface-variant px-md py-xs rounded-full text-label-caps font-label-caps whitespace-nowrap">Administración</span>
+</div>
+</div>
+</section>
+<!-- Vertical Members List -->
+<div class="flex flex-col gap-sm">
+<!-- Member Card -->
+<div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl flex items-center justify-between active:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-md">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="A professional headshot of a middle-aged male engineer in an industrial setting. He is wearing a high-visibility vest and a white hard hat. The background shows blurred industrial machinery and structural steel beams with cool blue and grey tones. The lighting is crisp and bright, conveying a professional and high-reliability environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBnWHXZiqyUGNZhDDpXlTT16rR4k3KbDBhyfA3M1EnYVev9WO78X6kHT9a2QRpNZyd2kFIC3pFJzCqb2K2KPzGXuWPNnoi1x_HyI7c2WzsdVQv5YTxd6QYkbCJH3BhneEjATZhy3a4FKCF_mM7z1GimMTadf2s3PeZbAkUXyJXVW5mCo9pbXEGAg25rxS5RFzuRXT2xY1L8dLWLclFoxdIeu-5yqDkJVsjLV-X1xwcdFGq288NuR7tBybrpI2FOnB68WTuUKly8ryY">
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-lg text-on-surface leading-tight">Carlos Mendoza</span>
+<div class="flex items-center gap-xs mt-xs">
+<span class="text-label-caps font-label-caps text-on-tertiary-fixed-variant bg-tertiary-fixed px-sm rounded-xs">Nave A</span>
+<span class="text-body-sm text-outline">•</span>
+<span class="text-body-sm text-outline">Mantenimiento</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</div>
+<!-- Member Card -->
+<div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl flex items-center justify-between active:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-md">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="A portrait of a young female industrial technician in a technical workspace. She is wearing blue coveralls with a small company logo. The background is a clean, modern factory floor with soft bokeh. The lighting is natural and high-key, emphasizing a clean and efficient workspace with a teal and navy professional color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoSLuH3_G64Zc8YUepA_RQQ5wf1BxAMTaI0VFNPFRzNJtpg2l5IKsTEVXtykL8bFCkAkfONmFPNiq1LMaVMacA4NVa_6gSzqf-T8rRc_qC7UCloC1BBPWmYkYJfjVRbQe8wJDa4VOAuTHUFlv1u0k6vdZebMetXLt4Eg3ayLDgAdeUH_JfDStsSUhhnEeIIEWEgChmK664g4bIpr-4ob78FoGNNDqHIQspVcESHHVsjRrkuloe-s4nrJZDLcOIFLvbiiYVT7-eyxg">
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-lg text-on-surface leading-tight">Elena Rivera</span>
+<div class="flex items-center gap-xs mt-xs">
+<span class="text-label-caps font-label-caps text-on-tertiary-fixed-variant bg-tertiary-fixed px-sm rounded-xs">Nave B</span>
+<span class="text-body-sm text-outline">•</span>
+<span class="text-body-sm text-outline">Operaciones</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</div>
+<!-- Member Card -->
+<div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl flex items-center justify-between active:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-md">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="A portrait of a focused man in his 40s wearing smart casual attire in a modern industrial office. In the background, there are glass partitions and technical blueprints visible. The atmosphere is professional and sophisticated, with high-contrast lighting and a palette dominated by deep navies and sharp white accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAJowzH09qOOheGRvQmwArUBrCaP4IA2hoCboSGrShgBz9-TCTZ7nQ4W_Rml21sxKDiO88Nzj2lnpxqpP9h60HTPFBxIVrb-5fd3XYqLSl4IVKtuTejjhWzkt6JQ797p1oIXScU7nbkeP-_XaH-ngPLz4DPohJ7K1baMg6QQ7gbZiRc5nv44xNM1mjrTiRhyL98ZWfu84mUsJUqv3QjVGl_aixUw1EEYcpLMMiMI-3aYO6hDA1RbdvHMo7A3FIXRigQdmx3vrxtyDM">
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-lg text-on-surface leading-tight">Jorge Valdivia</span>
+<div class="flex items-center gap-xs mt-xs">
+<span class="text-label-caps font-label-caps text-on-secondary-fixed-variant bg-secondary-fixed px-sm rounded-xs">Admin</span>
+<span class="text-body-sm text-outline">•</span>
+<span class="text-body-sm text-outline">Gerencia</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</div>
+<!-- Member Card -->
+<div class="bg-surface-container-lowest border border-outline-variant p-md rounded-xl flex items-center justify-between active:bg-surface-container-low transition-colors">
+<div class="flex items-center gap-md">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="A smiling female professional in a bright, modern control room environment. She is wearing a headset and looking towards a digital display out of frame. The lighting is cool and even, highlighting a high-tech, corporate industrial aesthetic. The color scheme features clean whites and professional navy blue tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBO-uTK4kEEwfwHMfFd6ec2VfCiuI2arApla1FlU-dWhv1omPGWfBqxpCeMBVYG1z07dfhGKQ1FT0A21W7-XONVAl8J-kreniovUyYVrydkBXuls9CDHXlI7g-BA7Iy_jNfNkzYCQpFNecYbuTNiCrPisiin9YPo0s50CSzO42gFO_7mgciKECiSclDcZPFXUMhdHOFxRetc9xI-6bc58AaYh8rGA-nZXe-dZYECiXXJnW6h6g6gP7F2Dq6XSygADWRply9D7pyQY8">
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-lg text-on-surface leading-tight">Lucia Torres</span>
+<div class="flex items-center gap-xs mt-xs">
+<span class="text-label-caps font-label-caps text-on-tertiary-fixed-variant bg-tertiary-fixed px-sm rounded-xs">Nave A</span>
+<span class="text-body-sm text-outline">•</span>
+<span class="text-body-sm text-outline">Control de Calidad</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</div>
+<!-- Member Card (Zebra striping aid with slightly different BG) -->
+<div class="bg-surface-container-low border border-outline-variant p-md rounded-xl flex items-center justify-between active:bg-surface-container-high transition-colors">
+<div class="flex items-center gap-md">
+<img class="w-12 h-12 rounded-full object-cover" data-alt="A professional male worker in a technical lab environment. He is wearing safety glasses and a dark blue industrial polo shirt. The room is filled with technical equipment and soft glowing indicators. The mood is precise and technical, using a corporate light-mode palette with subtle blue accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCmBlAX4Nhx-68zFD3mTHprPkILYtH0huA-c1vulmghCkuY478zRRHbVWF4YSOJBxGP2q0b8OWxZ22BYaBBtRjVLq2moKAt_X3PHmuM7B1QX0YVrFsabKeRmJ2eKKlghk3du3HSCw6QBgMviMlZlKJlYJmMUt2gCF8rT-lOlIgARoEftCHW-u26IXpX8K1wYq_9qLMfmiV2HxwTtM9yIDQzMB2gdQnZAzrY26MooIbUOD9A1Su3g5Co9Qpw-7yM5CdoPjqZTc5x2i8">
+<div class="flex flex-col">
+<span class="font-headline-sm text-body-lg text-on-surface leading-tight">Roberto Diaz</span>
+<div class="flex items-center gap-xs mt-xs">
+<span class="text-label-caps font-label-caps text-on-tertiary-fixed-variant bg-tertiary-fixed px-sm rounded-xs">Nave B</span>
+<span class="text-body-sm text-outline">•</span>
+<span class="text-body-sm text-outline">Seguridad</span>
+</div>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</div>
+</div>
+</main>
+<!-- Floating Action Button (FAB) -->
+<button class="fixed bottom-24 right-md w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center cursor-pointer active:scale-95 transition-transform z-50">
+<span class="material-symbols-outlined text-[32px]" data-icon="person_add">person_add</span>
+</button>
+<!-- Bottom Navigation Bar Shell -->
+<nav class="fixed bottom-0 left-0 w-full h-16 bg-surface border-t border-outline-variant flex justify-around items-center px-sm z-50 md:hidden">
+<div class="flex flex-col items-center gap-xs cursor-pointer text-on-surface-variant active:opacity-80">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+<span class="text-[10px] font-label-caps">Panel</span>
+</div>
+<div class="flex flex-col items-center gap-xs cursor-pointer active-nav-item px-md py-1">
+<span class="material-symbols-outlined" data-icon="manage_accounts">manage_accounts</span>
+<span class="text-[10px] font-label-caps">Usuarios</span>
+</div>
+<div class="flex flex-col items-center gap-xs cursor-pointer text-on-surface-variant active:opacity-80">
+<span class="material-symbols-outlined" data-icon="factory">factory</span>
+<span class="text-[10px] font-label-caps">Sectores</span>
+</div>
+<div class="flex flex-col items-center gap-xs cursor-pointer text-on-surface-variant active:opacity-80">
+<span class="material-symbols-outlined" data-icon="monitoring">monitoring</span>
+<span class="text-[10px] font-label-caps">Reportes</span>
+</div>
+</nav>
+<!-- Mini Footer -->
+<footer class="flex justify-between items-center px-lg py-xs w-full bg-surface-container-highest fixed bottom-0 hidden md:flex">
+<span class="font-data-mono text-data-mono text-on-surface-variant">Parque Industrial Jicamarca v1.2.4</span>
+<div class="flex gap-md">
+<span class="font-data-mono text-data-mono text-on-surface-variant">Server: Online</span>
+<span class="font-data-mono text-data-mono text-on-surface-variant">Latency: 24ms</span>
+</div>
+</footer>
+<script>
+        // Simple touch feedback and search focus interaction
+        document.querySelectorAll('.active\\:bg-surface-container-low').forEach(el => {
+            el.addEventListener('touchstart', () => el.classList.add('bg-surface-container-low'));
+            el.addEventListener('touchend', () => el.classList.remove('bg-surface-container-low'));
+        });
+
+        // Search highlight simulation
+        const searchInput = document.querySelector('input');
+        searchInput.addEventListener('focus', () => {
+            searchInput.parentElement.classList.add('scale-[1.01]');
+        });
+        searchInput.addEventListener('blur', () => {
+            searchInput.parentElement.classList.remove('scale-[1.01]');
+        });
+    </script>
+
+
+</body></html>
