@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 
-const Billing = () => {
+const Billing = ({ setCurrentView }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   return (
-    <main className="p-lg space-y-lg max-w-[1600px] w-full flex-grow">
-      {/* Dashboard Header */}
+    <main className="p-4 md:p-xl space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow">
+      {/* Resumen de Facturación */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-md">
         <div>
           <h2 className="font-headline-md text-headline-md text-on-surface font-bold">Módulo de Facturación</h2>
@@ -38,14 +38,20 @@ const Billing = () => {
               <div className="absolute right-0 mt-2 w-56 bg-surface border border-outline-variant rounded-lg shadow-lg z-50 py-sm">
                 <button 
                   className="w-full text-left px-md py-sm hover:bg-surface-container-low flex items-center gap-sm text-body-sm text-on-surface"
-                  onClick={() => setIsDropdownOpen(false)}
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    if (setCurrentView) setCurrentView('generate_invoices');
+                  }}
                 >
                   <span className="material-symbols-outlined text-[18px]">receipt_long</span>
                   Generar todas (Octubre)
                 </button>
                 <button 
                   className="w-full text-left px-md py-sm hover:bg-surface-container-low flex items-center gap-sm text-body-sm text-on-surface"
-                  onClick={() => setIsDropdownOpen(false)}
+                  onClick={() => {
+                    setIsDropdownOpen(false);
+                    if (setCurrentView) setCurrentView('generate_invoices');
+                  }}
                 >
                   <span className="material-symbols-outlined text-[18px]">rule</span>
                   Generar seleccionadas
@@ -124,14 +130,20 @@ const Billing = () => {
 
       {/* Inquilinos Table Area */}
       <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-md">
-        <div className="px-lg py-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+        <div className="px-lg py-md border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-md bg-surface-container-low">
           <h4 className="font-headline-sm text-headline-sm font-bold">Detalle de Facturación por Inquilino</h4>
-          <div className="flex gap-sm">
+          <div className="flex flex-wrap items-center gap-sm">
+            <button className="flex items-center gap-2 px-md py-2 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-sm rounded-lg transition-colors border border-[#107C41]/20">
+              <span className="material-symbols-outlined text-[18px]">table_view</span>
+              Excel
+            </button>
+            <button className="flex items-center gap-2 px-md py-2 bg-error/10 text-error hover:bg-error/20 font-bold text-sm rounded-lg transition-colors border border-error/20">
+              <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+              PDF
+            </button>
+            <div className="hidden md:block w-[1px] h-6 bg-outline-variant mx-1"></div>
             <button className="p-2 border border-outline-variant rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant">
               <span className="material-symbols-outlined text-[20px]">filter_list</span>
-            </button>
-            <button className="p-2 border border-outline-variant rounded-lg hover:bg-surface-container-high transition-colors text-on-surface-variant">
-              <span className="material-symbols-outlined text-[20px]">download</span>
             </button>
           </div>
         </div>

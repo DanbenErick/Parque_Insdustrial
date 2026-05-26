@@ -50,7 +50,7 @@ const ReceiptDetail = () => {
                   <p className="font-headline-sm text-headline-sm font-bold mt-1">Corporación Textil del Norte S.A.C.</p>
                   <div className="grid grid-cols-2 gap-x-xl gap-y-xs mt-xs">
                     <p className="text-body-sm text-on-surface-variant">RUC: <span className="text-on-surface font-bold">20123456789</span></p>
-                    <p className="text-body-sm text-on-surface-variant">Nave / Sector: <span className="text-on-surface font-bold">Lote B-22 / Sector 4</span></p>
+                    <p className="text-body-sm text-on-surface-variant">Manzana / Sector: <span className="text-on-surface font-bold">Lote B-22 / Sector 4</span></p>
                     <p className="text-body-sm text-on-surface-variant">Mes de Facturación: <span className="text-on-surface font-bold">Agosto 2024</span></p>
                     <p className="text-body-sm text-on-surface-variant">Vencimiento: <span className="text-on-surface font-bold">15 Sep 2024</span></p>
                   </div>

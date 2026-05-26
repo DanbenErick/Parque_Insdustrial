@@ -115,6 +115,19 @@ const Payments = () => {
 
       {/* Data Table */}
       <div className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden shadow-sm">
+        <div className="px-lg py-md border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-md bg-surface-container-low">
+          <h4 className="font-headline-sm text-headline-sm font-bold">Historial de Pagos</h4>
+          <div className="flex flex-wrap items-center gap-sm">
+            <button className="flex items-center gap-2 px-md py-2 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-sm rounded-lg transition-colors border border-[#107C41]/20">
+              <span className="material-symbols-outlined text-[18px]">table_view</span>
+              Excel
+            </button>
+            <button className="flex items-center gap-2 px-md py-2 bg-error/10 text-error hover:bg-error/20 font-bold text-sm rounded-lg transition-colors border border-error/20">
+              <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+              PDF
+            </button>
+          </div>
+        </div>
         <table className="w-full text-left border-collapse zebra-table">
           <thead className="bg-surface-container-low border-b border-outline-variant">
             <tr>

@@ -2,7 +2,7 @@ import React from 'react';
 
 const Dashboard = () => {
   return (
-    <main className="p-lg space-y-lg max-w-[1600px] mx-auto w-full flex-grow">
+    <main className="p-4 md:p-lg space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow">
       {/* KPIs Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
         {/* KPI 1 */}
@@ -83,7 +83,7 @@ const Dashboard = () => {
           <div className="space-y-sm flex-grow overflow-y-auto custom-scrollbar pr-1">
             <div className="p-sm bg-error-container/20 border-l-4 border-error rounded flex flex-col gap-xs">
               <div className="flex justify-between items-center">
-                <span className="font-bold text-body-sm text-on-background">Sector B - Nave 12</span>
+                <span className="font-bold text-body-sm text-on-background">Sector B - Manzana 12</span>
                 <span className="text-[10px] font-data-mono text-error font-bold">98% CAP.</span>
               </div>
               <p className="text-[12px] text-on-surface-variant leading-tight">Industrias Metalex: Pico de consumo detectado (245kW).</p>
@@ -91,7 +91,7 @@ const Dashboard = () => {
             
             <div className="p-sm bg-tertiary-container/10 border-l-4 border-tertiary rounded flex flex-col gap-xs">
               <div className="flex justify-between items-center">
-                <span className="font-bold text-body-sm text-on-background">Sector A - Nave 04</span>
+                <span className="font-bold text-body-sm text-on-background">Sector A - Manzana 04</span>
                 <span className="text-[10px] font-data-mono text-tertiary font-bold">PRÓXIMO</span>
               </div>
               <p className="text-[12px] text-on-surface-variant leading-tight">Almacenes Peruanos: Consumo acumulado supera media mensual.</p>
@@ -126,7 +126,7 @@ const Dashboard = () => {
             <thead className="bg-surface-container-low/50 text-on-surface-variant font-label-caps text-[11px] uppercase tracking-wider">
               <tr>
                 <th className="px-md py-sm">Empresa / ID</th>
-                <th className="px-md py-sm">Sector / Nave</th>
+                <th className="px-md py-sm">Sector / Manzana</th>
                 <th className="px-md py-sm">Lectura (kWh)</th>
                 <th className="px-md py-sm">Tendencia</th>
                 <th className="px-md py-sm text-right">Acción</th>
@@ -141,7 +141,7 @@ const Dashboard = () => {
                   </div>
                 </td>
                 <td className="px-md py-md">
-                  <span className="text-body-sm">Sector A - Nave 15</span>
+                  <span className="text-body-sm">Sector A - Manzana 15</span>
                 </td>
                 <td className="px-md py-md">
                   <span className="font-data-mono text-body-sm font-bold">4,520.12</span>
@@ -166,7 +166,7 @@ const Dashboard = () => {
                   </div>
                 </td>
                 <td className="px-md py-md">
-                  <span className="text-body-sm">Sector C - Nave 02</span>
+                  <span className="text-body-sm">Sector C - Manzana 02</span>
                 </td>
                 <td className="px-md py-md">
                   <span className="font-data-mono text-body-sm font-bold">1,215.80</span>
@@ -191,7 +191,7 @@ const Dashboard = () => {
                   </div>
                 </td>
                 <td className="px-md py-md">
-                  <span className="text-body-sm">Sector B - Nave 08</span>
+                  <span className="text-body-sm">Sector B - Manzana 08</span>
                 </td>
                 <td className="px-md py-md">
                   <span className="font-data-mono text-body-sm font-bold">8,932.44</span>

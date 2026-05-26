@@ -223,10 +223,19 @@ const GenerateInvoices = () => {
           <div className="bg-surface border border-outline-variant rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95">
             <div className="px-lg py-md bg-surface-container-low border-b border-outline-variant flex justify-between items-center">
               <h4 className="font-headline-sm text-headline-sm text-on-surface font-bold">Detalle de Miembros a Facturar</h4>
-              <div className="flex items-center gap-md">
+              <div className="flex flex-wrap items-center gap-sm">
+                <button className="flex items-center gap-2 px-md py-1 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-xs rounded-lg transition-colors border border-[#107C41]/20">
+                  <span className="material-symbols-outlined text-[16px]">table_view</span>
+                  Excel
+                </button>
+                <button className="flex items-center gap-2 px-md py-1 bg-error/10 text-error hover:bg-error/20 font-bold text-xs rounded-lg transition-colors border border-error/20">
+                  <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+                  PDF
+                </button>
+                <div className="hidden md:block w-[1px] h-4 bg-outline-variant mx-1"></div>
                 <button className="text-primary hover:bg-primary/5 px-sm py-1 rounded flex items-center gap-xs transition-colors">
                   <span className="material-symbols-outlined text-md">filter_list</span>
-                  <span className="font-label-caps text-[11px] font-bold uppercase">Filtrar</span>
+                  <span className="font-label-caps text-[11px] font-bold uppercase hidden md:inline">Filtrar</span>
                 </button>
                 <button onClick={() => setShowDetailsModal(false)} className="text-on-surface-variant hover:text-on-surface p-1 rounded-full">
                   <span className="material-symbols-outlined text-md">close</span>
@@ -237,7 +246,7 @@ const GenerateInvoices = () => {
               <table className="w-full text-left border-collapse table-zebra">
                 <thead>
                   <tr className="bg-surface-container-lowest border-b border-outline-variant sticky top-0">
-                    <th className="px-md py-sm font-label-caps text-secondary text-[11px] uppercase tracking-wider font-bold">MIEMBRO / NAVE</th>
+                    <th className="px-md py-sm font-label-caps text-secondary text-[11px] uppercase tracking-wider font-bold">MIEMBRO / MANZANA</th>
                     <th className="px-md py-sm font-label-caps text-secondary text-[11px] uppercase tracking-wider text-right font-bold">Última Lectura</th>
                     <th className="px-md py-sm font-label-caps text-secondary text-[11px] uppercase tracking-wider text-right font-bold">Consumo (kWh)</th>
                     <th className="px-md py-sm font-label-caps text-secondary text-[11px] uppercase tracking-wider text-right font-bold">Monto Estimado</th>
@@ -248,7 +257,7 @@ const GenerateInvoices = () => {
                   <tr className="hover:bg-surface-container-lowest transition-colors">
                     <td className="px-md py-md">
                       <p className="font-body-md font-bold text-on-surface">Logística del Pacífico S.A.</p>
-                      <p className="text-xs text-on-surface-variant">Nave A-12</p>
+                      <p className="text-xs text-on-surface-variant">Manzana A-12</p>
                     </td>
                     <td className="px-md py-md text-right font-data-mono text-on-surface">45,120.50</td>
                     <td className="px-md py-md text-right font-data-mono font-bold text-primary">1,245.00</td>
@@ -260,7 +269,7 @@ const GenerateInvoices = () => {
                   <tr className="hover:bg-surface-container-lowest transition-colors">
                     <td className="px-md py-md">
                       <p className="font-body-md font-bold text-on-surface">Textiles del Sur E.I.R.L.</p>
-                      <p className="text-xs text-on-surface-variant">Nave B-05</p>
+                      <p className="text-xs text-on-surface-variant">Manzana B-05</p>
                     </td>
                     <td className="px-md py-md text-right font-data-mono text-on-surface">12,840.20</td>
                     <td className="px-md py-md text-right font-data-mono font-bold text-primary">840.50</td>
@@ -272,7 +281,7 @@ const GenerateInvoices = () => {
                   <tr className="hover:bg-surface-container-lowest transition-colors">
                     <td className="px-md py-md">
                       <p className="font-body-md font-bold text-on-surface">Inversiones Metalmecánicas</p>
-                      <p className="text-xs text-on-surface-variant">Nave C-01</p>
+                      <p className="text-xs text-on-surface-variant">Manzana C-01</p>
                     </td>
                     <td className="px-md py-md text-right font-data-mono text-on-surface">8,520.00</td>
                     <td className="px-md py-md text-right font-data-mono font-bold text-primary">150.25</td>
@@ -284,7 +293,7 @@ const GenerateInvoices = () => {
                   <tr className="hover:bg-surface-container-lowest transition-colors">
                     <td className="px-md py-md">
                       <p className="font-body-md font-bold text-on-surface">Almacenes Generales S.A.</p>
-                      <p className="text-xs text-on-surface-variant">Nave A-03</p>
+                      <p className="text-xs text-on-surface-variant">Manzana A-03</p>
                     </td>
                     <td className="px-md py-md text-right font-data-mono text-on-surface">22,310.10</td>
                     <td className="px-md py-md text-right font-data-mono font-bold text-primary">450.70</td>

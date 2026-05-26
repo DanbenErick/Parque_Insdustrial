@@ -163,11 +163,24 @@ const MemberReport = () => {
 
         {/* Detailed Table: Desglose de Facturación */}
         <div className="bg-white border border-outline-variant rounded-lg overflow-hidden shadow-md mt-lg">
-          <div className="p-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+          <div className="p-md border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-md bg-surface-container-low">
             <h4 className="font-headline-sm text-headline-sm font-bold">Desglose de Facturación por Miembro</h4>
-            <div className="flex gap-md items-center">
-              <span className="text-xs text-on-surface-variant">Mostrando 40 miembros</span>
-              <button className="material-symbols-outlined text-on-surface-variant">filter_list</button>
+            <div className="flex flex-col md:flex-row gap-md items-start md:items-center w-full md:w-auto">
+              <span className="text-xs text-on-surface-variant mr-2">Mostrando 40 miembros</span>
+              <div className="flex flex-wrap items-center gap-sm">
+                <button className="flex items-center gap-2 px-md py-1 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-xs rounded-lg transition-colors border border-[#107C41]/20">
+                  <span className="material-symbols-outlined text-[16px]">table_view</span>
+                  Excel
+                </button>
+                <button className="flex items-center gap-2 px-md py-1 bg-error/10 text-error hover:bg-error/20 font-bold text-xs rounded-lg transition-colors border border-error/20">
+                  <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+                  PDF
+                </button>
+                <div className="hidden md:block w-[1px] h-4 bg-outline-variant mx-1"></div>
+                <button className="text-primary hover:bg-primary/5 px-sm py-1 rounded flex items-center gap-xs transition-colors">
+                  <span className="material-symbols-outlined text-md">filter_list</span>
+                </button>
+              </div>
             </div>
           </div>
           <div className="overflow-x-auto">

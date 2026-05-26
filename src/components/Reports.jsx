@@ -176,11 +176,11 @@ const Reports = () => {
 
         {/* Distribution by Sector */}
         <div className="col-span-12 lg:col-span-4 bg-white border border-outline-variant p-lg rounded-lg">
-          <h3 className="font-headline-sm text-headline-sm text-on-surface mb-md">Distribución por Nave</h3>
+          <h3 className="font-headline-sm text-headline-sm text-on-surface mb-md">Distribución por Manzana</h3>
           <div className="space-y-md">
             <div>
               <div className="flex justify-between items-center mb-xs">
-                <span className="font-body-sm font-bold">Nave A (Textiles)</span>
+                <span className="font-body-sm font-bold">Manzana A (Textiles)</span>
                 <span className="font-data-mono text-body-sm">412 MWh</span>
               </div>
               <div className="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
@@ -189,7 +189,7 @@ const Reports = () => {
             </div>
             <div>
               <div className="flex justify-between items-center mb-xs">
-                <span className="font-body-sm font-bold">Nave B (Metalurgia)</span>
+                <span className="font-body-sm font-bold">Manzana B (Metalurgia)</span>
                 <span className="font-data-mono text-body-sm">524 MWh</span>
               </div>
               <div className="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
@@ -198,7 +198,7 @@ const Reports = () => {
             </div>
             <div>
               <div className="flex justify-between items-center mb-xs">
-                <span className="font-body-sm font-bold">Nave C (Almacén)</span>
+                <span className="font-body-sm font-bold">Manzana C (Almacén)</span>
                 <span className="font-data-mono text-body-sm">118 MWh</span>
               </div>
               <div className="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
@@ -219,7 +219,7 @@ const Reports = () => {
           <div className="mt-xl p-md bg-surface-container-low rounded-lg border border-outline-variant flex items-center gap-md">
             <span className="material-symbols-outlined text-tertiary text-[32px]">lightbulb</span>
             <p className="font-body-sm leading-tight">
-              <strong className="text-on-surface">Sugerencia:</strong> La Nave B presenta un pico anómalo a las 03:00 AM. Se recomienda revisar maquinaria pesada.
+              <strong className="text-on-surface">Sugerencia:</strong> La Manzana B presenta un pico anómalo a las 03:00 AM. Se recomienda revisar maquinaria pesada.
             </p>
           </div>
         </div>
@@ -246,7 +246,7 @@ const Reports = () => {
             </thead>
             <tbody className="font-body-sm divide-y divide-outline-variant">
               <tr className="hover:bg-surface-container-low transition-colors h-[40px]">
-                <td className="px-lg py-2 font-bold">Nave A - Sector 01</td>
+                <td className="px-lg py-2 font-bold">Manzana A - Sector 01</td>
                 <td className="px-lg py-2">
                   <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-[11px] font-bold">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-600"></span> ESTABLE
@@ -257,7 +257,7 @@ const Reports = () => {
                 <td className="px-lg py-2 font-data-mono text-right">$4,852.00</td>
               </tr>
               <tr className="bg-surface-container-lowest hover:bg-surface-container-low transition-colors h-[40px]">
-                <td className="px-lg py-2 font-bold">Nave B - Sector 04</td>
+                <td className="px-lg py-2 font-bold">Manzana B - Sector 04</td>
                 <td className="px-lg py-2">
                   <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-600"></span> ALERTA CARGA
@@ -268,7 +268,7 @@ const Reports = () => {
                 <td className="px-lg py-2 font-data-mono text-right">$9,711.50</td>
               </tr>
               <tr className="hover:bg-surface-container-low transition-colors h-[40px]">
-                <td className="px-lg py-2 font-bold">Nave B - Sector 05</td>
+                <td className="px-lg py-2 font-bold">Manzana B - Sector 05</td>
                 <td className="px-lg py-2">
                   <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-[11px] font-bold">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-600"></span> ESTABLE
@@ -279,7 +279,7 @@ const Reports = () => {
                 <td className="px-lg py-2 font-data-mono text-right">$3,838.40</td>
               </tr>
               <tr className="bg-surface-container-lowest hover:bg-surface-container-low transition-colors h-[40px]">
-                <td className="px-lg py-2 font-bold">Nave C - Logística</td>
+                <td className="px-lg py-2 font-bold">Manzana C - Logística</td>
                 <td className="px-lg py-2">
                   <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-100 text-green-800 text-[11px] font-bold">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-600"></span> ESTABLE
@@ -290,7 +290,7 @@ const Reports = () => {
                 <td className="px-lg py-2 font-data-mono text-right">$1,564.80</td>
               </tr>
               <tr className="hover:bg-surface-container-low transition-colors h-[40px]">
-                <td className="px-lg py-2 font-bold">Nave D - Metalmecánica</td>
+                <td className="px-lg py-2 font-bold">Manzana D - Metalmecánica</td>
                 <td className="px-lg py-2">
                   <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-100 text-red-800 text-[11px] font-bold">
                     <span className="w-1.5 h-1.5 rounded-full bg-red-600"></span> MANTENIMIENTO

@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 
 const TenantsAndSectors = () => {
-  const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, nave: '', company: '', stats: '' });
+  const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, manzana: '', company: '', stats: '' });
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleMouseEnter = (e, nave, company, stats) => {
+  const handleMouseEnter = (e, manzana, company, stats) => {
     setTooltip({
       show: true,
       x: e.clientX + 15,
       y: e.clientY + 15,
-      nave,
+      manzana,
       company,
       stats: stats ? `Consumo Actual: ${stats}` : 'Estado: Disponible'
     });
@@ -24,9 +24,8 @@ const TenantsAndSectors = () => {
   };
 
   return (
-    <main className="p-lg space-y-lg max-w-[1600px] mx-auto w-full flex-grow relative">
-      {/* Header & Top Controls */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-md">
+    <main className="p-4 md:p-xl space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
         <div>
           <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold">Mapa de Sectores y Miembros</h2>
           <p className="font-body-md text-body-md text-on-surface-variant">Visualización en tiempo real de la ocupación y consumo industrial.</p>
@@ -79,17 +78,17 @@ const TenantsAndSectors = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-md">
             
-            {/* Nave A1 */}
+            {/* Manzana A1 */}
             <div 
               className="col-span-1 bg-surface-container-low border border-outline-variant hover:border-primary transition-all rounded-lg p-md group cursor-pointer relative overflow-hidden"
-              onMouseEnter={(e) => handleMouseEnter(e, 'NAVE A1', 'Alimentos Lima', '1.2 MW/h')}
+              onMouseEnter={(e) => handleMouseEnter(e, 'MANZANA A1', 'Alimentos Lima', '1.2 MW/h')}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
             >
               <div className="absolute top-2 right-2">
                 <span className="material-symbols-outlined text-[16px] text-primary" style={{fontVariationSettings: "'FILL' 1"}}>check_circle</span>
               </div>
-              <p className="font-data-mono text-[10px] text-primary/70">NAVE A1</p>
+              <p className="font-data-mono text-[10px] text-primary/70">MANZANA A1</p>
               <p className="font-body-md font-bold text-on-surface mt-1">Alimentos Lima</p>
               <div className="mt-xl flex items-center justify-between">
                 <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-bold uppercase">Frío</span>
@@ -97,14 +96,14 @@ const TenantsAndSectors = () => {
               </div>
             </div>
 
-            {/* Nave A2 */}
+            {/* Manzana A2 */}
             <div 
               className="col-span-1 bg-surface-container-low border border-outline-variant hover:border-primary transition-all rounded-lg p-md group cursor-pointer"
-              onMouseEnter={(e) => handleMouseEnter(e, 'NAVE A2', 'Agroexport SAC', '0.9 MW/h')}
+              onMouseEnter={(e) => handleMouseEnter(e, 'MANZANA A2', 'Agroexport SAC', '0.9 MW/h')}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
             >
-              <p className="font-data-mono text-[10px] text-primary/70">NAVE A2</p>
+              <p className="font-data-mono text-[10px] text-primary/70">MANZANA A2</p>
               <p className="font-body-md font-bold text-on-surface mt-1">Agroexport SAC</p>
               <div className="mt-xl flex items-center justify-between">
                 <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded font-bold uppercase">Frío</span>
@@ -112,21 +111,21 @@ const TenantsAndSectors = () => {
               </div>
             </div>
 
-            {/* Nave A3-4 Empty */}
+            {/* Manzana A3-4 Empty */}
             <div className="col-span-1 sm:col-span-2 bg-surface-container border border-dashed border-outline-variant rounded-lg p-md flex flex-col items-center justify-center group hover:bg-surface-variant/20 transition-all">
-              <p className="font-data-mono text-[10px] text-on-surface-variant/50">NAVE A3 - A4</p>
+              <p className="font-data-mono text-[10px] text-on-surface-variant/50">MANZANA A3 - A4</p>
               <p className="font-body-sm text-on-surface-variant italic">Espacio Disponible</p>
               <button className="mt-2 text-xs font-bold text-primary hover:underline">ASIGNAR</button>
             </div>
 
-            {/* Nave A5 */}
+            {/* Manzana A5 */}
             <div 
               className="col-span-1 sm:col-span-2 bg-surface-container-low border border-outline-variant hover:border-primary transition-all rounded-lg p-md"
-              onMouseEnter={(e) => handleMouseEnter(e, 'NAVE A5 (MEZANINE)', 'Logística Inversa S.A.', '0.4 MW/h')}
+              onMouseEnter={(e) => handleMouseEnter(e, 'MANZANA A5 (MEZANINE)', 'Logística Inversa S.A.', '0.4 MW/h')}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
             >
-              <p className="font-data-mono text-[10px] text-primary/70">NAVE A5 (MEZANINE)</p>
+              <p className="font-data-mono text-[10px] text-primary/70">MANZANA A5 (MEZANINE)</p>
               <p className="font-body-md font-bold text-on-surface mt-1">Logística Inversa S.A.</p>
               <div className="mt-xl flex items-center justify-between">
                 <span className="text-[10px] bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-bold uppercase">Logística</span>
@@ -134,14 +133,14 @@ const TenantsAndSectors = () => {
               </div>
             </div>
 
-            {/* Nave A6 */}
+            {/* Manzana A6 */}
             <div 
               className="col-span-1 sm:col-span-2 bg-surface-container-low border border-outline-variant hover:border-primary transition-all rounded-lg p-md"
-              onMouseEnter={(e) => handleMouseEnter(e, 'NAVE A6', 'Distribuidora Norte', '0.7 MW/h')}
+              onMouseEnter={(e) => handleMouseEnter(e, 'MANZANA A6', 'Distribuidora Norte', '0.7 MW/h')}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
             >
-              <p className="font-data-mono text-[10px] text-primary/70">NAVE A6</p>
+              <p className="font-data-mono text-[10px] text-primary/70">MANZANA A6</p>
               <p className="font-body-md font-bold text-on-surface mt-1">Distribuidora Norte</p>
               <div className="mt-xl flex items-center justify-between">
                 <span className="text-[10px] bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded font-bold uppercase">Logística</span>
@@ -160,15 +159,15 @@ const TenantsAndSectors = () => {
           </div>
           <div className="grid grid-cols-1 gap-md">
             
-            {/* Nave B1 */}
+            {/* Manzana B1 */}
             <div 
               className="bg-surface-container-low border border-tertiary/20 hover:border-tertiary transition-all rounded-lg p-md min-h-[160px] flex flex-col justify-between"
-              onMouseEnter={(e) => handleMouseEnter(e, 'NAVE B1 (FULL)', 'Metalmecánica Perú', '4.8 MW/h')}
+              onMouseEnter={(e) => handleMouseEnter(e, 'MANZANA B1 (FULL)', 'Metalmecánica Perú', '4.8 MW/h')}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
             >
               <div>
-                <p className="font-data-mono text-[10px] text-tertiary/70">NAVE B1 (FULL)</p>
+                <p className="font-data-mono text-[10px] text-tertiary/70">MANZANA B1 (FULL)</p>
                 <p className="font-body-md font-bold text-on-surface mt-1">Metalmecánica Perú</p>
                 <p className="text-[11px] text-on-surface-variant mt-1">Actividad: Fundición y ensamble</p>
               </div>
@@ -181,16 +180,16 @@ const TenantsAndSectors = () => {
               </div>
             </div>
 
-            {/* Nave B2 Alert */}
+            {/* Manzana B2 Alert */}
             <div 
               className="bg-error-container/10 border border-error/30 rounded-lg p-md flex flex-col justify-between min-h-[120px]"
-              onMouseEnter={(e) => handleMouseEnter(e, 'NAVE B2', 'Textiles del Sur', null)}
+              onMouseEnter={(e) => handleMouseEnter(e, 'MANZANA B2', 'Textiles del Sur', null)}
               onMouseMove={handleMouseMove}
               onMouseLeave={handleMouseLeave}
             >
               <div>
                 <div className="flex justify-between items-start">
-                  <p className="font-data-mono text-[10px] text-error/70">NAVE B2</p>
+                  <p className="font-data-mono text-[10px] text-error/70">MANZANA B2</p>
                   <span className="bg-error text-on-error text-[10px] px-2 rounded-full font-bold animate-pulse">ALERTA</span>
                 </div>
                 <p className="font-body-md font-bold text-on-surface mt-1">Textiles del Sur</p>
@@ -214,15 +213,21 @@ const TenantsAndSectors = () => {
       {/* Active Members Table */}
       <section className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-md">
         <div className="p-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
-          <h4 className="font-headline-sm text-headline-sm text-on-surface font-bold">Miembros Activos</h4>
-          <div className="flex gap-md items-center">
-            <span className="text-xs text-on-surface-variant">Mostrando 4 de 18 miembros activos</span>
-            <div className="flex gap-1">
-              <button className="w-8 h-8 flex items-center justify-center hover:bg-surface-container transition-colors rounded text-on-surface-variant">
-                <span className="material-symbols-outlined text-[20px]">download</span>
+          <h4 className="font-headline-sm text-headline-sm text-on-surface font-bold mb-2 md:mb-0">Miembros Activos</h4>
+          <div className="flex flex-col md:flex-row gap-md items-start md:items-center w-full md:w-auto">
+            <span className="text-xs text-on-surface-variant mr-2">Mostrando 4 de 18</span>
+            <div className="flex flex-wrap items-center gap-sm">
+              <button className="flex items-center gap-2 px-md py-2 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-sm rounded-lg transition-colors border border-[#107C41]/20">
+                <span className="material-symbols-outlined text-[18px]">table_view</span>
+                Excel
               </button>
-              <button className="w-8 h-8 flex items-center justify-center hover:bg-surface-container transition-colors rounded text-on-surface-variant">
-                <span className="material-symbols-outlined text-[20px]">filter_list</span>
+              <button className="flex items-center gap-2 px-md py-2 bg-error/10 text-error hover:bg-error/20 font-bold text-sm rounded-lg transition-colors border border-error/20">
+                <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+                PDF
+              </button>
+              <div className="hidden md:block w-[1px] h-6 bg-outline-variant mx-1"></div>
+              <button className="p-2 hover:bg-surface-container-high rounded-lg transition-all text-on-surface-variant flex items-center justify-center" title="Filtrar">
+                <span className="material-symbols-outlined">filter_list</span>
               </button>
             </div>
           </div>
@@ -233,7 +238,7 @@ const TenantsAndSectors = () => {
             <thead>
               <tr className="bg-surface-container-low text-on-surface-variant font-label-caps text-[11px] uppercase tracking-wider">
                 <th className="px-lg py-sm font-bold">Nombre de Empresa</th>
-                <th className="px-lg py-sm font-bold">ID Nave</th>
+                <th className="px-lg py-sm font-bold">ID Manzana</th>
                 <th className="px-lg py-sm font-bold">Tipo de Actividad</th>
                 <th className="px-lg py-sm font-bold">Consumo Mes (MW/h)</th>
                 <th className="px-lg py-sm font-bold">Estado Pago</th>
@@ -362,7 +367,7 @@ const TenantsAndSectors = () => {
           style={{ left: tooltip.x, top: tooltip.y }}
         >
           <div className="flex flex-col gap-1">
-            <span className="font-data-mono text-primary-fixed-dim text-[10px]">{tooltip.nave}</span>
+            <span className="font-data-mono text-primary-fixed-dim text-[10px]">{tooltip.manzana}</span>
             <span className="font-bold">{tooltip.company}</span>
             <span className="text-white/60 text-[11px]">{tooltip.stats}</span>
           </div>
@@ -407,10 +412,10 @@ const TenantsAndSectors = () => {
                     <div className="flex flex-col gap-xs">
                       <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">Sector Asignado</label>
                       <select className="border border-outline-variant rounded px-md py-sm font-body-md focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all appearance-none" defaultValue="">
-                        <option disabled value="">Seleccione Nave...</option>
-                        <option>Nave A-01</option>
-                        <option>Nave A-02</option>
-                        <option>Nave B-01</option>
+                        <option disabled value="">Seleccione Manzana...</option>
+                        <option>Manzana A-01</option>
+                        <option>Manzana A-02</option>
+                        <option>Manzana B-01</option>
                         <option>Sect. Exterior 04</option>
                       </select>
                     </div>

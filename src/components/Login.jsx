@@ -102,14 +102,18 @@ const Login = ({ onLogin }) => {
             {/* Input Fields */}
             <div className="space-y-md">
               <div className="space-y-xs">
-                <label className="font-label-caps text-label-caps text-on-surface-variant" htmlFor="username">USUARIO</label>
+                <label className="font-label-caps text-label-caps text-on-surface-variant" htmlFor="username">
+                  {selectedRole === 'Administrator' ? 'USUARIO' : 'DNI / USUARIO'}
+                </label>
                 <div className="relative">
-                  <span className={`material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-[20px] transition-colors ${getIconClass('username')}`}>account_circle</span>
+                  <span className={`material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-[20px] transition-colors ${getIconClass('username')}`}>
+                    {selectedRole === 'Administrator' ? 'account_circle' : 'badge'}
+                  </span>
                   <input 
                     id="username" 
                     type="text" 
                     className="w-full pl-[48px] pr-md py-md bg-surface-container-lowest border border-outline-variant rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-md text-on-surface" 
-                    placeholder="nombre.apellido"
+                    placeholder={selectedRole === 'Administrator' ? 'nombre.apellido' : 'Ej. 76543210'}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     onFocus={() => setFocusedInput('username')}
@@ -120,23 +124,41 @@ const Login = ({ onLogin }) => {
               </div>
               <div className="space-y-xs">
                 <div className="flex justify-between items-center">
-                  <label className="font-label-caps text-label-caps text-on-surface-variant" htmlFor="password">CONTRASEÑA</label>
-                  <a className="text-[12px] text-primary hover:underline font-medium" href="#">¿Olvidó su contraseña?</a>
+                  <label className="font-label-caps text-label-caps text-on-surface-variant" htmlFor="password">
+                    {selectedRole === 'Administrator' ? 'CONTRASEÑA' : 'PIN DE 6 DÍGITOS'}
+                  </label>
+                  <a className="text-[12px] text-primary hover:underline font-medium" href="#">¿Olvidó su acceso?</a>
                 </div>
                 <div className="relative">
-                  <span className={`material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-[20px] transition-colors ${getIconClass('password')}`}>lock</span>
+                  <span className={`material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-[20px] transition-colors ${getIconClass('password')}`}>
+                    {selectedRole === 'Administrator' ? 'lock' : 'dialpad'}
+                  </span>
                   <input 
                     id="password" 
-                    type="password" 
-                    className="w-full pl-[48px] pr-md py-md bg-surface-container-lowest border border-outline-variant rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-md text-on-surface" 
-                    placeholder="••••••••"
+                    type={selectedRole === 'Administrator' ? 'password' : 'password'}
+                    maxLength={selectedRole === 'Administrator' ? undefined : 6}
+                    inputMode={selectedRole === 'Administrator' ? 'text' : 'numeric'}
+                    pattern={selectedRole === 'Administrator' ? undefined : '\\d{6}'}
+                    className="w-full pl-[48px] pr-md py-md bg-surface-container-lowest border border-outline-variant rounded-lg focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all font-body-md text-on-surface tracking-widest" 
+                    placeholder={selectedRole === 'Administrator' ? '••••••••' : '••••••'}
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      if (selectedRole !== 'Administrator') {
+                        // Solo permitir números para PIN
+                        const val = e.target.value.replace(/\D/g, '');
+                        setPassword(val);
+                      } else {
+                        setPassword(e.target.value);
+                      }
+                    }}
                     onFocus={() => setFocusedInput('password')}
                     onBlur={() => setFocusedInput(null)}
                     required
                   />
                 </div>
+                {selectedRole !== 'Administrator' && (
+                  <p className="text-[11px] text-on-surface-variant mt-1 text-right">Ingrese exactamente 6 números</p>
+                )}
               </div>
             </div>
 
