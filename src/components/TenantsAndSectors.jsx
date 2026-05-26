@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 
 const TenantsAndSectors = () => {
   const [tooltip, setTooltip] = useState({ show: false, x: 0, y: 0, nave: '', company: '', stats: '' });
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleMouseEnter = (e, nave, company, stats) => {
     setTooltip({
@@ -54,6 +55,15 @@ const TenantsAndSectors = () => {
               </select>
               <span className="material-symbols-outlined absolute right-sm top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none">expand_more</span>
             </div>
+          </div>
+          <div className="flex items-end">
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-xs px-md py-sm bg-primary text-on-primary font-semibold rounded-md hover:opacity-90 transition-all shadow-md h-[42px]"
+            >
+              <span className="material-symbols-outlined text-sm">add</span>
+              <span className="font-bold text-body-sm">Registrar Miembro</span>
+            </button>
           </div>
         </div>
       </div>
@@ -358,6 +368,128 @@ const TenantsAndSectors = () => {
           </div>
         </div>
       )}
+      
+      {/* Nuevo Miembro Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
+          <div className="bg-surface-container-lowest w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden border border-outline-variant flex flex-col max-h-[90vh]">
+            {/* Modal Header */}
+            <div className="flex justify-between items-center px-lg py-md border-b border-outline-variant bg-surface-container-high">
+              <div>
+                <h3 className="font-headline-sm text-headline-sm text-on-surface">Registrar Nuevo Inquilino</h3>
+                <p className="font-body-sm text-body-sm text-on-surface-variant">Cree un nuevo registro corporativo y su usuario administrador.</p>
+              </div>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="p-xs hover:bg-surface-container-highest rounded-full transition-colors group"
+              >
+                <span className="material-symbols-outlined text-on-surface-variant group-hover:text-error transition-colors">close</span>
+              </button>
+            </div>
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-lg custom-scrollbar">
+              <form className="space-y-lg" id="tenant-form" onSubmit={(e) => e.preventDefault()}>
+                {/* Section 1: Datos de la Empresa */}
+                <div className="space-y-md">
+                  <div className="flex items-center gap-sm text-primary">
+                    <span className="material-symbols-outlined text-[20px]">factory</span>
+                    <span className="font-label-caps text-label-caps font-bold">DATOS DE LA EMPRESA</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+                    <div className="flex flex-col gap-xs">
+                      <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">Nombre o Razón Social</label>
+                      <input className="border border-outline-variant rounded px-md py-sm font-body-md focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all" placeholder="Ej. Alimentos del Sol S.A." type="text" />
+                    </div>
+                    <div className="flex flex-col gap-xs">
+                      <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">RUC</label>
+                      <input className="border border-outline-variant rounded px-md py-sm font-data-mono focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all" maxLength="11" placeholder="11 dígitos" type="text" />
+                    </div>
+                    <div className="flex flex-col gap-xs">
+                      <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">Sector Asignado</label>
+                      <select className="border border-outline-variant rounded px-md py-sm font-body-md focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all appearance-none" defaultValue="">
+                        <option disabled value="">Seleccione Nave...</option>
+                        <option>Nave A-01</option>
+                        <option>Nave A-02</option>
+                        <option>Nave B-01</option>
+                        <option>Sect. Exterior 04</option>
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-xs">
+                      <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">Tipo de Actividad</label>
+                      <select className="border border-outline-variant rounded px-md py-sm font-body-md focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all appearance-none" defaultValue="">
+                        <option disabled value="">Seleccione rubro...</option>
+                        <option>Alimentos</option>
+                        <option>Manufactura</option>
+                        <option>Logística</option>
+                        <option>Químicos</option>
+                        <option>Metalmecánica</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                {/* Visual Divider */}
+                <div className="h-[1px] bg-outline-variant/30"></div>
+                {/* Section 2: Datos del Usuario Administrador */}
+                <div className="space-y-md">
+                  <div className="flex items-center gap-sm text-primary">
+                    <span className="material-symbols-outlined text-[20px]">person_add</span>
+                    <span className="font-label-caps text-label-caps font-bold">DATOS DEL USUARIO (ADMINISTRADOR)</span>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+                    <div className="flex flex-col gap-xs md:col-span-2">
+                      <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">Nombre Completo del Representante</label>
+                      <input className="border border-outline-variant rounded px-md py-sm font-body-md focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all" placeholder="Nombre completo" type="text" />
+                    </div>
+                    <div className="flex flex-col gap-xs">
+                      <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">Correo Electrónico</label>
+                      <input className="border border-outline-variant rounded px-md py-sm font-body-md focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all" placeholder="email@empresa.com" type="email" />
+                    </div>
+                    <div className="flex flex-col gap-xs">
+                      <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">Teléfono de Contacto</label>
+                      <input className="border border-outline-variant rounded px-md py-sm font-body-md focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all" placeholder="+51 900 000 000" type="tel" />
+                    </div>
+                    <div className="flex flex-col gap-xs md:col-span-2">
+                      <div className="bg-surface-container-low p-md border-l-4 border-tertiary-container rounded">
+                        <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant flex items-center gap-xs">
+                          Código de Acceso Eléctrico 
+                          <span className="material-symbols-outlined text-[16px]" title="Código manual para seguimiento de consumo de Watts">info</span>
+                        </label>
+                        <input className="mt-xs border border-outline-variant rounded px-md py-sm font-data-mono focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white w-full" placeholder="Ej. ACC-WATT-2024" type="text" />
+                        <p className="text-[11px] text-on-surface-variant mt-xs italic">Este código vincula el medidor inteligente con la cuenta del usuario.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </form>
+            </div>
+            {/* Modal Footer */}
+            <div className="px-lg py-md bg-surface-container-high border-t border-outline-variant flex justify-between items-center">
+              <p className="text-[12px] text-on-surface-variant max-w-[200px] leading-tight">
+                Al registrar, se enviará un correo de bienvenida al inquilino.
+              </p>
+              <div className="flex gap-md">
+                <button 
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-lg py-sm border border-outline text-on-surface font-bold rounded-lg hover:bg-surface transition-colors active:scale-95 duration-150"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  onClick={() => {
+                    alert("Miembro registrado exitosamente.");
+                    setIsModalOpen(false);
+                  }}
+                  className="px-lg py-sm bg-primary text-on-primary font-bold rounded-lg shadow-sm hover:opacity-90 active:scale-95 transition-all duration-150 flex items-center gap-sm"
+                >
+                  <span className="material-symbols-outlined text-[18px]">save</span>
+                  Registrar Inquilino
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
     </main>
   );
 };

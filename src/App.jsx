@@ -5,10 +5,16 @@ import TenantsAndSectors from './components/TenantsAndSectors';
 import Billing from './components/Billing';
 import Payments from './components/Payments';
 import Reports from './components/Reports';
+import UserManagement from './components/UserManagement';
+import GenerateInvoices from './components/GenerateInvoices';
+import ReceiptDetail from './components/ReceiptDetail';
+import MemberReport from './components/MemberReport';
+import ManualBilling from './components/ManualBilling';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [currentView, setCurrentView] = useState('dashboard');
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const renderContent = () => {
     switch (currentView) {
@@ -22,6 +28,16 @@ function App() {
         return <Payments />;
       case 'reports':
         return <Reports />;
+      case 'member_report':
+        return <MemberReport />;
+      case 'generate_invoices':
+        return <GenerateInvoices />;
+      case 'manual_billing':
+        return <ManualBilling />;
+      case 'receipt_detail':
+        return <ReceiptDetail />;
+      case 'users':
+        return <UserManagement />;
       default:
         return <Dashboard />;
     }
@@ -77,16 +93,54 @@ function App() {
             onClick={() => setCurrentView('reports')}
             className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'reports' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
           >
-            <span className="material-symbols-outlined">monitoring</span>
-            <span className="font-body-md text-body-md">Reportes</span>
+            <span className="material-symbols-outlined">analytics</span>
+            <span className="font-body-md text-body-md">Reporte General</span>
+          </button>
+          <button 
+            onClick={() => setCurrentView('member_report')}
+            className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'member_report' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
+          >
+            <span className="material-symbols-outlined">pie_chart</span>
+            <span className="font-body-md text-body-md">Reporte por Miembro</span>
+          </button>
+          <button 
+            onClick={() => setCurrentView('generate_invoices')}
+            className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'generate_invoices' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
+          >
+            <span className="material-symbols-outlined">receipt</span>
+            <span className="font-body-md text-body-md">Generar Facturas</span>
+          </button>
+          <button 
+            onClick={() => setCurrentView('manual_billing')}
+            className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'manual_billing' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
+          >
+            <span className="material-symbols-outlined">edit_document</span>
+            <span className="font-body-md text-body-md">Registro Manual</span>
+          </button>
+          <button 
+            onClick={() => setCurrentView('receipt_detail')}
+            className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'receipt_detail' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
+          >
+            <span className="material-symbols-outlined">description</span>
+            <span className="font-body-md text-body-md">Ver Recibo</span>
           </button>
         </nav>
-        <div className="mt-auto pt-md border-t border-white/10 flex items-center gap-sm">
-          <div className="w-8 h-8 rounded-full bg-primary-fixed-dim flex items-center justify-center text-on-primary-fixed font-bold text-xs">RA</div>
-          <div className="flex flex-col overflow-hidden text-left">
-            <span className="font-body-sm text-body-sm font-semibold truncate">Ing. Ricardo Alva</span>
-            <span className="text-[10px] text-white/50">Adm. de Parque</span>
-          </div>
+        <div className="mt-auto pt-md border-t border-white/10 flex flex-col gap-xs">
+          <button 
+            onClick={() => setCurrentView('users')}
+            className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'users' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
+          >
+            <span className="material-symbols-outlined">manage_accounts</span>
+            <span className="font-body-md text-body-md">Gestión de Usuarios</span>
+          </button>
+          <button className="flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left text-white/70 hover:bg-white/10">
+            <span className="material-symbols-outlined">settings</span>
+            <span className="font-body-md text-body-md">Configuración</span>
+          </button>
+          <button className="flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left text-white/70 hover:bg-white/10">
+            <span className="material-symbols-outlined">contact_support</span>
+            <span className="font-body-md text-body-md">Soporte</span>
+          </button>
         </div>
       </aside>
 
@@ -94,20 +148,74 @@ function App() {
       <div className="ml-[240px] flex flex-col flex-grow">
         {/* TopAppBar */}
         <header className="sticky top-0 z-40 bg-surface/80 backdrop-blur-md flex justify-between items-center w-full px-lg h-16 border-b border-outline-variant">
-          <div className="flex items-center flex-1 max-w-xl">
-            <div className="relative w-full group">
-              <span className="material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-              <input className="w-full bg-surface-container-low border-none rounded-lg pl-xl pr-md py-sm font-body-sm focus:ring-1 focus:ring-primary outline-none" placeholder="Buscar inquilino, sector o medidor..." type="text" />
+          <div className="flex items-center gap-lg">
+            <div className="relative hidden lg:block">
+              <input 
+                type="text" 
+                placeholder="Buscar inquilino, sector, recibo..." 
+                className="pl-xl pr-md py-xs bg-surface-container border border-outline rounded-lg text-body-sm focus:outline-none focus:ring-2 focus:ring-primary/20 w-64"
+              />
+              <span className="material-symbols-outlined absolute left-sm top-1/2 -translate-y-1/2 text-on-surface-variant scale-75">search</span>
+            </div>
+            <div className="flex items-center gap-md relative">
+              <button 
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="relative p-2 hover:bg-surface-container rounded-full transition-colors"
+              >
+                <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
+                <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+              </button>
+              <span className="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">account_circle</span>
+              
+              {/* Global Notifications Modal */}
+              {showNotifications && (
+                <div className="absolute top-12 right-0 w-80 bg-surface border border-outline-variant rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                  <div className="p-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+                    <h3 className="font-headline-sm font-bold text-on-surface">Notificaciones</h3>
+                    <button onClick={() => setShowNotifications(false)} className="text-on-surface-variant hover:text-on-surface">
+                      <span className="material-symbols-outlined text-sm">close</span>
+                    </button>
+                  </div>
+                  <div className="max-h-96 overflow-y-auto">
+                    <div className="p-md border-b border-outline-variant/50 hover:bg-surface-container-lowest transition-colors cursor-pointer bg-primary-container/10">
+                      <div className="flex gap-sm">
+                        <span className="material-symbols-outlined text-primary">receipt_long</span>
+                        <div>
+                          <p className="font-body-sm font-bold text-on-surface">Nueva Factura Emitida</p>
+                          <p className="text-xs text-on-surface-variant mt-1">Corporación Textil ha generado su factura de Octubre.</p>
+                          <span className="text-[10px] text-primary font-bold mt-2 block">Hace 5 min</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-md border-b border-outline-variant/50 hover:bg-surface-container-lowest transition-colors cursor-pointer">
+                      <div className="flex gap-sm">
+                        <span className="material-symbols-outlined text-error">warning</span>
+                        <div>
+                          <p className="font-body-sm font-bold text-on-surface">Vencimiento de Pago</p>
+                          <p className="text-xs text-on-surface-variant mt-1">Aceros Industriales tiene 2 días de retraso.</p>
+                          <span className="text-[10px] text-on-surface-variant mt-2 block">Hace 2 horas</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-md border-b border-outline-variant/50 hover:bg-surface-container-lowest transition-colors cursor-pointer">
+                      <div className="flex gap-sm">
+                        <span className="material-symbols-outlined text-secondary">check_circle</span>
+                        <div>
+                          <p className="font-body-sm font-bold text-on-surface">Cierre de Mes Completado</p>
+                          <p className="text-xs text-on-surface-variant mt-1">El reporte de septiembre ha sido consolidado con éxito.</p>
+                          <span className="text-[10px] text-on-surface-variant mt-2 block">Ayer</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="p-sm text-center border-t border-outline-variant bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors">
+                    <span className="text-xs font-bold text-primary">Marcar todas como leídas</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <div className="flex items-center gap-md">
-            <button className="w-10 h-10 flex items-center justify-center hover:bg-surface-container-low transition-colors rounded-full text-on-surface-variant">
-              <span className="material-symbols-outlined">help_outline</span>
-            </button>
-            <button className="w-10 h-10 flex items-center justify-center hover:bg-surface-container-low transition-colors rounded-full text-on-surface-variant relative">
-              <span className="material-symbols-outlined">notifications</span>
-              <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border-2 border-surface"></span>
-            </button>
             <button className="w-10 h-10 flex items-center justify-center hover:bg-surface-container-low transition-colors rounded-full text-on-surface-variant">
               <span className="material-symbols-outlined">settings</span>
             </button>

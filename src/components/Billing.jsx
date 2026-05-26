@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 const Billing = () => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
   return (
     <main className="p-lg space-y-lg max-w-[1600px] w-full flex-grow">
       {/* Dashboard Header */}
@@ -21,10 +23,51 @@ const Billing = () => {
               <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant">expand_more</span>
             </div>
           </div>
-          <button className="bg-primary text-on-primary px-lg py-[10px] h-fit self-end flex items-center gap-xs rounded-lg hover:opacity-90 transition-opacity shadow-md">
-            <span className="material-symbols-outlined text-[20px]">add</span>
-            <span className="font-bold font-body-sm uppercase tracking-wide">Generar Facturas</span>
-          </button>
+          <div className="relative">
+            <button 
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="bg-primary text-on-primary px-lg py-[10px] h-fit self-end flex items-center gap-xs rounded-lg hover:opacity-90 transition-opacity shadow-md"
+            >
+              <span className="material-symbols-outlined text-[20px]">add</span>
+              <span className="font-bold font-body-sm uppercase tracking-wide">Generar Facturas</span>
+              <span className="material-symbols-outlined text-[16px] ml-1">{isDropdownOpen ? 'expand_less' : 'expand_more'}</span>
+            </button>
+            
+            {/* Dropdown Menu */}
+            {isDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-56 bg-surface border border-outline-variant rounded-lg shadow-lg z-50 py-sm">
+                <button 
+                  className="w-full text-left px-md py-sm hover:bg-surface-container-low flex items-center gap-sm text-body-sm text-on-surface"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+                  Generar todas (Octubre)
+                </button>
+                <button 
+                  className="w-full text-left px-md py-sm hover:bg-surface-container-low flex items-center gap-sm text-body-sm text-on-surface"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <span className="material-symbols-outlined text-[18px]">rule</span>
+                  Generar seleccionadas
+                </button>
+                <div className="h-px bg-outline-variant/50 my-1"></div>
+                <button 
+                  className="w-full text-left px-md py-sm hover:bg-surface-container-low flex items-center gap-sm text-body-sm text-on-surface"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <span className="material-symbols-outlined text-[18px]">forward_to_inbox</span>
+                  Enviar por correo
+                </button>
+                <button 
+                  className="w-full text-left px-md py-sm hover:bg-surface-container-low flex items-center gap-sm text-body-sm text-on-surface"
+                  onClick={() => setIsDropdownOpen(false)}
+                >
+                  <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+                  Descargar todas en PDF
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
