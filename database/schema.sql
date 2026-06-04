@@ -49,10 +49,12 @@ CREATE TABLE `usuario` (
   `clave_acceso`          VARCHAR(255) NOT NULL       COMMENT 'Hash bcrypt del password o PIN',
   `cargo_representante`   VARCHAR(100) DEFAULT NULL   COMMENT 'Cargo (staff) o Representante Legal (miembro)',
   `telefono`              VARCHAR(20)  DEFAULT NULL,
-  `correo`                VARCHAR(100) DEFAULT NULL,
+  `correo`                VARCHAR(100) DEFAULT NULL COMMENT 'Opcional (Ej. para envío de comprobantes)',
   `id_manzana`            VARCHAR(10)  DEFAULT NULL   COMMENT 'NULL para staff, asignado para miembros',
   `lote`                  VARCHAR(10)  DEFAULT NULL   COMMENT 'NULL para staff, asignado para miembros',
+  `direccion`             VARCHAR(255) DEFAULT NULL   COMMENT 'Dirección de la manzana/lote',
   `es_activo`             BOOLEAN      NOT NULL DEFAULT TRUE,
+  `saldo_a_favor`         DECIMAL(12,2) DEFAULT 0.00  COMMENT 'Excedente de pagos para descontar en el próximo recibo',
   `ultimo_acceso`         TIMESTAMP    NULL     DEFAULT NULL COMMENT 'Timestamp del último login exitoso',
   `created_at`            TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`            TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -88,7 +90,8 @@ CREATE TABLE `periodo_facturacion` (
   `mes_anio`              VARCHAR(20)    NOT NULL      COMMENT 'Ej. Oct 2024',
   `factor_multiplicador`  DECIMAL(6,4)   NOT NULL DEFAULT 1.0000,
   `tarifa_kwh`            DECIMAL(10,4)  NOT NULL      COMMENT 'Precio por kWh de energía eléctrica',
-  `tarifa_mantenimiento`  DECIMAL(10,2)  NOT NULL      COMMENT 'Cargo fijo mensual de mantenimiento',
+  `tarifa_mantenimiento_normal`  DECIMAL(10,2)  NOT NULL DEFAULT 0.00 COMMENT 'Cargo mensual de mantenimiento medidor normal',
+  `tarifa_mantenimiento_tiempo_real` DECIMAL(10,2) NOT NULL DEFAULT 0.00 COMMENT 'Cargo mensual de mantenimiento medidor tiempo real',
   `fecha_inicio`          DATE           NOT NULL,
   `fecha_fin`             DATE           NOT NULL,
   `created_at`            TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -111,6 +114,7 @@ CREATE TABLE `medidor` (
   `id`           INT AUTO_INCREMENT PRIMARY KEY,
   `usuario_id`   INT          NOT NULL    COMMENT 'Miembro propietario del medidor',
   `num_serie`    VARCHAR(20)  NOT NULL    COMMENT 'Número de serie del equipo',
+  `tipo`         VARCHAR(20)  NOT NULL DEFAULT 'Normal' COMMENT 'Normal o Tiempo Real',
   `operativo`    BOOLEAN      NOT NULL DEFAULT TRUE,
   `created_at`   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at`   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -181,7 +185,15 @@ CREATE TABLE `recibo` (
                                                     COMMENT 'consumo × tarifa × factor',
   `cargo_mantenimiento`  DECIMAL(12,2)  NOT NULL DEFAULT 0.00
                                                     COMMENT 'Cargo fijo del período',
-  `subtotal`             DECIMAL(12,2)  NOT NULL    COMMENT 'cargo_energia + cargo_mantenimiento',
+  `cargo_fijo`           DECIMAL(12,2)  DEFAULT 0.00,
+  `cargo_corte`          DECIMAL(12,2)  DEFAULT 0.00,
+  `multa_manipulacion`   DECIMAL(12,2)  DEFAULT 0.00,
+  `multa_reconexion`     DECIMAL(12,2)  DEFAULT 0.00,
+  `instalacion_medidor`  DECIMAL(12,2)  DEFAULT 0.00,
+  `deuda_pendiente`      DECIMAL(12,2)  DEFAULT 0.00,
+  `deuda_consumo`        DECIMAL(12,2)  DEFAULT 0.00,
+  `deuda_vencida`        DECIMAL(12,2)  DEFAULT 0.00,
+  `subtotal`             DECIMAL(12,2)  NOT NULL    COMMENT 'cargo_energia + cargo_mantenimiento + extras',
   `igv`                  DECIMAL(12,2)  NOT NULL    COMMENT '18% sobre subtotal',
   `total`                DECIMAL(12,2)  NOT NULL    COMMENT 'subtotal + igv',
   `fecha_emision`        DATE           NOT NULL,
@@ -196,7 +208,7 @@ CREATE TABLE `recibo` (
   UNIQUE KEY `uq_recibo_usuario_periodo` (`usuario_id`, `periodo_id`),
 
   CONSTRAINT `chk_recibo_fechas` CHECK (`fecha_vencimiento` > `fecha_emision`),
-  CONSTRAINT `chk_recibo_estado` CHECK (`estado` IN ('Pendiente', 'Pagado', 'Vencido')),
+  CONSTRAINT `chk_recibo_estado` CHECK (`estado` IN ('Pendiente', 'Pagado', 'Pago Parcial', 'Vencido')),
 
   -- FK
   CONSTRAINT `fk_recibo_usuario` FOREIGN KEY (`usuario_id`)
@@ -455,14 +467,15 @@ CREATE PROCEDURE `sp_generar_recibos`(
 BEGIN
   DECLARE v_tarifa_kwh DECIMAL(10,4);
   DECLARE v_factor     DECIMAL(6,4);
-  DECLARE v_tarifa_mant DECIMAL(10,2);
+  DECLARE v_tarifa_mant_normal DECIMAL(10,2);
+  DECLARE v_tarifa_mant_tr     DECIMAL(10,2);
   DECLARE v_fecha_fin  DATE;
   DECLARE v_mes_anio   VARCHAR(20);
 
   -- Obtener datos del período
-  SELECT `tarifa_kwh`, `factor_multiplicador`, `tarifa_mantenimiento`,
+  SELECT `tarifa_kwh`, `factor_multiplicador`, `tarifa_mantenimiento_normal`, `tarifa_mantenimiento_tiempo_real`,
          `fecha_fin`, `mes_anio`
-  INTO v_tarifa_kwh, v_factor, v_tarifa_mant, v_fecha_fin, v_mes_anio
+  INTO v_tarifa_kwh, v_factor, v_tarifa_mant_normal, v_tarifa_mant_tr, v_fecha_fin, v_mes_anio
   FROM `periodo_facturacion`
   WHERE `id` = p_periodo_id AND `deleted_at` IS NULL;
 
@@ -480,10 +493,10 @@ BEGIN
     l.`id`,
     CONCAT('REC-', DATE_FORMAT(v_fecha_fin, '%Y'), '-', LPAD(ROW_NUMBER() OVER (ORDER BY m.`usuario_id`), 4, '0')),
     ROUND(l.`consumo_calculado` * v_tarifa_kwh * v_factor, 2),
-    v_tarifa_mant,
-    ROUND(l.`consumo_calculado` * v_tarifa_kwh * v_factor + v_tarifa_mant, 2),
-    ROUND((l.`consumo_calculado` * v_tarifa_kwh * v_factor + v_tarifa_mant) * 0.18, 2),
-    ROUND((l.`consumo_calculado` * v_tarifa_kwh * v_factor + v_tarifa_mant) * 1.18, 2),
+    IF(m.`tipo` = 'Tiempo Real', v_tarifa_mant_tr, v_tarifa_mant_normal),
+    ROUND(l.`consumo_calculado` * v_tarifa_kwh * v_factor + IF(m.`tipo` = 'Tiempo Real', v_tarifa_mant_tr, v_tarifa_mant_normal), 2),
+    ROUND((l.`consumo_calculado` * v_tarifa_kwh * v_factor + IF(m.`tipo` = 'Tiempo Real', v_tarifa_mant_tr, v_tarifa_mant_normal)) * 0.18, 2),
+    ROUND((l.`consumo_calculado` * v_tarifa_kwh * v_factor + IF(m.`tipo` = 'Tiempo Real', v_tarifa_mant_tr, v_tarifa_mant_normal)) * 1.18, 2),
     CURDATE(),
     DATE_ADD(CURDATE(), INTERVAL 15 DAY),
     'Pendiente'

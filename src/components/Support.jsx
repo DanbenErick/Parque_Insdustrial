@@ -14,7 +14,7 @@ const Support = () => {
     {
       id: 2,
       question: "¿Cómo se calculan las tarifas de mantenimiento?",
-      answer: "La tarifa de mantenimiento se calcula automáticamente basándose en los metros cuadrados (m2) registrados para cada manzana industrial en el panel de Inquilinos y Sectores."
+      answer: "La tarifa de mantenimiento se calcula automáticamente basándose en los parámetros registrados para cada manzana industrial en el panel de Miembros y Conexiones."
     },
     {
       id: 3,

@@ -74,14 +74,14 @@ export default {
         "xs": "4px"
       },
       fontFamily: {
-        "headline-md": ["Hanken Grotesk"],
-        "headline-lg": ["Hanken Grotesk"],
-        "body-md": ["Hanken Grotesk"],
-        "headline-sm": ["Hanken Grotesk"],
-        "label-caps": ["Hanken Grotesk"],
-        "body-sm": ["Hanken Grotesk"],
-        "body-lg": ["Hanken Grotesk"],
-        "display": ["Hanken Grotesk"],
+        "headline-md": ["Lexend"],
+        "headline-lg": ["Lexend"],
+        "body-md": ["Lexend"],
+        "headline-sm": ["Lexend"],
+        "label-caps": ["Lexend"],
+        "body-sm": ["Lexend"],
+        "body-lg": ["Lexend"],
+        "display": ["Lexend"],
         "data-mono": ["JetBrains Mono"]
       },
       fontSize: {
@@ -100,5 +100,6 @@ export default {
   plugins: [
     require('@tailwindcss/forms'),
     require('@tailwindcss/container-queries'),
+    require('tailwindcss-animate'),
   ],
 }

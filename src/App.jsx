@@ -1,4 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
+import { Toaster } from 'sonner';
+import { useAuth } from './context/AuthContext';
+import { useTheme } from './context/ThemeContext';
+import { useYear } from './context/YearContext';
+import PageTransition from './components/PageTransition';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import TenantsAndSectors from './components/TenantsAndSectors';
@@ -8,38 +15,57 @@ import Reports from './components/Reports';
 import UserManagement from './components/UserManagement';
 import GenerateInvoices from './components/GenerateInvoices';
 import ReceiptDetail from './components/ReceiptDetail';
-import MemberReport from './components/MemberReport';
+
 import ManualBilling from './components/ManualBilling';
 import Settings from './components/Settings';
 import Support from './components/Support';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [currentView, setCurrentView] = useState('dashboard');
+  const { user, isAuthenticated, isLoading, logout } = useAuth();
+  const userRole = user?.nombre_rol || 'Miembro';
+  const { isDarkMode, toggleTheme } = useTheme();
+  const { activeYear, setActiveYear } = useYear();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname.substring(1) || 'dashboard';
+
   const [showNotifications, setShowNotifications] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [globalSearchTerm, setGlobalSearchTerm] = useState('');
   const [globalSearchResults, setGlobalSearchResults] = useState([]);
+  const [isGlobalLoading, setIsGlobalLoading] = useState(false);
+
+  useEffect(() => {
+    const handleGlobalLoading = (e) => {
+      setIsGlobalLoading(e.detail);
+    };
+    window.addEventListener('globalLoading', handleGlobalLoading);
+    return () => window.removeEventListener('globalLoading', handleGlobalLoading);
+  }, []);
+
+  const userRutas = user?.rutas || [];
 
   const appScreens = [
-    { view: 'dashboard', name: 'Panel de Control', icon: 'dashboard', keywords: ['inicio', 'home', 'kpi', 'resumen'] },
-    { view: 'tenants', name: 'Inquilinos y Sectores', icon: 'factory', keywords: ['empresas', 'fabricas', 'miembros', 'sectores', 'manzanas'] },
-    { view: 'billing', name: 'Facturación', icon: 'receipt_long', keywords: ['facturas', 'cobros', 'recibos', 'generar', 'boletas'] },
-    { view: 'payments', name: 'Pagos Recibidos', icon: 'payments', keywords: ['pagos', 'ingresos', 'dinero', 'historial'] },
-    { view: 'reports', name: 'Reportes', icon: 'bar_chart', keywords: ['estadisticas', 'graficos', 'analisis'] },
-    { view: 'users', name: 'Gestión de Usuarios', icon: 'manage_accounts', keywords: ['administradores', 'moderadores', 'cuentas', 'permisos', 'contraseñas'] },
-    { view: 'settings', name: 'Ajustes Generales', icon: 'settings', keywords: ['configuracion', 'parametros', 'sistema'] },
-    { view: 'support', name: 'Soporte Técnico', icon: 'support_agent', keywords: ['ayuda', 'contacto', 'problemas', 'ticket'] },
-    { view: 'manual_billing', name: 'Registro Manual', icon: 'edit_document', keywords: ['lectura', 'watts', 'medidor', 'consumo'] }
+    { view: 'dashboard', name: 'Panel de Control', icon: 'dashboard', keywords: ['inicio', 'home', 'kpi', 'resumen'], hasAccess: userRutas.includes('dashboard') },
+    { view: 'tenants', name: 'Empresas', icon: 'factory', keywords: ['empresas', 'fabricas', 'miembros', 'sectores', 'manzanas', 'propietarios'], hasAccess: userRutas.includes('tenants') },
+    { view: 'billing', name: 'Facturación', icon: 'receipt_long', keywords: ['facturas', 'cobros', 'recibos', 'generar', 'boletas'], hasAccess: userRutas.includes('billing') },
+    { view: 'payments', name: 'Pagos Recibidos', icon: 'payments', keywords: ['pagos', 'ingresos', 'dinero', 'historial'], hasAccess: userRutas.includes('payments') },
+    { view: 'reports', name: 'Reportes', icon: 'bar_chart', keywords: ['estadisticas', 'graficos', 'analisis'], hasAccess: userRutas.includes('reports') },
+    { view: 'manual_billing', name: 'Registro de Lecturas', icon: 'edit_document', keywords: ['lectura', 'kwh', 'medidor', 'consumo'], hasAccess: userRutas.includes('manual_billing') },
+    { view: 'users', name: 'Gestión de Usuarios', icon: 'manage_accounts', keywords: ['administradores', 'moderadores', 'cuentas', 'permisos', 'contraseñas'], isConfig: true, hasAccess: userRutas.includes('users') },
+    { view: 'settings', name: 'Ajustes Generales', icon: 'settings', keywords: ['configuracion', 'parametros', 'sistema'], isConfig: true, hasAccess: userRutas.includes('settings') },
+    { view: 'support', name: 'Soporte Técnico', icon: 'support_agent', keywords: ['ayuda', 'contacto', 'problemas', 'ticket'], hasAccess: userRutas.includes('support') }
   ];
+
+  const visibleScreens = appScreens.filter(screen => screen.hasAccess);
 
   const handleGlobalSearch = (e) => {
     const term = e.target.value;
     setGlobalSearchTerm(term);
-    
+
     if (term.trim().length > 1) {
-      const results = appScreens.filter(screen => 
-        screen.name.toLowerCase().includes(term.toLowerCase()) || 
+      const results = visibleScreens.filter(screen =>
+        screen.name.toLowerCase().includes(term.toLowerCase()) ||
         screen.keywords.some(k => k.includes(term.toLowerCase()))
       );
       setGlobalSearchResults(results);
@@ -49,229 +75,196 @@ function App() {
   };
 
   const handleNavClick = (view) => {
-    setCurrentView(view);
+    navigate(`/${view}`);
     setIsMobileMenuOpen(false); // Close menu on mobile after selection
   };
 
-  const renderContent = () => {
-    switch (currentView) {
-      case 'dashboard':
-        return <Dashboard />;
-      case 'tenants':
-        return <TenantsAndSectors />;
-      case 'billing':
-        return <Billing setCurrentView={setCurrentView} />;
-      case 'payments':
-        return <Payments />;
-      case 'reports':
-        return <Reports />;
-      case 'member_report':
-        return <MemberReport />;
-      case 'generate_invoices':
-        return <GenerateInvoices />;
-      case 'manual_billing':
-        return <ManualBilling />;
-      case 'receipt_detail':
-        return <ReceiptDetail />;
-      case 'users':
-        return <UserManagement />;
-      case 'settings':
-        return <Settings />;
-      case 'support':
-        return <Support />;
-      default:
-        return <Dashboard />;
-    }
-  };
-
-  const handleLogin = (role) => {
-    // Logic to handle user role can be added here
-    setIsAuthenticated(true);
-  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-surface gap-4">
+        <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+        <p className="text-on-surface-variant font-body-sm font-bold animate-pulse">Cargando sesión...</p>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />;
+    return (
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    );
   }
 
   return (
-    <div className="bg-surface font-body-md text-on-surface antialiased flex flex-col md:flex-row min-h-screen relative overflow-x-hidden">
-      
-      {/* Mobile Top Bar */}
-      <header className="md:hidden flex items-center justify-between p-4 bg-surface-dim text-white shadow-md z-40 sticky top-0">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setIsMobileMenuOpen(true)} className="p-1 hover:bg-white/10 rounded-lg transition-colors">
-            <span className="material-symbols-outlined text-[28px]">menu</span>
-          </button>
-          <img src="/logo.png" alt="Jicamarca Logo" className="h-8 w-auto object-contain" />
-        </div>
-        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center font-bold text-on-primary">
-          AD
-        </div>
-      </header>
+    <>
+      <Toaster position="bottom-right" theme={isDarkMode ? 'dark' : 'light'} richColors />
+      <div className="bg-surface font-body-md text-on-surface antialiased flex flex-col md:flex-row min-h-screen relative overflow-x-hidden">
 
-      {/* Mobile Overlay */}
-      {isMobileMenuOpen && (
-        <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in"
-          onClick={() => setIsMobileMenuOpen(false)}
-        ></div>
-      )}
+        {/* Mobile Top Bar */}
+        <header className="md:hidden flex items-center justify-between p-4 bg-surface-dim text-white shadow-md z-40 sticky top-0 print:hidden">
+          <div className="flex items-center gap-3">
+            <button onClick={() => setIsMobileMenuOpen(true)} className="p-1 hover:bg-white/10 rounded-lg transition-colors">
+              <span className="material-symbols-outlined text-[28px]">menu</span>
+            </button>
+            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center overflow-hidden">
+              <img src="/logo.png" alt="Jicamarca Logo" className="w-[85%] h-[85%] object-contain" />
+            </div>
+          </div>
+          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center font-bold text-on-primary text-xs uppercase">
+            {user?.nombre_razonsocial ? user.nombre_razonsocial.substring(0, 2) : 'AD'}
+          </div>
+        </header>
 
-      {/* SideNavBar */}
-      <aside className={`fixed left-0 top-0 h-full w-[280px] md:w-[240px] border-r border-outline-variant flex flex-col p-md gap-sm z-50 bg-surface-dim text-white shadow-2xl transition-transform duration-300 ease-in-out ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-        <div className="mb-lg px-xs flex justify-between items-start">
-          <div>
-            <img src="/logo.png" alt="Parque Industrial Jicamarca" className="h-12 w-auto object-contain mb-2 bg-white rounded p-1" />
-            <p className="font-body-sm text-body-sm text-white/60">Gestión Industrial</p>
-          </div>
-          <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden p-2 text-white/70 hover:bg-white/10 rounded-lg">
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
-        <nav className="flex flex-col gap-xs flex-grow overflow-y-auto pb-20 md:pb-0">
-          <button 
-            onClick={() => handleNavClick('dashboard')}
-            className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'dashboard' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
-          >
-            <span className="material-symbols-outlined">dashboard</span>
-            <span className="font-body-md text-body-md">Panel de Control</span>
-          </button>
-          <button 
-            onClick={() => handleNavClick('tenants')}
-            className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'tenants' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
-          >
-            <span className="material-symbols-outlined">factory</span>
-            <span className="font-body-md text-body-md">Inquilinos y Sectores</span>
-          </button>
-          <button 
-            onClick={() => handleNavClick('billing')}
-            className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'billing' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
-          >
-            <span className="material-symbols-outlined">receipt_long</span>
-            <span className="font-body-md text-body-md">Facturación</span>
-          </button>
-          <button 
-            onClick={() => handleNavClick('payments')}
-            className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'payments' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
-          >
-            <span className="material-symbols-outlined">payments</span>
-            <span className="font-body-md text-body-md">Pagos Recibidos</span>
-          </button>
-          <button 
-            onClick={() => handleNavClick('reports')}
-            className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'reports' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
-          >
-            <span className="material-symbols-outlined">analytics</span>
-            <span className="font-body-md text-body-md">Reporte General</span>
-          </button>
-          <button 
-            onClick={() => handleNavClick('member_report')}
-            className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'member_report' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
-          >
-            <span className="material-symbols-outlined">pie_chart</span>
-            <span className="font-body-md text-body-md">Reporte por Miembro</span>
-          </button>
-          <button 
-            onClick={() => handleNavClick('manual_billing')}
-            className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'manual_billing' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
-          >
-            <span className="material-symbols-outlined">edit_document</span>
-            <span className="font-body-md text-body-md">Registro Manual</span>
-          </button>
-          <button 
-            onClick={() => handleNavClick('receipt_detail')}
-            className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'receipt_detail' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
-          >
-            <span className="material-symbols-outlined">description</span>
-            <span className="font-body-md text-body-md">Ver Recibo</span>
-          </button>
-          <div className="h-px bg-white/10 my-sm mx-xs"></div>
-          <p className="px-md text-[10px] font-bold text-white/40 uppercase tracking-wider mb-xs">Configuración</p>
-          <button 
-            onClick={() => handleNavClick('users')}
-            className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'users' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
-          >
-            <span className="material-symbols-outlined">manage_accounts</span>
-            <span className="font-body-md text-body-md">Gestión de Usuarios</span>
-          </button>
-          <button 
-            onClick={() => handleNavClick('settings')}
-            className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'settings' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
-          >
-            <span className="material-symbols-outlined">settings</span>
-            <span className="font-body-md text-body-md">Ajustes Generales</span>
-          </button>
-          <button 
-            onClick={() => handleNavClick('support')}
-            className={`flex items-center gap-md px-md py-sm rounded-lg transition-all w-full text-left ${currentView === 'support' ? 'bg-primary text-on-primary font-semibold shadow-lg' : 'text-white/70 hover:bg-white/10'}`}
-          >
-            <span className="material-symbols-outlined">support_agent</span>
-            <span className="font-body-md text-body-md">Soporte Técnico</span>
-          </button>
-        </nav>
-        <div className="mt-auto flex items-center gap-sm px-xs pt-md border-t border-white/10">
-          <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-bold text-on-primary shadow-inner">
-            AD
-          </div>
-          <div>
-            <p className="font-body-md text-body-md font-bold text-white">Admin Principal</p>
-            <button className="text-[11px] text-error hover:text-error/80 font-bold transition-colors">Cerrar Sesión</button>
-          </div>
-        </div>
-      </aside>
+        {/* Mobile Overlay */}
+        {isMobileMenuOpen && (
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in"
+            onClick={() => setIsMobileMenuOpen(false)}
+          ></div>
+        )}
 
-      {/* Main Content Area */}
-      <div className="flex-1 md:ml-[240px] flex flex-col h-[calc(100vh-64px)] md:h-screen w-full relative">
-        {/* TopAppBar */}
-        <header className="sticky top-0 z-40 bg-surface/80 backdrop-blur-md hidden md:flex justify-between items-center w-full px-lg h-16 border-b border-outline-variant">
-          <div className="flex items-center gap-lg">
-            <div className="relative hidden lg:block">
-              <input 
-                type="text" 
-                value={globalSearchTerm}
-                onChange={handleGlobalSearch}
-                placeholder="Buscar pantallas..." 
-                className="bg-surface-container border border-outline-variant rounded-full pl-10 pr-4 py-2 text-sm w-64 focus:border-primary outline-none focus:w-80 transition-all"
-              />
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
-              
-              {/* Search Results Dropdown */}
-              {globalSearchResults.length > 0 && (
-                <div className="absolute top-full left-0 mt-2 w-full bg-surface border border-outline-variant rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2">
-                  <ul className="divide-y divide-outline-variant">
-                    {globalSearchResults.map((screen) => (
-                      <li 
-                        key={screen.view}
-                        onClick={() => {
-                          handleNavClick(screen.view);
-                          setGlobalSearchTerm('');
-                          setGlobalSearchResults([]);
-                        }}
-                        className="px-4 py-3 hover:bg-surface-container cursor-pointer flex items-center gap-3 transition-colors group"
-                      >
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                          <span className="material-symbols-outlined text-[18px]">{screen.icon}</span>
-                        </div>
-                        <div>
-                          <p className="font-bold text-sm text-on-surface">{screen.name}</p>
-                          <p className="text-[10px] text-on-surface-variant uppercase tracking-wider">Pantalla del Sistema</p>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
+        {/* SideNavBar */}
+        <aside className={`fixed left-0 top-0 h-full w-[280px] md:w-[260px] flex flex-col z-50 bg-surface-dim text-white shadow-2xl transition-transform duration-300 ease-in-out print:hidden ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+          {/* Logo Area */}
+          <div className="h-20 px-6 flex items-center justify-between border-b border-white/10 bg-surface-dim">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden shrink-0">
+                <img src="/logo.png" alt="Logo" className="w-[85%] h-[85%] object-contain" />
+              </div>
+              <div className="flex flex-col mt-1">
+                <span className="font-bold text-white text-[15px] leading-tight tracking-wide font-headline-sm">Parque Industrial</span>
+                <span className="text-[10px] text-slate-400 font-bold tracking-[0.2em] uppercase">Jicamarca</span>
+              </div>
+            </div>
+            <button onClick={() => setIsMobileMenuOpen(false)} className="md:hidden p-2 text-slate-400 hover:bg-slate-800 rounded-lg">
+              <span className="material-symbols-outlined">close</span>
+            </button>
+          </div>
+
+          {/* Year Selector */}
+          <div className="px-4 py-3 border-b border-white/5 bg-surface-dim">
+            <div className="relative">
+              <select 
+                value={activeYear}
+                onChange={(e) => setActiveYear(parseInt(e.target.value))}
+                className="w-full appearance-none bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm font-bold focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-colors cursor-pointer"
+              >
+                {[2024, 2025, 2026, 2027].map(year => (
+                  <option key={year} value={year} className="bg-surface text-on-surface">Año {year}</option>
+                ))}
+              </select>
+              <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none text-[18px]">
+                calendar_month
+              </span>
+            </div>
+          </div>
+
+          <nav className="flex flex-col gap-1 px-4 py-4 flex-grow overflow-y-auto custom-scrollbar">
+            <p className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Menú Principal</p>
+            {visibleScreens.filter(s => !s.isConfig).map(screen => (
+              <button
+                key={screen.view}
+                onClick={() => handleNavClick(screen.view)}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 w-full text-left group relative overflow-hidden ${currentPath === screen.view ? 'bg-primary text-on-primary font-bold shadow-lg' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
+              >
+                {currentPath === screen.view && <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full"></div>}
+                <span className={`material-symbols-outlined text-[20px] transition-transform duration-200 ${currentPath === screen.view ? 'scale-110' : 'group-hover:scale-110'}`} style={{ fontVariationSettings: currentPath === screen.view ? "'FILL' 1" : "'FILL' 0" }}>{screen.icon}</span>
+                <span className="text-[13px] tracking-wide">{screen.name}</span>
+              </button>
+            ))}
+
+            {visibleScreens.some(s => s.isConfig) && (
+              <>
+                <p className="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 mt-6">Configuración</p>
+                {visibleScreens.filter(s => s.isConfig).map(screen => (
+                  <button
+                    key={screen.view}
+                    onClick={() => handleNavClick(screen.view)}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 w-full text-left group relative overflow-hidden ${currentPath === screen.view ? 'bg-primary text-on-primary font-bold shadow-lg' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
+                  >
+                    {currentPath === screen.view && <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full"></div>}
+                    <span className={`material-symbols-outlined text-[20px] transition-transform duration-200 ${currentPath === screen.view ? 'scale-110' : 'group-hover:scale-110'}`} style={{ fontVariationSettings: currentPath === screen.view ? "'FILL' 1" : "'FILL' 0" }}>{screen.icon}</span>
+                    <span className="text-[13px] tracking-wide">{screen.name}</span>
+                  </button>
+                ))}
+              </>
+            )}
+          </nav>
+          
+          <div className="p-4 border-t border-white/10 bg-surface-dim">
+            <div className="flex items-center gap-3 px-2 py-2 rounded-xl hover:bg-white/10 transition-colors group cursor-pointer border border-transparent hover:border-white/20">
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center font-bold text-on-primary text-[12px] shadow-inner uppercase border border-white/20 group-hover:border-white/50 transition-colors">
+                {user?.nombre_razonsocial ? user.nombre_razonsocial.substring(0, 2) : 'AD'}
+              </div>
+              <div className="flex flex-col flex-1 min-w-0">
+                <p className="text-[12px] font-bold text-white truncate">{user?.nombre_razonsocial || 'Usuario'}</p>
+                <p className="text-[10px] text-white/60 capitalize truncate">{userRole}</p>
+              </div>
+              <button onClick={logout} className="p-1.5 text-white/60 hover:text-error hover:bg-error/20 rounded-lg transition-colors ml-auto" title="Cerrar Sesión">
+                <span className="material-symbols-outlined text-[20px]">logout</span>
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <div className="flex-1 ml-0 md:ml-[260px] flex flex-col h-screen overflow-hidden bg-background dark:bg-[#1a1c1e]">
+
+          {/* Desktop Top Bar */}
+          <header className="sticky top-0 z-40 bg-surface/80 backdrop-blur-md hidden md:flex justify-between items-center w-full px-lg h-16 border-b border-outline-variant print:hidden">
+            <div className="flex items-center gap-lg">
+              <div className="relative hidden lg:block">
+                <input
+                  type="text"
+                  value={globalSearchTerm}
+                  onChange={handleGlobalSearch}
+                  placeholder="Buscar pantallas..."
+                  className="bg-surface-container border border-outline-variant rounded-full pl-10 pr-4 py-2 text-sm w-64 focus:border-primary outline-none focus:w-80 transition-all"
+                />
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+
+                {/* Search Results Dropdown */}
+                {globalSearchResults.length > 0 && (
+                  <div className="absolute top-full left-0 mt-2 w-full bg-surface border border-outline-variant rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2">
+                    <ul className="divide-y divide-outline-variant">
+                      {globalSearchResults.map((screen) => (
+                        <li
+                          key={screen.view}
+                          onClick={() => {
+                            handleNavClick(screen.view);
+                            setGlobalSearchTerm('');
+                            setGlobalSearchResults([]);
+                          }}
+                          className="px-4 py-3 hover:bg-surface-container cursor-pointer flex items-center gap-3 transition-colors group"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                            <span className="material-symbols-outlined text-[18px]">{screen.icon}</span>
+                          </div>
+                          <div>
+                            <p className="font-bold text-sm text-on-surface">{screen.name}</p>
+                            <p className="text-[10px] text-on-surface-variant uppercase tracking-wider">Pantalla del Sistema</p>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
             </div>
             <div className="flex items-center gap-md relative">
-              <button 
+              <button
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="relative p-2 hover:bg-surface-container rounded-full transition-colors"
               >
                 <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
                 <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
               </button>
-              <span className="material-symbols-outlined text-on-surface-variant cursor-pointer hover:text-primary transition-colors">account_circle</span>
-              
+              <button onClick={() => handleNavClick('settings')} className="w-10 h-10 flex items-center justify-center hover:bg-surface-container-low transition-colors rounded-full text-on-surface-variant">
+                <span className="material-symbols-outlined">settings</span>
+              </button>
+
               {/* Global Notifications Modal */}
               {showNotifications && (
                 <div className="absolute top-12 right-0 w-80 bg-surface border border-outline-variant rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
@@ -319,35 +312,55 @@ function App() {
                 </div>
               )}
             </div>
-          </div>
-          <div className="flex items-center gap-md">
-            <button className="w-10 h-10 flex items-center justify-center hover:bg-surface-container-low transition-colors rounded-full text-on-surface-variant">
-              <span className="material-symbols-outlined">settings</span>
-            </button>
-          </div>
-        </header>
+          </header>
 
-        {/* Content */}
-        {renderContent()}
+          {/* Content */}
+          <div className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col">
+            <AnimatePresence mode="wait">
+              <Routes location={location} key={location.pathname}>
+                <Route path="/" element={<Navigate to="/dashboard" />} />
+                <Route path="/dashboard" element={<PageTransition><Dashboard /></PageTransition>} />
+                <Route path="/tenants" element={<PageTransition><TenantsAndSectors /></PageTransition>} />
+                <Route path="/billing" element={<PageTransition><Billing /></PageTransition>} />
+                <Route path="/payments" element={<PageTransition><Payments /></PageTransition>} />
+                <Route path="/reports" element={<PageTransition><Reports /></PageTransition>} />
 
-        {/* Footer */}
-        <footer className="mt-auto bg-surface-container-highest flex justify-between items-center px-lg py-xs w-full border-t border-outline-variant">
-          <div className="flex gap-lg items-center">
-            <span className="font-label-caps text-label-caps text-on-surface-variant font-bold">© 2024 Parque Industrial Jicamarca</span>
-            <div className="flex gap-md">
-              <div className="flex items-center gap-xs">
-                <span className="w-2 h-2 rounded-full bg-primary animate-pulse" style={{ opacity: 1 }}></span>
-                <span className="font-data-mono text-on-surface-variant text-[10px]">Estado: Activo | Latencia: 24ms</span>
-              </div>
-            </div>
+                <Route path="/generate_invoices" element={<PageTransition><GenerateInvoices /></PageTransition>} />
+                <Route path="/manual_billing" element={<PageTransition><ManualBilling /></PageTransition>} />
+                <Route path="/receipt_detail" element={<PageTransition><ReceiptDetail /></PageTransition>} />
+                <Route path="/users" element={<PageTransition><UserManagement /></PageTransition>} />
+                <Route path="/settings" element={<PageTransition><Settings /></PageTransition>} />
+                <Route path="/support" element={<PageTransition><Support /></PageTransition>} />
+                <Route path="/login" element={<Navigate to="/dashboard" />} />
+                <Route path="*" element={<PageTransition><Dashboard /></PageTransition>} />
+              </Routes>
+            </AnimatePresence>
           </div>
-          <div className="flex gap-lg text-[10px] font-data-mono text-on-surface-variant uppercase tracking-wider">
-            <a className="hover:text-primary transition-colors" href="#">Soporte Técnico</a>
-            <a className="hover:text-primary transition-colors" href="#">Documentación API</a>
-          </div>
-        </footer>
+
+          {/* Footer */}
+          <footer className="mt-auto bg-surface-container-highest flex justify-center items-center px-lg py-sm w-full border-t border-outline-variant print:hidden">
+            <span className="font-label-caps text-label-caps text-on-surface-variant font-bold">© 2026 Parque Industrial Jicamarca</span>
+          </footer>
+        </div>
       </div>
-    </div>
+
+      {/* Global Loader Overlay */}
+      <AnimatePresence>
+        {isGlobalLoading && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[9999] bg-black/60 backdrop-blur-sm flex flex-col items-center justify-center text-white"
+          >
+            <div className="w-16 h-16 border-4 border-white/20 border-t-primary rounded-full animate-spin mb-4 shadow-xl"></div>
+            <h2 className="text-xl font-bold font-headline-sm animate-pulse drop-shadow-md">Procesando solicitud...</h2>
+            <p className="text-sm text-white/70 mt-2">Por favor, no cierre ni recargue esta ventana.</p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
