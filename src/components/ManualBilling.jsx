@@ -33,6 +33,8 @@ const ManualBilling = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
   const [currentReading, setCurrentReading] = useState('');
+  const [currentReadingPunta, setCurrentReadingPunta] = useState('');
+  const [factorPotencia, setFactorPotencia] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [medidores, setMedidores] = useState([]);
   const [periodos, setPeriodos] = useState([]);
@@ -113,6 +115,8 @@ const ManualBilling = () => {
     setSearchTerm(member.propietario || member.num_serie);
     setSearchResults([]);
     setCurrentReading('');
+    setCurrentReadingPunta('');
+    setFactorPotencia('');
   };
 
   const handleEditFromTable = (record) => {
@@ -134,6 +138,9 @@ const ManualBilling = () => {
         periodo_id: activePeriodo.id,
         lectura_anterior: parseFloat(selectedMember.ultima_lectura || 0),
         lectura_actual: parseFloat(currentReading),
+        lectura_anterior_punta: parseFloat(selectedMember.ultima_lectura_punta || 0),
+        lectura_actual_punta: currentReadingPunta ? parseFloat(currentReadingPunta) : 0,
+        factor_potencia: factorPotencia ? parseFloat(factorPotencia) : 0,
         estado: 'Validado'
       };
 
@@ -163,6 +170,8 @@ const ManualBilling = () => {
       setSelectedMember(null);
       setSearchTerm('');
       setCurrentReading('');
+      setCurrentReadingPunta('');
+      setFactorPotencia('');
     } catch (error) {
       toast.error(error.response?.data?.error || 'Error al guardar la lectura');
     } finally {
@@ -242,6 +251,8 @@ const ManualBilling = () => {
                         setSelectedMember(null);
                         setSearchTerm('');
                         setCurrentReading('');
+                        setCurrentReadingPunta('');
+                        setFactorPotencia('');
                       }}
                       className="appearance-none bg-transparent border-none py-2 pl-3 pr-9 text-base font-bold text-primary cursor-pointer focus:outline-none focus:ring-0"
                     >
@@ -353,7 +364,7 @@ const ManualBilling = () => {
                 
                 {searchTerm.length > 0 && searchResults.length === 0 && !selectedMember && (
                   <div className="absolute left-0 right-0 mt-2 mx-md md:mx-lg bg-surface border border-outline-variant rounded-xl shadow-lg p-md text-center text-on-surface-variant animate-in fade-in">
-                    No se encontraron medidores o miembros que coincidan.
+                    No se encontraron medidores o socios que coincidan.
                   </div>
                 )}
               </div>
@@ -405,7 +416,7 @@ const ManualBilling = () => {
                       </div>
 
                       <div className="flex flex-col">
-                        <label className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Lectura Actual (Ingresar kWh)</label>
+                        <label className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Lectura Actual (Ingresar kWh) {selectedMember.tipo === 'Tiempo Real' && 'Normal'}</label>
                         <div className="relative">
                           <input 
                             type="number" 
@@ -420,6 +431,48 @@ const ManualBilling = () => {
                           <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">kWh</span>
                         </div>
                       </div>
+
+                      {selectedMember.tipo === 'Tiempo Real' && (
+                        <>
+                          <div className="bg-surface-container-low rounded-xl p-md border border-outline-variant flex flex-col justify-center">
+                            <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Lectura Anterior Punta</span>
+                            <span className="font-data-mono text-[24px] text-on-surface opacity-70">
+                              {parseFloat(selectedMember.ultima_lectura_punta || 0).toLocaleString('en-US', {minimumFractionDigits: 2})} <span className="text-sm">kWh</span>
+                            </span>
+                          </div>
+
+                          <div className="flex flex-col">
+                            <label className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Lectura Actual Punta</label>
+                            <div className="relative">
+                              <input 
+                                type="number" 
+                                step="0.01"
+                                required
+                                value={currentReadingPunta}
+                                onChange={(e) => setCurrentReadingPunta(e.target.value)}
+                                placeholder="0.00" 
+                                className="w-full bg-white border-2 border-primary rounded-xl pl-4 pr-20 py-4 text-[28px] font-data-mono font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-primary/20 text-right shadow-inner"
+                              />
+                              <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">kWh</span>
+                            </div>
+                          </div>
+
+                          <div className="md:col-span-2 flex flex-col">
+                            <label className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Factor de Potencia</label>
+                            <div className="relative">
+                              <input 
+                                type="number" 
+                                step="0.0001"
+                                required
+                                value={factorPotencia}
+                                onChange={(e) => setFactorPotencia(e.target.value)}
+                                placeholder="0.0000" 
+                                className="w-full bg-white border-2 border-primary rounded-xl pl-4 pr-20 py-4 text-[28px] font-data-mono font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-primary/20 text-right shadow-inner"
+                              />
+                            </div>
+                          </div>
+                        </>
+                      )}
 
                       <div className="md:col-span-2 mt-sm">
                         <button 
@@ -450,7 +503,7 @@ const ManualBilling = () => {
                   </div>
                   <h3 className="font-headline-sm text-on-surface font-bold">Esperando Búsqueda...</h3>
                   <p className="text-sm text-on-surface-variant mt-2 max-w-sm">
-                    Utiliza el buscador de arriba para encontrar un miembro o medidor. El formulario de registro aparecerá aquí.
+                    Utiliza el buscador de arriba para encontrar un socio o medidor. El formulario de registro aparecerá aquí.
                   </p>
                 </div>
               )}
@@ -468,7 +521,7 @@ const ManualBilling = () => {
                     <thead className="sticky top-0 bg-surface-container-lowest shadow-sm z-10">
                       <tr className="text-on-surface-variant border-b border-outline-variant text-[10px] uppercase tracking-wider">
                         <th className="px-md py-2">Fecha/Hora</th>
-                        <th className="px-md py-2">Miembro/Medidor</th>
+                        <th className="px-md py-2">Socio/Medidor</th>
                         <th className="px-md py-2 text-right text-primary font-bold">Lectura (W)</th>
                       </tr>
                     </thead>
@@ -571,7 +624,7 @@ const ManualBilling = () => {
                     <thead className="sticky top-0 bg-surface-container-lowest shadow-sm z-10">
                       <tr className="text-on-surface-variant border-b border-outline-variant text-xs uppercase tracking-wider">
                         <th className="px-xl py-4 font-bold">Fecha / Hora</th>
-                        <th className="px-xl py-4 font-bold">Empresa / Miembro</th>
+                        <th className="px-xl py-4 font-bold">Empresa / Socio</th>
                         <th className="px-xl py-4 font-bold">Medidor</th>
                         <th className="px-xl py-4 text-right text-primary font-bold">Lectura Registrada</th>
                         <th className="px-xl py-4 text-center font-bold">Acciones</th>

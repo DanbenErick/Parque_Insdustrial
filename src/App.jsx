@@ -22,7 +22,7 @@ import Support from './components/Support';
 
 function App() {
   const { user, isAuthenticated, isLoading, logout } = useAuth();
-  const userRole = user?.nombre_rol || 'Miembro';
+  const userRole = user?.nombre_rol || 'Socio';
   const { isDarkMode, toggleTheme } = useTheme();
   const { activeYear, setActiveYear } = useYear();
   const navigate = useNavigate();
@@ -47,7 +47,7 @@ function App() {
 
   const appScreens = [
     { view: 'dashboard', name: 'Panel de Control', icon: 'dashboard', keywords: ['inicio', 'home', 'kpi', 'resumen'], hasAccess: userRutas.includes('dashboard') },
-    { view: 'tenants', name: 'Empresas', icon: 'factory', keywords: ['empresas', 'fabricas', 'miembros', 'sectores', 'manzanas', 'propietarios'], hasAccess: userRutas.includes('tenants') },
+    { view: 'tenants', name: 'Empresas', icon: 'factory', keywords: ['empresas', 'fabricas', 'socios', 'sectores', 'manzanas', 'propietarios'], hasAccess: userRutas.includes('tenants') },
     { view: 'billing', name: 'Facturación', icon: 'receipt_long', keywords: ['facturas', 'cobros', 'recibos', 'generar', 'boletas'], hasAccess: userRutas.includes('billing') },
     { view: 'payments', name: 'Pagos Recibidos', icon: 'payments', keywords: ['pagos', 'ingresos', 'dinero', 'historial'], hasAccess: userRutas.includes('payments') },
     { view: 'reports', name: 'Reportes', icon: 'bar_chart', keywords: ['estadisticas', 'graficos', 'analisis'], hasAccess: userRutas.includes('reports') },

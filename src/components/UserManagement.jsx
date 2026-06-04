@@ -67,7 +67,7 @@ const UserManagement = () => {
     switch (rolName) {
       case 'Admin': return 'bg-primary-container text-on-primary-container';
       case 'Operario': return 'bg-tertiary-container text-on-tertiary-container';
-      case 'Miembro': return 'bg-secondary-container text-on-secondary-container';
+      case 'Socio': return 'bg-secondary-container text-on-secondary-container';
       default: return 'bg-surface-variant text-on-surface-variant';
     }
   };
@@ -226,7 +226,7 @@ const UserManagement = () => {
       {/* Users Table Section */}
       <div className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden shadow-sm">
         <div className="px-lg py-md border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-md bg-surface-container-low">
-          <span className="font-headline-sm text-headline-sm text-on-surface font-bold">Listado del Personal y Miembros</span>
+          <span className="font-headline-sm text-headline-sm text-on-surface font-bold">Listado del Personal y Socios</span>
           <div className="flex flex-wrap items-center gap-sm">
             <div className="relative">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>

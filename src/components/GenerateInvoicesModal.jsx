@@ -24,7 +24,7 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
           // Solo medidores operativos
           setMedidores(medidoresRes.data.filter(m => m.operativo));
           setLecturas(lecturasRes.data);
-          setUsuarios(usuariosRes.data.filter(u => u.nombre_rol === 'Miembro'));
+          setUsuarios(usuariosRes.data.filter(u => u.nombre_rol === 'Socio'));
         } catch (error) {
           toast.error('Error al cargar datos para validación');
         } finally {
@@ -210,20 +210,20 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
                 </>
               ) : (
                 <div className="bg-surface-container-lowest border border-outline-variant p-4 rounded-xl">
-                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-2">Seleccione un Miembro</label>
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-2">Seleccione un Socio</label>
                   <select 
                     value={selectedUsuarioId}
                     onChange={(e) => setSelectedUsuarioId(e.target.value)}
                     className="w-full border border-outline-variant rounded-lg font-body-md bg-white focus:border-primary focus:ring-1 focus:ring-primary px-3 py-2 cursor-pointer outline-none"
                   >
-                    <option value="">-- Buscar Miembro --</option>
+                    <option value="">-- Buscar Socio --</option>
                     {usuarios.map(u => (
                       <option key={u.id} value={u.id}>{u.nombre_razonsocial} ({u.documento_identidad})</option>
                     ))}
                   </select>
                   <p className="text-xs text-on-surface-variant mt-3 flex items-center gap-1">
                     <span className="material-symbols-outlined text-[14px]">info</span>
-                    Se verificará que el miembro tenga una lectura registrada en este periodo.
+                    Se verificará que el socio tenga una lectura registrada en este periodo.
                   </p>
                 </div>
               )}
@@ -231,7 +231,7 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
               <div className="bg-secondary-container/30 border border-secondary/20 p-md rounded-lg flex items-start gap-3">
                 <span className="material-symbols-outlined text-secondary text-[20px]">info</span>
                 <p className="text-xs text-on-surface-variant leading-relaxed">
-                  <strong className="text-on-surface">Nota sobre multas:</strong> Si un miembro incurre en multas por manipulación o reconexión, estas deben agregarse de manera manual editando su recibo correspondiente después de haberlos generado.
+                  <strong className="text-on-surface">Nota sobre multas:</strong> Si un socio incurre en multas por manipulación o reconexión, estas deben agregarse de manera manual editando su recibo correspondiente después de haberlos generado.
                 </p>
               </div>
             </>

@@ -103,6 +103,59 @@ const Billing = () => {
     }
   };
 
+  const handleViewPdfV3 = async (id) => {
+    try {
+      const response = await api.get(`/recibos/${id}/pdf-v3`, { responseType: 'blob' });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      setPdfUrl(url);
+      setPdfId(id);
+      setIsPdfModalOpen(true);
+    } catch (error) {
+      toast.error('Error al cargar el PDF V3');
+    }
+  };
+
+  const handleWhatsApp = async (recibo) => {
+    if (!recibo.telefono) {
+      return toast.error('El socio no tiene un número de teléfono registrado.');
+    }
+    
+    // Formatear el número (quitar espacios, agregar prefijo +51 si no lo tiene)
+    let phone = recibo.telefono.replace(/\s+/g, '');
+    if (!phone.startsWith('+')) {
+      if (phone.length === 9) phone = '51' + phone; // Asumimos Perú
+    } else {
+      phone = phone.replace('+', '');
+    }
+
+    // Preparar el mensaje
+    const total = parseFloat(recibo.total).toLocaleString('en-US', { minimumFractionDigits: 2 });
+    const fechaVen = recibo.fecha_vencimiento ? new Date(recibo.fecha_vencimiento).toLocaleDateString('es-PE') : '-';
+    const text = `Hola *${recibo.socio}*, se ha generado tu recibo de luz del periodo *${recibo.periodo}*.\n\n*Total a pagar:* S/ ${total}\n*Vencimiento:* ${fechaVen}\n\nAdjunto tu recibo detallado en PDF. Gracias por tu pago puntual.`;
+    const encodedText = encodeURIComponent(text);
+    
+    // Descargar el PDF (V3 Premium) automáticamente para que el usuario pueda enviarlo
+    try {
+      toast.success('Descargando PDF para enviar por WhatsApp...', { duration: 2000 });
+      const response = await api.get(`/recibos/${recibo.id}/pdf-v3`, { responseType: 'blob' });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Recibo_${recibo.periodo}_${recibo.socio.replace(/\s+/g, '_')}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      toast.error('Error al descargar el PDF.');
+    }
+
+    // Abrir WhatsApp
+    window.open(`https://wa.me/${phone}?text=${encodedText}`, '_blank');
+  };
+
   const handleExportExcel = async () => {
     try {
       const params = {};
@@ -295,10 +348,10 @@ const Billing = () => {
       // 3. Tabla Principal con AutoTable
       autoTable(doc, {
         startY: 82,
-        head: [['N° Comprobante', 'Miembro', 'Documento', 'Periodo', 'Total', 'Vencimiento', 'Estado']],
+        head: [['N° Comprobante', 'Socio', 'Documento', 'Periodo', 'Total', 'Vencimiento', 'Estado']],
         body: filteredRecibos.map(r => [
           r.numero_comprobante || '-',
-          r.miembro || 'Desconocido',
+          r.socio || 'Desconocido',
           r.documento_identidad || '-',
           formatPeriod(r.periodo) || 'N/A',
           `S/ ${parseFloat(r.total || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
@@ -322,7 +375,7 @@ const Billing = () => {
           fillColor: [248, 250, 252] // Slate 50
         },
         columnStyles: {
-          1: { halign: 'left', fontStyle: 'bold', textColor: [31, 73, 125] }, // Miembro a la izquierda y destacado
+          1: { halign: 'left', fontStyle: 'bold', textColor: [31, 73, 125] }, // Socio a la izquierda y destacado
           4: { fontStyle: 'bold' } // Total en negrita
         },
         didParseCell: function (data) {
@@ -413,11 +466,11 @@ const Billing = () => {
 
   const pendientes = statsRecibos.filter(r => r.estado === 'Pendiente' || r.estado === 'Pago Parcial');
   const pendienteCobro = pendientes.reduce((acc, r) => acc + parseFloat(r.saldo_pendiente !== undefined ? r.saldo_pendiente : r.total || 0), 0);
-  const usuariosPendientes = new Set(pendientes.map(r => r.usuario_id || r.miembro)).size;
+  const usuariosPendientes = new Set(pendientes.map(r => r.usuario_id || r.socio)).size;
 
   const vencidos = statsRecibos.filter(r => r.estado === 'Vencido');
   const deudaVencida = vencidos.reduce((acc, r) => acc + parseFloat(r.saldo_pendiente !== undefined ? r.saldo_pendiente : r.total || 0), 0);
-  const usuariosVencidos = new Set(vencidos.map(r => r.usuario_id || r.miembro)).size;
+  const usuariosVencidos = new Set(vencidos.map(r => r.usuario_id || r.socio)).size;
 
   // Lógica de Paginación
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -575,7 +628,7 @@ const Billing = () => {
         </div>
       </div>
 
-      {/* Miembros Table Area */}
+      {/* Socios Table Area */}
       <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-md">
         {/* Cabecera Principal */}
         <div className="px-md lg:px-lg py-md border-b border-outline-variant flex flex-col xl:flex-row justify-between items-start xl:items-center gap-md bg-surface-container-low">
@@ -588,7 +641,7 @@ const Billing = () => {
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
               <input
                 type="text"
-                placeholder="Buscar miembro o doc..."
+                placeholder="Buscar socio o doc..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-9 pr-4 py-2 border border-outline-variant rounded-lg text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none bg-white w-full md:w-64 transition-all h-[38px]"
@@ -700,7 +753,7 @@ const Billing = () => {
                         onClick={() => setDrawerReceiptId(recibo.id)}
                         className="font-body-sm text-body-sm font-bold text-primary hover:text-primary-container hover:underline transition-colors flex items-center gap-1 text-left relative group/tooltip"
                       >
-                        {recibo.miembro || 'Desconocido'}
+                        {recibo.socio || 'Desconocido'}
                         <span className="material-symbols-outlined text-[16px] opacity-0 group-hover/name:opacity-100 transition-opacity">open_in_new</span>
                         
                         {/* Custom Tooltip */}
@@ -747,6 +800,22 @@ const Billing = () => {
                         >
                           <span className="material-symbols-outlined text-[16px]">description</span>
                           PDF v2
+                        </button>
+                        <button
+                          onClick={() => handleViewPdfV3(recibo.id)}
+                          className="text-teal-600 hover:bg-teal-100 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 transition-colors"
+                          title="Ver PDF V3 Premium"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">verified</span>
+                          V3
+                        </button>
+                        <button
+                          onClick={() => handleWhatsApp(recibo)}
+                          className="text-[#25D366] hover:bg-[#25D366]/10 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 transition-colors"
+                          title="Enviar por WhatsApp"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">chat</span>
+                          WhatsApp
                         </button>
                       </div>
                     </td>

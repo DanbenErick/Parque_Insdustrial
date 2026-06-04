@@ -184,7 +184,7 @@ const TenantsAndSectors = () => {
     }
 
     if (!editId && (!formData.medidores || formData.medidores.length === 0 || !formData.medidores[0].num_serie)) {
-      return toast.error("El número de serie del medidor es obligatorio para nuevos miembros.");
+      return toast.error("El número de serie del medidor es obligatorio para nuevos socios.");
     }
 
     if (formData.documento_identidad.length !== 8 && formData.documento_identidad.length !== 11) {
@@ -381,7 +381,7 @@ const TenantsAndSectors = () => {
       doc.setFontSize(11);
       doc.setTextColor(100, 116, 139); // slate-500
       doc.setFont("helvetica", "normal");
-      doc.text('Directorio Oficial de Miembros y Propietarios', titleStartX, 26);
+      doc.text('Directorio Oficial de Socios y Propietarios', titleStartX, 26);
 
       // Fecha y Datos de Cabecera (Alineados a la derecha)
       doc.setFontSize(9);
@@ -465,7 +465,7 @@ const TenantsAndSectors = () => {
     <main className={`p-4 md:p-xl space-y-6 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow transition-opacity duration-300 ${isLoading && tenants.length === 0 ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
         <div>
-          <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold">Directorio de Miembros y Conexiones</h2>
+          <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold">Directorio de Socios y Conexiones</h2>
           <p className="font-body-md text-body-md text-on-surface-variant">Gestión de propietarios de predios, conexiones eléctricas y estado de suministro.</p>
         </div>
         <div className="flex flex-wrap gap-md">
@@ -475,7 +475,7 @@ const TenantsAndSectors = () => {
               className="flex items-center gap-xs px-md py-sm bg-primary text-on-primary font-semibold rounded-md hover:opacity-90 transition-all shadow-md h-[42px]"
             >
               <span className="material-symbols-outlined text-sm">add</span>
-              <span className="font-bold text-body-sm">Registrar Miembro</span>
+              <span className="font-bold text-body-sm">Registrar Socio</span>
             </button>
           </div>
         </div>
@@ -483,10 +483,10 @@ const TenantsAndSectors = () => {
 
       {/* KPI Cards Section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
-        {/* KPI 1: Total Miembros */}
+        {/* KPI 1: Total Socios */}
         <div className="bg-white border border-outline-variant rounded-xl p-md shadow-sm flex items-center justify-between transition-transform hover:-translate-y-0.5 duration-200">
           <div className="space-y-1">
-            <p className="font-label-caps text-label-caps text-on-surface-variant uppercase">Total de Miembros</p>
+            <p className="font-label-caps text-label-caps text-on-surface-variant uppercase">Total de Socios</p>
             <h3 className="font-data-mono text-headline-md text-on-surface font-bold">{globalStats.total}</h3>
             <p className="text-[11px] text-on-surface-variant">Propietarios empadronados</p>
           </div>
@@ -532,7 +532,7 @@ const TenantsAndSectors = () => {
             <div className="relative flex-grow md:flex-grow-0">
               <input
                 type="text"
-                placeholder="Buscar miembro..."
+                placeholder="Buscar socio..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearchClick()}
@@ -701,7 +701,7 @@ const TenantsAndSectors = () => {
                       <button 
                         onClick={() => handleOpenEdit(tenant)}
                         className="p-2 rounded-lg transition-colors text-blue-600 hover:bg-blue-50"
-                        title="Editar Miembro"
+                        title="Editar Socio"
                       >
                         <span className="material-symbols-outlined text-[20px]">edit</span>
                       </button>
@@ -718,7 +718,7 @@ const TenantsAndSectors = () => {
               ))}
               {filteredTenants.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="px-lg py-xl text-center text-on-surface-variant">No se encontraron miembros registrados.</td>
+                  <td colSpan="6" className="px-lg py-xl text-center text-on-surface-variant">No se encontraron socios registrados.</td>
                 </tr>
               )}
             </tbody>
@@ -778,7 +778,7 @@ const TenantsAndSectors = () => {
         </div>
       )}
 
-      {/* Nuevo Miembro Modal */}
+      {/* Nuevo Socio Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
           <div className="bg-surface-container-lowest w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden border border-outline-variant flex flex-col max-h-[90vh]">
@@ -923,7 +923,7 @@ const TenantsAndSectors = () => {
                         </div>
                       ))}
                     </div>
-                    <p className="text-[11px] text-on-surface-variant mt-xs italic">{editId ? 'Puede actualizar, eliminar o asignar medidores a este miembro.' : 'El registro de al menos un medidor es obligatorio al crear un nuevo miembro.'}</p>
+                    <p className="text-[11px] text-on-surface-variant mt-xs italic">{editId ? 'Puede actualizar, eliminar o asignar medidores a este socio.' : 'El registro de al menos un medidor es obligatorio al crear un nuevo socio.'}</p>
                   </div>
                 </>
               </form>
@@ -1048,7 +1048,7 @@ const TenantsAndSectors = () => {
         </div>
       )}
 
-      {/* Drawer del Expediente del Miembro */}
+      {/* Drawer del Expediente del Socio */}
       <AnimatePresence>
         {drawerTenant && (
           <>

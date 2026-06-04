@@ -58,7 +58,7 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
 
   // 1. Data calculations for "Todos" (All members)
   const tableData = filteredLecturas.map(l => {
-    const matchingRecibo = filteredRecibos.find(r => r.miembro === l.propietario);
+    const matchingRecibo = filteredRecibos.find(r => r.socio === l.propietario);
     const total = matchingRecibo ? parseFloat(matchingRecibo.total) || 0 : 0;
     const neto = total / 1.18;
     const igv = total - neto;
@@ -166,7 +166,7 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
 
   // 2. Data calculations for specific member
   const currentLectura = filteredLecturas.find(l => l.propietario === selectedMember);
-  const currentRecibo = filteredRecibos.find(r => r.miembro === selectedMember);
+  const currentRecibo = filteredRecibos.find(r => r.socio === selectedMember);
   const memberConsumo = currentLectura ? parseFloat(currentLectura.consumo_calculado) || 0 : 0;
   const memberTotal = currentRecibo ? parseFloat(currentRecibo.total) || 0 : 0;
   const memberEstado = currentRecibo ? currentRecibo.estado : 'Pendiente';
@@ -235,18 +235,18 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
   return (
     <div className="space-y-lg animate-in fade-in duration-300">
       
-      {/* Selector de Miembro Buscable */}
+      {/* Selector de Socio Buscable */}
       <div className="bg-white border border-outline-variant rounded-lg p-md flex flex-col md:flex-row md:items-center justify-between gap-md shadow-sm relative z-50">
         <div className="flex-grow max-w-md space-y-xs relative">
-          <label className="font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant font-bold">Seleccionar Miembro / Propietario</label>
+          <label className="font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant font-bold">Seleccionar Socio / Propietario</label>
           <div className="relative">
             {/* Input Trigger */}
             <div className="relative">
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">corporate_fare</span>
               <input
                 type="text"
-                placeholder="Buscar miembro..."
-                value={isOpen ? searchQuery : (selectedMember === 'Todos' ? 'Ver Todos los Miembros' : selectedMember)}
+                placeholder="Buscar socio..."
+                value={isOpen ? searchQuery : (selectedMember === 'Todos' ? 'Ver Todos los Socios' : selectedMember)}
                 onChange={(e) => {
                   setSearchQuery(e.target.value);
                   setIsOpen(true);
@@ -280,7 +280,7 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
                     className={`px-md py-2.5 hover:bg-primary/5 cursor-pointer text-sm font-semibold transition-colors flex items-center gap-xs ${selectedMember === 'Todos' ? 'bg-primary/10 text-primary' : 'text-on-surface'}`}
                   >
                     <span className="material-symbols-outlined text-[16px]">group</span>
-                    Ver Todos los Miembros
+                    Ver Todos los Socios
                   </div>
                   {filteredMembersList.map(m => (
                     <div 
@@ -300,7 +300,7 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
                   ))}
                   {filteredMembersList.length === 0 && (
                     <div className="px-md py-3 text-center text-xs text-on-surface-variant italic">
-                      No se encontraron miembros
+                      No se encontraron socios
                     </div>
                   )}
                 </div>
@@ -323,7 +323,7 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
             {/* Bar Chart: Comparative Consumption */}
             <div className="lg:col-span-2 bg-white border border-outline-variant rounded-lg p-md flex flex-col h-[360px] shadow-sm">
               <div className="mb-md">
-                <h4 className="font-headline-sm text-headline-sm font-bold text-on-surface">Comparativa de Consumo por Miembro</h4>
+                <h4 className="font-headline-sm text-headline-sm font-bold text-on-surface">Comparativa de Consumo por Socio</h4>
                 <p className="text-body-sm text-on-surface-variant">Top Consumidores del mes (kWh)</p>
               </div>
               <div className="flex-grow relative">
@@ -360,14 +360,14 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
           {/* Detailed Table */}
           <div className="bg-white border border-outline-variant rounded-lg overflow-hidden shadow-sm">
             <div className="p-md border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
-              <h4 className="font-headline-sm text-headline-sm font-bold text-on-surface">Desglose de Facturación por Miembro</h4>
-              <span className="text-body-sm text-on-surface-variant font-medium">Mostrando {tableData.length} miembros</span>
+              <h4 className="font-headline-sm text-headline-sm font-bold text-on-surface">Desglose de Facturación por Socio</h4>
+              <span className="text-body-sm text-on-surface-variant font-medium">Mostrando {tableData.length} socios</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-left zebra-table border-collapse">
                 <thead>
                   <tr className="bg-surface-container-low text-on-surface-variant font-label-caps text-[11px] uppercase tracking-wider border-b border-outline-variant">
-                    <th className="px-lg py-3 text-xs font-bold">Miembro / Propietario</th>
+                    <th className="px-lg py-3 text-xs font-bold">Socio / Propietario</th>
                     <th className="px-lg py-3 text-xs font-bold text-right">Consumo (kWh)</th>
                     <th className="px-lg py-3 text-xs font-bold text-right">Monto Neto (S/)</th>
                     <th className="px-lg py-3 text-xs font-bold text-right">IGV (18%)</th>
@@ -477,7 +477,7 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
               </div>
               <div className="space-y-sm flex-grow overflow-y-auto pr-xs custom-scrollbar">
                 {memberLecturas.map(l => {
-                  const matchingRec = recibos.find(r => r.miembro === selectedMember && (r.periodo === l.periodo || r.mes_anio === l.periodo));
+                  const matchingRec = recibos.find(r => r.socio === selectedMember && (r.periodo === l.periodo || r.mes_anio === l.periodo));
                   const total = matchingRec ? parseFloat(matchingRec.total) || 0 : 0;
                   const estado = matchingRec ? matchingRec.estado : 'Pendiente';
                   return (
@@ -521,7 +521,7 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
                 </thead>
                 <tbody className="text-sm divide-y divide-outline-variant">
                   {memberLecturas.map(l => {
-                    const matchingRec = recibos.find(r => r.miembro === selectedMember && (r.periodo === l.periodo || r.mes_anio === l.periodo));
+                    const matchingRec = recibos.find(r => r.socio === selectedMember && (r.periodo === l.periodo || r.mes_anio === l.periodo));
                     const total = matchingRec ? parseFloat(matchingRec.total) || 0 : 0;
                     const estado = matchingRec ? matchingRec.estado : 'Pendiente';
                     return (

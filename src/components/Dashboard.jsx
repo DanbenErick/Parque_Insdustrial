@@ -636,7 +636,7 @@ const Dashboard = () => {
             { view: 'manual_billing', name: 'Registrar Lectura', icon: 'edit_document', color: 'bg-primary/10 text-primary hover:bg-primary hover:text-on-primary' },
             { view: 'billing', name: 'Facturación', icon: 'receipt_long', color: 'bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41] hover:text-white' },
             { view: 'payments', name: 'Pagos Recibidos', icon: 'payments', color: 'bg-[#FFB300]/15 text-[#F57F17] hover:bg-[#F57F17] hover:text-white' },
-            { view: 'tenants', name: 'Directorio Miembros', icon: 'factory', color: 'bg-secondary-container text-on-secondary-container hover:bg-secondary hover:text-on-secondary' }
+            { view: 'tenants', name: 'Directorio Socios', icon: 'factory', color: 'bg-secondary-container text-on-secondary-container hover:bg-secondary hover:text-on-secondary' }
           ].map((item, idx) => (
             <button
               key={idx}

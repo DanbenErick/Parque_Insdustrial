@@ -31,7 +31,7 @@ const Settings = () => {
   const [notifications, setNotifications] = useState({
     pagos: true,
     facturas: true,
-    miembros: false,
+    socios: false,
     reportes: true
   });
 
@@ -371,7 +371,7 @@ const Settings = () => {
                     <div className="p-md flex items-center justify-between hover:bg-surface-container-lowest" onClick={() => toggleNotification('pagos')}>
                       <div>
                         <p className="font-bold text-on-surface text-sm">Vencimiento de Pagos</p>
-                        <p className="text-xs text-on-surface-variant mt-1">Mostrar alertas cuando un miembro tenga retraso.</p>
+                        <p className="text-xs text-on-surface-variant mt-1">Mostrar alertas cuando un socio tenga retraso.</p>
                       </div>
                       <div className={`w-10 h-6 rounded-full relative cursor-pointer shadow-inner transition-colors ${notifications.pagos ? 'bg-primary' : 'bg-surface-container-high'}`}>
                         <div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow-sm transition-all ${notifications.pagos ? 'right-1' : 'left-1'}`}></div>
@@ -388,13 +388,13 @@ const Settings = () => {
                       </div>
                     </div>
 
-                    <div className="p-md flex items-center justify-between hover:bg-surface-container-lowest" onClick={() => toggleNotification('miembros')}>
+                    <div className="p-md flex items-center justify-between hover:bg-surface-container-lowest" onClick={() => toggleNotification('socios')}>
                       <div>
-                        <p className="font-bold text-on-surface text-sm">Nuevos Miembros Registrados</p>
+                        <p className="font-bold text-on-surface text-sm">Nuevos Socios Registrados</p>
                         <p className="text-xs text-on-surface-variant mt-1">Notificar cuando un operador registre una nueva empresa.</p>
                       </div>
-                      <div className={`w-10 h-6 rounded-full relative cursor-pointer shadow-inner transition-colors ${notifications.miembros ? 'bg-primary' : 'bg-surface-container-high'}`}>
-                        <div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow-sm transition-all ${notifications.miembros ? 'right-1' : 'left-1'}`}></div>
+                      <div className={`w-10 h-6 rounded-full relative cursor-pointer shadow-inner transition-colors ${notifications.socios ? 'bg-primary' : 'bg-surface-container-high'}`}>
+                        <div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow-sm transition-all ${notifications.socios ? 'right-1' : 'left-1'}`}></div>
                       </div>
                     </div>
 

@@ -26,6 +26,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
   // Form State
   const [mes, setMes] = useState('01');
   const [tarifaKwh, setTarifaKwh] = useState('');
+  const [tarifaKwhPunta, setTarifaKwhPunta] = useState('');
   const [tarifaMantenimientoNormal, setTarifaMantenimientoNormal] = useState('');
   const [tarifaMantenimientoTiempoReal, setTarifaMantenimientoTiempoReal] = useState('');
   const [factorMultiplicador, setFactorMultiplicador] = useState('1.0000');
@@ -42,6 +43,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
         const m = parts[0].length === 4 ? parts[1] : parts[0];
         setMes(m);
         setTarifaKwh(initialData.tarifa_kwh);
+        setTarifaKwhPunta(initialData.tarifa_kwh_punta || '');
         setTarifaMantenimientoNormal(initialData.tarifa_mantenimiento_normal);
         setTarifaMantenimientoTiempoReal(initialData.tarifa_mantenimiento_tiempo_real);
         setFactorMultiplicador(initialData.factor_multiplicador || '1.0000');
@@ -59,6 +61,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
 
         setMes(initialMes);
         setTarifaKwh('');
+        setTarifaKwhPunta('');
         setTarifaMantenimientoNormal('');
         setTarifaMantenimientoTiempoReal('');
         setFactorMultiplicador('1.0000');
@@ -94,6 +97,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
     const payload = {
       mes_anio: `${activeYear}-${mes}`,
       tarifa_kwh: parseFloat(tarifaKwh),
+      tarifa_kwh_punta: tarifaKwhPunta ? parseFloat(tarifaKwhPunta) : 0,
       tarifa_mantenimiento_normal: parseFloat(tarifaMantenimientoNormal),
       tarifa_mantenimiento_tiempo_real: parseFloat(tarifaMantenimientoTiempoReal),
       factor_multiplicador: parseFloat(factorMultiplicador),
@@ -181,6 +185,20 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                   required
                   value={tarifaKwh}
                   onChange={(e) => setTarifaKwh(e.target.value)}
+                  placeholder="0.00" 
+                  className="w-full bg-white border border-primary/30 rounded-lg pl-8 pr-3 py-2 text-base font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-inner"
+                />
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <label className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">Tarifa Punta (S/ por kWh)</label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">S/</span>
+                <input 
+                  type="number" 
+                  step="0.0001"
+                  value={tarifaKwhPunta}
+                  onChange={(e) => setTarifaKwhPunta(e.target.value)}
                   placeholder="0.00" 
                   className="w-full bg-white border border-primary/30 rounded-lg pl-8 pr-3 py-2 text-base font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-inner"
                 />

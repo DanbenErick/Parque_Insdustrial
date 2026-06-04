@@ -337,7 +337,7 @@ const Reports = () => {
 
   // Group detailed table rows
   const memberData = filteredLecturas.map(l => {
-    const matchingRecibo = filteredRecibos.find(r => r.miembro === l.propietario);
+    const matchingRecibo = filteredRecibos.find(r => r.socio === l.propietario);
     return {
       id: l.id,
       propietario: l.propietario,
@@ -941,7 +941,7 @@ const Reports = () => {
                 <div className="relative w-full sm:w-64">
                   <input
                     type="text"
-                    placeholder="Buscar miembro o dirección..."
+                    placeholder="Buscar socio o dirección..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="w-full bg-surface border border-outline-variant rounded-full pl-9 pr-4 py-1.5 text-body-sm text-on-surface focus:border-primary outline-none transition-all"
@@ -973,7 +973,7 @@ const Reports = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-surface-container-low border-b border-outline-variant">
-                    <th className="px-lg py-3 text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider text-xs font-bold">Miembro / Propietario</th>
+                    <th className="px-lg py-3 text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider text-xs font-bold">Socio / Propietario</th>
                     <th className="px-lg py-3 text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider text-xs font-bold">Dirección</th>
                     <th className="px-lg py-3 text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider text-xs font-bold text-right">L. Anterior</th>
                     <th className="px-lg py-3 text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider text-xs font-bold text-right">L. Actual</th>

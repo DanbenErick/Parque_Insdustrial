@@ -31,7 +31,7 @@ const Payments = () => {
   const [numeroOperacion, setNumeroOperacion] = useState('');
   
   // Autocomplete state
-  const [searchMiembro, setSearchMiembro] = useState('');
+  const [searchSocio, setSearchSocio] = useState('');
   const [isAutocompleteOpen, setIsAutocompleteOpen] = useState(false);
 
   const fetchData = async () => {
@@ -99,7 +99,7 @@ const Payments = () => {
   const totalFacturas = allRecibos.length;
 
   const filteredPagos = pagos.filter(pago => 
-    pago.miembro?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    pago.socio?.toLowerCase().includes(searchTerm.toLowerCase()) || 
     pago.numero_comprobante?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -119,9 +119,9 @@ const Payments = () => {
     }
   };
 
-  const handleSelectMiembro = (recibo) => {
+  const handleSelectSocio = (recibo) => {
     setSelectedRecibo(recibo.id);
-    setSearchMiembro(recibo.miembro);
+    setSearchSocio(recibo.socio);
     setMonto(parseFloat(recibo.saldo_pendiente || recibo.total).toFixed(2));
     setIsAutocompleteOpen(false);
   };
@@ -131,11 +131,11 @@ const Payments = () => {
   const isPagoParcial = monto && parseFloat(monto) < saldoPendiente - 0.02;
   const isPagoExcedido = monto && parseFloat(monto) > saldoPendiente + 0.02;
 
-  const filteredMiembros = searchMiembro === '*' 
+  const filteredSocios = searchSocio === '*' 
     ? recibosPendientes
     : recibosPendientes.filter(r => 
-        r.miembro.toLowerCase().includes(searchMiembro.toLowerCase()) || 
-        r.numero_comprobante.toLowerCase().includes(searchMiembro.toLowerCase())
+        r.socio.toLowerCase().includes(searchSocio.toLowerCase()) || 
+        r.numero_comprobante.toLowerCase().includes(searchSocio.toLowerCase())
       );
 
   const handleRegistrarPago = async (e) => {
@@ -156,7 +156,7 @@ const Payments = () => {
       setIsModalOpen(false);
       // Reset form
       setSelectedRecibo('');
-      setSearchMiembro('');
+      setSearchSocio('');
       setMonto('');
       setMetodoPago('Transferencia');
       setNumeroOperacion('');
@@ -289,9 +289,9 @@ const Payments = () => {
       // Configuración de la tabla super compacta
       autoTable(doc, {
         startY: 30,
-        head: [['MIEMBRO', 'Nº RECIBO', 'FECHA PAGO', 'MÉTODO', 'MONTO (S/)']],
+        head: [['SOCIO', 'Nº RECIBO', 'FECHA PAGO', 'MÉTODO', 'MONTO (S/)']],
         body: filteredPagos.map(p => [
-          p.miembro || 'Desconocido',
+          p.socio || 'Desconocido',
           p.numero_comprobante || '-',
           new Date(p.fecha_pago).toLocaleDateString('es-PE'),
           p.metodo_pago + (p.numero_operacion ? ` (${p.numero_operacion})` : ''),
@@ -468,7 +468,7 @@ const Payments = () => {
               <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
               <input
                 type="text"
-                placeholder="Buscar por miembro o recibo..."
+                placeholder="Buscar por socio o recibo..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 border border-outline-variant rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-64 bg-white transition-all"
@@ -495,7 +495,7 @@ const Payments = () => {
           <table className="w-full text-left border-collapse zebra-table">
             <thead className="bg-surface-container-low border-b border-outline-variant">
               <tr>
-                <th className="px-md py-3 text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider">Miembro</th>
+                <th className="px-md py-3 text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider">Socio</th>
                 <th className="px-md py-3 text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider">Fecha Pago</th>
                 <th className="px-md py-3 text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider">Método</th>
                 <th className="px-md py-3 text-label-caps font-label-caps text-on-surface-variant uppercase tracking-wider text-right">Monto (PEN)</th>
@@ -520,7 +520,7 @@ const Payments = () => {
                         className="font-bold text-primary hover:text-primary-dark hover:underline focus:outline-none text-sm text-left transition-colors"
                         title="Ver Detalles del Pago"
                       >
-                        {pago.miembro}
+                        {pago.socio}
                       </button>
                     </td>
                     <td className="px-md py-3 text-sm text-on-surface-variant">
@@ -600,16 +600,16 @@ const Payments = () => {
                 
                 {/* Recibo Pendiente (Autocomplete) */}
                 <div className="bg-surface-container-lowest border border-outline-variant p-4 rounded-xl">
-                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-2">Miembro o Recibo <span className="text-error">*</span></label>
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-2">Socio o Recibo <span className="text-error">*</span></label>
                   <div className="relative">
                     <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
                     <input 
                       type="text"
                       className="w-full border border-outline-variant rounded-lg font-body-md bg-white focus:border-primary focus:ring-1 focus:ring-primary pl-9 pr-3 py-2.5 outline-none transition-colors hover:border-primary/50"
                       placeholder="Buscar por nombre o N° recibo..."
-                      value={searchMiembro}
+                      value={searchSocio}
                       onChange={(e) => {
-                        setSearchMiembro(e.target.value);
+                        setSearchSocio(e.target.value);
                         setSelectedRecibo(''); // Reseteamos si vuelve a escribir
                         setMonto('');
                         setIsAutocompleteOpen(true);
@@ -618,19 +618,19 @@ const Payments = () => {
                     />
                     
                     {/* Dropdown de Autocomplete */}
-                    {isAutocompleteOpen && searchMiembro && !selectedRecibo && (
+                    {isAutocompleteOpen && searchSocio && !selectedRecibo && (
                       <div className="absolute z-10 w-full mt-1 bg-surface border border-outline-variant rounded-lg shadow-xl max-h-60 overflow-y-auto custom-scrollbar">
-                        {filteredMiembros.length === 0 ? (
+                        {filteredSocios.length === 0 ? (
                           <div className="p-3 text-sm text-on-surface-variant text-center">No se encontraron recibos pendientes</div>
                         ) : (
-                          filteredMiembros.map(r => (
+                          filteredSocios.map(r => (
                             <button
                               key={r.id}
                               type="button"
-                              onClick={() => handleSelectMiembro(r)}
+                              onClick={() => handleSelectSocio(r)}
                               className="w-full text-left px-4 py-3 hover:bg-surface-container-low border-b border-outline-variant/50 last:border-0 transition-colors flex flex-col"
                             >
-                              <span className="font-bold text-sm text-on-surface">{r.miembro}</span>
+                              <span className="font-bold text-sm text-on-surface">{r.socio}</span>
                               <div className="flex justify-between items-center mt-1">
                                 <span className="text-xs text-on-surface-variant flex items-center gap-1">
                                   <span className="material-symbols-outlined text-[14px]">receipt_long</span>
@@ -838,11 +838,11 @@ const Payments = () => {
                 </div>
               </div>
 
-              {/* Miembro Info */}
+              {/* Socio Info */}
               <div>
                 <h4 className="text-label-caps font-bold text-on-surface-variant uppercase tracking-wider mb-sm">Información del Cliente</h4>
                 <div className="bg-white border border-outline-variant rounded-xl p-md">
-                  <div className="font-bold text-on-surface">{selectedPaymentForDetails.miembro}</div>
+                  <div className="font-bold text-on-surface">{selectedPaymentForDetails.socio}</div>
                   <div className="text-sm text-on-surface-variant mt-1 flex items-center gap-1">
                     <span className="material-symbols-outlined text-[16px]">folder</span>
                     Recibo Asociado: <span className="font-data-mono font-bold">{selectedPaymentForDetails.numero_comprobante}</span>

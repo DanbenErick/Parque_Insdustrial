@@ -14,12 +14,12 @@ const Support = () => {
     {
       id: 2,
       question: "¿Cómo se calculan las tarifas de mantenimiento?",
-      answer: "La tarifa de mantenimiento se calcula automáticamente basándose en los parámetros registrados para cada manzana industrial en el panel de Miembros y Conexiones."
+      answer: "La tarifa de mantenimiento se calcula automáticamente basándose en los parámetros registrados para cada manzana industrial en el panel de Socios y Conexiones."
     },
     {
       id: 3,
       question: "¿Es posible cambiar la fecha de vencimiento de un recibo?",
-      answer: "Sí, durante el proceso de 'Generar Facturas', antes de confirmar, puedes ajustar manualmente la fecha de vencimiento general o editando el registro individual del miembro."
+      answer: "Sí, durante el proceso de 'Generar Facturas', antes de confirmar, puedes ajustar manualmente la fecha de vencimiento general o editando el registro individual del socio."
     },
     {
       id: 4,

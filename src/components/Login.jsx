@@ -103,7 +103,7 @@ const Login = () => {
                 onClick={() => setSelectedRole('Member')}
               >
                 <span className="material-symbols-outlined text-[18px]">person</span>
-                Miembro
+                Socio
               </button>
             </div>
 
