@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axiosConfig';
 import PeriodosSettingsTab from './PeriodosSettingsTab';
+import CargosSettingsTab from './CargosSettingsTab';
 
 const Settings = () => {
   const { user } = useAuth();
@@ -412,56 +413,7 @@ const Settings = () => {
               )}
 
               {activeTab === 'tarifas' && (
-                <div className="animate-in fade-in space-y-xl">
-                  <div>
-                    <h3 className="font-headline-sm font-bold text-on-surface mb-xs">Tarifas y Cobros Especiales</h3>
-                    <p className="text-sm text-on-surface-variant mb-lg">Ajusta los montos base automáticos que se cobrarán por defectos o infracciones.</p>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
-                    <div className="bg-surface-container-low border border-outline-variant rounded-xl p-lg flex flex-col gap-4 shadow-sm">
-                      <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center text-primary">
-                        <span className="material-symbols-outlined text-[24px]">build</span>
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-on-surface text-lg">Costo de Instalación de Medidor</h4>
-                        <p className="text-sm text-on-surface-variant mt-1">
-                          Este monto se aplicará <strong>automáticamente</strong> al recibo de un cliente la primera vez que se registre en el sistema.
-                        </p>
-                      </div>
-                      <div className="relative mt-2">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">S/</span>
-                        <input 
-                          type="number" step="0.01" min="0"
-                          value={tarifas.monto_instalacion_base}
-                          onChange={(e) => setTarifas({...tarifas, monto_instalacion_base: e.target.value})}
-                          className="w-full bg-white border-2 border-primary/20 rounded-xl pl-10 pr-4 py-3 text-xl font-data-mono font-bold text-primary focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="bg-surface-container-low border border-outline-variant rounded-xl p-lg flex flex-col gap-4 shadow-sm">
-                      <div className="w-12 h-12 bg-error/10 rounded-full flex items-center justify-center text-error">
-                        <span className="material-symbols-outlined text-[24px]">gavel</span>
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-on-surface text-lg">Multa Estándar por Infracción</h4>
-                        <p className="text-sm text-on-surface-variant mt-1">
-                          Este monto aparecerá como "Multa Estándar" para que puedas aplicarlo rápidamente con un clic al editar un recibo.
-                        </p>
-                      </div>
-                      <div className="relative mt-2">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">S/</span>
-                        <input 
-                          type="number" step="0.01" min="0"
-                          value={tarifas.monto_multa_base}
-                          onChange={(e) => setTarifas({...tarifas, monto_multa_base: e.target.value})}
-                          className="w-full bg-white border-2 border-error/20 rounded-xl pl-10 pr-4 py-3 text-xl font-data-mono font-bold text-error focus:border-error focus:ring-4 focus:ring-error/10 outline-none transition-all"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <CargosSettingsTab />
               )}
 
               {activeTab === 'periodos' && (

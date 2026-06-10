@@ -47,10 +47,12 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
   
   const [tarifasGlobales, setTarifasGlobales] = useState({ monto_multa_base: 50 });
   const [tipoMulta, setTipoMulta] = useState('ninguna'); // ninguna, estandar, personalizada
+  const [availableCargosDinamicos, setAvailableCargosDinamicos] = useState([]);
+  const [selectedCargosDinamicos, setSelectedCargosDinamicos] = useState([]);
 
   useEffect(() => {
     if (!id) {
-      setIsLoading(false);
+      setTimeout(() => setIsLoading(false), 0);
       return;
     }
 
@@ -87,6 +89,15 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
             setTipoMulta('personalizada');
           }
         }
+        
+        // Fetch dynamic cargos and merge with already applied ones
+        try {
+          const catRes = await api.get(`/catalogo-cargos/periodo/${r.periodo_id}`);
+          setAvailableCargosDinamicos(catRes.data || []);
+          setSelectedCargosDinamicos(r.cargos_dinamicos || []);
+        } catch(e) {
+          console.error("Error fetching catalogo cargos", e);
+        }
       } catch (err) {
         console.error('Error fetching receipt detail:', err);
         toast.error('Error al cargar el detalle del recibo');
@@ -116,7 +127,8 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
       link.remove();
       window.URL.revokeObjectURL(url);
       toast.success('PDF descargado exitosamente');
-    } catch (error) {
+    } catch (err) {
+      console.error(err);
       toast.error('Error al descargar el PDF');
     }
   };
@@ -130,17 +142,18 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
     setIsSaving(true);
     try {
       // Ajustar la multa antes de guardar según el tipo seleccionado
-      let payload = { ...cargos };
+      let payload = { ...cargos, cargos_dinamicos: selectedCargosDinamicos };
       if (tipoMulta === 'ninguna') payload.multa_manipulacion = 0;
       else if (tipoMulta === 'estandar') payload.multa_manipulacion = tarifasGlobales.monto_multa_base;
       
-      const res = await api.put(`/recibos/${id}/cargos`, payload);
+      await api.put(`/recibos/${id}/cargos`, payload);
       toast.success('Cargos y descuentos actualizados');
       setIsEditModalOpen(false);
       // Reload receipt data
       const resData = await api.get(`/recibos/${id}`);
       setRecibo(resData.data.recibo);
-    } catch (error) {
+    } catch (err) {
+      console.error(err);
       toast.error('Error al actualizar cargos');
     } finally {
       setIsSaving(false);
@@ -185,36 +198,10 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
   );
 
   // Helpers
-  const formatDayMonth = (dateStr) => {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    const day = String(d.getUTCDate()).padStart(2, '0');
-    const month = String(d.getUTCMonth() + 1).padStart(2, '0');
-    return `${day}/${month}`;
-  };
 
   const renderContent = () => {
     if (isLoading) return renderLoading();
     if (!id || !recibo) return renderError();
-
-    const totalMantenimiento = parseFloat(recibo.cargo_mantenimiento || 0);
-    let cargoFijo = 0;
-    let mantenimientoRed = 0;
-    let alumbrado = 0;
-
-    if (totalMantenimiento >= 229.50) {
-      cargoFijo = 45.00;
-      alumbrado = 2.50;
-      mantenimientoRed = totalMantenimiento - cargoFijo - alumbrado;
-    } else if (totalMantenimiento > 10) {
-      cargoFijo = Math.min(45.00, totalMantenimiento * 0.2);
-      alumbrado = Math.min(2.50, totalMantenimiento * 0.01);
-      mantenimientoRed = totalMantenimiento - cargoFijo - alumbrado;
-    } else {
-      cargoFijo = totalMantenimiento;
-      mantenimientoRed = 0;
-      alumbrado = 0;
-    }
 
     const currentConsumo = parseFloat(recibo.consumo_calculado || 0);
     let pctChangeText = '';
@@ -235,312 +222,286 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
     }
 
     return (
-      <div className="flex-grow flex flex-col relative bg-background w-full">
-      {/* TopAppBar inside content for layout consistency */}
-      <div className="flex justify-between items-center mb-lg p-xl pb-0 print:hidden">
-        <h2 className="font-headline-lg text-headline-lg text-primary font-bold">Detalle de Recibo</h2>
-      </div>
-
-      <div className="flex-grow overflow-y-auto p-xl pt-md pb-32 print:p-0 print:overflow-visible print:h-auto">
-        <div className="receipt-container space-y-lg max-w-6xl mx-auto">
-          {/* Actions Toolbar */}
-          <div className="flex justify-between items-center bg-white p-md rounded-xl border border-outline-variant shadow-sm print:hidden">
-            <button 
-              onClick={handleBack} 
-              className="flex items-center text-secondary hover:text-primary transition-colors font-label-caps text-[11px] uppercase tracking-widest font-bold"
-            >
-              <span className="material-symbols-outlined mr-xs">arrow_back</span> REGRESAR
-            </button>
-            <div className="flex gap-md">
+      <div className="flex-grow flex flex-col relative min-h-screen bg-slate-50 w-full overflow-hidden">
+      <div className="relative z-10 flex-grow overflow-y-auto p-4 md:p-8 pt-6 pb-32 print:p-0 print:overflow-visible print:h-auto">
+        <div className="space-y-6 max-w-6xl mx-auto">
+          {/* Header & Actions */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 print:hidden">
+            <div>
               <button 
-                onClick={handlePrint}
-                className="flex items-center px-md py-2 border border-outline-variant rounded-lg text-secondary hover:bg-surface-container-low transition-colors font-bold text-sm" 
+                onClick={handleBack} 
+                className="flex items-center text-slate-500 hover:text-slate-800 transition-colors mb-2 text-xs font-semibold uppercase tracking-wider"
               >
-                <span className="material-symbols-outlined mr-sm">print</span> Imprimir
+                <span className="material-symbols-outlined mr-1 text-[16px]">arrow_back</span>
+                VOLVER AL LISTADO
               </button>
+              <h2 className="text-2xl font-bold tracking-tight text-slate-800">Detalle de Recibo</h2>
+            </div>
+            
+            <div className="flex gap-3">
               {recibo.estado === 'Pendiente' && (
                 <button 
                   onClick={() => setIsEditModalOpen(true)}
-                  className="flex items-center px-md py-2 bg-secondary text-on-secondary rounded-lg hover:opacity-90 transition-all font-bold text-sm shadow-sm"
+                  className="flex items-center px-4 py-2 border border-blue-200 bg-blue-50 text-blue-700 rounded-md hover:bg-blue-100 transition-colors font-medium text-sm shadow-sm"
                 >
-                  <span className="material-symbols-outlined mr-sm">edit</span> Editar Multas / Cargos
+                  <span className="material-symbols-outlined mr-2 text-[18px]">edit</span> Editar
                 </button>
               )}
               <button 
                 onClick={handleDownloadPdf}
-                className="flex items-center px-md py-2 bg-primary text-on-primary rounded-lg hover:opacity-90 transition-all font-bold text-sm shadow-sm"
+                className="flex items-center px-4 py-2 bg-blue-700 text-white rounded-md hover:bg-blue-800 transition-colors font-medium text-sm shadow-sm"
               >
-                <span className="material-symbols-outlined mr-sm">picture_as_pdf</span> Descargar PDF
+                <span className="material-symbols-outlined mr-2 text-[18px]">picture_as_pdf</span> Descargar PDF
               </button>
             </div>
           </div>
 
-          {/* Receipt Document */}
-          <div className="bg-white border border-outline-variant shadow-sm rounded-lg overflow-hidden" id="receipt-document">
-            {/* Document Header */}
-            <div className="p-xl border-b border-outline-variant flex flex-col md:flex-row justify-between items-start gap-lg bg-surface-container-lowest">
-              <div className="space-y-sm w-full md:w-2/3">
-                <div className="flex items-center gap-md border-b border-outline-variant/50 pb-sm mb-md">
-                  <div className="w-12 h-12 bg-primary/10 flex items-center justify-center rounded-lg">
-                    <span className="material-symbols-outlined text-primary text-[28px]">factory</span>
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-on-surface text-sm uppercase tracking-wider">Parque Industrial Jicamarca S.A.</h3>
-                    <p className="text-[11px] text-on-surface-variant font-data-mono">RUC: 20456789123 | Emisor del Recibo</p>
-                  </div>
-                </div>
-                <div>
-                  <h4 className="font-label-caps text-[11px] tracking-wider text-primary font-bold flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">person</span>
-                    FACTURADO A:
-                  </h4>
-                  <p className="font-headline-md text-headline-md font-bold mt-1 text-on-surface">{recibo.nombre_razonsocial}</p>
-                  <div className="grid grid-cols-2 gap-x-xl gap-y-xs mt-sm bg-surface p-sm rounded-lg border border-outline-variant/30">
-                    <p className="text-body-sm text-on-surface-variant">RUC/DNI: <span className="text-on-surface font-bold font-data-mono">{recibo.documento_identidad}</span></p>
-                    <p className="text-body-sm text-on-surface-variant">Dirección: <span className="text-on-surface font-bold">{recibo.direccion || 'No registrada'}</span></p>
-                    <p className="text-body-sm text-on-surface-variant">Mes de Facturación: <span className="text-on-surface font-bold">{formatPeriodo(recibo.mes_anio)}</span></p>
-                    <p className="text-body-sm text-on-surface-variant">Vencimiento: <span className="text-on-surface font-bold">{recibo.fecha_vencimiento ? new Date(recibo.fecha_vencimiento).toLocaleDateString('es-PE') : '-'}</span></p>
-                  </div>
-                </div>
-              </div>
-              <div className="text-right space-y-xs w-full md:w-auto">
-                <div className="bg-surface-container-high px-md py-sm rounded-lg inline-block text-center w-full md:w-auto">
-                  <span className="block font-label-caps text-[11px] tracking-wider text-on-surface-variant text-center font-bold">TOTAL A PAGAR</span>
-                  <span className="block font-headline-lg text-headline-lg text-primary font-bold">S/ {parseFloat(recibo.total).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
-                </div>
-                <p className={`text-[12px] font-bold tracking-widest text-center md:text-right mt-2 ${recibo.estado === 'Pagado' ? 'text-green-600' : recibo.estado === 'Pago Parcial' ? 'text-[#0ea5e9]' : recibo.estado === 'Pendiente' ? 'text-yellow-600' : 'text-error'}`}>
-                  ESTADO: {recibo.estado.toUpperCase()}
-                </p>
-              </div>
-            </div>
-
-            {/* Consumption Breakdown Grid */}
-            <div className="p-xl grid grid-cols-1 md:grid-cols-3 gap-xl bg-surface-container-lowest">
-              {/* Meter Readings */}
-              <div className="md:col-span-2">
-                <h4 className="font-label-caps text-[11px] tracking-wider text-on-surface-variant mb-md font-bold">DETALLE DE LECTURAS (MEDIDOR {recibo.num_medidor || 'N/A'})</h4>
-                <div className="grid grid-cols-2 gap-md">
-                  <div className="p-md bg-white border border-outline-variant rounded-lg shadow-sm">
-                    <span className="text-sm text-on-surface-variant block mb-xs">Lectura Anterior ({formatDayMonth(recibo.periodo_inicio)})</span>
-                    <span className="font-data-mono text-xl text-on-surface font-bold">{recibo.lectura_anterior !== null ? parseFloat(recibo.lectura_anterior).toLocaleString('es-PE', { minimumFractionDigits: 2 }) : '0.00'} <span className="text-xs font-sans text-on-surface-variant font-normal">kWh</span></span>
-                  </div>
-                  <div className="p-md bg-white border border-outline-variant rounded-lg shadow-sm">
-                    <span className="text-sm text-on-surface-variant block mb-xs">Lectura Actual ({formatDayMonth(recibo.periodo_fin)})</span>
-                    <span className="font-data-mono text-xl text-on-surface font-bold">{recibo.lectura_actual !== null ? parseFloat(recibo.lectura_actual).toLocaleString('es-PE', { minimumFractionDigits: 2 }) : '0.00'} <span className="text-xs font-sans text-on-surface-variant font-normal">kWh</span></span>
-                  </div>
-                </div>
-                <div className="mt-md p-md bg-primary-container/10 border border-primary-container/20 rounded-lg flex justify-between items-center shadow-sm">
-                  <div>
-                    <span className="text-[12px] text-primary font-bold block tracking-wider">CONSUMO TOTAL DEL PERIODO</span>
-                    {pctChangeText && <span className="text-xs text-on-surface-variant font-bold block mt-0.5">{pctChangeText}</span>}
-                  </div>
-                  <div className="text-right">
-                    <span className="font-data-mono text-headline-md text-primary font-bold">{parseFloat(recibo.consumo_calculado || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
-                    <span className="text-sm text-primary font-bold ml-1">kWh</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Consumption Trend Mini-Chart Simulation */}
-              <div className="bg-white border border-outline-variant rounded-lg p-md flex flex-col shadow-sm">
-                <h4 className="font-label-caps text-[11px] tracking-wider text-on-surface-variant mb-md font-bold">TENDENCIA CONSUMO</h4>
-                <div className="flex-grow flex items-end justify-between gap-1.5 px-sm h-24">
-                  {historial.length > 0 ? (
-                    historial.map((hist, index) => {
-                      const maxHist = Math.max(...historial.map(h => parseFloat(h.consumo_calculado || 0)), 1);
-                      const heightPercent = (parseFloat(hist.consumo_calculado || 0) / maxHist) * 100;
-                      const isCurrent = index === historial.length - 1;
-                      return (
-                        <div 
-                          key={index} 
-                          className={`w-full rounded-t transition-all ${isCurrent ? 'bg-primary' : 'bg-outline-variant/60'}`} 
-                          style={{ height: `${Math.max(heightPercent, 12)}%` }}
-                          title={`${formatPeriodo(hist.mes_anio)}: ${parseFloat(hist.consumo_calculado).toFixed(1)} kWh`}
-                        ></div>
-                      );
-                    })
-                  ) : (
-                    <div className="text-center w-full text-on-surface-variant text-[10px] pb-md">Sin historial</div>
-                  )}
-                </div>
-                <div className="flex justify-between mt-sm text-[8px] text-on-surface-variant font-bold tracking-tight">
-                  {historial.map((hist, index) => (
-                    <span key={index} className={index === historial.length - 1 ? 'text-primary font-bold' : ''}>
-                      {hist.mes_anio ? hist.mes_anio.substring(5) : ''}
+          {/* Dashboard Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            
+            {/* Columna Izquierda (Info & Métricas) */}
+            <div className="lg:col-span-2 flex flex-col gap-6">
+              
+              {/* Tarjeta Hero (Resumen Rápido) */}
+              <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6 flex flex-col md:flex-row gap-6 justify-between items-start md:items-center">
+                <div className="flex gap-4 items-center">
+                  <div className={`w-12 h-12 rounded-md flex items-center justify-center text-white ${recibo.estado === 'Pagado' ? 'bg-emerald-600' : recibo.estado === 'Pago Parcial' ? 'bg-sky-600' : recibo.estado === 'Pendiente' ? 'bg-amber-500' : 'bg-rose-600'}`}>
+                    <span className="material-symbols-outlined text-[24px]">
+                      {recibo.estado === 'Pagado' ? 'check_circle' : recibo.estado === 'Pago Parcial' ? 'timelapse' : recibo.estado === 'Pendiente' ? 'schedule' : 'warning'}
                     </span>
-                  ))}
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold text-slate-800">{recibo.nombre_razonsocial}</h3>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm text-slate-500 font-mono">
+                      <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">badge</span> {recibo.documento_identidad}</span>
+                      <span className="text-slate-300">|</span>
+                      <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">location_on</span> {recibo.direccion || 'Sin dirección'}</span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="text-left md:text-right w-full md:w-auto bg-slate-50 p-4 rounded-md border border-slate-100">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1">TOTAL A PAGAR</p>
+                  <p className={`text-3xl font-bold tracking-tight ${recibo.estado === 'Pagado' ? 'text-emerald-700' : recibo.estado === 'Pago Parcial' ? 'text-sky-700' : recibo.estado === 'Pendiente' ? 'text-amber-700' : 'text-rose-700'}`}>
+                    <span className="text-xl font-medium mr-1 text-slate-500">S/</span>
+                    {parseFloat(recibo.total).toLocaleString('es-PE', { minimumFractionDigits: 2 })}
+                  </p>
+                  <div className="mt-2">
+                    <span className={`px-2.5 py-1 rounded-sm text-xs font-semibold uppercase tracking-wider ${recibo.estado === 'Pagado' ? 'bg-emerald-100 text-emerald-800' : recibo.estado === 'Pago Parcial' ? 'bg-sky-100 text-sky-800' : recibo.estado === 'Pendiente' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800'}`}>
+                      {recibo.estado}
+                    </span>
+                  </div>
                 </div>
               </div>
+
+              {/* Grid de Período y Consumo */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                
+                {/* Fechas */}
+                <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="material-symbols-outlined text-slate-400 text-[20px]">calendar_month</span>
+                    <h4 className="text-sm font-semibold uppercase tracking-wider text-slate-600">Período de Facturación</h4>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                      <span className="text-sm text-slate-500">Mes</span>
+                      <span className="text-sm font-semibold text-slate-800">{formatPeriodo(recibo.mes_anio)}</span>
+                    </div>
+                    <div className="flex justify-between items-center border-b border-slate-100 pb-3">
+                      <span className="text-sm text-slate-500">Emisión</span>
+                      <span className="text-sm font-semibold text-slate-800">{recibo.fecha_emision ? new Date(recibo.fecha_emision).toLocaleDateString('es-PE') : '-'}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-slate-500">Vencimiento</span>
+                      <span className={`text-sm font-semibold ${new Date(recibo.fecha_vencimiento) < new Date() && recibo.estado !== 'Pagado' ? 'text-rose-600' : 'text-slate-800'}`}>
+                        {recibo.fecha_vencimiento ? new Date(recibo.fecha_vencimiento).toLocaleDateString('es-PE') : '-'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Consumo */}
+                <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-slate-400 text-[20px]">electric_meter</span>
+                      <h4 className="text-sm font-semibold uppercase tracking-wider text-slate-600">Lecturas</h4>
+                    </div>
+                    <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded-sm text-xs font-mono border border-slate-200">#{recibo.num_medidor || 'N/A'}</span>
+                  </div>
+                  
+                  <div>
+                    <div className="flex items-baseline gap-1 mb-2">
+                      <span className="text-3xl font-bold tracking-tight text-slate-800">{parseFloat(recibo.consumo_calculado || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                      <span className="text-sm font-medium text-slate-500">kWh</span>
+                    </div>
+                    
+                    {pctChangeText && (
+                      <div className={`inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-medium ${pctChangeText.includes('Incremento') ? 'bg-rose-50 text-rose-700 border border-rose-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'}`}>
+                        <span className="material-symbols-outlined text-[14px]">
+                          {pctChangeText.includes('Incremento') ? 'trending_up' : 'trending_down'}
+                        </span>
+                        {pctChangeText}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-slate-100">
+                      <div>
+                        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 block mb-1">Anterior</span>
+                        <span className="font-mono text-sm text-slate-800">{recibo.lectura_anterior !== null ? parseFloat(recibo.lectura_anterior).toLocaleString('es-PE', { minimumFractionDigits: 2 }) : '0.00'}</span>
+                      </div>
+                      <div>
+                        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 block mb-1">Actual</span>
+                        <span className="font-mono text-sm text-slate-800">{recibo.lectura_actual !== null ? parseFloat(recibo.lectura_actual).toLocaleString('es-PE', { minimumFractionDigits: 2 }) : '0.00'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Tendencia de Consumo */}
+              {historial && historial.length > 0 && (
+                <div className="bg-white rounded-lg border border-slate-200 shadow-sm p-6 flex-grow">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-2">
+                      <span className="material-symbols-outlined text-slate-400 text-[20px]">bar_chart</span>
+                      <h4 className="text-sm font-semibold uppercase tracking-wider text-slate-600">Historial de Consumo (6 Meses)</h4>
+                    </div>
+                  </div>
+                  <div className="flex items-end gap-2 sm:gap-4 h-40 mt-4 border-b border-slate-200 pb-2">
+                    {(() => {
+                      const maxConsumo = Math.max(...historial.map(x => parseFloat(x.consumo_calculado || 0)));
+                      const displayData = historial.slice(0, 6).reverse(); // Assuming API returns newest first, we reverse to show chronological order
+                      
+                      return displayData.map((h, i) => {
+                         const height = maxConsumo > 0 ? (parseFloat(h.consumo_calculado || 0) / maxConsumo) * 100 : 0;
+                         const isCurrent = h.mes_anio === recibo.mes_anio;
+                         return (
+                           <div key={i} className="flex-1 flex flex-col justify-end items-center group relative h-full">
+                             <div 
+                               className={`w-full max-w-[40px] rounded-t-sm transition-all relative ${isCurrent ? 'bg-blue-600' : 'bg-blue-100 hover:bg-blue-200'}`} 
+                               style={{ height: `${Math.max(height, 5)}%` }}
+                             >
+                               {/* tooltip */}
+                               <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-[10px] py-1 px-2 rounded pointer-events-none whitespace-nowrap z-20">
+                                 {parseFloat(h.consumo_calculado || 0).toFixed(2)} kWh
+                               </div>
+                             </div>
+                             <span className={`text-[10px] mt-2 truncate w-full text-center ${isCurrent ? 'font-bold text-slate-800' : 'text-slate-500'}`}>
+                               {formatPeriodo(h.mes_anio).split(' ')[0].substring(0,3)}
+                             </span>
+                           </div>
+                         )
+                      });
+                    })()}
+                  </div>
+                </div>
+              )}
+
             </div>
 
-            {/* Billing Concepts Table */}
-            <div className="px-xl py-lg">
-              <h4 className="font-label-caps text-[11px] tracking-wider text-on-surface-variant mb-md font-bold">CONCEPTOS DE FACTURACIÓN</h4>
-              <table className="w-full text-left border-collapse table-zebra">
-                <thead>
-                  <tr className="border-b border-outline-variant bg-surface-container-low">
-                    <th className="px-md py-sm font-label-caps text-[11px] text-on-surface-variant font-bold">Descripción</th>
-                    <th className="px-md py-sm font-label-caps text-[11px] text-on-surface-variant text-right font-bold">Cant/Unid</th>
-                    <th className="px-md py-sm font-label-caps text-[11px] text-on-surface-variant text-right font-bold">Precio Unit. (S/)</th>
-                    <th className="px-md py-sm font-label-caps text-[11px] text-on-surface-variant text-right font-bold">Importe (S/)</th>
-                  </tr>
-                </thead>
-                <tbody className="text-sm">
-                  <tr className="border-b border-outline-variant/50">
-                    <td className="px-md py-md">Consumo Energía Activa (Baja Tensión)</td>
-                    <td className="px-md py-md text-right font-data-mono">{parseFloat(recibo.consumo_calculado || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })} kWh</td>
-                    <td className="px-md py-md text-right font-data-mono">S/ {parseFloat(recibo.tarifa_kwh || 0.65).toFixed(4)}</td>
-                    <td className="px-md py-md text-right font-data-mono">{parseFloat(recibo.cargo_energia || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                  </tr>
-                  <tr className="border-b border-outline-variant/50">
-                    <td className="px-md py-md">Cargo Fijo Mensual</td>
-                    <td className="px-md py-md text-right font-data-mono">1.00</td>
-                    <td className="px-md py-md text-right font-data-mono">S/ {parseFloat(cargoFijo).toFixed(2)}</td>
-                    <td className="px-md py-md text-right font-data-mono">{parseFloat(cargoFijo).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                  </tr>
-                  {mantenimientoRed > 0 && (
-                    <tr className="border-b border-outline-variant/50">
-                      <td className="px-md py-md">Mantenimiento de Red e Infraestructura</td>
-                      <td className="px-md py-md text-right font-data-mono">1.00</td>
-                      <td className="px-md py-md text-right font-data-mono">S/ {parseFloat(mantenimientoRed).toFixed(2)}</td>
-                      <td className="px-md py-md text-right font-data-mono">{parseFloat(mantenimientoRed).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                    </tr>
-                  )}
-                  {alumbrado > 0 && (
-                    <tr className="border-b border-outline-variant/50">
-                      <td className="px-md py-md">Alumbrado Público Prorrateado</td>
-                      <td className="px-md py-md text-right font-data-mono">1.00</td>
-                      <td className="px-md py-md text-right font-data-mono">S/ {parseFloat(alumbrado).toFixed(2)}</td>
-                      <td className="px-md py-md text-right font-data-mono">{parseFloat(alumbrado).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                    </tr>
-                  )}
-                  {parseFloat(recibo.cargo_corte || 0) > 0 && (
-                    <tr className="border-b border-outline-variant/50">
-                      <td className="px-md py-md text-error font-bold">Cargo por Corte / Reconexión</td>
-                      <td className="px-md py-md text-right font-data-mono">1.00</td>
-                      <td className="px-md py-md text-right font-data-mono">S/ {parseFloat(recibo.cargo_corte).toFixed(2)}</td>
-                      <td className="px-md py-md text-right font-data-mono">{parseFloat(recibo.cargo_corte).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                    </tr>
+            {/* Columna Derecha (Finanzas) */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-lg border border-slate-200 shadow-sm flex flex-col h-full">
+                <div className="p-5 border-b border-slate-200 bg-slate-50 rounded-t-lg">
+                  <h4 className="text-sm font-semibold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px]">receipt_long</span> Desglose de Cargos
+                  </h4>
+                </div>
+                
+                <div className="p-5 flex-grow space-y-3 text-sm">
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Energía Activa</span>
+                    <span className="font-mono text-slate-800">S/ {parseFloat(recibo.cargo_energia || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-slate-600">Cargo Fijo</span>
+                    <span className="font-mono text-slate-800">S/ {parseFloat(recibo.cargo_fijo || 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  {parseFloat(recibo.cargo_mantenimiento || 0) > 0 && (
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-600">Mantenimiento</span>
+                      <span className="font-mono text-slate-800">S/ {parseFloat(recibo.cargo_mantenimiento).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                    </div>
                   )}
                   {parseFloat(recibo.multa_manipulacion || 0) > 0 && (
-                    <tr className="border-b border-outline-variant/50">
-                      <td className="px-md py-md text-error font-bold">Multa por Manipulación / Infracción</td>
-                      <td className="px-md py-md text-right font-data-mono">1.00</td>
-                      <td className="px-md py-md text-right font-data-mono">S/ {parseFloat(recibo.multa_manipulacion).toFixed(2)}</td>
-                      <td className="px-md py-md text-right font-data-mono">{parseFloat(recibo.multa_manipulacion).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                    </tr>
+                    <div className="flex justify-between items-center text-rose-600">
+                      <span>Multa Manipulación</span>
+                      <span className="font-mono">S/ {parseFloat(recibo.multa_manipulacion).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                    </div>
                   )}
                   {parseFloat(recibo.multa_reconexion || 0) > 0 && (
-                    <tr className="border-b border-outline-variant/50">
-                      <td className="px-md py-md text-error font-bold">Multa por Reconexión Sin Autorización</td>
-                      <td className="px-md py-md text-right font-data-mono">1.00</td>
-                      <td className="px-md py-md text-right font-data-mono">S/ {parseFloat(recibo.multa_reconexion).toFixed(2)}</td>
-                      <td className="px-md py-md text-right font-data-mono">{parseFloat(recibo.multa_reconexion).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                    </tr>
+                    <div className="flex justify-between items-center text-rose-600">
+                      <span>Multa Reconexión</span>
+                      <span className="font-mono">S/ {parseFloat(recibo.multa_reconexion).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  )}
+                  {parseFloat(recibo.cargo_corte || 0) > 0 && (
+                    <div className="flex justify-between items-center text-rose-600">
+                      <span>Cargo por Corte</span>
+                      <span className="font-mono">S/ {parseFloat(recibo.cargo_corte).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                    </div>
                   )}
                   {parseFloat(recibo.instalacion_medidor || 0) > 0 && (
-                    <tr className="border-b border-outline-variant/50">
-                      <td className="px-md py-md">Instalación de Medidor Nuevo</td>
-                      <td className="px-md py-md text-right font-data-mono">1.00</td>
-                      <td className="px-md py-md text-right font-data-mono">S/ {parseFloat(recibo.instalacion_medidor).toFixed(2)}</td>
-                      <td className="px-md py-md text-right font-data-mono">{parseFloat(recibo.instalacion_medidor).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                    </tr>
+                    <div className="flex justify-between items-center text-rose-600">
+                      <span>Instalación Medidor</span>
+                      <span className="font-mono">S/ {parseFloat(recibo.instalacion_medidor).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                    </div>
                   )}
+                  {recibo.cargos_dinamicos && recibo.cargos_dinamicos.map((cd) => (
+                    <div key={cd.id} className="flex justify-between items-center text-rose-600">
+                      <span>{cd.descripcion}</span>
+                      <span className="font-mono">S/ {parseFloat(cd.monto).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                    </div>
+                  ))}
                   {parseFloat(recibo.deuda_vencida || 0) > 0 && (
-                    <tr className="border-b border-outline-variant/50">
-                      <td className="px-md py-md text-warning font-bold">Deuda Vencida Meses Anteriores</td>
-                      <td className="px-md py-md text-right font-data-mono">1.00</td>
-                      <td className="px-md py-md text-right font-data-mono">S/ {parseFloat(recibo.deuda_vencida).toFixed(2)}</td>
-                      <td className="px-md py-md text-right font-data-mono">{parseFloat(recibo.deuda_vencida).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                    </tr>
+                    <div className="flex justify-between items-center text-rose-600 font-medium">
+                      <span>Deuda Anterior</span>
+                      <span className="font-mono">S/ {parseFloat(recibo.deuda_vencida).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                    </div>
                   )}
                   {parseFloat(recibo.descuento || 0) > 0 && (
-                    <tr className="border-b border-outline-variant/50 bg-[#107C41]/5">
-                      <td className="px-md py-md text-[#107C41] font-bold">
-                        Descuento Especial Aplicado <br/>
-                        <span className="text-xs font-normal italic text-on-surface-variant">Motivo: {recibo.motivo_descuento}</span>
-                      </td>
-                      <td className="px-md py-md text-right font-data-mono text-[#107C41]">1.00</td>
-                      <td className="px-md py-md text-right font-data-mono text-[#107C41]">- S/ {parseFloat(recibo.descuento).toFixed(2)}</td>
-                      <td className="px-md py-md text-right font-data-mono font-bold text-[#107C41]">- {parseFloat(recibo.descuento).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                    </tr>
+                    <div className="flex justify-between items-center text-emerald-600 bg-emerald-50 px-2 py-1 rounded">
+                      <span>Descuento Especial</span>
+                      <span className="font-mono">- S/ {parseFloat(recibo.descuento).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                    </div>
                   )}
-                </tbody>
-              </table>
-            </div>
+                </div>
 
-            {/* Footer Summary and QR */}
-            <div className="p-xl border-t border-outline-variant flex flex-col md:flex-row gap-xl items-center bg-surface-container-low/50">
-              <div className="flex-1 flex flex-col sm:flex-row gap-lg items-center sm:items-start text-center sm:text-left">
-                <div className="bg-white p-sm border border-outline-variant rounded-lg shadow-sm">
-                  <img alt="Código QR para validación y pago" className="w-24 h-24" src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=ReceiptId_${recibo.id}_${recibo.numero_comprobante}`} />
-                </div>
-                <div className="max-w-xs">
-                  <h5 className="font-label-caps text-[11px] tracking-wider text-on-surface-variant font-bold">VALIDACIÓN DIGITAL</h5>
-                  <p className="text-sm text-on-surface-variant mt-xs">Escanee este código para validar la autenticidad del recibo o realizar el pago directo vía App PI Jicamarca.</p>
-                  <p className="text-[10px] font-data-mono text-outline mt-sm">HASH: {recibo.id}_{recibo.numero_comprobante}_8f2a1c</p>
-                </div>
-              </div>
-              <div className="w-full md:w-64 space-y-xs">
-                <div className="flex justify-between text-sm">
-                  <span className="text-on-surface-variant">Subtotal:</span>
-                  <span className="font-data-mono font-bold">S/ {parseFloat(recibo.subtotal).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-on-surface-variant">IGV (18%):</span>
-                  <span className="font-data-mono font-bold">S/ {parseFloat(recibo.igv).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
-                </div>
-                <div className="flex justify-between pt-sm border-t border-outline-variant mt-2">
-                  <span className="font-bold text-on-surface">TOTAL:</span>
-                  <span className="font-headline-sm text-primary font-bold">S/ {parseFloat(recibo.total).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
-                </div>
-                {pagosHistorial.length > 0 && (
-                  <>
-                    <div className="flex justify-between pt-sm mt-1 text-sm text-[#059669]">
-                      <span className="font-bold">Total Pagado:</span>
-                      <span className="font-data-mono font-bold">- S/ {pagosHistorial.reduce((acc, p) => acc + parseFloat(p.monto_pagado || 0), 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                <div className="p-5 bg-slate-50 border-t border-slate-200 rounded-b-lg space-y-2">
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-slate-600">Subtotal</span>
+                    <span className="font-mono text-slate-800">S/ {parseFloat(recibo.subtotal).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm border-b border-slate-200 pb-3">
+                    <span className="text-slate-600">IGV (18%)</span>
+                    <span className="font-mono text-slate-800">S/ {parseFloat(recibo.igv).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-3">
+                    <span className="font-bold text-slate-800 uppercase text-xs tracking-wider">TOTAL</span>
+                    <span className="font-bold text-xl text-blue-700">S/ {parseFloat(recibo.total).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                  </div>
+
+                  {pagosHistorial.length > 0 && (
+                    <div className="mt-4 pt-3 border-t border-slate-200 space-y-2">
+                      <div className="flex justify-between items-center text-sm text-emerald-600">
+                        <span className="font-medium">Pagado</span>
+                        <span className="font-mono">- S/ {pagosHistorial.reduce((acc, p) => acc + parseFloat(p.monto_pagado || 0), 0).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-sm font-bold text-rose-600">
+                        <span>SALDO ACTUAL</span>
+                        <span className="font-mono">
+                          S/ {Math.max(0, parseFloat(recibo.total) - pagosHistorial.reduce((acc, p) => acc + parseFloat(p.monto_pagado || 0), 0)).toLocaleString('es-PE', { minimumFractionDigits: 2 })}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex justify-between pt-sm border-t border-outline-variant mt-2">
-                      <span className="font-bold text-error">SALDO PENDIENTE:</span>
-                      <span className="font-headline-sm text-error font-bold">S/ {Math.max(0, parseFloat(recibo.total) - pagosHistorial.reduce((acc, p) => acc + parseFloat(p.monto_pagado || 0), 0)).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</span>
-                    </div>
-                  </>
-                )}
+                  )}
+                </div>
               </div>
             </div>
-
-            {/* Payment History Table */}
-            {pagosHistorial.length > 0 && (
-              <div className="px-xl py-lg border-t border-outline-variant bg-surface-container-lowest">
-                <h4 className="font-label-caps text-[11px] tracking-wider text-on-surface-variant mb-md font-bold">HISTORIAL DE PAGOS</h4>
-                <table className="w-full text-left border-collapse table-zebra">
-                  <thead>
-                    <tr className="border-b border-outline-variant bg-surface-container-low">
-                      <th className="px-md py-sm font-label-caps text-[11px] text-on-surface-variant font-bold">Fecha</th>
-                      <th className="px-md py-sm font-label-caps text-[11px] text-on-surface-variant font-bold">Método / Op.</th>
-                      <th className="px-md py-sm font-label-caps text-[11px] text-on-surface-variant text-right font-bold">Monto (S/)</th>
-                    </tr>
-                  </thead>
-                  <tbody className="text-sm">
-                    {pagosHistorial.map((pago, index) => (
-                      <tr key={index} className="border-b border-outline-variant/50">
-                        <td className="px-md py-sm">{new Date(pago.fecha_pago).toLocaleString('es-PE')}</td>
-                        <td className="px-md py-sm">{pago.metodo_pago} {pago.numero_operacion ? `(${pago.numero_operacion})` : ''}</td>
-                        <td className="px-md py-sm text-right font-data-mono text-[#059669] font-bold">S/ {parseFloat(pago.monto_pagado).toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-
-          {/* Notice / Disclaimer */}
-          <div className="bg-tertiary-container/10 border-l-4 border-tertiary p-md flex items-start gap-md print-hidden rounded-r-md">
-            <span className="material-symbols-outlined text-tertiary">warning</span>
-            <p className="text-sm text-on-tertiary-fixed-variant">
-              <strong className="font-bold">Aviso importante:</strong> Si el pago no se registra antes de la fecha de vencimiento ({recibo.fecha_vencimiento ? new Date(recibo.fecha_vencimiento).toLocaleDateString('es-PE') : '-'}), se procederá al corte preventivo del suministro de acuerdo al reglamento interno del Parque Industrial. Evite recargos por mora.
-            </p>
           </div>
         </div>
       </div>
@@ -565,100 +526,73 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
             <div className="p-lg">
               <form onSubmit={handleSaveCargos} className="space-y-md">
                 
+                {/* Deuda vencida removida por seguridad, se calcula automáticamente */}
+
+                {/* Dynamic Cargos Section */}
                 <div className="bg-surface-container-low p-md rounded-lg border border-outline-variant space-y-3">
-                  <label className="text-sm font-bold text-on-surface uppercase tracking-wider text-[11px] block">Multa por Manipulación / Infracción</label>
-                  <div className="flex gap-4">
-                    <label className="flex items-center gap-2 cursor-pointer text-sm">
-                      <input type="radio" name="tipoMulta" value="ninguna" checked={tipoMulta === 'ninguna'} onChange={() => setTipoMulta('ninguna')} className="text-primary accent-primary" />
-                      Sin Multa
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer text-sm">
-                      <input type="radio" name="tipoMulta" value="estandar" checked={tipoMulta === 'estandar'} onChange={() => setTipoMulta('estandar')} className="text-primary accent-primary" />
-                      Multa Estándar (S/ {tarifasGlobales.monto_multa_base})
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer text-sm">
-                      <input type="radio" name="tipoMulta" value="personalizada" checked={tipoMulta === 'personalizada'} onChange={() => setTipoMulta('personalizada')} className="text-primary accent-primary" />
-                      Personalizada
-                    </label>
-                  </div>
-                  {tipoMulta === 'personalizada' && (
-                    <input 
-                      type="number" step="0.01" min="0" required
-                      className="w-full mt-2 border border-outline-variant rounded-md px-3 py-2 bg-white text-sm font-data-mono focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-                      value={cargos.multa_manipulacion}
-                      onChange={(e) => setCargos({...cargos, multa_manipulacion: e.target.value})}
-                      placeholder="Ingrese monto exacto"
-                    />
+                  <label className="text-sm font-bold text-on-surface uppercase tracking-wider text-[11px] block">Cargos Adicionales y Multas Dinámicas</label>
+                  
+                  {availableCargosDinamicos.length === 0 ? (
+                    <p className="text-xs text-on-surface-variant italic">No hay cargos adicionales configurados para este periodo.</p>
+                  ) : (
+                    <div className="space-y-2">
+                      {availableCargosDinamicos.map(cargo => {
+                        const isSelected = selectedCargosDinamicos.some(c => c.descripcion === cargo.descripcion);
+                        return (
+                          <div key={cargo.id} className={`flex items-center justify-between p-2 rounded border ${isSelected ? 'bg-primary/5 border-primary/30' : 'bg-white border-outline-variant'} transition-colors`}>
+                            <label className="flex items-center gap-3 cursor-pointer flex-grow">
+                              <input 
+                                type="checkbox" 
+                                checked={isSelected}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setSelectedCargosDinamicos([...selectedCargosDinamicos, { descripcion: cargo.descripcion, tipo: cargo.tipo, monto: cargo.monto_defecto }]);
+                                  } else {
+                                    setSelectedCargosDinamicos(selectedCargosDinamicos.filter(c => c.descripcion !== cargo.descripcion));
+                                  }
+                                }}
+                                className="rounded text-primary focus:ring-primary w-4 h-4"
+                              />
+                              <div>
+                                <span className="text-sm font-bold block">{cargo.descripcion}</span>
+                                <span className={`text-[10px] uppercase font-bold px-1.5 py-0.5 rounded ${cargo.tipo === 'Multa' ? 'bg-error/10 text-error' : 'bg-primary/10 text-primary'}`}>{cargo.tipo}</span>
+                              </div>
+                            </label>
+                            <span className="text-sm font-data-mono font-bold text-on-surface-variant">S/ {parseFloat(cargo.monto_defecto).toFixed(2)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-md">
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider text-[11px]">Cargo por Corte (S/)</label>
-                    <input 
-                      type="number" step="0.01" min="0"
-                      className="border border-outline-variant rounded-md px-3 py-2 bg-white text-sm font-data-mono focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-                      value={cargos.cargo_corte}
-                      onChange={(e) => setCargos({...cargos, cargo_corte: e.target.value})}
-                    />
+                <div className="bg-[#f0fdf4] p-md rounded-lg border border-[#bbf7d0] space-y-4">
+                  <div className="flex items-center gap-2 border-b border-[#bbf7d0]/50 pb-2">
+                    <span className="material-symbols-outlined text-[#16a34a] text-[18px]">loyalty</span>
+                    <h4 className="font-bold text-[#166534] text-sm uppercase tracking-wide">Descuento a Favor</h4>
                   </div>
 
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider text-[11px]">Instalación de Medidor (S/)</label>
-                    <input 
-                      type="number" step="0.01" min="0"
-                      className="border border-outline-variant rounded-md px-3 py-2 bg-white text-sm font-data-mono focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-                      value={cargos.instalacion_medidor}
-                      onChange={(e) => setCargos({...cargos, instalacion_medidor: e.target.value})}
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1 col-span-2">
-                    <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider text-[11px]">Multa por Reconexión Sin Autorización (S/)</label>
-                    <input 
-                      type="number" step="0.01" min="0"
-                      className="border border-outline-variant rounded-md px-3 py-2 bg-white text-sm font-data-mono focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-                      value={cargos.multa_reconexion}
-                      onChange={(e) => setCargos({...cargos, multa_reconexion: e.target.value})}
-                    />
-                  </div>
-
-                  <div className="flex flex-col gap-1">
-                    <label className="text-sm font-bold text-on-surface-variant uppercase tracking-wider text-[11px]">Deuda Vencida (S/)</label>
-                    <input 
-                      type="number" step="0.01" min="0"
-                      className="border border-outline-variant rounded-md px-3 py-2 bg-white text-sm font-data-mono focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-                      value={cargos.deuda_vencida}
-                      onChange={(e) => setCargos({...cargos, deuda_vencida: e.target.value})}
-                    />
-                  </div>
-                </div>
-
-                <div className="bg-[#107C41]/10 border border-[#107C41]/20 p-md rounded-lg space-y-md">
-                  <h4 className="font-bold text-[#107C41] text-sm flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[18px]">discount</span>
-                    Aplicar Descuento Especial
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-2">
                     <div className="flex flex-col gap-1">
-                      <label className="text-sm font-bold text-[#107C41] uppercase tracking-wider text-[11px]">Monto a descontar (S/)</label>
+                      <label className="text-sm font-bold text-[#15803d] uppercase tracking-wider text-[11px]">Monto (S/)</label>
                       <input 
                         type="number" step="0.01" min="0"
-                        className="border border-[#107C41]/30 rounded-md px-3 py-2 bg-white text-sm font-data-mono focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] outline-none"
+                        className="w-full border border-[#86efac] rounded-md px-3 py-2 bg-white text-sm font-data-mono text-[#14532d] focus:border-[#22c55e] focus:ring-1 focus:ring-[#22c55e] outline-none"
                         value={cargos.descuento}
                         onChange={(e) => setCargos({...cargos, descuento: e.target.value})}
                         placeholder="0.00"
                       />
                     </div>
+                    
                     <div className="flex flex-col gap-1 md:col-span-2">
-                      <label className="text-sm font-bold text-[#107C41] uppercase tracking-wider text-[11px]">Sustento / Motivo (Obligatorio)</label>
+                      <label className="text-sm font-bold text-[#15803d] uppercase tracking-wider text-[11px] truncate" title="Motivo del Descuento (Obligatorio)">Motivo (Obligatorio)</label>
                       <input 
                         type="text"
                         required={cargos.descuento > 0}
-                        className="border border-[#107C41]/30 rounded-md px-3 py-2 bg-white text-sm focus:border-[#107C41] focus:ring-1 focus:ring-[#107C41] outline-none"
+                        className="w-full border border-[#86efac] rounded-md px-3 py-2 bg-white text-sm text-[#14532d] focus:border-[#22c55e] focus:ring-1 focus:ring-[#22c55e] outline-none placeholder:text-[#86efac]"
                         value={cargos.motivo_descuento}
                         onChange={(e) => setCargos({...cargos, motivo_descuento: e.target.value})}
-                        placeholder="Ej: Problemas técnicos con el cableado, etc."
+                        placeholder="Especifique la razón..."
                       />
                     </div>
                   </div>

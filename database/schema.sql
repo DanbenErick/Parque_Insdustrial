@@ -38,7 +38,7 @@ CREATE TABLE `rol` (
 
 -- =============================================================================
 -- 2. TABLA: USUARIO
--- Tabla unificada para staff (Admin, Operario) y miembros/inquilinos
+-- Tabla unificada para staff (Admin, Operario) y socios/socios
 -- =============================================================================
 DROP TABLE IF EXISTS `usuario`;
 CREATE TABLE `usuario` (
@@ -47,11 +47,11 @@ CREATE TABLE `usuario` (
   `documento_identidad`   VARCHAR(11)  NOT NULL,
   `nombre_razonsocial`    VARCHAR(200) NOT NULL,
   `clave_acceso`          VARCHAR(255) NOT NULL       COMMENT 'Hash bcrypt del password o PIN',
-  `cargo_representante`   VARCHAR(100) DEFAULT NULL   COMMENT 'Cargo (staff) o Representante Legal (miembro)',
+  `cargo_representante`   VARCHAR(100) DEFAULT NULL   COMMENT 'Cargo (staff) o Representante Legal (socio)',
   `telefono`              VARCHAR(20)  DEFAULT NULL,
   `correo`                VARCHAR(100) DEFAULT NULL COMMENT 'Opcional (Ej. para envío de comprobantes)',
-  `id_manzana`            VARCHAR(10)  DEFAULT NULL   COMMENT 'NULL para staff, asignado para miembros',
-  `lote`                  VARCHAR(10)  DEFAULT NULL   COMMENT 'NULL para staff, asignado para miembros',
+  `id_manzana`            VARCHAR(10)  DEFAULT NULL   COMMENT 'NULL para staff, asignado para socios',
+  `lote`                  VARCHAR(10)  DEFAULT NULL   COMMENT 'NULL para staff, asignado para socios',
   `direccion`             VARCHAR(255) DEFAULT NULL   COMMENT 'Dirección de la manzana/lote',
   `es_activo`             BOOLEAN      NOT NULL DEFAULT TRUE,
   `saldo_a_favor`         DECIMAL(12,2) DEFAULT 0.00  COMMENT 'Excedente de pagos para descontar en el próximo recibo',
@@ -78,7 +78,7 @@ CREATE TABLE `usuario` (
   INDEX `idx_usuario_rol_activo` (`rol_id`, `es_activo`),
   INDEX `idx_usuario_manzana` (`id_manzana`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  COMMENT='Usuarios del sistema: staff operativo y miembros/inquilinos';
+  COMMENT='Usuarios del sistema: staff operativo y socios/socios';
 
 -- =============================================================================
 -- 3. TABLA: PERIODO_FACTURACION
@@ -108,12 +108,12 @@ CREATE TABLE `periodo_facturacion` (
 
 -- =============================================================================
 -- 4. TABLA: MEDIDOR
--- Equipo de medición eléctrica vinculado a un miembro
+-- Equipo de medición eléctrica vinculado a un socio
 -- =============================================================================
 DROP TABLE IF EXISTS `medidor`;
 CREATE TABLE `medidor` (
   `id`           INT AUTO_INCREMENT PRIMARY KEY,
-  `usuario_id`   INT          NOT NULL    COMMENT 'Miembro propietario del medidor',
+  `usuario_id`   INT          NOT NULL    COMMENT 'Socio propietario del medidor',
   `num_serie`    VARCHAR(20)  NOT NULL    COMMENT 'Número de serie del equipo',
   `tipo`         VARCHAR(20)  NOT NULL DEFAULT 'Normal' COMMENT 'Normal o Tiempo Real',
   `operativo`    BOOLEAN      NOT NULL DEFAULT TRUE,
@@ -131,7 +131,7 @@ CREATE TABLE `medidor` (
   -- Índices
   INDEX `idx_medidor_usuario` (`usuario_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  COMMENT='Medidores eléctricos asignados a miembros del parque';
+  COMMENT='Medidores eléctricos asignados a socios del parque';
 
 -- =============================================================================
 -- 5. TABLA: LECTURA
@@ -152,6 +152,7 @@ CREATE TABLE `lectura` (
   `consumo_calculado_punta` DECIMAL(12,3) GENERATED ALWAYS AS (`lectura_actual_punta` - `lectura_anterior_punta`) STORED
                                                   COMMENT 'Consumo hora punta calculado',
   `factor_potencia`    DECIMAL(10,4)  DEFAULT 0.00 COMMENT 'Valor de Factor de Potencia / Energía Reactiva',
+  `precio_factor_potencia` DECIMAL(10,4) DEFAULT 0.00 COMMENT 'Precio por unidad de energia reactiva',
   `fecha_registro`     TIMESTAMP      NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `estado`             VARCHAR(20)    NOT NULL DEFAULT 'Validado',
   `justificacion`      TEXT           DEFAULT NULL COMMENT 'Justificación si fue editada o rectificada',
@@ -179,12 +180,12 @@ CREATE TABLE `lectura` (
 
 -- =============================================================================
 -- 6. TABLA: RECIBO
--- Comprobante de cobro emitido a un miembro por período de facturación
+-- Comprobante de cobro emitido a un socio por período de facturación
 -- =============================================================================
 DROP TABLE IF EXISTS `recibo`;
 CREATE TABLE `recibo` (
   `id`                   INT AUTO_INCREMENT PRIMARY KEY,
-  `usuario_id`           INT            NOT NULL    COMMENT 'Miembro facturado',
+  `usuario_id`           INT            NOT NULL    COMMENT 'Socio facturado',
   `periodo_id`           INT            NOT NULL    COMMENT 'Período de facturación',
   `lectura_id`           INT            DEFAULT NULL COMMENT 'Lectura que originó el cargo de energía',
   `numero_comprobante`   VARCHAR(20)    NOT NULL    COMMENT 'Ej. REC-2024-001',
@@ -230,7 +231,7 @@ CREATE TABLE `recibo` (
   INDEX `idx_recibo_periodo` (`periodo_id`),
   INDEX `idx_recibo_vencimiento` (`fecha_vencimiento`, `estado`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
-  COMMENT='Recibos de cobro emitidos a miembros del parque';
+  COMMENT='Recibos de cobro emitidos a socios del parque';
 
 -- =============================================================================
 -- 7. TABLA: PAGO
@@ -359,7 +360,7 @@ INSERT INTO `rol` (`nombre_rol`, `permisos_json`) VALUES
     'medidores', 'R',
     'recibos', 'R'
   )),
-  ('Miembro',  JSON_OBJECT(
+  ('Socio',  JSON_OBJECT(
     'recibos', 'R',
     'pagos', 'CR',
     'lecturas', 'R'
@@ -400,12 +401,12 @@ FROM `usuario` u
 INNER JOIN `rol` r ON r.`id` = u.`rol_id`
 WHERE u.`deleted_at` IS NULL;
 
--- Vista: Recibos pendientes con datos del miembro
+-- Vista: Recibos pendientes con datos del socio
 CREATE OR REPLACE VIEW `v_recibos_pendientes` AS
 SELECT
   rec.`id`,
   rec.`numero_comprobante`,
-  u.`nombre_razonsocial`    AS miembro,
+  u.`nombre_razonsocial`    AS socio,
   u.`documento_identidad`   AS ruc_dni,
   u.`id_manzana`,
   u.`lote`,
@@ -430,7 +431,7 @@ ORDER BY rec.`fecha_vencimiento` ASC;
 CREATE OR REPLACE VIEW `v_consumo_por_periodo` AS
 SELECT
   pf.`mes_anio`             AS periodo,
-  u.`nombre_razonsocial`    AS miembro,
+  u.`nombre_razonsocial`    AS socio,
   m.`num_serie`             AS medidor,
   l.`lectura_anterior`,
   l.`lectura_actual`,
@@ -486,7 +487,7 @@ BEGIN
   FROM `periodo_facturacion`
   WHERE `id` = p_periodo_id AND `deleted_at` IS NULL;
 
-  -- Generar recibos para cada miembro con lectura en el período
+  -- Generar recibos para cada socio con lectura en el período
   INSERT INTO `recibo` (
     `usuario_id`, `periodo_id`, `lectura_id`,
     `numero_comprobante`,
@@ -547,8 +548,44 @@ END //
 DELIMITER ;
 
 -- =============================================================================
+-- 9. TABLAS DE CARGOS Y MULTAS DINÁMICAS
+-- =============================================================================
+DROP TABLE IF EXISTS `recibo_cargo_dinamico`;
+DROP TABLE IF EXISTS `catalogo_cargo_periodo`;
+DROP TABLE IF EXISTS `catalogo_cargo`;
+
+CREATE TABLE `catalogo_cargo` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `tipo` VARCHAR(20) NOT NULL COMMENT 'Costo o Multa',
+  `descripcion` VARCHAR(150) NOT NULL,
+  `monto_defecto` DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+  `es_activo` BOOLEAN NOT NULL DEFAULT TRUE,
+  `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `deleted_at` TIMESTAMP NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `catalogo_cargo_periodo` (
+  `catalogo_cargo_id` INT NOT NULL,
+  `periodo_facturacion_id` INT NOT NULL,
+  PRIMARY KEY (`catalogo_cargo_id`, `periodo_facturacion_id`),
+  CONSTRAINT `fk_ccp_cargo` FOREIGN KEY (`catalogo_cargo_id`) REFERENCES `catalogo_cargo` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_ccp_periodo` FOREIGN KEY (`periodo_facturacion_id`) REFERENCES `periodo_facturacion` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE `recibo_cargo_dinamico` (
+  `id` INT AUTO_INCREMENT PRIMARY KEY,
+  `recibo_id` INT NOT NULL,
+  `descripcion` VARCHAR(150) NOT NULL,
+  `tipo` VARCHAR(20) NOT NULL,
+  `monto` DECIMAL(12,2) NOT NULL,
+  `fecha_aplicacion` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT `fk_rcd_recibo` FOREIGN KEY (`recibo_id`) REFERENCES `recibo` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =============================================================================
 -- ✅ SCRIPT COMPLETADO
--- Tablas creadas:  8
+-- Tablas creadas:  11
 -- Vistas creadas:  4
 -- Triggers:        2
 -- Procedimientos:  1

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
 import { toast } from 'sonner';
@@ -31,7 +32,22 @@ const Billing = () => {
   const [pdfId, setPdfId] = useState(null);
   const [drawerReceiptId, setDrawerReceiptId] = useState(null);
 
+  const [isRefacturarModalOpen, setIsRefacturarModalOpen] = useState(false);
+  const [refacturarReceiptId, setRefacturarReceiptId] = useState(null);
+  const [refacturarMotivo, setRefacturarMotivo] = useState('');
+  const [isRefacturando, setIsRefacturando] = useState(false);
+
+  const [showDeudasModal, setShowDeudasModal] = useState(false);
+
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+
+  const [globalStats, setGlobalStats] = useState({
+    totalRecaudado: 0,
+    pendienteCobro: 0,
+    usuariosPendientes: 0,
+    deudaVencida: 0,
+    usuariosVencidos: 0
+  });
 
   // Debounce para la búsqueda
   useEffect(() => {
@@ -60,12 +76,14 @@ const Billing = () => {
         params.search = debouncedSearchTerm;
       }
 
-      const [resRecibos, resPeriodos] = await Promise.all([
+      const [resRecibos, resPeriodos, resStats] = await Promise.all([
         api.get('/recibos', { params }),
-        api.get('/periodos')
+        api.get('/periodos'),
+        api.get('/recibos/stats/global', { params })
       ]);
       setRecibos(resRecibos.data);
       setPeriodos(resPeriodos.data);
+      setGlobalStats(resStats.data);
     } catch (err) {
       toast.error('Error al cargar datos');
     } finally {
@@ -187,6 +205,31 @@ const Billing = () => {
     }
   };
 
+  const handleExportExcelDeudas = async (tipo) => {
+    try {
+      setShowDeudasModal(false);
+      let queryParams = '';
+      if (tipo === 'mensual' && filterMes && filterMes !== 'Todos' && filterMes !== 'TodosHistorico') {
+        queryParams = `?periodo=${filterMes}`;
+      }
+      const response = await api.get(`/recibos/reportes/deudas/excel${queryParams}`, {
+        responseType: 'blob'
+      });
+      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Reporte_Deudas_${tipo === 'mensual' ? (filterMes !== 'Todos' ? filterMes : 'Global') : 'Historico_General'}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success('Excel de Deudas descargado exitosamente');
+    } catch (error) {
+      toast.error('Error al descargar el Excel de Deudas');
+    }
+  };
+
   const handleExportExcelSinMedidor = async () => {
     try {
       const params = {};
@@ -242,6 +285,31 @@ const Billing = () => {
       toast.success('PDF masivo generado con éxito', { id: 'pdfMasivo' });
     } catch (error) {
       toast.error('Error al generar el PDF masivo', { id: 'pdfMasivo' });
+    }
+  };
+
+  const handleOpenRefacturar = (id) => {
+    setRefacturarReceiptId(id);
+    setRefacturarMotivo('');
+    setIsRefacturarModalOpen(true);
+  };
+
+  const handleRefacturarSubmit = async (e) => {
+    e.preventDefault();
+    if (!refacturarMotivo.trim()) return toast.error('El motivo es obligatorio.');
+    if (refacturarMotivo.trim().length < 5) return toast.error('Ingrese un motivo más detallado.');
+
+    setIsRefacturando(true);
+    try {
+      const res = await api.post(`/recibos/${refacturarReceiptId}/refacturar`, { motivo: refacturarMotivo });
+      toast.success(res.data.message || 'Recibo refacturado exitosamente');
+      setIsRefacturarModalOpen(false);
+      setRefacturarMotivo('');
+      fetchData(); // Recargar datos
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Error al refacturar recibo');
+    } finally {
+      setIsRefacturando(false);
     }
   };
 
@@ -460,17 +528,11 @@ const Billing = () => {
 
   // Al usar Server-Side Filtering, recibos ya viene con los filtros aplicados
   const filteredRecibos = recibos;
-  const statsRecibos = recibos;
-
-  const totalRecaudado = statsRecibos.filter(r => r.estado === 'Pagado').reduce((acc, r) => acc + parseFloat(r.total || 0), 0);
-
-  const pendientes = statsRecibos.filter(r => r.estado === 'Pendiente' || r.estado === 'Pago Parcial');
-  const pendienteCobro = pendientes.reduce((acc, r) => acc + parseFloat(r.saldo_pendiente !== undefined ? r.saldo_pendiente : r.total || 0), 0);
-  const usuariosPendientes = new Set(pendientes.map(r => r.usuario_id || r.socio)).size;
-
-  const vencidos = statsRecibos.filter(r => r.estado === 'Vencido');
-  const deudaVencida = vencidos.reduce((acc, r) => acc + parseFloat(r.saldo_pendiente !== undefined ? r.saldo_pendiente : r.total || 0), 0);
-  const usuariosVencidos = new Set(vencidos.map(r => r.usuario_id || r.socio)).size;
+  const totalRecaudado = parseFloat(globalStats?.totalRecaudado || 0);
+  const pendienteCobro = parseFloat(globalStats?.pendienteCobro || 0);
+  const usuariosPendientes = parseInt(globalStats?.usuariosPendientes || 0, 10);
+  const deudaVencida = parseFloat(globalStats?.deudaVencida || 0);
+  const usuariosVencidos = parseInt(globalStats?.usuariosVencidos || 0, 10);
 
   // Lógica de Paginación
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -619,12 +681,48 @@ const Billing = () => {
 
         </div>
         
-        {/* Global Progress Bar embedded at the bottom of the banner */}
-        <div className="h-1.5 w-full bg-surface-variant">
-          <div 
-            className="h-full bg-primary transition-all duration-1000" 
-            style={{ width: (totalRecaudado + pendienteCobro) > 0 ? `${(totalRecaudado / (totalRecaudado + pendienteCobro)) * 100}%` : '0%' }}
-          ></div>
+        {/* Global Progress Bar embedded at the bottom of the banner - 100% Stacked Bar */}
+        <div className="h-4 w-full bg-surface-variant flex relative group">
+          {(() => {
+            const total = totalRecaudado + pendienteCobro + deudaVencida;
+            if (total === 0) return <div className="h-full w-full bg-surface-variant"></div>;
+            
+            const wRecaudado = (totalRecaudado / total) * 100;
+            const wPendiente = (pendienteCobro / total) * 100;
+            const wVencida = (deudaVencida / total) * 100;
+            
+            return (
+              <>
+                {wRecaudado > 0 && (
+                  <div 
+                    className="h-full bg-primary transition-all duration-1000 flex items-center justify-center relative overflow-hidden" 
+                    style={{ width: `${wRecaudado}%` }}
+                    title={`Recaudado: ${wRecaudado.toFixed(1)}%`}
+                  >
+                    {wRecaudado > 5 && <span className="text-[10px] text-white font-bold">{wRecaudado.toFixed(1)}%</span>}
+                  </div>
+                )}
+                {wPendiente > 0 && (
+                  <div 
+                    className="h-full bg-tertiary transition-all duration-1000 flex items-center justify-center relative overflow-hidden" 
+                    style={{ width: `${wPendiente}%` }}
+                    title={`Pendiente: ${wPendiente.toFixed(1)}%`}
+                  >
+                    {wPendiente > 5 && <span className="text-[10px] text-white font-bold">{wPendiente.toFixed(1)}%</span>}
+                  </div>
+                )}
+                {wVencida > 0 && (
+                  <div 
+                    className="h-full bg-error transition-all duration-1000 flex items-center justify-center relative overflow-hidden" 
+                    style={{ width: `${wVencida}%` }}
+                    title={`Deuda Vencida: ${wVencida.toFixed(1)}%`}
+                  >
+                    {wVencida > 5 && <span className="text-[10px] text-white font-bold">{wVencida.toFixed(1)}%</span>}
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       </div>
 
@@ -665,11 +763,11 @@ const Billing = () => {
               Excel
             </button>
             <button
-              onClick={handleExportExcelSinMedidor}
-              className="flex items-center gap-2 px-md py-2 bg-[#059669]/10 text-[#059669] hover:bg-[#059669]/20 font-bold text-sm rounded-lg transition-colors border border-[#059669]/20 h-[38px]"
+              onClick={() => setShowDeudasModal(true)}
+              className="flex items-center gap-2 px-md py-2 bg-[#ea580c]/10 text-[#ea580c] hover:bg-[#ea580c]/20 font-bold text-sm rounded-lg transition-colors border border-[#ea580c]/20 h-[38px]"
             >
-              <span className="material-symbols-outlined text-[18px]">electric_meter</span>
-              Sin Medidor
+              <span className="material-symbols-outlined text-[18px]">request_quote</span>
+              Reporte Deudas
             </button>
             <button
               onClick={handleExportPDF}
@@ -710,6 +808,7 @@ const Billing = () => {
                 <option value="Pagado">Pagados</option>
                 <option value="Pendiente">Pendientes</option>
                 <option value="Vencido">Vencidos</option>
+                <option value="Anulado">Anulados</option>
               </select>
             </div>
 
@@ -776,9 +875,9 @@ const Billing = () => {
                       {recibo.fecha_vencimiento ? new Date(recibo.fecha_vencimiento).toLocaleDateString('es-PE') : '-'}
                     </td>
                     <td className="px-3 py-2.5 md:px-4 md:py-3 text-center">
-                      <span className={`inline-flex items-center gap-xs px-xs py-[2px] rounded text-[10px] font-bold uppercase tracking-tight ${recibo.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-700' : recibo.estado === 'Pagado' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                      <span className={`inline-flex items-center gap-xs px-xs py-[2px] rounded text-[10px] font-bold uppercase tracking-tight ${recibo.estado === 'Pendiente' ? 'bg-yellow-100 text-yellow-700' : recibo.estado === 'Pagado' ? 'bg-green-100 text-green-700' : recibo.estado === 'Anulado' ? 'bg-gray-200 text-gray-700' : 'bg-red-100 text-red-700'}`}>
                         <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>
-                          {recibo.estado === 'Pagado' ? 'check_circle' : recibo.estado === 'Pendiente' ? 'schedule' : 'error'}
+                          {recibo.estado === 'Pagado' ? 'check_circle' : recibo.estado === 'Pendiente' ? 'schedule' : recibo.estado === 'Anulado' ? 'cancel' : 'error'}
                         </span>
                         {recibo.estado}
                       </span>
@@ -786,37 +885,37 @@ const Billing = () => {
                     <td className="px-3 py-2.5 md:px-4 md:py-3">
                       <div className="flex justify-end gap-sm">
                         <button
-                          onClick={() => handleViewPdf(recibo.id)}
-                          className="text-error hover:bg-error/10 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 transition-colors"
-                          title="Ver PDF"
-                        >
-                          <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
-                          PDF
-                        </button>
-                        <button
-                          onClick={() => handleViewPdfV2(recibo.id)}
-                          className="text-indigo-600 hover:bg-indigo-100 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 transition-colors"
-                          title="Ver PDF V2"
-                        >
-                          <span className="material-symbols-outlined text-[16px]">description</span>
-                          PDF v2
-                        </button>
-                        <button
                           onClick={() => handleViewPdfV3(recibo.id)}
-                          className="text-teal-600 hover:bg-teal-100 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 transition-colors"
-                          title="Ver PDF V3 Premium"
+                          className="group/tooltip relative text-error hover:bg-error/10 p-1.5 rounded-full transition-colors flex items-center justify-center"
                         >
-                          <span className="material-symbols-outlined text-[16px]">verified</span>
-                          V3
+                          <span className="material-symbols-outlined text-[20px]">picture_as_pdf</span>
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-inverse-surface text-inverse-on-surface text-[10px] font-bold tracking-wider rounded opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-lg">
+                            Ver Recibo
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-inverse-surface"></div>
+                          </div>
                         </button>
                         <button
                           onClick={() => handleWhatsApp(recibo)}
-                          className="text-[#25D366] hover:bg-[#25D366]/10 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 transition-colors"
-                          title="Enviar por WhatsApp"
+                          className="group/tooltip relative text-[#25D366] hover:bg-[#25D366]/10 p-1.5 rounded-full transition-colors flex items-center justify-center"
                         >
-                          <span className="material-symbols-outlined text-[16px]">chat</span>
-                          WhatsApp
+                          <span className="material-symbols-outlined text-[20px]">chat</span>
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-inverse-surface text-inverse-on-surface text-[10px] font-bold tracking-wider rounded opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-lg">
+                            Enviar por WhatsApp
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-inverse-surface"></div>
+                          </div>
                         </button>
+                        {recibo.estado !== 'Pagado' && recibo.estado !== 'Anulado' && (
+                          <button
+                            onClick={() => handleOpenRefacturar(recibo.id)}
+                            className="group/tooltip relative text-orange-600 hover:bg-orange-100 p-1.5 rounded-full transition-colors flex items-center justify-center"
+                          >
+                            <span className="material-symbols-outlined text-[20px]">autorenew</span>
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-inverse-surface text-inverse-on-surface text-[10px] font-bold tracking-wider rounded opacity-0 invisible group-hover/tooltip:opacity-100 group-hover/tooltip:visible transition-all duration-200 whitespace-nowrap z-50 pointer-events-none shadow-lg">
+                              Refacturar Recibo
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-inverse-surface"></div>
+                            </div>
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -870,9 +969,16 @@ const Billing = () => {
       </div>
 
       {/* Modal Visor PDF */}
+      <AnimatePresence>
       {isPdfModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div className="bg-surface rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95">
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        >
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+            className="bg-surface rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden"
+          >
             <div className="flex items-center justify-between p-4 border-b border-outline-variant bg-surface-dim">
               <h3 className="font-headline-sm font-bold text-on-surface flex items-center gap-2">
                 <span className="material-symbols-outlined text-error">picture_as_pdf</span>
@@ -907,9 +1013,10 @@ const Billing = () => {
                 </div>
               )}
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* Drawer Detalle de Recibo */}
       {drawerReceiptId && (
@@ -922,6 +1029,169 @@ const Billing = () => {
         selectedPeriodoId={periodoToGenerate}
         periodos={periodos}
       />
+
+      {/* Modal de Reporte de Deudas */}
+      <AnimatePresence>
+      {showDeudasModal && (
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+        >
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+            className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden"
+          >
+            <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                <span className="material-symbols-outlined text-[#ea580c]">request_quote</span>
+                Generar Reporte de Deudas
+              </h3>
+              <button 
+                onClick={() => setShowDeudasModal(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <p className="text-sm text-slate-600 mb-6">
+                Seleccione el alcance del reporte de deudas en Excel. Puede descargar solo las deudas del periodo actualmente filtrado o el historial completo.
+              </p>
+              
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={() => handleExportExcelDeudas('mensual')}
+                  className="w-full flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:border-[#ea580c] hover:bg-[#ea580c]/5 transition-all text-left group"
+                >
+                  <div>
+                    <div className="font-semibold text-slate-800 group-hover:text-[#ea580c] transition-colors">
+                      Deudas del Periodo Actual
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      {filterMes === 'Todos' || filterMes === 'TodosHistorico' ? 'Actualmente viendo todos los periodos' : `Periodo: ${filterMes}`}
+                    </div>
+                  </div>
+                  <span className="material-symbols-outlined text-slate-300 group-hover:text-[#ea580c]">chevron_right</span>
+                </button>
+                
+                <button
+                  onClick={() => handleExportExcelDeudas('historico')}
+                  className="w-full flex items-center justify-between p-4 rounded-lg border border-slate-200 hover:border-[#107C41] hover:bg-[#107C41]/5 transition-all text-left group"
+                >
+                  <div>
+                    <div className="font-semibold text-slate-800 group-hover:text-[#107C41] transition-colors">
+                      Historial de Todos los Años
+                    </div>
+                    <div className="text-xs text-slate-500 mt-1">
+                      Descarga todas las deudas vigentes e históricas
+                    </div>
+                  </div>
+                  <span className="material-symbols-outlined text-slate-300 group-hover:text-[#107C41]">history</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+      </AnimatePresence>
+
+      {/* Modal de Refacturación Premium */}
+      <AnimatePresence>
+      {isRefacturarModalOpen && (
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim/60 backdrop-blur-md p-4 transition-all duration-300"
+        >
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+            className="bg-surface-container-lowest rounded-[32px] w-full max-w-lg shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] overflow-hidden flex flex-col border border-outline-variant/30"
+          >
+            {/* Header with gradient */}
+            <div className="relative px-6 py-4 bg-gradient-to-r from-orange-500 to-amber-500 overflow-hidden">
+              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+              <div className="relative z-10 flex items-center justify-between">
+                <div className="flex items-center gap-3 text-white">
+                  <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner border border-white/30">
+                    <span className="material-symbols-outlined text-[24px]">autorenew</span>
+                  </div>
+                  <div>
+                    <h3 className="text-[20px] font-display font-bold leading-tight drop-shadow-sm">Refacturar Recibo</h3>
+                    <p className="text-orange-50 text-xs font-medium opacity-90 mt-0.5">Corrige valores y genera un nuevo documento</p>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setIsRefacturarModalOpen(false)}
+                  className="text-white hover:bg-white/20 p-2 rounded-full transition-all duration-200 flex items-center justify-center"
+                >
+                  <span className="material-symbols-outlined text-[20px]">close</span>
+                </button>
+              </div>
+            </div>
+
+            <form onSubmit={handleRefacturarSubmit} className="p-6 flex flex-col gap-4 bg-white">
+              
+              {/* Elegant Warning Banner */}
+              <div className="flex items-start gap-3 p-3 rounded-xl bg-gradient-to-br from-amber-50 to-orange-50/50 border border-orange-100 shadow-sm">
+                <div className="mt-0.5">
+                  <span className="material-symbols-outlined text-orange-500 text-[20px]">info</span>
+                </div>
+                <div className="text-xs text-on-surface-variant leading-relaxed">
+                  El recibo actual pasará a estado <span className="font-bold text-orange-700 bg-orange-100 px-1.5 py-0.5 rounded mx-0.5">ANULADO</span>. Se emitirá uno nuevo con las tarifas y lecturas más recientes.
+                </div>
+              </div>
+
+              {/* Input Area */}
+              <div className="flex flex-col gap-1.5">
+                <label className="text-[11px] font-bold text-on-surface uppercase tracking-wider pl-1">Motivo de Refacturación <span className="text-error">*</span></label>
+                <div className="relative group">
+                  <textarea
+                    required
+                    rows="2"
+                    className="w-full bg-surface-container-lowest border-2 border-outline-variant/60 rounded-xl p-3 text-sm text-on-surface focus:outline-none focus:border-orange-500 focus:ring-4 focus:ring-orange-500/10 resize-none transition-all duration-300 shadow-inner group-hover:border-outline-variant"
+                    placeholder="Ej. Se corrigió la lectura de Hora Punta que estaba en 0..."
+                    value={refacturarMotivo}
+                    onChange={(e) => setRefacturarMotivo(e.target.value)}
+                  />
+                  <div className="absolute right-3 bottom-3 text-[9px] font-bold text-on-surface-variant/50 uppercase tracking-widest pointer-events-none">
+                    Auditoría
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end gap-2 pt-3 border-t border-outline-variant/30 mt-1">
+                <button
+                  type="button"
+                  onClick={() => setIsRefacturarModalOpen(false)}
+                  className="px-5 py-2 rounded-full font-bold text-xs text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors"
+                  disabled={isRefacturando}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isRefacturando || !refacturarMotivo.trim()}
+                  className="px-6 py-2 rounded-full font-bold text-xs bg-gradient-to-r from-orange-500 to-orange-600 text-white hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-all duration-300 shadow-[0_4px_10px_-4px_rgba(234,88,12,0.4)] hover:shadow-[0_8px_16px_-4px_rgba(234,88,12,0.5)] hover:-translate-y-0.5 active:translate-y-0"
+                >
+                  {isRefacturando ? (
+                    <>
+                      <span className="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+                      Procesando...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[16px]">autorenew</span>
+                      Confirmar
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </motion.div>
+      )}
+      </AnimatePresence>
     </main>
   );
 };

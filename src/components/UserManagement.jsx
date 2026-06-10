@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'sonner';
 import api from '../api/axiosConfig';
@@ -334,9 +335,16 @@ const UserManagement = () => {
       </div>
 
       {/* 1. Modal: Añadir Usuario */}
+      <AnimatePresence>
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-md bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <form onSubmit={handleCreateSubmit} className="bg-surface border border-outline-variant rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-md bg-black/60 backdrop-blur-sm"
+        >
+          <motion.form 
+            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+            onSubmit={handleCreateSubmit} className="bg-surface border border-outline-variant rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+          >
             <div className="px-lg py-md border-b-0 bg-slate-800 flex justify-between items-center">
               <h3 className="font-headline-sm font-bold text-white flex items-center gap-2">
                 <span className="material-symbols-outlined text-white">person_add</span>
@@ -417,14 +425,22 @@ const UserManagement = () => {
                 {isSaving ? 'Guardando...' : 'Crear Usuario'}
               </button>
             </div>
-          </form>
-        </div>
+          </motion.form>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* 2. Modal: Editar Usuario */}
+      <AnimatePresence>
       {editingUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-md bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <form onSubmit={handleEditSubmit} className="bg-surface border border-outline-variant rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200">
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-md bg-black/60 backdrop-blur-sm"
+        >
+          <motion.form 
+            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+            onSubmit={handleEditSubmit} className="bg-surface border border-outline-variant rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+          >
             <div className="px-lg py-md border-b-0 bg-slate-800 flex justify-between items-center">
               <h3 className="font-headline-sm font-bold text-white flex items-center gap-2">
                 <span className="material-symbols-outlined text-white">edit</span>
@@ -490,14 +506,22 @@ const UserManagement = () => {
                 {isSaving ? 'Guardando...' : 'Guardar Cambios'}
               </button>
             </div>
-          </form>
-        </div>
+          </motion.form>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* 3. Modal: Confirmación de Acción */}
+      <AnimatePresence>
       {confirmModal.show && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-md bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-surface border border-outline-variant rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[60] flex items-center justify-center p-md bg-black/60 backdrop-blur-sm"
+        >
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+            className="bg-surface border border-outline-variant rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
+          >
             <div className={`px-lg py-md flex justify-between items-center border-b-0 ${confirmModal.isActivating ? 'bg-primary' : 'bg-error'}`}>
               <h3 className="font-headline-sm font-bold text-white flex items-center gap-2">
                 <span className="material-symbols-outlined text-white">
@@ -540,9 +564,10 @@ const UserManagement = () => {
                 {confirmModal.isActivating ? 'Sí, reactivar' : 'Sí, desactivar'}
               </button>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
     </main>
   );

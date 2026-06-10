@@ -94,6 +94,17 @@ export default {
         "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
         "display": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
         "data-mono": ["14px", {"lineHeight": "20px", "fontWeight": "500"}]
+      },
+      keyframes: {
+        blob: {
+          "0%": { transform: "translate(0px, 0px) scale(1)" },
+          "33%": { transform: "translate(30px, -50px) scale(1.1)" },
+          "66%": { transform: "translate(-20px, 20px) scale(0.9)" },
+          "100%": { transform: "translate(0px, 0px) scale(1)" },
+        }
+      },
+      animation: {
+        blob: "blob 7s infinite"
       }
     },
   },

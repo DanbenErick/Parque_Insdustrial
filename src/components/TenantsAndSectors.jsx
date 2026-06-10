@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import api from '../api/axiosConfig';
 import { toast } from 'sonner';
 import { jsPDF } from 'jspdf';
@@ -15,7 +15,7 @@ const TenantsAndSectors = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [confirmModal, setConfirmModal] = useState({ show: false, user: null, isActivating: false });
   const [isSavingToggle, setIsSavingToggle] = useState(false);
-  
+
   // PDF Viewer State
   const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -37,7 +37,7 @@ const TenantsAndSectors = () => {
     nombre_razonsocial: '',
     documento_identidad: '',
     direccion: '',
-    actividad: '', 
+    actividad: '',
     correo: '',
     telefono: '',
     clave_acceso: '',
@@ -103,9 +103,9 @@ const TenantsAndSectors = () => {
       if (query.trim()) url += `&search=${encodeURIComponent(query.trim())}`;
       if (estado !== 'Todos') url += `&estado=${estado === 'Activos' ? 'activos' : 'suspendidos'}`;
       if (rubro !== 'Todos') url += `&rubro=${encodeURIComponent(rubro)}`;
-        
+
       const response = await api.get(url);
-      const propietarios = response.data.map(tenant => {
+      const socios = response.data.map(tenant => {
         let parsedMedidores = [];
         try {
           if (tenant.medidores) {
@@ -114,10 +114,10 @@ const TenantsAndSectors = () => {
               parsedMedidores = parsed;
             }
           }
-        } catch (e) {}
+        } catch (e) { }
         return { ...tenant, parsedMedidores };
       });
-      setTenants(propietarios);
+      setTenants(socios);
 
       // Si no hay búsqueda ni filtros, actualizamos las estadísticas globales
       if (!query.trim() && estado === 'Todos' && rubro === 'Todos') {
@@ -133,8 +133,8 @@ const TenantsAndSectors = () => {
         }
       }
     } catch (error) {
-      console.error("Error al obtener propietarios:", error);
-      toast.error("No se pudieron cargar los propietarios");
+      console.error("Error al obtener socios:", error);
+      toast.error("No se pudieron cargar los socios");
     } finally {
       setIsLoading(false);
     }
@@ -157,7 +157,7 @@ const TenantsAndSectors = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    
+
     let finalValue = value;
     // Limitar caracteres
     if (name === 'documento_identidad') {
@@ -169,7 +169,7 @@ const TenantsAndSectors = () => {
     }
 
     setFormData(prev => ({ ...prev, [name]: finalValue }));
-    
+
     // Validar en tiempo real
     const errorMsg = validateField(name, finalValue);
     setErrors(prev => ({ ...prev, [name]: errorMsg }));
@@ -183,8 +183,8 @@ const TenantsAndSectors = () => {
       return toast.error("Todos los campos de la empresa y del representante son obligatorios.");
     }
 
-    if (!editId && (!formData.medidores || formData.medidores.length === 0 || !formData.medidores[0].num_serie)) {
-      return toast.error("El número de serie del medidor es obligatorio para nuevos socios.");
+    if (!editId && (!formData.medidores || formData.medidores.length === 0 || (!formData.medidores[0].num_serie && formData.medidores[0].tipo !== 'Sin Medidor'))) {
+      return toast.error("El número de serie del medidor es obligatorio para nuevos socios (a menos que indique 'Sin Medidor').");
     }
 
     if (formData.documento_identidad.length !== 8 && formData.documento_identidad.length !== 11) {
@@ -198,15 +198,15 @@ const TenantsAndSectors = () => {
         rol_id: 3,
         actividad_rubro: formData.actividad
       };
-      
+
       if (!editId) {
-        payload.clave_acceso = formData.clave_acceso || '123456';
+        payload.clave_acceso = '000000'; // Contraseña por defecto
         await api.post('/usuarios', payload);
-        toast.success("Propietario registrado exitosamente.");
+        toast.success("Socio registrado exitosamente.");
       } else {
         if (!formData.clave_acceso) delete payload.clave_acceso;
         await api.put(`/usuarios/${editId}`, payload);
-        toast.success("Propietario actualizado exitosamente.");
+        toast.success("Socio actualizado exitosamente.");
       }
 
       setIsModalOpen(false);
@@ -217,7 +217,7 @@ const TenantsAndSectors = () => {
       setErrors({});
       fetchTenants();
     } catch (error) {
-      toast.error(error.response?.data?.error || "Error al registrar propietario");
+      toast.error(error.response?.data?.error || "Error al registrar socio");
     } finally {
       setIsSubmitting(false);
     }
@@ -247,7 +247,7 @@ const TenantsAndSectors = () => {
           parsedMedidores = parsed;
         }
       }
-    } catch (e) {}
+    } catch (e) { }
 
     setFormData({
       nombre_razonsocial: tenant.nombre_razonsocial,
@@ -282,7 +282,26 @@ const TenantsAndSectors = () => {
       };
 
       await api.put(`/usuarios/${user.id}`, toggleData);
-      toast.success(isActivating ? 'Conexión reactivada' : 'Servicio cortado exitosamente');
+      toast.custom((t) => (
+        <div className="bg-surface border-l-4 border-outline-variant shadow-lg rounded-r-lg p-4 flex items-start gap-3 w-[350px] animate-in slide-in-from-top-5" style={{ borderLeftColor: isActivating ? '#059669' : '#d97706' }}>
+          <div className={`mt-0.5 w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isActivating ? 'bg-[#059669]/10 text-[#059669]' : 'bg-amber-100 text-amber-700'}`}>
+            <span className="material-symbols-outlined text-[18px]">
+              {isActivating ? 'power' : 'power_off'}
+            </span>
+          </div>
+          <div className="flex-1">
+            <h4 className="font-bold text-sm text-on-surface">
+              {isActivating ? 'Conexión Reactivada' : 'Servicio Suspendido'}
+            </h4>
+            <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
+              El suministro de <strong className="text-on-surface">{user.nombre_razonsocial}</strong> ha sido actualizado con éxito.
+            </p>
+          </div>
+          <button onClick={() => toast.dismiss(t)} className="text-on-surface-variant hover:text-on-surface transition-colors">
+            <span className="material-symbols-outlined text-[16px]">close</span>
+          </button>
+        </div>
+      ), { duration: 5000, position: 'top-center' });
       fetchTenants();
     } catch (error) {
       toast.error(error.message);
@@ -313,14 +332,14 @@ const TenantsAndSectors = () => {
         'Nombre de Empresa': t.nombre_razonsocial,
         'RUC': t.documento_identidad,
         'Dirección': t.direccion || 'N/A',
-        'Actividad / Cargo': t.cargo_representante || 'General',
+        'Actividad / Representante': t.cargo_representante || 'General',
         'Estado': t.es_activo ? 'Activo' : 'Suspendido / Cortado'
       }));
 
       const worksheet = XLSX.utils.json_to_sheet(data);
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Propietarios');
-      XLSX.writeFile(workbook, `Propietarios_Empadronados_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Socios');
+      XLSX.writeFile(workbook, `Socios_Empadronados_${new Date().toISOString().slice(0, 10)}.xlsx`);
       toast.success('Excel descargado exitosamente');
     } catch (error) {
       toast.error('Error al exportar a Excel');
@@ -335,7 +354,7 @@ const TenantsAndSectors = () => {
     try {
       setIsGeneratingPdf(true);
       const doc = new jsPDF({ orientation: 'landscape' });
-      
+
       // Load Logo.png to Base64
       let logoData = null;
       let logoRatio = 1;
@@ -347,7 +366,7 @@ const TenantsAndSectors = () => {
           reader.onloadend = () => resolve(reader.result);
           reader.readAsDataURL(blob);
         });
-        
+
         // Obtener dimensiones reales para evitar que se achate
         logoRatio = await new Promise((resolve) => {
           const img = new Image();
@@ -357,10 +376,10 @@ const TenantsAndSectors = () => {
       } catch (e) {
         console.warn("No se pudo cargar el logo", e);
       }
-      
+
       // Colores corporativos
       const primaryColor = [0, 51, 102]; // Azul Marino corporativo muy elegante
-      
+
       // Cabecera Blanca Limpia (Membrete)
       let titleStartX = 14;
       if (logoData) {
@@ -370,25 +389,25 @@ const TenantsAndSectors = () => {
         doc.addImage(logoData, 'PNG', 14, 10, calcWidth, targetHeight);
         titleStartX = 14 + calcWidth + 8; // Dejar 8 puntos de separación
       }
-      
+
       // Título Principal
       doc.setFontSize(22);
       doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
       doc.setFont("helvetica", "bold");
       doc.text('PARQUE INDUSTRIAL JICAMARCA', titleStartX, 20);
-      
+
       // Subtítulo
       doc.setFontSize(11);
       doc.setTextColor(100, 116, 139); // slate-500
       doc.setFont("helvetica", "normal");
-      doc.text('Directorio Oficial de Socios y Propietarios', titleStartX, 26);
+      doc.text('Directorio Oficial de Socios y Socios', titleStartX, 26);
 
       // Fecha y Datos de Cabecera (Alineados a la derecha)
       doc.setFontSize(9);
       doc.setTextColor(100, 116, 139);
       doc.text(`Generado el: ${new Date().toLocaleString('es-PE')}`, 282, 20, { align: 'right' });
       doc.text(`Total Registros: ${filteredTenants.length}`, 282, 26, { align: 'right' });
-      
+
       // Generación de Tabla con AutoTable
       autoTable(doc, {
         startY: 38,
@@ -443,12 +462,12 @@ const TenantsAndSectors = () => {
           doc.setFontSize(8);
           doc.setTextColor(148, 163, 184); // slate-400
           doc.setFont("helvetica", "italic");
-          
+
           doc.text(`Página ${data.pageNumber}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
           doc.text('Documento Confidencial - Uso Interno Exclusivo', doc.internal.pageSize.width - data.settings.margin.right, doc.internal.pageSize.height - 10, { align: 'right' });
         }
       });
-      
+
       // En lugar de descargar, generamos un Blob URL para el iframe
       const blobUrl = doc.output('bloburl');
       setPdfBlobUrl(blobUrl);
@@ -462,60 +481,99 @@ const TenantsAndSectors = () => {
   };
 
   return (
-    <main className={`p-4 md:p-xl space-y-6 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow transition-opacity duration-300 ${isLoading && tenants.length === 0 ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
+    <main className={`p-4 md:p-6 space-y-4 max-w-[1600px] mx-auto w-full flex-grow transition-opacity duration-300 ${isLoading && tenants.length === 0 ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
         <div>
-          <h2 className="font-headline-lg text-headline-lg text-on-surface font-bold">Directorio de Socios y Conexiones</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant">Gestión de propietarios de predios, conexiones eléctricas y estado de suministro.</p>
+          <h2 className="text-2xl text-on-surface font-bold leading-tight">Directorio de Socios y Conexiones</h2>
+          <p className="text-sm text-on-surface-variant">Gestión de socios de predios, conexiones eléctricas y estado de suministro.</p>
         </div>
         <div className="flex flex-wrap gap-md">
           <div className="flex items-end">
             <button
               onClick={handleOpenNew}
-              className="flex items-center gap-xs px-md py-sm bg-primary text-on-primary font-semibold rounded-md hover:opacity-90 transition-all shadow-md h-[42px]"
+              className="flex items-center gap-1.5 px-4 py-1.5 bg-primary text-on-primary font-bold rounded-md hover:opacity-90 transition-all shadow-sm h-8"
             >
-              <span className="material-symbols-outlined text-sm">add</span>
-              <span className="font-bold text-body-sm">Registrar Socio</span>
+              <span className="material-symbols-outlined text-[16px]">add</span>
+              <span className="text-xs">Registrar Socio</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* KPI Cards Section */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-md">
-        {/* KPI 1: Total Socios */}
-        <div className="bg-white border border-outline-variant rounded-xl p-md shadow-sm flex items-center justify-between transition-transform hover:-translate-y-0.5 duration-200">
-          <div className="space-y-1">
-            <p className="font-label-caps text-label-caps text-on-surface-variant uppercase">Total de Socios</p>
-            <h3 className="font-data-mono text-headline-md text-on-surface font-bold">{globalStats.total}</h3>
-            <p className="text-[11px] text-on-surface-variant">Propietarios empadronados</p>
+      {/* Resumen y Distribución de Estado de Suministro */}
+      <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-md">
+        {/* KPI Cards Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-outline-variant">
+          {/* KPI 1: Total Socios */}
+          <div className="p-4 flex items-center justify-between transition-colors hover:bg-surface-container-lowest">
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Total de Socios</p>
+              <h3 className="font-data-mono text-2xl text-on-surface font-bold leading-none">{globalStats.total}</h3>
+              <p className="text-[11px] text-on-surface-variant">Socios empadronados</p>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <span className="material-symbols-outlined text-[20px]">group</span>
+            </div>
           </div>
-          <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-            <span className="material-symbols-outlined text-[28px]">group</span>
+
+          {/* KPI 2: Conexiones Activas */}
+          <div className="p-4 flex items-center justify-between transition-colors hover:bg-surface-container-lowest">
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Conexiones Activas</p>
+              <h3 className="font-data-mono text-2xl text-green-600 font-bold leading-none">{globalStats.activos}</h3>
+              <p className="text-[11px] text-on-surface-variant">Con suministro activo</p>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+              <span className="material-symbols-outlined text-[20px]">bolt</span>
+            </div>
+          </div>
+
+          {/* KPI 3: Conexiones Suspendidas o Cortadas */}
+          <div className="p-4 flex items-center justify-between transition-colors hover:bg-surface-container-lowest">
+            <div className="space-y-0.5">
+              <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Suspendidas / Cortadas</p>
+              <h3 className="font-data-mono text-2xl text-error font-bold leading-none">{globalStats.inactivos}</h3>
+              <p className="text-[11px] text-on-surface-variant">Cortes o suspensiones de luz</p>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-error">
+              <span className="material-symbols-outlined text-[20px]">power_off</span>
+            </div>
           </div>
         </div>
 
-        {/* KPI 2: Conexiones Activas */}
-        <div className="bg-white border border-outline-variant rounded-xl p-md shadow-sm flex items-center justify-between transition-transform hover:-translate-y-0.5 duration-200">
-          <div className="space-y-1">
-            <p className="font-label-caps text-label-caps text-on-surface-variant uppercase">Conexiones Activas</p>
-            <h3 className="font-data-mono text-headline-md text-green-600 font-bold">{globalStats.activos}</h3>
-            <p className="text-[11px] text-on-surface-variant">Con suministro activo</p>
-          </div>
-          <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
-            <span className="material-symbols-outlined text-[28px]">bolt</span>
-          </div>
-        </div>
-
-        {/* KPI 3: Conexiones Suspendidas o Cortadas */}
-        <div className="bg-white border border-outline-variant rounded-xl p-md shadow-sm flex items-center justify-between transition-transform hover:-translate-y-0.5 duration-200">
-          <div className="space-y-1">
-            <p className="font-label-caps text-label-caps text-on-surface-variant uppercase">Suspendidas / Cortadas</p>
-            <h3 className="font-data-mono text-headline-md text-error font-bold">{globalStats.inactivos}</h3>
-            <p className="text-[11px] text-on-surface-variant">Cortes o suspensiones de luz</p>
-          </div>
-          <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-error">
-            <span className="material-symbols-outlined text-[28px]">power_off</span>
+        {/* Gráfico de Barras de Conexiones */}
+        <div className="border-t border-outline-variant bg-surface-container-lowest flex flex-col">
+          <div className="h-4 w-full bg-surface-variant flex relative group">
+            {(() => {
+              const total = globalStats.activos + globalStats.inactivos;
+              if (total === 0) return <div className="h-full w-full bg-surface-variant"></div>;
+              
+              const wActivos = (globalStats.activos / total) * 100;
+              const wInactivos = (globalStats.inactivos / total) * 100;
+              
+              return (
+                <>
+                  {wActivos > 0 && (
+                    <div 
+                      className="h-full bg-green-600 transition-all duration-1000 flex items-center justify-center relative overflow-hidden" 
+                      style={{ width: `${wActivos}%` }}
+                      title={`Activas: ${wActivos.toFixed(1)}%`}
+                    >
+                      {wActivos > 5 && <span className="text-[10px] text-white font-mono font-bold tracking-wider">{Math.round(wActivos)}%</span>}
+                    </div>
+                  )}
+                  {wInactivos > 0 && (
+                    <div 
+                      className="h-full bg-red-600 transition-all duration-1000 flex items-center justify-center relative overflow-hidden" 
+                      style={{ width: `${wInactivos}%` }}
+                      title={`Suspendidas/Cortadas: ${wInactivos.toFixed(1)}%`}
+                    >
+                      {wInactivos > 5 && <span className="text-[10px] text-white font-mono font-bold tracking-wider">{Math.round(wInactivos)}%</span>}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       </div>
@@ -523,11 +581,11 @@ const TenantsAndSectors = () => {
       {/* Active Members Table */}
       <section className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-md">
         {/* Cabecera Principal */}
-        <div className="px-lg py-md border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-md bg-surface-container-low">
+        <div className="px-4 py-2 border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-surface-container-low">
           <div className="flex items-center">
-            <h4 className="font-headline-sm text-headline-sm text-on-surface font-bold">Propietarios Empadronados</h4>
+            <h4 className="text-base text-on-surface font-bold">Socios Empadronados</h4>
           </div>
-          <div className="flex flex-wrap items-center gap-sm w-full lg:w-auto">
+          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
             {/* Buscador */}
             <div className="relative flex-grow md:flex-grow-0">
               <input
@@ -536,40 +594,40 @@ const TenantsAndSectors = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSearchClick()}
-                className="pl-4 pr-10 py-2 border border-outline-variant rounded-lg font-body-sm text-body-sm bg-white focus:border-primary focus:ring-1 focus:ring-primary w-full md:w-[260px] transition-all h-[38px]"
+                className="pl-3 pr-8 py-1.5 border border-outline-variant rounded-md text-xs bg-white focus:border-primary focus:ring-1 focus:ring-primary w-full md:w-[220px] transition-all h-8"
               />
-              <button 
+              <button
                 onClick={handleSearchClick}
-                className="absolute right-1 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center w-8 h-8 rounded-md hover:bg-surface-container"
+                className="absolute right-1 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center w-6 h-6 rounded hover:bg-surface-container"
               >
-                <span className="material-symbols-outlined text-[18px]">search</span>
+                <span className="material-symbols-outlined text-[16px]">search</span>
               </button>
             </div>
-            
+
             {/* Botón Filtros */}
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-2 px-md py-2 font-bold text-sm rounded-lg transition-colors border h-[38px] ${showFilters ? 'bg-primary/10 text-primary border-primary/20' : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container'}`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 font-bold text-xs rounded-md transition-colors border h-8 ${showFilters ? 'bg-primary/10 text-primary border-primary/20' : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container'}`}
             >
-              <span className="material-symbols-outlined text-[18px]">filter_list</span>
-              Filtros {(filterEstado !== 'Todos' || filterRubro !== 'Todos') && <span className="w-2 h-2 rounded-full bg-primary animate-pulse"></span>}
+              <span className="material-symbols-outlined text-[16px]">filter_list</span>
+              Filtros {(filterEstado !== 'Todos' || filterRubro !== 'Todos') && <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>}
             </button>
 
             {/* Botón Excel */}
             <button
               onClick={handleExportExcel}
-              className="flex items-center gap-2 px-md py-2 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-sm rounded-lg transition-colors border border-[#107C41]/20 h-[38px]"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-xs rounded-md transition-colors border border-[#107C41]/20 h-8"
             >
-              <span className="material-symbols-outlined text-[18px]">table_view</span>
+              <span className="material-symbols-outlined text-[16px]">table_view</span>
               Excel
             </button>
             {/* Botón PDF */}
-            <button 
+            <button
               onClick={handleExportPDF}
               disabled={isGeneratingPdf}
-              className="flex items-center gap-2 px-md py-2 bg-error/10 text-error hover:bg-error/20 font-bold text-sm rounded-lg transition-colors border border-error/20 h-[38px] disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-error/10 text-error hover:bg-error/20 font-bold text-xs rounded-md transition-colors border border-error/20 h-8 disabled:opacity-50"
             >
-              <span className={`material-symbols-outlined text-[18px] ${isGeneratingPdf ? 'animate-spin' : ''}`}>
+              <span className={`material-symbols-outlined text-[16px] ${isGeneratingPdf ? 'animate-spin' : ''}`}>
                 {isGeneratingPdf ? 'sync' : 'picture_as_pdf'}
               </span>
               PDF
@@ -608,9 +666,9 @@ const TenantsAndSectors = () => {
                 <option value="General">General</option>
               </select>
             </div>
-            
+
             {(filterEstado !== 'Todos' || filterRubro !== 'Todos') && (
-              <button 
+              <button
                 onClick={() => { setFilterEstado('Todos'); setFilterRubro('Todos'); }}
                 className="text-xs font-bold text-error hover:underline ml-auto flex items-center gap-1"
               >
@@ -622,95 +680,95 @@ const TenantsAndSectors = () => {
         )}
 
         <div className="overflow-x-auto overflow-y-auto max-h-[500px] custom-scrollbar relative">
-          <table className="w-full text-left zebra-table border-collapse">
+          <table className="w-full min-w-[900px] text-left zebra-table border-collapse">
             <thead className="sticky top-0 z-10 shadow-sm">
-              <tr className="bg-surface-container-low text-on-surface-variant font-label-caps text-[11px] uppercase tracking-wider">
-                <th className="px-lg py-sm font-bold bg-surface-container-low">Nombre de Empresa / Documento</th>
-                <th className="px-lg py-sm font-bold bg-surface-container-low">Dirección</th>
-                <th className="px-lg py-sm font-bold bg-surface-container-low">Medidor</th>
-                <th className="px-lg py-sm font-bold bg-surface-container-low">Actividad / Cargo</th>
-                <th className="px-lg py-sm font-bold bg-surface-container-low">Estado</th>
-                <th className="px-lg py-sm font-bold text-right bg-surface-container-low">Acciones</th>
+              <tr className="bg-surface-container-low text-on-surface-variant text-[10px] uppercase tracking-wider">
+                <th className="px-4 py-2 font-bold bg-surface-container-low">Nombre de Empresa / Documento</th>
+                <th className="px-4 py-2 font-bold bg-surface-container-low">Dirección</th>
+                <th className="px-4 py-2 font-bold bg-surface-container-low">Medidor</th>
+                <th className="px-4 py-2 font-bold bg-surface-container-low">Actividad / Representante</th>
+                <th className="px-4 py-2 font-bold bg-surface-container-low">Estado</th>
+                <th className="px-4 py-2 font-bold text-right bg-surface-container-low">Acciones</th>
               </tr>
             </thead>
             <tbody className="text-body-sm">
               {currentItems.map((tenant) => (
                 <tr key={tenant.id} className="border-b border-outline-variant hover:bg-surface-container-low transition-colors group">
-                  <td className="px-lg py-md">
-                    <div className="flex items-center gap-md">
-                      <div 
-                        className="w-9 h-9 rounded bg-primary-container/20 flex items-center justify-center text-primary font-bold text-xs cursor-pointer hover:bg-primary-container transition-colors"
+                  <td className="px-4 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-8 h-8 rounded bg-primary-container/20 flex items-center justify-center text-primary font-bold text-[10px] cursor-pointer hover:bg-primary-container transition-colors"
                         onClick={() => setDrawerTenant(tenant)}
                         title="Ver Expediente"
                       >
                         {getInitials(tenant.nombre_razonsocial)}
                       </div>
                       <div className="flex flex-col">
-                        <span 
-                          className="font-semibold text-on-surface cursor-pointer hover:text-primary transition-colors"
+                        <span
+                          className="font-bold text-xs text-on-surface cursor-pointer hover:text-primary transition-colors"
                           onClick={() => setDrawerTenant(tenant)}
                         >
                           {tenant.nombre_razonsocial}
                         </span>
-                        <span className="text-[11px] text-on-surface-variant font-data-mono mt-0.5">
+                        <span className="text-[10px] text-on-surface-variant font-data-mono mt-0.5">
                           {tenant.documento_identidad?.length === 8 ? 'DNI' : 'RUC'}: {tenant.documento_identidad}
                         </span>
                         {parseFloat(tenant.deuda_total) > 0 && (
-                          <span className="text-[10px] font-bold text-error bg-error/10 px-2 py-0.5 rounded-sm w-fit mt-1 flex items-center gap-1 border border-error/20">
-                            <span className="material-symbols-outlined text-[12px]">warning</span>
+                          <span className="text-[9px] font-bold text-error bg-error/10 px-1.5 py-0.5 rounded-sm w-fit mt-1 flex items-center gap-1 border border-error/20">
+                            <span className="material-symbols-outlined text-[10px]">warning</span>
                             Deuda: S/ {parseFloat(tenant.deuda_total).toFixed(2)} ({tenant.recibos_pendientes})
                           </span>
                         )}
                         {parseFloat(tenant.saldo_a_favor) > 0 && (
-                          <span className="text-[10px] font-bold text-[#059669] bg-[#059669]/10 px-2 py-0.5 rounded-sm w-fit mt-1 flex items-center gap-1 border border-[#059669]/20">
-                            <span className="material-symbols-outlined text-[12px]">account_balance_wallet</span>
+                          <span className="text-[9px] font-bold text-[#059669] bg-[#059669]/10 px-1.5 py-0.5 rounded-sm w-fit mt-1 flex items-center gap-1 border border-[#059669]/20">
+                            <span className="material-symbols-outlined text-[10px]">account_balance_wallet</span>
                             Saldo a Favor: S/ {parseFloat(tenant.saldo_a_favor).toFixed(2)}
                           </span>
                         )}
                       </div>
                     </div>
                   </td>
-                  <td className="px-lg py-md font-data-mono text-on-surface-variant">{tenant.direccion || 'N/A'}</td>
-                  <td className="px-lg py-md">
+                  <td className="px-4 py-2.5 font-data-mono text-xs text-on-surface-variant">{tenant.direccion || 'N/A'}</td>
+                  <td className="px-4 py-2.5">
                     {tenant.parsedMedidores && tenant.parsedMedidores.length > 0 ? (
                       <div className="flex flex-col gap-1">
                         {tenant.parsedMedidores.map((m, i) => (
-                          <span key={i} className="font-data-mono text-xs font-bold text-primary bg-primary/5 px-2 py-1 rounded border border-primary/20 w-fit">
+                          <span key={i} className="font-data-mono text-[10px] font-bold text-primary bg-primary/5 px-2 py-0.5 rounded border border-primary/20 w-fit">
                             {m.num_serie}
                           </span>
                         ))}
                       </div>
                     ) : (
-                      <span className="text-xs text-on-surface-variant italic">Sin medidor</span>
+                      <span className="text-[10px] text-on-surface-variant italic">Sin medidor</span>
                     )}
                   </td>
-                  <td className="px-lg py-md">
-                    <span className="bg-primary/10 text-primary px-3 py-1 rounded-full text-[11px] font-bold uppercase">{tenant.actividad_rubro || 'General'}</span>
-                    <span className="block text-xs text-on-surface-variant mt-1 font-semibold">{tenant.cargo_representante}</span>
+                  <td className="px-4 py-2.5">
+                    <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-[9px] font-bold uppercase">{tenant.actividad_rubro || 'General'}</span>
+                    <span className="block text-[11px] text-on-surface-variant mt-1 font-semibold">{tenant.cargo_representante}</span>
                   </td>
-                  <td className="px-lg py-md">
-                    <span className={`flex items-center gap-2 text-[12px] font-semibold ${tenant.es_activo ? 'text-green-600' : 'text-error'}`}>
-                      <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  <td className="px-4 py-2.5">
+                    <span className={`flex items-center gap-1 text-[11px] font-bold ${tenant.es_activo ? 'text-green-600' : 'text-error'}`}>
+                      <span className="material-symbols-outlined text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>
                         {tenant.es_activo ? 'check_circle' : 'error'}
                       </span>
                       {tenant.es_activo ? 'Activo' : 'Suspendido / Cortado'}
                     </span>
                   </td>
-                  <td className="px-lg py-md text-right">
+                  <td className="px-4 py-2.5 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <button 
+                      <button
                         onClick={() => handleOpenEdit(tenant)}
-                        className="p-2 rounded-lg transition-colors text-blue-600 hover:bg-blue-50"
+                        className="p-1.5 rounded-md transition-colors text-blue-600 hover:bg-blue-50"
                         title="Editar Socio"
                       >
-                        <span className="material-symbols-outlined text-[20px]">edit</span>
+                        <span className="material-symbols-outlined text-[16px]">edit</span>
                       </button>
-                      <button 
+                      <button
                         onClick={() => toggleUserStatus(tenant)}
-                        className={`p-2 rounded-lg transition-colors ${tenant.es_activo ? 'text-error hover:bg-error/10' : 'text-primary hover:bg-primary/10'}`}
+                        className={`p-1.5 rounded-md transition-colors ${tenant.es_activo ? 'text-error hover:bg-error/10' : 'text-primary hover:bg-primary/10'}`}
                         title={tenant.es_activo ? "Cortar Servicio" : "Reactivar Servicio"}
                       >
-                        <span className="material-symbols-outlined text-[20px]">{tenant.es_activo ? 'power_off' : 'bolt'}</span>
+                        <span className="material-symbols-outlined text-[16px]">{tenant.es_activo ? 'power_off' : 'bolt'}</span>
                       </button>
                     </div>
                   </td>
@@ -726,38 +784,38 @@ const TenantsAndSectors = () => {
         </div>
 
         {/* Controles de Paginación e Información */}
-        <div className="px-lg py-md border-t border-outline-variant bg-surface-container-lowest flex flex-col sm:flex-row justify-between items-center gap-4">
-          <span className="text-xs text-on-surface-variant font-medium">
+        <div className="px-4 py-2 border-t border-outline-variant bg-surface-container-lowest flex flex-col sm:flex-row justify-between items-center gap-4">
+          <span className="text-[11px] text-on-surface-variant font-medium">
             Mostrando {filteredTenants.length > 0 ? indexOfFirstItem + 1 : 0} a {Math.min(indexOfLastItem, filteredTenants.length)} de {filteredTenants.length} registros
           </span>
           {totalPages > 1 && (
-            <div className="flex gap-2">
-              <button 
+            <div className="flex gap-1.5">
+              <button
                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
-                className="px-3 py-1.5 rounded-md border border-outline-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-bold flex items-center gap-1 text-on-surface"
+                className="px-2.5 py-1 rounded-md border border-outline-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-[11px] font-bold flex items-center gap-0.5 text-on-surface"
               >
-                <span className="material-symbols-outlined text-[16px]">chevron_left</span> Anterior
+                <span className="material-symbols-outlined text-[14px]">chevron_left</span> Anterior
               </button>
-              
+
               <div className="flex items-center gap-1">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`w-8 h-8 rounded-md text-xs font-bold transition-colors ${currentPage === page ? 'bg-primary text-white' : 'hover:bg-surface-container text-on-surface-variant'}`}
+                    className={`w-6 h-6 rounded-md text-[11px] font-bold transition-colors ${currentPage === page ? 'bg-primary text-white' : 'hover:bg-surface-container text-on-surface-variant'}`}
                   >
                     {page}
                   </button>
                 ))}
               </div>
 
-              <button 
+              <button
                 onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                 disabled={currentPage === totalPages}
-                className="px-3 py-1.5 rounded-md border border-outline-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-bold flex items-center gap-1 text-on-surface"
+                className="px-2.5 py-1 rounded-md border border-outline-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-[11px] font-bold flex items-center gap-0.5 text-on-surface"
               >
-                Siguiente <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+                Siguiente <span className="material-symbols-outlined text-[14px]">chevron_right</span>
               </button>
             </div>
           )}
@@ -767,7 +825,7 @@ const TenantsAndSectors = () => {
       {/* Tooltip */}
       {tooltip.show && (
         <div
-          className="fixed pointer-events-none bg-inverse-surface text-inverse-on-surface px-md py-sm rounded-lg text-body-sm shadow-xl z-[100] border border-outline"
+          className="fixed pointer-events-none bg-inverse-surface text-inverse-on-surface px-md py-sm rounded-lg text-body-sm shadow-xl z-[100] border border-outline !m-0"
           style={{ left: tooltip.x, top: tooltip.y }}
         >
           <div className="flex flex-col gap-1">
@@ -779,47 +837,59 @@ const TenantsAndSectors = () => {
       )}
 
       {/* Nuevo Socio Modal */}
+      <AnimatePresence>
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-          <div className="bg-surface-container-lowest w-full max-w-2xl rounded-xl shadow-2xl overflow-hidden border border-outline-variant flex flex-col max-h-[90vh]">
-            <div className="flex justify-between items-center px-lg py-md border-b-0 bg-slate-800 text-white">
-              <div>
-              <h3 className="font-headline-sm text-headline-sm text-white font-bold">{editId ? 'Editar Propietario' : 'Registrar Nuevo Propietario'}</h3>
-              <p className="font-body-sm text-body-sm text-white/80">{editId ? 'Modifique los datos comerciales o de contacto.' : 'Cree un nuevo registro corporativo y su usuario administrador.'}</p>
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-0 md:p-4 !m-0"
+        >
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+            className="bg-surface-container-lowest w-full h-full md:h-auto max-w-2xl md:rounded-xl shadow-2xl overflow-hidden border-0 md:border border-outline-variant flex flex-col max-h-screen md:max-h-[90vh]"
+          >
+            <div className="flex justify-between items-start px-md py-3 border-b border-outline-variant bg-surface-container-lowest">
+              <div className="flex gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mt-0.5 flex-shrink-0">
+                  <span className="material-symbols-outlined text-[18px]">{editId ? 'edit_document' : 'add_business'}</span>
+                </div>
+                <div>
+                  <h3 className="text-base text-on-surface font-bold leading-tight">{editId ? 'Editar Socio' : 'Registrar Nuevo Socio'}</h3>
+                  <p className="text-[11px] text-on-surface-variant mt-0.5">{editId ? 'Modifique los datos comerciales o de contacto.' : 'Cree un nuevo registro corporativo y su usuario administrador.'}</p>
+                </div>
               </div>
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="p-xs hover:bg-white/20 rounded-full transition-colors group"
+                className="p-1 hover:bg-surface-container rounded-full transition-colors text-on-surface-variant flex-shrink-0"
               >
-                <span className="material-symbols-outlined text-white/80 group-hover:text-white transition-colors">close</span>
+                <span className="material-symbols-outlined text-[20px]">close</span>
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-lg custom-scrollbar">
-              <form className="space-y-lg" id="tenant-form" onSubmit={handleRegister}>
+            <div className="flex-1 overflow-y-auto p-md custom-scrollbar">
+              <form className="space-y-md" id="tenant-form" onSubmit={handleRegister}>
                 {/* Section 1: Datos de la Empresa */}
-                <div className="space-y-md">
-                  <div className="flex items-center gap-sm text-primary">
-                    <span className="material-symbols-outlined text-[20px]">factory</span>
-                    <span className="font-label-caps text-label-caps font-bold">DATOS DE LA EMPRESA</span>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-primary">
+                    <span className="material-symbols-outlined text-[18px]">factory</span>
+                    <span className="font-label-caps text-[11px] font-bold">DATOS DE LA EMPRESA</span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-                    <div className="flex flex-col gap-xs">
-                      <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">Nombre o Razón Social *</label>
-                      <input name="nombre_razonsocial" value={formData.nombre_razonsocial} onChange={handleInputChange} required className="border border-outline-variant rounded px-md py-sm font-body-md focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all" placeholder="Ej. Alimentos del Sol S.A." type="text" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold text-on-surface-variant">Nombre o Razón Social *</label>
+                      <input name="nombre_razonsocial" value={formData.nombre_razonsocial} onChange={handleInputChange} required className="border border-outline-variant rounded px-3 py-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all" placeholder="Ej. Alimentos del Sol S.A." type="text" />
                     </div>
-                    <div className="flex flex-col gap-xs">
-                      <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">RUC o DNI *</label>
-                      <input name="documento_identidad" value={formData.documento_identidad} onChange={handleInputChange} required className={`border rounded px-md py-sm font-data-mono transition-all ${errors.documento_identidad ? 'border-error focus:border-error focus:ring-1 focus:ring-error/20 bg-error/5' : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white'}`} placeholder="8 u 11 dígitos" type="text" />
-                      {errors.documento_identidad && <span className="text-[11px] text-error font-bold">{errors.documento_identidad}</span>}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold text-on-surface-variant">RUC o DNI *</label>
+                      <input name="documento_identidad" value={formData.documento_identidad} onChange={handleInputChange} required className={`border rounded px-3 py-1.5 font-data-mono text-sm transition-all ${errors.documento_identidad ? 'border-error focus:border-error focus:ring-1 focus:ring-error/20 bg-error/5' : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white'}`} placeholder="8 u 11 dígitos" type="text" />
+                      {errors.documento_identidad && <span className="text-[10px] text-error font-bold">{errors.documento_identidad}</span>}
                     </div>
-                    <div className="flex flex-col gap-xs">
-                      <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">Dirección *</label>
-                      <input type="text" name="direccion" value={formData.direccion} onChange={handleInputChange} required className="border border-outline-variant rounded px-md py-sm font-body-md focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all" placeholder="Av. Principal, Mz A" />
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold text-on-surface-variant">Dirección *</label>
+                      <input type="text" name="direccion" value={formData.direccion} onChange={handleInputChange} required className="border border-outline-variant rounded px-3 py-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all" placeholder="Av. Principal, Mz A" />
                     </div>
-                    <div className="flex flex-col gap-xs">
-                      <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">Tipo de Actividad *</label>
-                      <select name="actividad" value={formData.actividad} onChange={handleInputChange} required className="border border-outline-variant rounded px-md py-sm font-body-md focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all appearance-none">
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold text-on-surface-variant">Tipo de Actividad *</label>
+                      <select name="actividad" value={formData.actividad} onChange={handleInputChange} required className="border border-outline-variant rounded px-3 py-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all appearance-none">
                         <option disabled value="">Seleccione rubro...</option>
                         <option value="Alimentos">Alimentos</option>
                         <option value="Manufactura">Manufactura</option>
@@ -836,108 +906,108 @@ const TenantsAndSectors = () => {
                 <div className="h-[1px] bg-outline-variant/30"></div>
 
                 {/* Section 2: Datos del Usuario Administrador */}
-                <div className="space-y-md">
-                  <div className="flex items-center gap-sm text-primary">
-                    <span className="material-symbols-outlined text-[20px]">person_add</span>
-                    <span className="font-label-caps text-label-caps font-bold">DATOS DEL USUARIO (ADMINISTRADOR)</span>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-primary">
+                    <span className="material-symbols-outlined text-[18px]">person_add</span>
+                    <span className="font-label-caps text-[11px] font-bold">DATOS DEL USUARIO (ADMINISTRADOR)</span>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
-                    <div className="flex flex-col gap-xs md:col-span-2">
-                      <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">Nombre Completo del Representante *</label>
-                      <input name="cargo_representante" value={formData.cargo_representante} onChange={handleInputChange} required className="border border-outline-variant rounded px-md py-sm font-body-md focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all" placeholder="Nombre completo" type="text" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="flex flex-col gap-1 md:col-span-2">
+                      <label className="text-xs font-semibold text-on-surface-variant">Nombre Completo del Representante *</label>
+                      <input name="cargo_representante" value={formData.cargo_representante} onChange={handleInputChange} required className="border border-outline-variant rounded px-3 py-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all" placeholder="Nombre completo" type="text" />
                     </div>
-                    <div className="flex flex-col gap-xs">
-                      <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">Correo Electrónico *</label>
-                      <input name="correo" value={formData.correo} onChange={handleInputChange} required className={`border rounded px-md py-sm font-body-md transition-all ${errors.correo ? 'border-error focus:border-error focus:ring-1 focus:ring-error/20 bg-error/5' : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white'}`} placeholder="email@empresa.com" type="email" />
-                      {errors.correo && <span className="text-[11px] text-error font-bold">{errors.correo}</span>}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold text-on-surface-variant">Correo Electrónico *</label>
+                      <input name="correo" value={formData.correo} onChange={handleInputChange} required className={`border rounded px-3 py-1.5 text-sm transition-all ${errors.correo ? 'border-error focus:border-error focus:ring-1 focus:ring-error/20 bg-error/5' : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white'}`} placeholder="email@empresa.com" type="email" />
+                      {errors.correo && <span className="text-[10px] text-error font-bold">{errors.correo}</span>}
                     </div>
-                    <div className="flex flex-col gap-xs">
-                      <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">Teléfono de Contacto *</label>
-                      <input name="telefono" value={formData.telefono} onChange={handleInputChange} required className={`border rounded px-md py-sm font-body-md transition-all ${errors.telefono ? 'border-error focus:border-error focus:ring-1 focus:ring-error/20 bg-error/5' : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white'}`} placeholder="900 000 000" type="tel" />
-                      {errors.telefono && <span className="text-[11px] text-error font-bold">{errors.telefono}</span>}
+                    <div className="flex flex-col gap-1">
+                      <label className="text-xs font-semibold text-on-surface-variant">Teléfono de Contacto *</label>
+                      <input name="telefono" value={formData.telefono} onChange={handleInputChange} required className={`border rounded px-3 py-1.5 text-sm transition-all ${errors.telefono ? 'border-error focus:border-error focus:ring-1 focus:ring-error/20 bg-error/5' : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white'}`} placeholder="900 000 000" type="tel" />
+                      {errors.telefono && <span className="text-[10px] text-error font-bold">{errors.telefono}</span>}
                     </div>
-                    <div className="flex flex-col gap-xs md:col-span-2">
-                      <div className="bg-surface-container-low p-md border-l-4 border-tertiary-container rounded">
-                        <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant flex items-center gap-xs">
-                          Clave de Acceso al Sistema
-                          <span className="material-symbols-outlined text-[16px]" title="Clave para que el usuario ingrese">info</span>
-                        </label>
-                        <input name="clave_acceso" value={formData.clave_acceso} onChange={handleInputChange} 
-                          className={`mt-xs border rounded px-md py-sm font-data-mono w-full transition-all outline-none ${errors.clave_acceso ? 'border-error focus:border-error focus:ring-1 focus:ring-error/20 bg-error/5 text-error' : (formData.clave_acceso && formData.clave_acceso.length === 6 ? 'border-green-500 focus:border-green-500 focus:ring-1 focus:ring-green-500/20 bg-green-50 text-green-700 font-bold' : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white')}`} 
-                          placeholder="Ej. 123456" type="text" maxLength="6" />
-                        {errors.clave_acceso && <p className="text-[11px] text-error mt-xs font-bold">{errors.clave_acceso}</p>}
-                        {!errors.clave_acceso && <p className="text-[11px] text-on-surface-variant mt-xs italic">Dejar vacío para usar '123456'. Debe tener 6 caracteres.</p>}
-                      </div>
-                    </div>
+
                   </div>
                 </div>
 
                 {/* Section 3: Datos del Medidor */}
                 <>
                   <div className="h-[1px] bg-outline-variant/30"></div>
-                  <div className="space-y-md">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-sm text-primary">
-                        <span className="material-symbols-outlined text-[20px]">speed</span>
-                        <span className="font-label-caps text-label-caps font-bold">MEDIDORES ASIGNADOS</span>
+                      <div className="flex items-center gap-2 text-primary">
+                        <span className="material-symbols-outlined text-[18px]">speed</span>
+                        <span className="font-label-caps text-[11px] font-bold">MEDIDORES ASIGNADOS</span>
                       </div>
                       <button type="button" onClick={() => {
                         setFormData(prev => ({ ...prev, medidores: [...prev.medidores, { num_serie: '', tipo: 'Normal' }] }));
-                      }} className="flex items-center gap-xs px-sm py-xs bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors font-bold text-[12px]">
-                        <span className="material-symbols-outlined text-[16px]">add</span>
+                      }} className="flex items-center gap-1 px-2 py-1 bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors font-bold text-[11px]">
+                        <span className="material-symbols-outlined text-[14px]">add</span>
                         Añadir Medidor
                       </button>
                     </div>
-                    
-                    <div className="flex flex-col gap-sm">
+
+                    <div className="flex flex-col gap-2">
                       {formData.medidores.map((medidor, index) => (
-                        <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-md p-md bg-surface-container-lowest rounded-lg border border-outline-variant relative">
+                        <div key={index} className="grid grid-cols-1 md:grid-cols-12 gap-3 p-3 bg-surface-container-lowest rounded-lg border border-outline-variant relative">
                           {formData.medidores.length > 1 && (
                             <button type="button" onClick={() => {
                               const newMedidores = [...formData.medidores];
                               newMedidores.splice(index, 1);
                               setFormData(prev => ({ ...prev, medidores: newMedidores }));
-                            }} className="absolute top-2 right-2 text-error hover:bg-error/10 p-xs rounded-full">
-                              <span className="material-symbols-outlined text-[18px]">close</span>
+                            }} className="absolute top-1 right-1 text-error hover:bg-error/10 p-1 rounded-full">
+                              <span className="material-symbols-outlined text-[16px]">close</span>
                             </button>
                           )}
-                          <div className="flex flex-col gap-xs md:col-span-7">
-                            <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">Número de Serie {editId && index === 0 ? '' : '*'}</label>
-                            <input value={medidor.num_serie} onChange={(e) => {
-                              const newMedidores = [...formData.medidores];
-                              newMedidores[index].num_serie = e.target.value;
-                              setFormData(prev => ({ ...prev, medidores: newMedidores }));
-                            }} required={!editId || index > 0} className="border border-outline-variant rounded px-md py-sm font-data-mono focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all" placeholder="Ej. MED-00123" type="text" />
+                          <div className="flex flex-col gap-1 md:col-span-7">
+                            <label className="text-xs font-semibold text-on-surface-variant">Número de Serie {index > 0 ? '*' : '(Opcional)'}</label>
+                            <input 
+                              value={medidor.num_serie} 
+                              disabled={medidor.tipo === 'Sin Medidor'}
+                              onChange={(e) => {
+                                const newMedidores = [...formData.medidores];
+                                newMedidores[index].num_serie = e.target.value;
+                                setFormData(prev => ({ ...prev, medidores: newMedidores }));
+                              }} 
+                              required={index > 0 && medidor.tipo !== 'Sin Medidor'} 
+                              className={`border border-outline-variant rounded px-3 py-1.5 font-data-mono text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all ${medidor.tipo === 'Sin Medidor' ? 'bg-surface-container-low text-on-surface-variant/50 cursor-not-allowed' : 'bg-white'}`} 
+                              placeholder={medidor.tipo === 'Sin Medidor' ? 'No aplica' : 'Ej. MED-00123'} 
+                              type="text" 
+                            />
                           </div>
-                          <div className="flex flex-col gap-xs md:col-span-5">
-                            <label className="font-body-sm text-body-sm font-semibold text-on-surface-variant">Tipo de Medidor *</label>
+                          <div className="flex flex-col gap-1 md:col-span-5">
+                            <label className="text-xs font-semibold text-on-surface-variant">Tipo de Medidor *</label>
                             <select value={medidor.tipo} onChange={(e) => {
                               const newMedidores = [...formData.medidores];
                               newMedidores[index].tipo = e.target.value;
+                              if (e.target.value === 'Sin Medidor') {
+                                newMedidores[index].num_serie = ''; // Limpiar serie
+                              }
                               setFormData(prev => ({ ...prev, medidores: newMedidores }));
-                            }} required className="border border-outline-variant rounded px-md py-sm font-body-md focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all appearance-none">
+                            }} required className="border border-outline-variant rounded px-3 py-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all appearance-none">
                               <option value="Normal">Normal</option>
                               <option value="Tiempo Real">Tiempo Real</option>
+                              <option value="Sin Medidor">Sin Medidor</option>
                             </select>
                           </div>
                         </div>
                       ))}
                     </div>
-                    <p className="text-[11px] text-on-surface-variant mt-xs italic">{editId ? 'Puede actualizar, eliminar o asignar medidores a este socio.' : 'El registro de al menos un medidor es obligatorio al crear un nuevo socio.'}</p>
+                    <p className="text-[10px] text-on-surface-variant mt-1 italic">{editId ? 'Puede actualizar, eliminar o asignar medidores a este socio.' : 'Si el socio aún no cuenta con un medidor instalado, seleccione la opción "Sin Medidor".'}</p>
                   </div>
                 </>
               </form>
             </div>
 
-            <div className="px-lg py-md bg-surface-container-high border-t border-outline-variant flex justify-between items-center">
-              <p className="text-[12px] text-on-surface-variant max-w-[200px] leading-tight">
-                El propietario quedará registrado en el directorio.
+            <div className="px-md py-3 bg-surface-container-high border-t border-outline-variant flex flex-col md:flex-row justify-between items-center gap-3">
+              <p className="text-[11px] text-on-surface-variant hidden md:block max-w-[200px] leading-tight">
+                El socio quedará registrado en el directorio.
               </p>
-              <div className="flex gap-md">
+              <div className="flex flex-col-reverse md:flex-row gap-2 w-full md:w-auto">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-lg py-sm border border-outline text-on-surface font-bold rounded-lg hover:bg-surface transition-colors active:scale-95 duration-150"
+                  className="w-full md:w-auto px-4 py-1.5 text-sm border border-outline text-on-surface font-bold rounded-lg hover:bg-surface transition-colors active:scale-95 duration-150"
                 >
                   Cancelar
                 </button>
@@ -945,21 +1015,29 @@ const TenantsAndSectors = () => {
                   type="submit"
                   form="tenant-form"
                   disabled={isSubmitting || Object.values(errors).some(e => e !== '')}
-                  className="px-lg py-sm bg-primary text-on-primary font-bold rounded-lg shadow-sm hover:opacity-90 disabled:opacity-50 active:scale-95 transition-all duration-150 flex items-center gap-sm"
+                  className="w-full md:w-auto px-4 py-1.5 text-sm bg-primary text-on-primary font-bold rounded-lg shadow-sm hover:opacity-90 disabled:opacity-50 active:scale-95 transition-all duration-150 flex justify-center items-center gap-2"
                 >
-                  <span className="material-symbols-outlined text-[18px]">save</span>
+                  <span className="material-symbols-outlined text-[16px]">save</span>
                   {isSubmitting ? 'Guardando...' : (editId ? 'Actualizar Registro' : 'Registrar Conexión')}
                 </button>
               </div>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* Modal Confirmación de Corte/Reactivación */}
+      <AnimatePresence>
       {confirmModal.show && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-md bg-black/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-surface border border-outline-variant rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200">
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[60] flex items-center justify-center p-md bg-black/60 backdrop-blur-sm !m-0"
+        >
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+            className="bg-surface border border-outline-variant rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
+          >
             <div className={`px-lg py-md flex justify-between items-center border-b-0 ${confirmModal.isActivating ? 'bg-primary' : 'bg-error'}`}>
               <h3 className="font-headline-sm font-bold text-white flex items-center gap-2">
                 <span className="material-symbols-outlined text-white">
@@ -974,19 +1052,19 @@ const TenantsAndSectors = () => {
               </p>
               {!confirmModal.isActivating && (
                 <p className="text-xs text-error mt-2 font-bold">
-                  El propietario aparecerá como "Suspendido / Cortado" en todo el sistema.
+                  El socio aparecerá como "Suspendido / Cortado" en todo el sistema.
                 </p>
               )}
             </div>
             <div className="px-lg py-md border-t border-outline-variant bg-surface-container-lowest flex justify-end gap-md">
-              <button 
-                type="button" 
-                onClick={() => setConfirmModal({ show: false, user: null, isActivating: false })} 
+              <button
+                type="button"
+                onClick={() => setConfirmModal({ show: false, user: null, isActivating: false })}
                 className="px-md py-2 font-bold text-on-surface-variant hover:bg-surface-container rounded-lg transition-colors"
               >
                 Cancelar
               </button>
-              <button 
+              <button
                 type="button"
                 onClick={executeToggleUser}
                 disabled={isSavingToggle}
@@ -1002,14 +1080,22 @@ const TenantsAndSectors = () => {
                 {confirmModal.isActivating ? 'Sí, reactivar' : 'Sí, cortar'}
               </button>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* Modal Visor de PDF */}
+      <AnimatePresence>
       {pdfBlobUrl && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="bg-surface w-full max-w-6xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95">
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 !m-0"
+        >
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+            className="bg-surface w-full max-w-6xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+          >
             <div className="px-lg py-sm border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-full bg-error/10 flex items-center justify-center text-error">
@@ -1018,18 +1104,18 @@ const TenantsAndSectors = () => {
                 <h3 className="font-headline-sm font-bold text-on-surface">Visor de Reporte PDF</h3>
               </div>
               <div className="flex gap-2">
-                <a 
-                  href={pdfBlobUrl} 
+                <a
+                  href={pdfBlobUrl}
                   download={`Directorio_PIJ_${new Date().toISOString().slice(0, 10)}.pdf`}
                   className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 flex items-center gap-2 transition-colors"
                 >
                   <span className="material-symbols-outlined text-[18px]">download</span>
                   Descargar PDF
                 </a>
-                <button 
+                <button
                   onClick={() => {
                     setPdfBlobUrl(null);
-                  }} 
+                  }}
                   className="p-2 hover:bg-error/10 hover:text-error text-on-surface-variant rounded-lg transition-colors"
                 >
                   <span className="material-symbols-outlined text-[18px]">close</span>
@@ -1038,34 +1124,35 @@ const TenantsAndSectors = () => {
               </div>
             </div>
             <div className="flex-1 overflow-hidden">
-              <iframe 
-                src={`${pdfBlobUrl}#toolbar=0`} 
+              <iframe
+                src={`${pdfBlobUrl}#toolbar=0`}
                 className="w-full h-full border-none"
                 title="Reporte PDF"
               />
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* Drawer del Expediente del Socio */}
       <AnimatePresence>
         {drawerTenant && (
           <>
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]" 
-              onClick={() => setDrawerTenant(null)} 
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] !m-0"
+              onClick={() => setDrawerTenant(null)}
             />
-            <motion.div 
+            <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ duration: 0.3, ease: 'easeInOut' }}
-              className="fixed inset-y-0 right-0 w-full md:w-[450px] bg-surface shadow-2xl z-[110] flex flex-col border-l border-outline-variant"
+              className="fixed inset-y-0 right-0 w-full md:w-[450px] bg-surface shadow-2xl z-[110] flex flex-col border-l border-outline-variant !m-0"
             >
               {/* Header del Drawer */}
               <div className="px-lg py-md border-b border-outline-variant bg-surface-container-low flex justify-between items-center shadow-sm">
@@ -1077,96 +1164,96 @@ const TenantsAndSectors = () => {
                   <span className="material-symbols-outlined">close</span>
                 </button>
               </div>
-            
-            {/* Cuerpo del Drawer */}
-            <div className="flex-1 overflow-y-auto p-lg custom-scrollbar space-y-6">
-               {/* Perfil Principal */}
-               <div className="flex flex-col items-center text-center space-y-3 bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm">
-                 <div className="w-20 h-20 rounded-full bg-primary/10 border-4 border-primary/20 flex items-center justify-center text-primary font-bold text-2xl shadow-inner">
-                   {getInitials(drawerTenant.nombre_razonsocial)}
-                 </div>
-                 <div>
-                   <h2 className="text-xl font-bold text-on-surface">{drawerTenant.nombre_razonsocial}</h2>
-                   <p className="font-data-mono text-sm text-on-surface-variant mt-1">RUC/DNI: {drawerTenant.documento_identidad}</p>
-                 </div>
-                 <div className="flex items-center gap-2 mt-2">
-                   <span className={`px-3 py-1 rounded-full text-xs font-bold border ${drawerTenant.es_activo ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-error border-red-200'}`}>
-                     {drawerTenant.es_activo ? 'CONEXIÓN ACTIVA' : 'SERVICIO SUSPENDIDO'}
-                   </span>
-                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 uppercase">
-                     {drawerTenant.actividad_rubro || 'GENERAL'}
-                   </span>
-                 </div>
-               </div>
 
-               {/* Situación Financiera */}
-               <div className="space-y-3">
-                 <h4 className="text-sm font-label-caps font-bold text-on-surface-variant uppercase flex items-center gap-2">
-                   <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
-                   Situación Financiera
-                 </h4>
-                 <div className={`p-4 rounded-xl border ${parseFloat(drawerTenant.deuda_total) > 0 ? 'bg-error/5 border-error/20' : 'bg-green-50 border-green-200'}`}>
-                   <div className="flex justify-between items-center">
-                     <div>
-                       <p className={`text-sm font-semibold ${parseFloat(drawerTenant.deuda_total) > 0 ? 'text-error' : 'text-green-700'}`}>
-                         {parseFloat(drawerTenant.deuda_total) > 0 ? 'Deuda Pendiente' : 'Al Día (Sin Deuda)'}
-                       </p>
-                       {parseFloat(drawerTenant.deuda_total) > 0 && (
-                         <p className="text-xs text-on-surface-variant mt-1">
-                           {drawerTenant.recibos_pendientes} recibo(s) sin pagar
-                         </p>
-                       )}
-                     </div>
-                     <div className={`text-2xl font-data-mono font-bold ${parseFloat(drawerTenant.deuda_total) > 0 ? 'text-error' : 'text-green-700'}`}>
-                       S/ {parseFloat(drawerTenant.deuda_total || 0).toFixed(2)}
-                     </div>
-                   </div>
-                 </div>
-               </div>
+              {/* Cuerpo del Drawer */}
+              <div className="flex-1 overflow-y-auto p-lg custom-scrollbar space-y-6">
+                {/* Perfil Principal */}
+                <div className="flex flex-col items-center text-center space-y-3 bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm">
+                  <div className="w-20 h-20 rounded-full bg-primary/10 border-4 border-primary/20 flex items-center justify-center text-primary font-bold text-2xl shadow-inner">
+                    {getInitials(drawerTenant.nombre_razonsocial)}
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-on-surface">{drawerTenant.nombre_razonsocial}</h2>
+                    <p className="font-data-mono text-sm text-on-surface-variant mt-1">RUC/DNI: {drawerTenant.documento_identidad}</p>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className={`px-3 py-1 rounded-full text-xs font-bold border ${drawerTenant.es_activo ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-error border-red-200'}`}>
+                      {drawerTenant.es_activo ? 'CONEXIÓN ACTIVA' : 'SERVICIO SUSPENDIDO'}
+                    </span>
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 uppercase">
+                      {drawerTenant.actividad_rubro || 'GENERAL'}
+                    </span>
+                  </div>
+                </div>
 
-               {/* Datos de Contacto y Representación */}
-               <div className="space-y-3">
-                 <h4 className="text-sm font-label-caps font-bold text-on-surface-variant uppercase flex items-center gap-2">
-                   <span className="material-symbols-outlined text-[18px]">badge</span>
-                   Contacto y Representación
-                 </h4>
-                 <div className="bg-white rounded-xl border border-outline-variant divide-y divide-outline-variant shadow-sm">
-                   <div className="p-3 flex items-start gap-3">
-                     <span className="material-symbols-outlined text-on-surface-variant mt-0.5">person</span>
-                     <div>
-                       <p className="text-xs text-on-surface-variant font-medium">Representante Legal</p>
-                       <p className="text-sm font-semibold text-on-surface">{drawerTenant.cargo_representante || 'No registrado'}</p>
-                     </div>
-                   </div>
-                   <div className="p-3 flex items-start gap-3">
-                     <span className="material-symbols-outlined text-on-surface-variant mt-0.5">call</span>
-                     <div>
-                       <p className="text-xs text-on-surface-variant font-medium">Teléfono Principal</p>
-                       <p className="text-sm font-semibold text-on-surface">{drawerTenant.telefono || 'No registrado'}</p>
-                     </div>
-                   </div>
-                   <div className="p-3 flex items-start gap-3">
-                     <span className="material-symbols-outlined text-on-surface-variant mt-0.5">mail</span>
-                     <div>
-                       <p className="text-xs text-on-surface-variant font-medium">Correo Electrónico</p>
-                       <p className="text-sm font-semibold text-on-surface">{drawerTenant.correo || 'No registrado'}</p>
-                     </div>
-                   </div>
-                   <div className="p-3 flex items-start gap-3">
-                     <span className="material-symbols-outlined text-on-surface-variant mt-0.5">location_on</span>
-                     <div>
-                       <p className="text-xs text-on-surface-variant font-medium">Ubicación del Predio</p>
-                       <p className="text-sm font-semibold text-on-surface">{drawerTenant.direccion || 'No registrado'}</p>
-                     </div>
-                   </div>
-                 </div>
-               </div>
-               
-            </div>
-            
-            {/* Footer del Drawer */}
+                {/* Situación Financiera */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-label-caps font-bold text-on-surface-variant uppercase flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px]">account_balance_wallet</span>
+                    Situación Financiera
+                  </h4>
+                  <div className={`p-4 rounded-xl border ${parseFloat(drawerTenant.deuda_total) > 0 ? 'bg-error/5 border-error/20' : 'bg-green-50 border-green-200'}`}>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p className={`text-sm font-semibold ${parseFloat(drawerTenant.deuda_total) > 0 ? 'text-error' : 'text-green-700'}`}>
+                          {parseFloat(drawerTenant.deuda_total) > 0 ? 'Deuda Pendiente' : 'Al Día (Sin Deuda)'}
+                        </p>
+                        {parseFloat(drawerTenant.deuda_total) > 0 && (
+                          <p className="text-xs text-on-surface-variant mt-1">
+                            {drawerTenant.recibos_pendientes} recibo(s) sin pagar
+                          </p>
+                        )}
+                      </div>
+                      <div className={`text-2xl font-data-mono font-bold ${parseFloat(drawerTenant.deuda_total) > 0 ? 'text-error' : 'text-green-700'}`}>
+                        S/ {parseFloat(drawerTenant.deuda_total || 0).toFixed(2)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Datos de Contacto y Representación */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-label-caps font-bold text-on-surface-variant uppercase flex items-center gap-2">
+                    <span className="material-symbols-outlined text-[18px]">badge</span>
+                    Contacto y Representación
+                  </h4>
+                  <div className="bg-white rounded-xl border border-outline-variant divide-y divide-outline-variant shadow-sm">
+                    <div className="p-3 flex items-start gap-3">
+                      <span className="material-symbols-outlined text-on-surface-variant mt-0.5">person</span>
+                      <div>
+                        <p className="text-xs text-on-surface-variant font-medium">Representante Legal</p>
+                        <p className="text-sm font-semibold text-on-surface">{drawerTenant.cargo_representante || 'No registrado'}</p>
+                      </div>
+                    </div>
+                    <div className="p-3 flex items-start gap-3">
+                      <span className="material-symbols-outlined text-on-surface-variant mt-0.5">call</span>
+                      <div>
+                        <p className="text-xs text-on-surface-variant font-medium">Teléfono Principal</p>
+                        <p className="text-sm font-semibold text-on-surface">{drawerTenant.telefono || 'No registrado'}</p>
+                      </div>
+                    </div>
+                    <div className="p-3 flex items-start gap-3">
+                      <span className="material-symbols-outlined text-on-surface-variant mt-0.5">mail</span>
+                      <div>
+                        <p className="text-xs text-on-surface-variant font-medium">Correo Electrónico</p>
+                        <p className="text-sm font-semibold text-on-surface">{drawerTenant.correo || 'No registrado'}</p>
+                      </div>
+                    </div>
+                    <div className="p-3 flex items-start gap-3">
+                      <span className="material-symbols-outlined text-on-surface-variant mt-0.5">location_on</span>
+                      <div>
+                        <p className="text-xs text-on-surface-variant font-medium">Ubicación del Predio</p>
+                        <p className="text-sm font-semibold text-on-surface">{drawerTenant.direccion || 'No registrado'}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Footer del Drawer */}
               <div className="p-lg border-t border-outline-variant bg-surface-container-lowest">
-                <button 
+                <button
                   onClick={() => {
                     setDrawerTenant(null);
                     handleOpenEdit(drawerTenant);
@@ -1174,7 +1261,7 @@ const TenantsAndSectors = () => {
                   className="w-full py-3 bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-lg font-bold flex justify-center items-center gap-2 border border-primary/20"
                 >
                   <span className="material-symbols-outlined">edit</span>
-                  Editar Datos del Propietario
+                  Editar Datos del Socio
                 </button>
               </div>
             </motion.div>

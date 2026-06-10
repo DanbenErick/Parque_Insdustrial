@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -267,10 +268,11 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
             </div>
 
             {/* Dropdown Options List */}
+            <AnimatePresence>
             {isOpen && (
               <>
-                <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)}></div>
-                <div className="absolute top-full left-0 right-0 mt-1 max-h-60 bg-white border border-outline-variant rounded-lg shadow-xl overflow-y-auto z-50 animate-in fade-in slide-in-from-top-2 custom-scrollbar">
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} className="fixed inset-0 z-40" onClick={() => setIsOpen(false)}></motion.div>
+                <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.15 }} className="absolute top-full left-0 right-0 mt-1 max-h-60 bg-white border border-outline-variant rounded-lg shadow-xl overflow-y-auto z-50 custom-scrollbar">
                   <div 
                     onClick={() => {
                       setSelectedMember('Todos');
@@ -303,9 +305,10 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
                       No se encontraron socios
                     </div>
                   )}
-                </div>
+                </motion.div>
               </>
             )}
+            </AnimatePresence>
           </div>
         </div>
         <div className="text-right">

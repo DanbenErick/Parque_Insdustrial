@@ -128,7 +128,12 @@ const Reports = () => {
   // Stats Calculations
   const totalConsumo = filteredLecturas.reduce((sum, l) => sum + (parseFloat(l.consumo_calculado) || 0), 0);
   const totalFacturado = filteredRecibos.reduce((sum, r) => sum + (parseFloat(r.total) || 0), 0);
-  const totalRecaudado = filteredRecibos.filter(r => r.estado === 'Pagado').reduce((sum, r) => sum + (parseFloat(r.total) || 0), 0);
+  const totalRecaudado = filteredRecibos.reduce((acc, r) => {
+    const total = parseFloat(r.total || 0);
+    const saldo = r.saldo_pendiente !== undefined ? parseFloat(r.saldo_pendiente) : (r.estado === 'Pagado' ? 0 : total);
+    const pagado = total - saldo;
+    return acc + (pagado > 0 ? pagado : 0);
+  }, 0);
   const totalPendiente = filteredRecibos.filter(r => r.estado === 'Pendiente' || r.estado === 'Pago Parcial').reduce((sum, r) => sum + parseFloat(r.saldo_pendiente !== undefined ? r.saldo_pendiente : r.total || 0), 0);
   const tasaRecaudacion = totalFacturado > 0 ? (totalRecaudado / totalFacturado) * 100 : 0;
 

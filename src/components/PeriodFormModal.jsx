@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '../api/axiosConfig';
 import { useYear } from '../context/YearContext';
@@ -122,172 +123,180 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in">
-      <div className="bg-surface w-full max-w-lg rounded-2xl shadow-2xl flex flex-col animate-in zoom-in-95 duration-200">
-        <div className="px-lg py-md border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest rounded-t-2xl">
-          <h3 className="font-headline-sm text-primary font-bold flex items-center gap-2">
-            <span className="material-symbols-outlined">{isEditing ? 'edit_calendar' : 'calendar_add_on'}</span>
-            {isEditing ? 'Modificar Periodo' : 'Aperturar Nuevo Periodo'}
-          </h3>
-          <button 
-            onClick={onClose}
-            className="w-8 h-8 rounded-full hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors"
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
+        >
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+            className="bg-surface w-full max-w-lg rounded-2xl shadow-2xl flex flex-col"
           >
-            <span className="material-symbols-outlined">close</span>
-          </button>
-        </div>
-        
-        <form onSubmit={handleSave} className="p-lg space-y-5">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col">
-              <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Mes a Aperturar</label>
-              <select 
-                value={mes}
-                onChange={handleMesChange}
-                disabled={isEditing}
-                className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 text-sm font-bold text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all disabled:opacity-50 disabled:bg-surface-container"
+            <div className="px-lg py-md border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest rounded-t-2xl">
+              <h3 className="font-headline-sm text-primary font-bold flex items-center gap-2">
+                <span className="material-symbols-outlined">{isEditing ? 'edit_calendar' : 'calendar_add_on'}</span>
+                {isEditing ? 'Modificar Periodo' : 'Aperturar Nuevo Periodo'}
+              </h3>
+              <button 
+                onClick={onClose}
+                className="w-8 h-8 rounded-full hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors"
               >
-                {monthNames.map(m => {
-                  // Un mes ya está creado si existe en la lista de existentes.
-                  // Formato de mes_anio es YYYY-MM
-                  const yaCreado = existentes.some(p => p.mes_anio.endsWith(`-${m.val}`));
-                  const isCurrentEditing = isEditing && initialData?.mes_anio.endsWith(`-${m.val}`);
-                  return (
-                    <option key={m.val} value={m.val} disabled={yaCreado && !isCurrentEditing}>
-                      {m.name} {yaCreado && !isCurrentEditing ? '(Ya existe)' : ''}
-                    </option>
-                  );
-                })}
-              </select>
+                <span className="material-symbols-outlined">close</span>
+              </button>
             </div>
-            <div className="flex flex-col">
-              <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Año (Global)</label>
-              <input 
-                type="text" 
-                value={activeYear}
-                disabled
-                className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 text-sm font-bold text-on-surface opacity-70 cursor-not-allowed"
-              />
-            </div>
-          </div>
+            
+            <form onSubmit={handleSave} className="p-lg space-y-5">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Mes a Aperturar</label>
+                  <select 
+                    value={mes}
+                    onChange={handleMesChange}
+                    disabled={isEditing}
+                    className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-4 py-3 text-sm font-bold text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all disabled:opacity-50 disabled:bg-surface-container"
+                  >
+                    {monthNames.map(m => {
+                      // Un mes ya está creado si existe en la lista de existentes.
+                      // Formato de mes_anio es YYYY-MM
+                      const yaCreado = existentes.some(p => p.mes_anio.endsWith(`-${m.val}`));
+                      const isCurrentEditing = isEditing && initialData?.mes_anio.endsWith(`-${m.val}`);
+                      return (
+                        <option key={m.val} value={m.val} disabled={yaCreado && !isCurrentEditing}>
+                          {m.name} {yaCreado && !isCurrentEditing ? '(Ya existe)' : ''}
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+                <div className="flex flex-col">
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Año (Global)</label>
+                  <input 
+                    type="text" 
+                    value={activeYear}
+                    disabled
+                    className="w-full bg-surface-container border border-outline-variant rounded-xl px-4 py-3 text-sm font-bold text-on-surface opacity-70 cursor-not-allowed"
+                  />
+                </div>
+              </div>
 
-          <div className="bg-primary/5 border border-primary/20 rounded-xl p-md grid grid-cols-2 gap-4">
-            <div className="flex flex-col">
-              <label className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">Tarifa Energía (S/ por kWh)</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">S/</span>
-                <input 
-                  type="number" 
-                  step="0.0001"
-                  required
-                  value={tarifaKwh}
-                  onChange={(e) => setTarifaKwh(e.target.value)}
-                  placeholder="0.00" 
-                  className="w-full bg-white border border-primary/30 rounded-lg pl-8 pr-3 py-2 text-base font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-inner"
-                />
+              <div className="bg-primary/5 border border-primary/20 rounded-xl p-md grid grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <label className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">Tarifa Energía (S/ por kWh)</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">S/</span>
+                    <input 
+                      type="number" 
+                      step="0.0001"
+                      required
+                      value={tarifaKwh}
+                      onChange={(e) => setTarifaKwh(e.target.value)}
+                      placeholder="0.00" 
+                      className="w-full bg-white border border-primary/30 rounded-lg pl-8 pr-3 py-2 text-base font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-inner"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <label className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">Tarifa Punta (S/ por kWh)</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">S/</span>
+                    <input 
+                      type="number" 
+                      step="0.0001"
+                      value={tarifaKwhPunta}
+                      onChange={(e) => setTarifaKwhPunta(e.target.value)}
+                      placeholder="0.00" 
+                      className="w-full bg-white border border-primary/30 rounded-lg pl-8 pr-3 py-2 text-base font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-inner"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <label className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">Cuota Mant. (Normal)</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">S/</span>
+                    <input 
+                      type="number" 
+                      step="0.01"
+                      required
+                      value={tarifaMantenimientoNormal}
+                      onChange={(e) => setTarifaMantenimientoNormal(e.target.value)}
+                      placeholder="0.00" 
+                      className="w-full bg-white border border-primary/30 rounded-lg pl-8 pr-3 py-2 text-base font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-inner"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col">
+                  <label className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">Cuota Mant. (Tiempo Real)</label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">S/</span>
+                    <input 
+                      type="number" 
+                      step="0.01"
+                      required
+                      value={tarifaMantenimientoTiempoReal}
+                      onChange={(e) => setTarifaMantenimientoTiempoReal(e.target.value)}
+                      placeholder="0.00" 
+                      className="w-full bg-white border border-primary/30 rounded-lg pl-8 pr-3 py-2 text-base font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-inner"
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col">
-              <label className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">Tarifa Punta (S/ por kWh)</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">S/</span>
-                <input 
-                  type="number" 
-                  step="0.0001"
-                  value={tarifaKwhPunta}
-                  onChange={(e) => setTarifaKwhPunta(e.target.value)}
-                  placeholder="0.00" 
-                  className="w-full bg-white border border-primary/30 rounded-lg pl-8 pr-3 py-2 text-base font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-inner"
-                />
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <label className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">Cuota Mant. (Normal)</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">S/</span>
-                <input 
-                  type="number" 
-                  step="0.01"
-                  required
-                  value={tarifaMantenimientoNormal}
-                  onChange={(e) => setTarifaMantenimientoNormal(e.target.value)}
-                  placeholder="0.00" 
-                  className="w-full bg-white border border-primary/30 rounded-lg pl-8 pr-3 py-2 text-base font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-inner"
-                />
-              </div>
-            </div>
-            <div className="flex flex-col">
-              <label className="text-[10px] font-bold text-primary uppercase tracking-wider mb-2">Cuota Mant. (Tiempo Real)</label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">S/</span>
-                <input 
-                  type="number" 
-                  step="0.01"
-                  required
-                  value={tarifaMantenimientoTiempoReal}
-                  onChange={(e) => setTarifaMantenimientoTiempoReal(e.target.value)}
-                  placeholder="0.00" 
-                  className="w-full bg-white border border-primary/30 rounded-lg pl-8 pr-3 py-2 text-base font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-inner"
-                />
-              </div>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="flex flex-col">
-              <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Fecha Inicio Lectura</label>
-              <input 
-                type="date" 
-                required
-                value={fechaInicio}
-                onChange={(e) => setFechaInicio(e.target.value)}
-                className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2.5 text-sm font-bold text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-              />
-            </div>
-            <div className="flex flex-col">
-              <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Fecha Fin Lectura</label>
-              <input 
-                type="date" 
-                required
-                value={fechaFin}
-                onChange={(e) => setFechaFin(e.target.value)}
-                className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2.5 text-sm font-bold text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none"
-              />
-            </div>
-          </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col">
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Fecha Inicio Lectura</label>
+                  <input 
+                    type="date" 
+                    required
+                    value={fechaInicio}
+                    onChange={(e) => setFechaInicio(e.target.value)}
+                    className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2.5 text-sm font-bold text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                  />
+                </div>
+                <div className="flex flex-col">
+                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Fecha Fin Lectura</label>
+                  <input 
+                    type="date" 
+                    required
+                    value={fechaFin}
+                    onChange={(e) => setFechaFin(e.target.value)}
+                    className="w-full bg-surface-container-lowest border border-outline-variant rounded-xl px-3 py-2.5 text-sm font-bold text-on-surface focus:border-primary focus:ring-1 focus:ring-primary outline-none"
+                  />
+                </div>
+              </div>
 
-          <div className="flex gap-md pt-2 border-t border-outline-variant">
-            <button 
-              type="button" 
-              onClick={onClose}
-              className="w-1/3 py-3 rounded-xl font-bold border border-outline-variant text-on-surface-variant hover:bg-surface-container-highest transition-colors"
-            >
-              Cancelar
-            </button>
-            <button 
-              type="submit" 
-              disabled={isSaving}
-              className="flex-grow py-3 rounded-xl font-bold flex items-center justify-center gap-sm transition-all shadow-md bg-primary text-on-primary hover:opacity-90 disabled:opacity-50"
-            >
-              {isSaving ? (
-                <>
-                  <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
-                  Guardando...
-                </>
-              ) : (
-                <>
-                  <span className="material-symbols-outlined text-[18px]">save</span>
-                  {isEditing ? 'Actualizar Periodo' : 'Aperturar Periodo'}
-                </>
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+              <div className="flex gap-md pt-2 border-t border-outline-variant">
+                <button 
+                  type="button" 
+                  onClick={onClose}
+                  className="w-1/3 py-3 rounded-xl font-bold border border-outline-variant text-on-surface-variant hover:bg-surface-container-highest transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={isSaving}
+                  className="flex-grow py-3 rounded-xl font-bold flex items-center justify-center gap-sm transition-all shadow-md bg-primary text-on-primary hover:opacity-90 disabled:opacity-50"
+                >
+                  {isSaving ? (
+                    <>
+                      <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[18px]">save</span>
+                      {isEditing ? 'Actualizar Periodo' : 'Aperturar Periodo'}
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 

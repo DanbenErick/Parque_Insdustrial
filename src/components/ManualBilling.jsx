@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '../api/axiosConfig';
 import { useYear } from '../context/YearContext';
@@ -35,14 +36,19 @@ const ManualBilling = () => {
   const [currentReading, setCurrentReading] = useState('');
   const [currentReadingPunta, setCurrentReadingPunta] = useState('');
   const [factorPotencia, setFactorPotencia] = useState('');
+  const [precioFactorPotencia, setPrecioFactorPotencia] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [medidores, setMedidores] = useState([]);
   const [periodos, setPeriodos] = useState([]);
   const [activePeriodo, setActivePeriodo] = useState(null);
   const [lecturas, setLecturas] = useState([]); // Lecturas reales de la DB
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editModalData, setEditModalData] = useState(null);
   const [editReadingVal, setEditReadingVal] = useState('');
+  const [editReadingValPunta, setEditReadingValPunta] = useState('');
+  const [editFactorPotencia, setEditFactorPotencia] = useState('');
+  const [editPrecioFactorPotencia, setEditPrecioFactorPotencia] = useState('');
   const [editJustificacion, setEditJustificacion] = useState('');
   const [modalSearchTerm, setModalSearchTerm] = useState('');
   const { activeYear } = useYear();
@@ -97,18 +103,19 @@ const ManualBilling = () => {
     const term = e.target.value;
     setSearchTerm(term);
     setSelectedMember(null);
-    
-    if (term.trim().length > 0) {
-      const results = medidores.filter(m => 
-        (m.propietario && m.propietario.toLowerCase().includes(term.toLowerCase())) || 
-        (m.documento_identidad && m.documento_identidad.includes(term)) || 
-        (m.num_serie && m.num_serie.toLowerCase().includes(term.toLowerCase()))
-      );
-      setSearchResults(results);
-    } else {
-      setSearchResults([]);
-    }
   };
+
+  const getFilteredMedidores = () => {
+    if (searchTerm.trim() === '') return medidores;
+    const termLower = searchTerm.toLowerCase();
+    return medidores.filter(m => 
+      (m.propietario && m.propietario.toLowerCase().includes(termLower)) || 
+      (m.documento_identidad && m.documento_identidad.includes(searchTerm)) || 
+      (m.num_serie && m.num_serie.toLowerCase().includes(termLower))
+    );
+  };
+
+  const currentSearchResults = getFilteredMedidores();
 
   const handleSelectMember = (member) => {
     setSelectedMember(member);
@@ -117,11 +124,15 @@ const ManualBilling = () => {
     setCurrentReading('');
     setCurrentReadingPunta('');
     setFactorPotencia('');
+    setPrecioFactorPotencia('');
   };
 
   const handleEditFromTable = (record) => {
     setEditModalData(record);
     setEditReadingVal(record.lectura_actual);
+    setEditReadingValPunta(record.lectura_actual_punta || '');
+    setEditFactorPotencia(record.factor_potencia || '');
+    setEditPrecioFactorPotencia(record.precio_factor_potencia || '');
     setEditJustificacion('');
     setIsModalOpen(false); // Cerramos el historial completo si estaba abierto
   };
@@ -141,6 +152,7 @@ const ManualBilling = () => {
         lectura_anterior_punta: parseFloat(selectedMember.ultima_lectura_punta || 0),
         lectura_actual_punta: currentReadingPunta ? parseFloat(currentReadingPunta) : 0,
         factor_potencia: factorPotencia ? parseFloat(factorPotencia) : 0,
+        precio_factor_potencia: precioFactorPotencia ? parseFloat(precioFactorPotencia) : 0,
         estado: 'Validado'
       };
 
@@ -172,6 +184,7 @@ const ManualBilling = () => {
       setCurrentReading('');
       setCurrentReadingPunta('');
       setFactorPotencia('');
+      setPrecioFactorPotencia('');
     } catch (error) {
       toast.error(error.response?.data?.error || 'Error al guardar la lectura');
     } finally {
@@ -189,6 +202,9 @@ const ManualBilling = () => {
       const payload = {
         lectura_anterior: parseFloat(editModalData.lectura_anterior || 0),
         lectura_actual: parseFloat(editReadingVal),
+        lectura_anterior_punta: parseFloat(editModalData.lectura_anterior_punta || 0),
+        lectura_actual_punta: editReadingValPunta ? parseFloat(editReadingValPunta) : 0,
+        factor_potencia: editFactorPotencia ? parseFloat(editFactorPotencia) : 0,
         justificacion: editJustificacion,
         estado: 'Validado'
       };
@@ -198,7 +214,13 @@ const ManualBilling = () => {
       // Actualizar la lectura en la lista global
       setLecturas(prev => prev.map(l => 
         l.id === editModalData.id 
-          ? { ...l, lectura_actual: parseFloat(editReadingVal), fecha_registro: new Date().toISOString() } 
+          ? { 
+              ...l, 
+              lectura_actual: parseFloat(editReadingVal), 
+              lectura_actual_punta: editReadingValPunta ? parseFloat(editReadingValPunta) : 0,
+              factor_potencia: editFactorPotencia ? parseFloat(editFactorPotencia) : 0,
+              fecha_registro: new Date().toISOString() 
+            } 
           : l
       ));
       
@@ -319,16 +341,21 @@ const ManualBilling = () => {
                         type="text" 
                         value={searchTerm}
                         onChange={handleSearch}
+                        onFocus={() => setIsSearchFocused(true)}
+                        onBlur={() => {
+                          // Pequeño timeout para permitir que el click en el dropdown registre
+                          setTimeout(() => setIsSearchFocused(false), 200);
+                        }}
                         placeholder="Ej. Nombre, RUC, o Serie (ENG-...)" 
                         className="w-full bg-surface-container-lowest border-2 border-primary/20 rounded-xl pl-14 pr-4 py-4 text-lg font-bold text-on-surface focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none transition-all shadow-inner"
                     />
                 </div>
                 
                 {/* Search Results Dropdown */}
-                {searchResults.length > 0 && !selectedMember && (
+                {isSearchFocused && currentSearchResults.length > 0 && !selectedMember && (
                   <div className="absolute left-0 right-0 mt-2 mx-md md:mx-lg bg-surface border-2 border-primary rounded-xl shadow-xl overflow-hidden max-h-64 overflow-y-auto animate-in slide-in-from-top-2 fade-in">
                     <ul className="divide-y divide-outline-variant">
-                      {searchResults.map((member) => (
+                      {currentSearchResults.map((member) => (
                         <li 
                           key={member.id} 
                           onClick={() => handleSelectMember(member)}
@@ -362,7 +389,7 @@ const ManualBilling = () => {
                   </div>
                 )}
                 
-                {searchTerm.length > 0 && searchResults.length === 0 && !selectedMember && (
+                {searchTerm.length > 0 && currentSearchResults.length === 0 && !selectedMember && (
                   <div className="absolute left-0 right-0 mt-2 mx-md md:mx-lg bg-surface border border-outline-variant rounded-xl shadow-lg p-md text-center text-on-surface-variant animate-in fade-in">
                     No se encontraron medidores o socios que coincidan.
                   </div>
@@ -416,7 +443,14 @@ const ManualBilling = () => {
                       </div>
 
                       <div className="flex flex-col">
-                        <label className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Lectura Actual (Ingresar kWh) {selectedMember.tipo === 'Tiempo Real' && 'Normal'}</label>
+                        <div className="flex justify-between items-end mb-2">
+                          <label className="text-xs font-bold text-primary uppercase tracking-wider">Lectura Actual (Ingresar kWh) {selectedMember.tipo === 'Tiempo Real' && 'Normal'}</label>
+                          {activePeriodo && (
+                            <span className="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded font-bold">
+                              Precio: S/ {parseFloat(activePeriodo.tarifa_kwh).toFixed(4)} / kWh
+                            </span>
+                          )}
+                        </div>
                         <div className="relative">
                           <input 
                             type="number" 
@@ -432,47 +466,105 @@ const ManualBilling = () => {
                         </div>
                       </div>
 
-                      {selectedMember.tipo === 'Tiempo Real' && (
-                        <>
-                          <div className="bg-surface-container-low rounded-xl p-md border border-outline-variant flex flex-col justify-center">
-                            <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Lectura Anterior Punta</span>
-                            <span className="font-data-mono text-[24px] text-on-surface opacity-70">
-                              {parseFloat(selectedMember.ultima_lectura_punta || 0).toLocaleString('en-US', {minimumFractionDigits: 2})} <span className="text-sm">kWh</span>
-                            </span>
-                          </div>
-
-                          <div className="flex flex-col">
-                            <label className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Lectura Actual Punta</label>
-                            <div className="relative">
-                              <input 
-                                type="number" 
-                                step="0.01"
-                                required
-                                value={currentReadingPunta}
-                                onChange={(e) => setCurrentReadingPunta(e.target.value)}
-                                placeholder="0.00" 
-                                className="w-full bg-white border-2 border-primary rounded-xl pl-4 pr-20 py-4 text-[28px] font-data-mono font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-primary/20 text-right shadow-inner"
-                              />
-                              <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">kWh</span>
+                        {/* Previsualización Consumo Normal */}
+                        {currentReading && !isNaN(currentReading) && activePeriodo && (
+                          <div className="md:col-span-2 bg-primary/10 rounded-lg p-sm flex justify-between items-center border border-primary/20 -mt-2">
+                            <span className="text-sm font-bold text-primary">Subtotal Energía Normal:</span>
+                            <div className="text-right">
+                              <span className="text-xs text-on-surface-variant block">Consumo: {Math.max(0, parseFloat(currentReading) - parseFloat(selectedMember.ultima_lectura || 0)).toFixed(2)} kWh × S/ {parseFloat(activePeriodo.tarifa_kwh).toFixed(4)}</span>
+                              <span className="font-data-mono font-bold text-primary">S/ {(Math.max(0, parseFloat(currentReading) - parseFloat(selectedMember.ultima_lectura || 0)) * parseFloat(activePeriodo.tarifa_kwh)).toFixed(2)}</span>
                             </div>
                           </div>
+                        )}
 
-                          <div className="md:col-span-2 flex flex-col">
-                            <label className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Factor de Potencia</label>
-                            <div className="relative">
-                              <input 
-                                type="number" 
-                                step="0.0001"
-                                required
-                                value={factorPotencia}
-                                onChange={(e) => setFactorPotencia(e.target.value)}
-                                placeholder="0.0000" 
-                                className="w-full bg-white border-2 border-primary rounded-xl pl-4 pr-20 py-4 text-[28px] font-data-mono font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-primary/20 text-right shadow-inner"
-                              />
+                        {selectedMember.tipo === 'Tiempo Real' && (
+                          <>
+                            <div className="bg-surface-container-low rounded-xl p-md border border-outline-variant flex flex-col justify-center mt-2">
+                              <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Lectura Anterior Punta</span>
+                              <span className="font-data-mono text-[24px] text-on-surface opacity-70">
+                                {parseFloat(selectedMember.ultima_lectura_punta || 0).toLocaleString('en-US', {minimumFractionDigits: 2})} <span className="text-sm">kWh</span>
+                              </span>
                             </div>
-                          </div>
-                        </>
-                      )}
+
+                            <div className="flex flex-col mt-2">
+                              <div className="flex justify-between items-end mb-2">
+                                <label className="text-xs font-bold text-primary uppercase tracking-wider">Lectura Actual Punta</label>
+                                {activePeriodo && (
+                                  <span className="text-[10px] bg-primary/10 text-primary px-2 py-1 rounded font-bold">
+                                    Precio: S/ {parseFloat(activePeriodo.tarifa_kwh_punta || 0).toFixed(4)} / kWh
+                                  </span>
+                                )}
+                              </div>
+                              <div className="relative">
+                                <input 
+                                  type="number" 
+                                  step="0.01"
+                                  required
+                                  value={currentReadingPunta}
+                                  onChange={(e) => setCurrentReadingPunta(e.target.value)}
+                                  placeholder="0.00" 
+                                  className="w-full bg-white border-2 border-primary rounded-xl pl-4 pr-20 py-4 text-[28px] font-data-mono font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-primary/20 text-right shadow-inner"
+                                />
+                                <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">kWh</span>
+                              </div>
+                            </div>
+
+                            {/* Previsualización Consumo Punta */}
+                            {currentReadingPunta && !isNaN(currentReadingPunta) && activePeriodo && (
+                              <div className="md:col-span-2 bg-primary/10 rounded-lg p-sm flex justify-between items-center border border-primary/20 -mt-2">
+                                <span className="text-sm font-bold text-primary">Subtotal Energía Punta:</span>
+                                <div className="text-right">
+                                  <span className="text-xs text-on-surface-variant block">Consumo: {Math.max(0, parseFloat(currentReadingPunta) - parseFloat(selectedMember.ultima_lectura_punta || 0)).toFixed(2)} kWh × S/ {parseFloat(activePeriodo.tarifa_kwh_punta || 0).toFixed(4)}</span>
+                                  <span className="font-data-mono font-bold text-primary">S/ {(Math.max(0, parseFloat(currentReadingPunta) - parseFloat(selectedMember.ultima_lectura_punta || 0)) * parseFloat(activePeriodo.tarifa_kwh_punta || 0)).toFixed(2)}</span>
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="md:col-span-2 flex flex-col md:flex-row gap-4 mt-2 p-md bg-orange-50 border border-orange-200 rounded-xl">
+                              <div className="flex-1 flex flex-col">
+                                <label className="text-xs font-bold text-orange-800 uppercase tracking-wider mb-2 flex items-center gap-1">
+                                  <span className="material-symbols-outlined text-[16px]">bolt</span>
+                                  Consumo Reactivo (kVARh)
+                                </label>
+                                <input 
+                                  type="number" 
+                                  step="0.01"
+                                  required
+                                  value={factorPotencia}
+                                  onChange={(e) => setFactorPotencia(e.target.value)}
+                                  placeholder="0.00" 
+                                  className="w-full bg-white border border-orange-300 rounded-lg pl-4 pr-4 py-3 text-xl font-data-mono font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-orange-500 text-right shadow-inner"
+                                />
+                              </div>
+                              <div className="flex-1 flex flex-col">
+                                <label className="text-xs font-bold text-orange-800 uppercase tracking-wider mb-2 flex items-center gap-1">
+                                  <span className="material-symbols-outlined text-[16px]">payments</span>
+                                  Precio Energía Reactiva (S/)
+                                </label>
+                                <input 
+                                  type="number" 
+                                  step="0.0001"
+                                  required
+                                  value={precioFactorPotencia}
+                                  onChange={(e) => setPrecioFactorPotencia(e.target.value)}
+                                  placeholder="0.0000" 
+                                  className="w-full bg-white border border-orange-300 rounded-lg pl-4 pr-4 py-3 text-xl font-data-mono font-bold text-on-surface focus:outline-none focus:ring-2 focus:ring-orange-500 text-right shadow-inner"
+                                />
+                              </div>
+                            </div>
+                            
+                            {/* Previsualización Factor Potencia */}
+                            {factorPotencia && precioFactorPotencia && !isNaN(factorPotencia) && !isNaN(precioFactorPotencia) && (
+                              <div className="md:col-span-2 bg-orange-100 rounded-lg p-sm flex justify-between items-center border border-orange-300 -mt-2">
+                                <span className="text-sm font-bold text-orange-900">Subtotal E. Reactiva:</span>
+                                <div className="text-right">
+                                  <span className="text-xs text-orange-800/80 block">Cálculo: {parseFloat(factorPotencia).toFixed(2)} × S/ {parseFloat(precioFactorPotencia).toFixed(4)}</span>
+                                  <span className="font-data-mono font-bold text-orange-900">S/ {(parseFloat(factorPotencia) * parseFloat(precioFactorPotencia)).toFixed(2)}</span>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
 
                       <div className="md:col-span-2 mt-sm">
                         <button 
@@ -535,15 +627,27 @@ const ManualBilling = () => {
                       ) : (
                         lecturasPeriodoActivo.slice(0, 5).map((record) => (
                           <tr key={record.id} className="hover:bg-surface-container-lowest transition-colors group">
-                            <td className="px-md py-3 text-xs text-on-surface-variant whitespace-nowrap">
+                            <td className="px-md py-3 text-xs text-on-surface-variant whitespace-nowrap align-top">
                               {new Date(record.fecha_registro).toLocaleString('es-PE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                             </td>
-                            <td className="px-md py-3">
+                            <td className="px-md py-3 align-top">
                               <p className="font-bold text-on-surface text-xs truncate max-w-[150px]">{record.propietario}</p>
                               <p className="text-[10px] text-on-surface-variant font-data-mono">{record.num_serie}</p>
                             </td>
-                            <td className="px-md py-3 text-right font-data-mono font-bold text-primary text-sm">
-                              {parseFloat(record.lectura_actual).toLocaleString('en-US', {minimumFractionDigits: 2})} W
+                            <td className="px-md py-3 text-right align-top">
+                              <div className="font-data-mono font-bold text-primary text-sm leading-tight">
+                                {parseFloat(record.lectura_actual).toLocaleString('en-US', {minimumFractionDigits: 2})} W <span className="text-[9px] font-normal opacity-70">N</span>
+                              </div>
+                              {(parseFloat(record.lectura_actual_punta || 0) > 0 || parseFloat(record.factor_potencia || 0) > 0) && (
+                                <>
+                                  <div className="font-data-mono font-bold text-orange-600 text-xs mt-1 leading-tight">
+                                    {parseFloat(record.lectura_actual_punta || 0).toLocaleString('en-US', {minimumFractionDigits: 2})} W <span className="text-[9px] font-normal opacity-70">P</span>
+                                  </div>
+                                  <div className="font-data-mono font-bold text-purple-600 text-xs mt-1 leading-tight">
+                                    {parseFloat(record.factor_potencia || 0).toLocaleString('en-US', {minimumFractionDigits: 2})} kVARh
+                                  </div>
+                                </>
+                              )}
                             </td>
                           </tr>
                         ))
@@ -569,6 +673,7 @@ const ManualBilling = () => {
         </div>
 
         {/* Modal de Detalle Completo */}
+        <AnimatePresence>
         {isModalOpen && (() => {
           const filteredModalLecturas = lecturasPeriodoActivo.filter(record => {
             if (!modalSearchTerm.trim()) return true;
@@ -584,8 +689,14 @@ const ManualBilling = () => {
           });
 
           return (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in">
-              <div className="bg-surface w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
+            >
+              <motion.div 
+                initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+                className="bg-surface w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]"
+              >
                 <div className="px-xl py-md border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface-container-lowest rounded-t-2xl">
                   <div>
                     <h3 className="font-headline-sm text-primary font-bold flex items-center gap-2">
@@ -649,10 +760,22 @@ const ManualBilling = () => {
                             <td className="px-xl py-3 text-sm font-data-mono text-on-surface-variant">
                               {record.num_serie}
                             </td>
-                            <td className="px-xl py-3 text-right font-data-mono font-bold text-primary text-base">
-                              {parseFloat(record.lectura_actual).toLocaleString('en-US', {minimumFractionDigits: 2})} W
+                            <td className="px-xl py-3 text-right align-top">
+                              <div className="font-data-mono font-bold text-primary text-sm leading-tight">
+                                {parseFloat(record.lectura_actual).toLocaleString('en-US', {minimumFractionDigits: 2})} W <span className="text-[10px] font-normal opacity-70">N</span>
+                              </div>
+                              {(parseFloat(record.lectura_actual_punta || 0) > 0 || parseFloat(record.factor_potencia || 0) > 0) && (
+                                <>
+                                  <div className="font-data-mono font-bold text-orange-600 text-xs mt-1 leading-tight">
+                                    {parseFloat(record.lectura_actual_punta || 0).toLocaleString('en-US', {minimumFractionDigits: 2})} W <span className="text-[10px] font-normal opacity-70">P</span>
+                                  </div>
+                                  <div className="font-data-mono font-bold text-purple-600 text-xs mt-1 leading-tight">
+                                    {parseFloat(record.factor_potencia || 0).toLocaleString('en-US', {minimumFractionDigits: 2})} kVARh <span className="text-[10px] font-normal opacity-70">FP</span>
+                                  </div>
+                                </>
+                              )}
                             </td>
-                            <td className="px-xl py-3 text-center">
+                            <td className="px-xl py-3 text-center align-top">
                               <button
                                 onClick={() => handleEditFromTable(record)}
                                 className="px-3 py-1.5 border border-outline-variant text-on-surface-variant rounded-lg hover:border-primary hover:text-primary transition-colors inline-flex items-center gap-1 opacity-0 group-hover:opacity-100"
@@ -667,15 +790,23 @@ const ManualBilling = () => {
                     </tbody>
                   </table>
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           );
         })()}
+        </AnimatePresence>
 
         {/* Modal de Modificación de Lectura */}
+        <AnimatePresence>
         {editModalData && (
-          <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in">
-            <div className="bg-surface w-full max-w-xl rounded-2xl shadow-2xl flex flex-col animate-in zoom-in-95 duration-200">
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+              className="bg-surface w-full max-w-xl rounded-2xl shadow-2xl flex flex-col"
+            >
               <div className="px-lg py-md border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest rounded-t-2xl">
                 <h3 className="font-headline-sm text-primary font-bold flex items-center gap-2">
                   <span className="material-symbols-outlined">edit_note</span>
@@ -699,7 +830,7 @@ const ManualBilling = () => {
                 </div>
 
                 <div className="flex flex-col">
-                  <label className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Nueva Lectura (kWh)</label>
+                  <label className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Nueva Lectura (kWh) {parseFloat(editModalData.lectura_actual_punta || 0) > 0 ? 'Normal' : ''}</label>
                   <div className="relative">
                     <input 
                       type="number" 
@@ -714,6 +845,41 @@ const ManualBilling = () => {
                     <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">kWh</span>
                   </div>
                 </div>
+
+                {(parseFloat(editModalData.lectura_actual_punta || 0) > 0 || parseFloat(editModalData.factor_potencia || 0) > 0) && (
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                      <label className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-2">Nueva Lectura Punta</label>
+                      <div className="relative">
+                        <input 
+                          type="number" 
+                          step="0.01"
+                          required
+                          value={editReadingValPunta}
+                          onChange={(e) => setEditReadingValPunta(e.target.value)}
+                          placeholder="0.00" 
+                          className="w-full bg-white border-2 border-orange-500 rounded-xl pl-4 pr-16 py-3 text-[18px] font-data-mono font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-orange-500/20 shadow-inner"
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">kWh</span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-xs font-bold text-purple-600 uppercase tracking-wider mb-2">Nuevo Factor Potencia</label>
+                      <div className="relative">
+                        <input 
+                          type="number" 
+                          step="0.01"
+                          required
+                          value={editFactorPotencia}
+                          onChange={(e) => setEditFactorPotencia(e.target.value)}
+                          placeholder="0.00" 
+                          className="w-full bg-white border-2 border-purple-500 rounded-xl pl-4 pr-16 py-3 text-[18px] font-data-mono font-bold text-on-surface focus:outline-none focus:ring-4 focus:ring-purple-500/20 shadow-inner"
+                        />
+                        <span className="absolute right-4 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant">kVARh</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="flex flex-col">
                   <label className="text-xs font-bold text-primary uppercase tracking-wider mb-2">Justificación del Cambio *</label>
@@ -759,9 +925,10 @@ const ManualBilling = () => {
                   </button>
                 </div>
               </form>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         )}
+        </AnimatePresence>
       {/* Modal Apertura de Periodo */}
       <PeriodFormModal 
         isOpen={isPeriodModalOpen}

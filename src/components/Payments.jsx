@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axiosConfig';
@@ -575,9 +576,16 @@ const Payments = () => {
       </div>
 
       {/* Modal Registrar Pago */}
+      <AnimatePresence>
       {isModalOpen && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in">
-          <div className="bg-surface rounded-2xl shadow-2xl w-full max-w-lg flex flex-col animate-in zoom-in-95 duration-200 overflow-hidden">
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+        >
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+            className="bg-surface rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden"
+          >
             
             {/* Header */}
             <div className="px-lg py-md border-b border-outline-variant bg-surface-container-lowest flex justify-between items-center">
@@ -756,14 +764,22 @@ const Payments = () => {
               </button>
             </div>
 
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* Modal PDF renderizado con Portal para cubrir toda la pantalla */}
+      <AnimatePresence>
       {isPdfModalOpen && createPortal(
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-          <div className="bg-surface rounded-2xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col h-[90vh] animate-slide-up">
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+        >
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+            className="bg-surface rounded-2xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col h-[90vh]"
+          >
             <div className="flex justify-between items-center p-6 border-b border-outline-variant">
               <div>
                 <h3 className="font-headline-sm text-on-surface">Visor de PDF</h3>
@@ -801,15 +817,23 @@ const Payments = () => {
                 title="Visor PDF"
               />
             </div>
-          </div>
-        </div>,
+          </motion.div>
+        </motion.div>,
         document.body
       )}
+      </AnimatePresence>
 
       {/* Drawer de Detalles del Pago */}
+      <AnimatePresence>
       {selectedPaymentForDetails && createPortal(
-        <div className="fixed inset-0 z-[100] flex justify-end bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" onClick={(e) => { if (e.target === e.currentTarget) setSelectedPaymentForDetails(null); }}>
-          <div className="w-full max-w-md bg-surface h-full shadow-2xl animate-in slide-in-from-right duration-300 flex flex-col">
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-[100] flex justify-end bg-black/50 backdrop-blur-sm" onClick={(e) => { if (e.target === e.currentTarget) setSelectedPaymentForDetails(null); }}
+        >
+          <motion.div 
+            initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            className="w-full max-w-md bg-surface h-full shadow-2xl flex flex-col"
+          >
             <div className="p-xl border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
               <h3 className="font-headline-sm text-on-surface font-bold flex items-center gap-2">
                 <span className="material-symbols-outlined text-primary">receipt_long</span>
@@ -940,10 +964,11 @@ const Payments = () => {
               </div>
 
             </div>
-          </div>
-        </div>,
+          </motion.div>
+        </motion.div>,
         document.body
       )}
+      </AnimatePresence>
 
     </main>
   );

@@ -47,11 +47,11 @@ function App() {
 
   const appScreens = [
     { view: 'dashboard', name: 'Panel de Control', icon: 'dashboard', keywords: ['inicio', 'home', 'kpi', 'resumen'], hasAccess: userRutas.includes('dashboard') },
-    { view: 'tenants', name: 'Empresas', icon: 'factory', keywords: ['empresas', 'fabricas', 'socios', 'sectores', 'manzanas', 'propietarios'], hasAccess: userRutas.includes('tenants') },
+    { view: 'tenants', name: 'Socios', icon: 'factory', keywords: ['empresas', 'fabricas', 'socios', 'sectores', 'manzanas', 'propietarios'], hasAccess: userRutas.includes('tenants') },
     { view: 'billing', name: 'Facturación', icon: 'receipt_long', keywords: ['facturas', 'cobros', 'recibos', 'generar', 'boletas'], hasAccess: userRutas.includes('billing') },
-    { view: 'payments', name: 'Pagos Recibidos', icon: 'payments', keywords: ['pagos', 'ingresos', 'dinero', 'historial'], hasAccess: userRutas.includes('payments') },
+    { view: 'payments', name: 'Pagos', icon: 'payments', keywords: ['pagos', 'ingresos', 'dinero', 'historial'], hasAccess: userRutas.includes('payments') },
     { view: 'reports', name: 'Reportes', icon: 'bar_chart', keywords: ['estadisticas', 'graficos', 'analisis'], hasAccess: userRutas.includes('reports') },
-    { view: 'manual_billing', name: 'Registro de Lecturas', icon: 'edit_document', keywords: ['lectura', 'kwh', 'medidor', 'consumo'], hasAccess: userRutas.includes('manual_billing') },
+    { view: 'manual_billing', name: 'Lecturas', icon: 'edit_document', keywords: ['lectura', 'kwh', 'medidor', 'consumo'], hasAccess: userRutas.includes('manual_billing') },
     { view: 'users', name: 'Gestión de Usuarios', icon: 'manage_accounts', keywords: ['administradores', 'moderadores', 'cuentas', 'permisos', 'contraseñas'], isConfig: true, hasAccess: userRutas.includes('users') },
     { view: 'settings', name: 'Ajustes Generales', icon: 'settings', keywords: ['configuracion', 'parametros', 'sistema'], isConfig: true, hasAccess: userRutas.includes('settings') },
     { view: 'support', name: 'Soporte Técnico', icon: 'support_agent', keywords: ['ayuda', 'contacto', 'problemas', 'ticket'], hasAccess: userRutas.includes('support') }

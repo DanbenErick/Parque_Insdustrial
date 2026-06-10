@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '../api/axiosConfig';
 import { useYear } from '../context/YearContext';
@@ -261,9 +262,16 @@ const GenerateInvoices = () => {
       </div>
 
       {/* Success Modal */}
+      <AnimatePresence>
       {showSuccess && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center">
-          <div className="bg-surface p-xl rounded-xl shadow-2xl max-w-md w-full text-center space-y-md border border-outline-variant">
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center"
+        >
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+            className="bg-surface p-xl rounded-xl shadow-2xl max-w-md w-full text-center space-y-md border border-outline-variant"
+          >
             <div className="w-20 h-20 bg-[#059669]/10 rounded-full flex items-center justify-center mx-auto mb-lg">
               <span className="material-symbols-outlined text-[#059669] text-[48px]">verified</span>
             </div>
@@ -280,14 +288,22 @@ const GenerateInvoices = () => {
                 Ir a Módulo de Facturación
               </button>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* Tenant Details Modal */}
+      <AnimatePresence>
       {showDetailsModal && (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-md">
-          <div className="bg-surface border border-outline-variant rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95">
+        <motion.div 
+          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-md"
+        >
+          <motion.div 
+            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+            className="bg-surface border border-outline-variant rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
+          >
             <div className="px-lg py-md bg-surface-container-low border-b border-outline-variant flex justify-between items-center">
               <h4 className="font-headline-sm text-headline-sm text-on-surface font-bold">Detalle de Lecturas del Periodo</h4>
               <div className="flex flex-wrap items-center gap-sm">
@@ -331,9 +347,10 @@ const GenerateInvoices = () => {
                   Cerrar
                </button>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </main>
   );
 };
