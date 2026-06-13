@@ -71,21 +71,21 @@ export const AuthProvider = ({ children }) => {
     // Step 2: background validation (optional — only invalidates on 401)
     api.get('/auth/me')
       .then((res) => {
-        // Refresh with minimal user data from server
-        const freshUser = pickUser(res.data?.usuario || res.data);
+        const data = res.data;
+        const freshUser = pickUser(data.usuario || data);
+        if (data.rutas) freshUser.rutas = data.rutas;
+        if (data.permisos) freshUser.permisos = data.permisos;
+        
         setUser((prev) => {
-          // Mantener rutas y permisos del state anterior si el servidor no los envió ahora
           const mergedUser = { ...prev, ...freshUser };
           localStorage.setItem('luz_user', JSON.stringify(mergedUser));
           return mergedUser;
         });
       })
       .catch((error) => {
-        // Only clear the session if the server explicitly says the token is invalid
         if (error?.response?.status === 401) {
           clearSession();
         }
-        // 404, 500, network error, etc. → keep the restored session intact
       })
       .finally(() => {
         setIsLoading(false);
@@ -99,7 +99,9 @@ export const AuthProvider = ({ children }) => {
     });
 
     const data = response.data;
-    const minimalUser = pickUser(data.usuario);
+    const minimalUser = pickUser(data.usuario || data);
+    if (data.rutas) minimalUser.rutas = data.rutas;
+    if (data.permisos) minimalUser.permisos = data.permisos;
 
     setUser(minimalUser);
     setIsAuthenticated(true);

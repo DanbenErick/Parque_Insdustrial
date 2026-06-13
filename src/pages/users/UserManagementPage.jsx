@@ -240,19 +240,16 @@ const UserManagement = () => {
       {/* Table Section */}
       <div className="bg-surface border border-outline-variant rounded-2xl overflow-hidden shadow-sm">
         {/* Table Header */}
-        <div className="px-5 py-5 border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface">
+        <div className="px-4 py-3 border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-surface-container-lowest">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-              <span className="material-symbols-outlined">group</span>
-            </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <h2 className="text-lg text-on-surface font-bold tracking-tight">Personal y Socios</h2>
+                <h2 className="text-base text-on-surface font-bold tracking-tight">Personal y Socios</h2>
                 <span className="bg-surface-variant text-on-surface-variant text-[10px] font-bold px-2 py-0.5 rounded-full">
                   {filteredUsers.length}
                 </span>
               </div>
-              <span className="text-xs text-on-surface-variant font-medium">Directorio completo de usuarios registrados</span>
+              <span className="text-[11px] text-on-surface-variant font-medium">Directorio completo de usuarios registrados</span>
             </div>
           </div>
 

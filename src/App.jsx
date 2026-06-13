@@ -11,6 +11,7 @@ import TopBar from './layouts/TopBar';
 
 // Shared components
 import PageTransition from './components/ui/PageTransition';
+import ReloadPrompt from './components/ui/ReloadPrompt';
 
 // Componente de carga para Lazy Pages
 const PageLoader = () => (
@@ -83,6 +84,7 @@ function App() {
   return (
     <>
       <Toaster position="bottom-right" theme={isDarkMode ? 'dark' : 'light'} richColors />
+      <ReloadPrompt />
       <div className="bg-surface font-body-md text-on-surface antialiased flex flex-col md:flex-row min-h-screen relative overflow-x-hidden">
 
         {/* Mobile Top Bar */}
