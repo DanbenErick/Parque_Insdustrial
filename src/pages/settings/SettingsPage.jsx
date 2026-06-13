@@ -1,0 +1,443 @@
+import React, { useState, useEffect } from 'react';
+import { toast } from 'sonner';
+import { useAuth } from '../../context/AuthContext';
+import api from '../../api/axiosConfig';
+import PeriodosSettingsTab from './PeriodosSettingsTab';
+import CargosSettingsTab from './CargosSettingsTab';
+
+const Settings = () => {
+  const { user } = useAuth();
+  
+  const [activeTab, setActiveTab] = useState('profile');
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Estados para cambio de contraseña
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passwordForm, setPasswordForm] = useState({
+    clave_actual: '',
+    clave_nueva: '',
+    clave_confirmar: ''
+  });
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // Estados para el perfil
+  const [profile, setProfile] = useState({
+    nombre_razonsocial: '',
+    cargo_representante: '',
+    telefono: '',
+    correo: ''
+  });
+
+  // Estados para notificaciones
+  const [notifications, setNotifications] = useState({
+    pagos: true,
+    facturas: true,
+    socios: false,
+    reportes: true
+  });
+
+  // Estados para tarifas base
+  const [tarifas, setTarifas] = useState({
+    monto_multa_base: 0,
+    monto_instalacion_base: 0
+  });
+
+  // Cargar datos del usuario y configuración global
+  useEffect(() => {
+    if (user) {
+      setProfile({
+        nombre_razonsocial: user.nombre_razonsocial || '',
+        cargo_representante: user.cargo_representante || '',
+        telefono: user.telefono || '',
+        correo: user.correo || ''
+      });
+    }
+
+    // Cargar preferencias locales
+    const savedPrefs = localStorage.getItem('luz_prefs');
+    if (savedPrefs) {
+      const parsed = JSON.parse(savedPrefs);
+      if (parsed.notifications) setNotifications(parsed.notifications);
+    }
+    
+    // Cargar configuraciones globales
+    api.get('/config').then(res => {
+      setTarifas({
+        monto_multa_base: res.data.monto_multa_base || 0,
+        monto_instalacion_base: res.data.monto_instalacion_base || 0
+      });
+    }).catch(() => { /* Config load failed silently */ });
+  }, [user]);
+
+  const handleProfileChange = (e) => {
+    const { name, value } = e.target;
+    setProfile(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePasswordInputChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordForm(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePasswordSave = async (e) => {
+    e.preventDefault();
+    if (!passwordForm.clave_actual || !passwordForm.clave_nueva || !passwordForm.clave_confirmar) {
+      return toast.error('Todos los campos son obligatorios.');
+    }
+    if (passwordForm.clave_nueva !== passwordForm.clave_confirmar) {
+      return toast.error('La nueva contraseña y la confirmación no coinciden.');
+    }
+    if (passwordForm.clave_nueva.length < 6) {
+      return toast.error('La nueva contraseña debe tener al menos 6 caracteres.');
+    }
+
+    setIsChangingPassword(true);
+    try {
+      await api.put('/auth/change-password', {
+        clave_actual: passwordForm.clave_actual,
+        clave_nueva: passwordForm.clave_nueva
+      });
+      toast.success('Contraseña actualizada correctamente.');
+      setPasswordForm({ clave_actual: '', clave_nueva: '', clave_confirmar: '' });
+      setShowPasswordForm(false);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Ocurrió un error al cambiar la contraseña');
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  const toggleNotification = (key) => {
+    setNotifications(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const handleSave = async () => {
+    setIsSaving(true);
+    
+    try {
+      if (activeTab === 'profile') {
+        if (!user || !user.id) {
+          throw new Error('No se pudo identificar al usuario actual.');
+        }
+        await api.put(`/usuarios/${user.id}`, profile);
+        toast.success('Perfil actualizado correctamente');
+      } else if (activeTab === 'tarifas') {
+        await api.put('/config', tarifas);
+        toast.success('Tarifas globales guardadas exitosamente');
+      } else {
+        // Guardar preferencias en localStorage
+        localStorage.setItem('luz_prefs', JSON.stringify({
+          notifications
+        }));
+        
+        toast.custom((t) => (
+          <div className="bg-surface border border-outline-variant rounded-xl shadow-lg p-3.5 flex items-center gap-3.5 w-full min-w-[300px]">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
+              <span className="material-symbols-outlined">task_alt</span>
+            </div>
+            <div className="flex-1">
+              <h4 className="text-sm font-bold text-on-surface leading-tight mb-0.5">Preferencias Guardadas</h4>
+              <p className="text-[11px] text-on-surface-variant leading-tight">Tu configuración local ha sido actualizada correctamente.</p>
+            </div>
+            <button onClick={() => toast.dismiss(t)} className="w-6 h-6 rounded-md hover:bg-surface-variant flex items-center justify-center text-on-surface-variant transition-colors shrink-0">
+              <span className="material-symbols-outlined text-[14px]">close</span>
+            </button>
+          </div>
+        ));
+      }
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Ocurrió un error al guardar los cambios');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <main className="flex-grow flex flex-col relative overflow-hidden bg-background">
+      <div className="flex-grow overflow-y-auto p-4 md:p-6 custom-scrollbar">
+        <div className="max-w-6xl mx-auto space-y-4">
+          
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h2 className="text-2xl text-primary font-bold leading-tight">Configuración del Sistema</h2>
+              <p className="text-sm text-on-surface-variant">Gestiona tus preferencias, perfil y notificaciones.</p>
+            </div>
+            <button 
+              onClick={handleSave}
+              disabled={isSaving}
+              className={`px-4 py-1.5 h-8 text-xs bg-primary text-on-primary font-bold rounded-md shadow-sm transition-all flex items-center gap-1.5 ${isSaving ? 'opacity-70 cursor-not-allowed' : 'hover:opacity-90 active:scale-95'}`}
+            >
+              {isSaving ? (
+                <>
+                  <span className="material-symbols-outlined animate-spin text-[16px]">sync</span>
+                  Guardando...
+                </>
+              ) : (
+                'Guardar Cambios'
+              )}
+            </button>
+          </div>
+
+          <div className="flex flex-col md:flex-row gap-4">
+            {/* Sidebar nav for settings */}
+            <div className="w-full md:w-56 space-y-1">
+              <button 
+                onClick={() => setActiveTab('profile')}
+                className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left text-xs ${activeTab === 'profile' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
+              >
+                <span className="material-symbols-outlined text-[16px]">person</span>
+                Perfil de Usuario
+              </button>
+              <button 
+                onClick={() => setActiveTab('notifications')}
+                className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left text-xs ${activeTab === 'notifications' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
+              >
+                <span className="material-symbols-outlined text-[16px]">notifications_active</span>
+                Notificaciones
+              </button>
+              <button 
+                onClick={() => setActiveTab('periodos')}
+                className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left text-xs ${activeTab === 'periodos' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
+              >
+                <span className="material-symbols-outlined text-[16px]">calendar_month</span>
+                Periodos de Facturación
+              </button>
+              <button 
+                onClick={() => setActiveTab('tarifas')}
+                className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left text-xs ${activeTab === 'tarifas' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
+              >
+                <span className="material-symbols-outlined text-[16px]">request_quote</span>
+                Tarifas y Cobros
+              </button>
+            </div>
+
+            {/* Content Area */}
+            <div className="flex-grow bg-surface border border-outline-variant rounded-lg shadow-sm p-4 md:p-6 min-h-[500px]">
+              
+              {activeTab === 'profile' && (
+                <div className="animate-in fade-in space-y-6">
+                  <div className="flex items-center gap-4 border-b border-outline-variant pb-4">
+                    <div className="w-16 h-16 bg-primary-container rounded-full flex items-center justify-center text-on-primary-container relative group cursor-pointer overflow-hidden">
+                      <span className="material-symbols-outlined text-[28px]">account_circle</span>
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="material-symbols-outlined text-white text-[20px]">photo_camera</span>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-base font-bold text-on-surface">{user?.nombre_razonsocial || 'Administrador'}</h3>
+                      <p className="text-on-surface-variant text-[11px]">{user?.correo || 'admin@jicamarca.com'}</p>
+                      <span className="inline-block mt-1 px-1.5 py-0.5 bg-surface-container-high rounded text-[10px] font-bold text-on-surface-variant">
+                        Rol: {user?.nombre_rol || 'Admin'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div className="space-y-0.5">
+                      <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Nombre / Razón Social</label>
+                      <input 
+                        type="text" 
+                        name="nombre_razonsocial"
+                        value={profile.nombre_razonsocial}
+                        onChange={handleProfileChange}
+                        className="w-full bg-surface-container border border-outline-variant rounded px-3 py-1.5 text-xs h-8 focus:border-primary outline-none transition-colors" 
+                      />
+                    </div>
+                    <div className="space-y-0.5">
+                      <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Cargo Representante</label>
+                      <input 
+                        type="text" 
+                        name="cargo_representante"
+                        value={profile.cargo_representante}
+                        onChange={handleProfileChange}
+                        className="w-full bg-surface-container border border-outline-variant rounded px-3 py-1.5 text-xs h-8 focus:border-primary outline-none transition-colors" 
+                      />
+                    </div>
+                    <div className="space-y-0.5">
+                      <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Teléfono de Contacto</label>
+                      <input 
+                        type="tel" 
+                        name="telefono"
+                        value={profile.telefono}
+                        onChange={handleProfileChange}
+                        className="w-full bg-surface-container border border-outline-variant rounded px-3 py-1.5 text-xs h-8 focus:border-primary outline-none transition-colors" 
+                      />
+                    </div>
+                    <div className="space-y-0.5">
+                      <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Correo Electrónico</label>
+                      <input 
+                        type="email" 
+                        name="correo"
+                        value={profile.correo}
+                        onChange={handleProfileChange}
+                        className="w-full bg-surface-container border border-outline-variant rounded px-3 py-1.5 text-xs h-8 focus:border-primary outline-none transition-colors" 
+                      />
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-outline-variant/30 mt-6">
+                    <h4 className="text-sm text-on-surface font-bold mb-2">Seguridad</h4>
+                    
+                    {!showPasswordForm ? (
+                      <div>
+                        <p className="text-xs text-on-surface-variant mb-3">
+                          Para proteger tu cuenta, te recomendamos usar una contraseña segura. El cambio afectará únicamente a tu sesión activa.
+                        </p>
+                        <button 
+                          onClick={() => setShowPasswordForm(true)}
+                          className="px-3 py-1.5 h-8 border border-primary text-primary hover:bg-primary/5 rounded-md transition-colors text-xs font-bold active:scale-95 duration-150"
+                        >
+                          Cambiar Contraseña
+                        </button>
+                      </div>
+                    ) : (
+                      <form onSubmit={handlePasswordSave} className="space-y-3 max-w-md bg-surface-container-low p-4 border border-outline-variant rounded-lg mt-2 animate-in slide-in-from-top-2 duration-200">
+                        <div className="flex justify-between items-center pb-2 border-b border-outline-variant/30 mb-2">
+                          <span className="text-xs font-bold text-on-surface flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[16px] text-primary">key</span>
+                            Actualizar Contraseña
+                          </span>
+                          <button 
+                            type="button" 
+                            onClick={() => {
+                              setShowPasswordForm(false);
+                              setPasswordForm({ clave_actual: '', clave_nueva: '', clave_confirmar: '' });
+                            }}
+                            className="p-1 hover:bg-surface-container-highest rounded text-on-surface-variant"
+                          >
+                            <span className="material-symbols-outlined text-[14px]">close</span>
+                          </button>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div className="space-y-0.5">
+                            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Contraseña Actual</label>
+                            <input 
+                              required
+                              type="password" 
+                              name="clave_actual" 
+                              value={passwordForm.clave_actual} 
+                              onChange={handlePasswordInputChange}
+                              placeholder="••••••••" 
+                              className="w-full bg-white border border-outline-variant rounded px-3 py-1.5 h-8 text-xs focus:border-primary outline-none" 
+                            />
+                          </div>
+                          <div className="space-y-0.5">
+                            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Nueva Contraseña</label>
+                            <input 
+                              required
+                              type="password" 
+                              name="clave_nueva" 
+                              value={passwordForm.clave_nueva} 
+                              onChange={handlePasswordInputChange}
+                              placeholder="Mínimo 6 caracteres" 
+                              className="w-full bg-white border border-outline-variant rounded px-3 py-1.5 h-8 text-xs focus:border-primary outline-none" 
+                            />
+                          </div>
+                          <div className="space-y-0.5">
+                            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Confirmar Nueva Contraseña</label>
+                            <input 
+                              required
+                              type="password" 
+                              name="clave_confirmar" 
+                              value={passwordForm.clave_confirmar} 
+                              onChange={handlePasswordInputChange}
+                              placeholder="Repite la contraseña" 
+                              className="w-full bg-white border border-outline-variant rounded px-3 py-1.5 h-8 text-xs focus:border-primary outline-none" 
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-2">
+                          <button 
+                            type="button" 
+                            onClick={() => {
+                              setShowPasswordForm(false);
+                              setPasswordForm({ clave_actual: '', clave_nueva: '', clave_confirmar: '' });
+                            }}
+                            className="px-3 py-1.5 border border-outline text-on-surface h-8 text-xs font-bold rounded-md hover:bg-surface transition-colors"
+                          >
+                            Cancelar
+                          </button>
+                          <button 
+                            type="submit" 
+                            disabled={isChangingPassword}
+                            className="px-3 py-1.5 bg-primary text-on-primary h-8 text-xs font-bold rounded-md shadow-sm hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center gap-1"
+                          >
+                            {isChangingPassword ? 'Guardando...' : 'Guardar Clave'}
+                          </button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'notifications' && (
+                <div className="animate-in fade-in space-y-4">
+                  <div>
+                    <h3 className="text-base font-bold text-on-surface mb-1">Avisos y Notificaciones</h3>
+                    <p className="text-[11px] text-on-surface-variant mb-4">Elige qué alertas deseas recibir localmente en la plataforma.</p>
+                  </div>
+
+                  <div className="space-y-0 divide-y divide-outline-variant border border-outline-variant rounded-md">
+                    <div className="px-4 py-3 flex items-center justify-between hover:bg-surface-container-lowest" onClick={() => toggleNotification('pagos')}>
+                      <div>
+                        <p className="font-bold text-on-surface text-[11px]">Vencimiento de Pagos</p>
+                        <p className="text-[10px] text-on-surface-variant mt-0.5">Mostrar alertas cuando un socio tenga retraso.</p>
+                      </div>
+                      <div className={`w-8 h-4 rounded-full relative cursor-pointer shadow-inner transition-colors ${notifications.pagos ? 'bg-primary' : 'bg-surface-container-high'}`}>
+                        <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${notifications.pagos ? 'right-0.5' : 'left-0.5'}`}></div>
+                      </div>
+                    </div>
+                    
+                    <div className="px-4 py-3 flex items-center justify-between hover:bg-surface-container-lowest" onClick={() => toggleNotification('facturas')}>
+                      <div>
+                        <p className="font-bold text-on-surface text-[11px]">Generación de Facturas Exitosas</p>
+                        <p className="text-[10px] text-on-surface-variant mt-0.5">Alerta al culminar el procesamiento masivo a fin de mes.</p>
+                      </div>
+                      <div className={`w-8 h-4 rounded-full relative cursor-pointer shadow-inner transition-colors ${notifications.facturas ? 'bg-primary' : 'bg-surface-container-high'}`}>
+                        <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${notifications.facturas ? 'right-0.5' : 'left-0.5'}`}></div>
+                      </div>
+                    </div>
+
+                    <div className="px-4 py-3 flex items-center justify-between hover:bg-surface-container-lowest" onClick={() => toggleNotification('socios')}>
+                      <div>
+                        <p className="font-bold text-on-surface text-[11px]">Nuevos Socios Registrados</p>
+                        <p className="text-[10px] text-on-surface-variant mt-0.5">Notificar cuando un operador registre una nueva empresa.</p>
+                      </div>
+                      <div className={`w-8 h-4 rounded-full relative cursor-pointer shadow-inner transition-colors ${notifications.socios ? 'bg-primary' : 'bg-surface-container-high'}`}>
+                        <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${notifications.socios ? 'right-0.5' : 'left-0.5'}`}></div>
+                      </div>
+                    </div>
+
+                    <div className="px-4 py-3 flex items-center justify-between hover:bg-surface-container-lowest" onClick={() => toggleNotification('reportes')}>
+                      <div>
+                        <p className="font-bold text-on-surface text-[11px]">Reporte Semanal Automatizado</p>
+                        <p className="text-[10px] text-on-surface-variant mt-0.5">Mostrar un resumen estadístico de consumos en el panel.</p>
+                      </div>
+                      <div className={`w-8 h-4 rounded-full relative cursor-pointer shadow-inner transition-colors ${notifications.reportes ? 'bg-primary' : 'bg-surface-container-high'}`}>
+                        <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${notifications.reportes ? 'right-0.5' : 'left-0.5'}`}></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'tarifas' && (
+                <CargosSettingsTab />
+              )}
+
+              {activeTab === 'periodos' && (
+                <PeriodosSettingsTab />
+              )}
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+};
+
+export default Settings;

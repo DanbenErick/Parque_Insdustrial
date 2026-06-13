@@ -8,25 +8,9 @@ const api = axios.create({
   }
 });
 
-let activeRequests = 0;
-
-const startLoader = () => {
-  activeRequests++;
-  window.dispatchEvent(new CustomEvent('globalLoading', { detail: true }));
-};
-
-const stopLoader = () => {
-  activeRequests--;
-  if (activeRequests <= 0) {
-    activeRequests = 0;
-    window.dispatchEvent(new CustomEvent('globalLoading', { detail: false }));
-  }
-};
-
-// Interceptor para inyectar el token en cada petición automáticamente y mostrar el loader
+// Interceptor para inyectar el token en cada petición automáticamente
 api.interceptors.request.use(
   (config) => {
-    startLoader();
     const token = localStorage.getItem('luz_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
@@ -34,19 +18,16 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    stopLoader();
     return Promise.reject(error);
   }
 );
 
-// Interceptor para manejar errores globalmente de forma limpia y ocultar el loader
+// Interceptor para manejar errores globalmente
 api.interceptors.response.use(
   (response) => {
-    stopLoader();
     return response;
   },
   (error) => {
-    stopLoader();
     // Si la sesión expiró o no está autorizada
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
       localStorage.removeItem('luz_user');

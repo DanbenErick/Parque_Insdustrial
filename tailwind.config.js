@@ -8,7 +8,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        "primary": "#00647c",
+        "primary": "#515B3A",
         "secondary-fixed-dim": "#bec6e0",
         "on-tertiary-container": "#fffbff",
         "tertiary": "#825100",
@@ -19,11 +19,11 @@ export default {
         "error": "#ba1a1a",
         "secondary-container": "#dae2fd",
         "tertiary-container": "#a36700",
-        "surface": "#f7f9fb",
+        "surface": "#ffffff",
         "on-surface-variant": "#3e484d",
         "on-secondary-fixed-variant": "#3f465c",
         "on-primary-fixed-variant": "#004e61",
-        "background": "#f7f9fb",
+        "background": "#F3F4F6",
         "surface-variant": "#e0e3e5",
         "outline-variant": "#bdc8ce",
         "surface-container-highest": "#e0e3e5",
@@ -44,7 +44,7 @@ export default {
         "surface-tint": "#006780",
         "on-secondary-fixed": "#131b2e",
         "surface-container-high": "#e6e8ea",
-        "surface-bright": "#f7f9fb",
+        "surface-bright": "#F3F4F6",
         "primary-fixed": "#b7eaff",
         "on-tertiary-fixed": "#2a1700",
         "on-tertiary-fixed-variant": "#653e00",

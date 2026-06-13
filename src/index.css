@@ -9,6 +9,14 @@
   body {
     @apply bg-background font-body-md text-on-surface antialiased;
   }
+
+  /* Animación global de "presionado" para todos los botones del sistema */
+  button:not(:disabled) {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, transform;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 150ms;
+    @apply active:scale-[0.96];
+  }
 }
 
 @layer utilities {
