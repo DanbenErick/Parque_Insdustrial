@@ -117,11 +117,10 @@ const UserManagement = () => {
   const closeEditModal = useCallback(() => setEditingUser(null), []);
 
   // --- API Actions ---
-  const handleCreateSubmit = useCallback(async (e) => {
-    e.preventDefault();
+  const handleCreateSubmit = useCallback(async (data) => {
     setIsSaving(true);
     try {
-      await api.post('/usuarios', formData);
+      await api.post('/usuarios', data);
       toast.success('Usuario creado exitosamente');
       setShowAddModal(false);
       fetchUsers();
@@ -130,13 +129,12 @@ const UserManagement = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [formData, fetchUsers]);
+  }, [fetchUsers]);
 
-  const handleEditSubmit = useCallback(async (e) => {
-    e.preventDefault();
+  const handleEditSubmit = useCallback(async (data) => {
     setIsSaving(true);
     try {
-      await api.put(`/usuarios/${editingUser.id}`, formData);
+      await api.put(`/usuarios/${editingUser.id}`, data);
       toast.success('Usuario actualizado exitosamente');
       setEditingUser(null);
       fetchUsers();
@@ -145,7 +143,7 @@ const UserManagement = () => {
     } finally {
       setIsSaving(false);
     }
-  }, [formData, editingUser, fetchUsers]);
+  }, [editingUser, fetchUsers]);
 
   const toggleUserStatus = useCallback((user) => {
     if (user.rol_id === 1) return toast.info('No puedes desactivar a un Administrador.');
@@ -365,21 +363,16 @@ const UserManagement = () => {
       <AnimatePresence>
         {showAddModal && (
           <UserFormModal
-            formData={formData}
-            onFieldChange={handleFormChange}
+            initialData={formData}
             onSubmit={handleCreateSubmit}
             onClose={closeAddModal}
             isSaving={isSaving}
             isEdit={false}
           />
         )}
-      </AnimatePresence>
-
-      <AnimatePresence>
         {editingUser && (
           <UserFormModal
-            formData={formData}
-            onFieldChange={handleFormChange}
+            initialData={formData}
             onSubmit={handleEditSubmit}
             onClose={closeEditModal}
             isSaving={isSaving}

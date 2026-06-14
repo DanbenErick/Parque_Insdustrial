@@ -80,6 +80,50 @@ export const EditReadingModal = ({
             )}
           </div>
 
+          {/* EDITAR DATOS DE CAMBIO DE MEDIDOR */}
+          {(editModalData.es_cambio_medidor === 1 || editModalData.es_cambio_medidor === true) && (
+            <div className="bg-orange-50/50 p-4 rounded-xl border border-orange-200/50 space-y-4">
+              <h4 className="text-[10px] font-bold text-orange-700 uppercase tracking-wider flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[14px]">swap_horiz</span> Editar Cambio de Medidor
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="text-[9px] font-bold text-error uppercase tracking-wider block mb-1">Final Dañado (Normal)</label>
+                  <div className="relative h-[40px]">
+                    <input type="number" step="0.01" required value={editLecturaFinalAntiguo} onChange={(e) => setEditLecturaFinalAntiguo(e.target.value)} className="w-full h-full bg-white border border-error/30 hover:border-error focus:border-error rounded-lg pl-3 pr-10 text-sm font-data-mono font-bold text-error focus:outline-none focus:ring-2 focus:ring-error/20 text-right" />
+                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 font-bold text-[9px] text-on-surface-variant">kWh</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-[9px] font-bold text-primary uppercase tracking-wider block mb-1">Inicial Nuevo (Normal)</label>
+                  <div className="relative h-[40px]">
+                    <input type="number" step="0.01" required value={editLecturaInicialNuevo} onChange={(e) => setEditLecturaInicialNuevo(e.target.value)} className="w-full h-full bg-white border border-primary/30 hover:border-primary focus:border-primary rounded-lg pl-3 pr-10 text-sm font-data-mono font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 text-right" />
+                    <span className="absolute right-2.5 top-1/2 -translate-y-1/2 font-bold text-[9px] text-on-surface-variant">kWh</span>
+                  </div>
+                </div>
+                
+                {parseSafe(editModalData.lectura_anterior_punta) > 0 && (
+                  <>
+                    <div>
+                      <label className="text-[9px] font-bold text-error uppercase tracking-wider block mb-1">Final Dañado (Punta)</label>
+                      <div className="relative h-[40px]">
+                        <input type="number" step="0.01" required value={editLecturaFinalAntiguoPunta} onChange={(e) => setEditLecturaFinalAntiguoPunta(e.target.value)} className="w-full h-full bg-white border border-error/30 hover:border-error focus:border-error rounded-lg pl-3 pr-10 text-sm font-data-mono font-bold text-error focus:outline-none focus:ring-2 focus:ring-error/20 text-right" />
+                        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 font-bold text-[9px] text-on-surface-variant">kWh</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-[9px] font-bold text-primary uppercase tracking-wider block mb-1">Inicial Nuevo (Punta)</label>
+                      <div className="relative h-[40px]">
+                        <input type="number" step="0.01" required value={editLecturaInicialNuevoPunta} onChange={(e) => setEditLecturaInicialNuevoPunta(e.target.value)} className="w-full h-full bg-white border border-primary/30 hover:border-primary focus:border-primary rounded-lg pl-3 pr-10 text-sm font-data-mono font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 text-right" />
+                        <span className="absolute right-2.5 top-1/2 -translate-y-1/2 font-bold text-[9px] text-on-surface-variant">kWh</span>
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-col">
             <div className="flex justify-between items-end mb-1">
               <label className="text-[9px] font-bold text-primary uppercase tracking-wider">Justificación del Cambio *</label>

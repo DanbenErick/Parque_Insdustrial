@@ -11,6 +11,7 @@ const INITIAL_FORM_DATA = {
   descripcion: '',
   monto_defecto: '',
   es_activo: true,
+  es_global: false,
   periodos_ids: [],
 };
 
@@ -59,7 +60,8 @@ const CargosSettingsTab = () => {
         tipo: cargo.tipo,
         descripcion: cargo.descripcion,
         monto_defecto: cargo.monto_defecto,
-        es_activo: cargo.es_activo === 1,
+        es_activo: cargo.es_activo === 1 || cargo.es_activo === true,
+        es_global: cargo.es_global === 1 || cargo.es_global === true,
         periodos_ids: cargo.periodos_ids || [],
       });
     } else {
@@ -85,7 +87,8 @@ const CargosSettingsTab = () => {
         descripcion: formData.descripcion,
         monto_defecto: parseFloat(formData.monto_defecto),
         es_activo: formData.es_activo,
-        periodos_ids: formData.periodos_ids,
+        es_global: formData.es_global,
+        periodos_ids: formData.es_global ? [] : formData.periodos_ids,
       };
 
       if (formData.id) {
@@ -169,7 +172,9 @@ const CargosSettingsTab = () => {
                   <td className="py-2.5 px-4 font-bold text-on-surface text-xs">
                     {cargo.descripcion}
                     <div className="text-[10px] text-on-surface-variant font-normal mt-0.5">
-                      {cargo.periodos_ids?.length || 0} periodos asignados
+                      {(cargo.es_global === 1 || cargo.es_global === true) 
+                        ? <span className="text-primary font-bold flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">public</span> Global (Todos)</span>
+                        : `${cargo.periodos_ids?.length || 0} periodos asignados`}
                     </div>
                   </td>
                   <td className="py-2.5 px-4 font-data-mono font-bold text-primary text-xs">S/ {cargo.montoFormateado}</td>

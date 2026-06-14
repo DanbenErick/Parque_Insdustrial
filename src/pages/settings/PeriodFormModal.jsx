@@ -90,7 +90,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
 
   const handleSave = async (e) => {
     e.preventDefault();
-    if (!tarifaKwh || !tarifaMantenimientoNormal || !tarifaMantenimientoTiempoReal || !fechaInicio || !fechaFin) {
+    if (!tarifaKwh || !tarifaMantenimientoNormal || !fechaInicio || !fechaFin) {
       return toast.error("Todos los campos son obligatorios.");
     }
 
@@ -100,7 +100,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
       tarifa_kwh: parseFloat(tarifaKwh),
       tarifa_kwh_punta: tarifaKwhPunta ? parseFloat(tarifaKwhPunta) : 0,
       tarifa_mantenimiento_normal: parseFloat(tarifaMantenimientoNormal),
-      tarifa_mantenimiento_tiempo_real: parseFloat(tarifaMantenimientoTiempoReal),
+      tarifa_mantenimiento_tiempo_real: parseFloat(tarifaMantenimientoNormal),
       factor_multiplicador: parseFloat(factorMultiplicador),
       fecha_inicio: fechaInicio,
       fecha_fin: fechaFin
@@ -217,7 +217,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                   </div>
                 </div>
                 <div className="flex flex-col">
-                  <label className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Cuota Mant. (Normal)</label>
+                  <label className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Cuota Mantenimiento</label>
                   <div className="relative">
                     <span className="absolute left-2.5 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-xs">S/</span>
                     <input 
@@ -226,21 +226,6 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                       required
                       value={tarifaMantenimientoNormal}
                       onChange={(e) => setTarifaMantenimientoNormal(e.target.value)}
-                      placeholder="0.00" 
-                      className="w-full bg-white border border-primary/30 rounded-lg pl-7 pr-3 py-1.5 text-sm font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm transition-all"
-                    />
-                  </div>
-                </div>
-                <div className="flex flex-col">
-                  <label className="text-[10px] font-bold text-primary uppercase tracking-wider mb-1">Cuota Mant. (T. Real)</label>
-                  <div className="relative">
-                    <span className="absolute left-2.5 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-xs">S/</span>
-                    <input 
-                      type="number" 
-                      step="0.01"
-                      required
-                      value={tarifaMantenimientoTiempoReal}
-                      onChange={(e) => setTarifaMantenimientoTiempoReal(e.target.value)}
                       placeholder="0.00" 
                       className="w-full bg-white border border-primary/30 rounded-lg pl-7 pr-3 py-1.5 text-sm font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm transition-all"
                     />

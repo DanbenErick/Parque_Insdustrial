@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { useYear } from '../../context/YearContext';
 import PeriodFormModal from '../settings/PeriodFormModal';
@@ -14,6 +14,7 @@ import { RegistrationForm } from './components/RegistrationForm';
 import { HistoryPanel } from './components/HistoryPanel';
 import { AllReadingsModal } from './components/AllReadingsModal';
 import { EditReadingModal } from './components/EditReadingModal';
+import { ReadingDetailDrawer } from './components/ReadingDetailDrawer';
 
 const ManualBilling = () => {
   const { activeYear } = useYear();
@@ -42,6 +43,11 @@ const ManualBilling = () => {
     currentReadingPunta, setCurrentReadingPunta,
     factorPotencia, setFactorPotencia,
     precioFactorPotencia, setPrecioFactorPotencia,
+    isCambioMedidor, setIsCambioMedidor,
+    lecturaFinalAntiguo, setLecturaFinalAntiguo,
+    lecturaInicialNuevo, setLecturaInicialNuevo,
+    lecturaFinalAntiguoPunta, setLecturaFinalAntiguoPunta,
+    lecturaInicialNuevoPunta, setLecturaInicialNuevoPunta,
     isSaving, handleSave, lecturaExistente,
     isModalOpen, setIsModalOpen,
     modalSearchTerm, setModalSearchTerm,
@@ -53,6 +59,8 @@ const ManualBilling = () => {
     editPrecioFactorPotencia, setEditPrecioFactorPotencia,
     editJustificacion, setEditJustificacion
   } = billingForms;
+
+  const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
 
   return (
     <main className="p-4 md:p-xl space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow relative flex flex-col h-full">
@@ -84,7 +92,7 @@ const ManualBilling = () => {
             />
 
             {selectedMember ? (
-              <RegistrationForm 
+                <RegistrationForm 
                 selectedMember={selectedMember}
                 lecturaExistente={lecturaExistente}
                 activePeriodo={activePeriodo}
@@ -92,6 +100,11 @@ const ManualBilling = () => {
                 currentReadingPunta={currentReadingPunta} setCurrentReadingPunta={setCurrentReadingPunta}
                 factorPotencia={factorPotencia} setFactorPotencia={setFactorPotencia}
                 precioFactorPotencia={precioFactorPotencia} setPrecioFactorPotencia={setPrecioFactorPotencia}
+                isCambioMedidor={isCambioMedidor} setIsCambioMedidor={setIsCambioMedidor}
+                lecturaFinalAntiguo={lecturaFinalAntiguo} setLecturaFinalAntiguo={setLecturaFinalAntiguo}
+                lecturaInicialNuevo={lecturaInicialNuevo} setLecturaInicialNuevo={setLecturaInicialNuevo}
+                lecturaFinalAntiguoPunta={lecturaFinalAntiguoPunta} setLecturaFinalAntiguoPunta={setLecturaFinalAntiguoPunta}
+                lecturaInicialNuevoPunta={lecturaInicialNuevoPunta} setLecturaInicialNuevoPunta={setLecturaInicialNuevoPunta}
                 isSaving={isSaving} handleSave={handleSave}
               />
             ) : (
@@ -113,6 +126,7 @@ const ManualBilling = () => {
               activePeriodo={activePeriodo}
               lecturasPeriodoActivo={lecturasPeriodoActivo}
               setIsModalOpen={setIsModalOpen}
+              onRowClick={(record) => setSelectedDetailRecord(record)}
             />
           </div>
         </div>
@@ -128,6 +142,7 @@ const ManualBilling = () => {
             setModalSearchTerm={setModalSearchTerm}
             setIsModalOpen={setIsModalOpen}
             handleEditFromTable={handleEditFromTable}
+            onRowClick={(record) => setSelectedDetailRecord(record)}
           />
         )}
       </AnimatePresence>
@@ -143,11 +158,20 @@ const ManualBilling = () => {
             editFactorPotencia={editFactorPotencia} setEditFactorPotencia={setEditFactorPotencia}
             editPrecioFactorPotencia={editPrecioFactorPotencia} setEditPrecioFactorPotencia={setEditPrecioFactorPotencia}
             editJustificacion={editJustificacion} setEditJustificacion={setEditJustificacion}
+            editLecturaFinalAntiguo={formState.editLecturaFinalAntiguo} setEditLecturaFinalAntiguo={formState.setEditLecturaFinalAntiguo}
+            editLecturaInicialNuevo={formState.editLecturaInicialNuevo} setEditLecturaInicialNuevo={formState.setEditLecturaInicialNuevo}
+            editLecturaFinalAntiguoPunta={formState.editLecturaFinalAntiguoPunta} setEditLecturaFinalAntiguoPunta={formState.setEditLecturaFinalAntiguoPunta}
+            editLecturaInicialNuevoPunta={formState.editLecturaInicialNuevoPunta} setEditLecturaInicialNuevoPunta={formState.setEditLecturaInicialNuevoPunta}
             isSaving={isSaving}
           />
         )}
       </AnimatePresence>
       
+      <ReadingDetailDrawer 
+        record={selectedDetailRecord} 
+        onClose={() => setSelectedDetailRecord(null)} 
+      />
+
       <PeriodFormModal isOpen={isPeriodModalOpen} onClose={() => setIsPeriodModalOpen(false)} onSuccess={fetchPeriodos} existentes={periodosFiltrados} />
     </main>
   );

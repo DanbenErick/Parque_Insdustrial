@@ -21,6 +21,15 @@ export const useBillingForms = (dataHook) => {
   const [precioFactorPotencia, setPrecioFactorPotencia] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   
+  // Cambio de Medidor State
+  const [isCambioMedidor, setIsCambioMedidor] = useState(false);
+  const [lecturaFinalAntiguo, setLecturaFinalAntiguo] = useState('');
+  const [lecturaInicialNuevo, setLecturaInicialNuevo] = useState('0');
+  
+  // Cambio de Medidor (Punta) State
+  const [lecturaFinalAntiguoPunta, setLecturaFinalAntiguoPunta] = useState('');
+  const [lecturaInicialNuevoPunta, setLecturaInicialNuevoPunta] = useState('0');
+  
   // UI state
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -34,6 +43,12 @@ export const useBillingForms = (dataHook) => {
   const [editFactorPotencia, setEditFactorPotencia] = useState('');
   const [editPrecioFactorPotencia, setEditPrecioFactorPotencia] = useState('');
   const [editJustificacion, setEditJustificacion] = useState('');
+
+  // Edit Cambio de Medidor
+  const [editLecturaFinalAntiguo, setEditLecturaFinalAntiguo] = useState('');
+  const [editLecturaInicialNuevo, setEditLecturaInicialNuevo] = useState('');
+  const [editLecturaFinalAntiguoPunta, setEditLecturaFinalAntiguoPunta] = useState('');
+  const [editLecturaInicialNuevoPunta, setEditLecturaInicialNuevoPunta] = useState('');
 
   const medidoresBuscables = useMemo(() => {
     return medidores.map(m => ({
@@ -62,6 +77,11 @@ export const useBillingForms = (dataHook) => {
     setCurrentReadingPunta('');
     setFactorPotencia('');
     setPrecioFactorPotencia('');
+    setIsCambioMedidor(false);
+    setLecturaFinalAntiguo('');
+    setLecturaInicialNuevo('0');
+    setLecturaFinalAntiguoPunta('');
+    setLecturaInicialNuevoPunta('0');
   }, []);
 
   const handleEditFromTable = useCallback((record) => {
@@ -71,6 +91,13 @@ export const useBillingForms = (dataHook) => {
     setEditFactorPotencia(record.factor_potencia || '');
     setEditPrecioFactorPotencia(record.precio_factor_potencia || '');
     setEditJustificacion('');
+    
+    // Set meter change values if they exist
+    setEditLecturaFinalAntiguo(record.lectura_final_viejo !== null ? record.lectura_final_viejo : '');
+    setEditLecturaInicialNuevo(record.lectura_inicial_nuevo !== null ? record.lectura_inicial_nuevo : '');
+    setEditLecturaFinalAntiguoPunta(record.lectura_final_viejo_punta !== null ? record.lectura_final_viejo_punta : '');
+    setEditLecturaInicialNuevoPunta(record.lectura_inicial_nuevo_punta !== null ? record.lectura_inicial_nuevo_punta : '');
+    
     setIsModalOpen(false); 
   }, []);
 
@@ -81,11 +108,29 @@ export const useBillingForms = (dataHook) => {
     setCurrentReadingPunta('');
     setFactorPotencia('');
     setPrecioFactorPotencia('');
+    setIsCambioMedidor(false);
+    setLecturaFinalAntiguo('');
+    setLecturaInicialNuevo('0');
+    setLecturaFinalAntiguoPunta('');
+    setLecturaInicialNuevoPunta('0');
   }, []);
 
   const handleSave = async (e) => {
     e.preventDefault();
     if (!currentReading || !selectedMember || !activePeriodo) return;
+    
+    const isTR = selectedMember.tipo === 'Tiempo Real';
+
+    if (isCambioMedidor) {
+      if (!lecturaFinalAntiguo || !lecturaInicialNuevo) {
+        toast.error('Complete los datos del medidor antiguo y nuevo (Normal)');
+        return;
+      }
+      if (isTR && (!lecturaFinalAntiguoPunta || !lecturaInicialNuevoPunta)) {
+        toast.error('Complete los datos del medidor antiguo y nuevo (Punta)');
+        return;
+      }
+    }
 
     setIsSaving(true);
     try {
@@ -98,7 +143,17 @@ export const useBillingForms = (dataHook) => {
         lectura_actual_punta: currentReadingPunta ? parseSafe(currentReadingPunta) : 0,
         factor_potencia: factorPotencia ? parseSafe(factorPotencia) : 0,
         precio_factor_potencia: precioFactorPotencia ? parseSafe(precioFactorPotencia) : 0,
-        estado: 'Validado'
+        estado: 'Validado',
+        // Campos de cambio de medidor
+        es_cambio_medidor: isCambioMedidor,
+        ...(isCambioMedidor && {
+          lectura_final_viejo: parseSafe(lecturaFinalAntiguo),
+          lectura_inicial_nuevo: parseSafe(lecturaInicialNuevo),
+          ...(isTR && {
+            lectura_final_viejo_punta: parseSafe(lecturaFinalAntiguoPunta),
+            lectura_inicial_nuevo_punta: parseSafe(lecturaInicialNuevoPunta)
+          })
+        })
       };
 
       await api.post('/lecturas', payload);
@@ -110,7 +165,8 @@ export const useBillingForms = (dataHook) => {
         lectura_anterior: parseSafe(selectedMember.ultima_lectura),
         lectura_actual: parseSafe(currentReading),
         periodo: activePeriodo.mes_anio,
-        fecha_registro: new Date().toISOString()
+        fecha_registro: new Date().toISOString(),
+        es_cambio_medidor: isCambioMedidor
       };
 
       setLecturas(prev => [newLectura, ...prev]);
@@ -135,6 +191,9 @@ export const useBillingForms = (dataHook) => {
 
     setIsSaving(true);
     try {
+      const isCambio = editModalData.es_cambio_medidor === 1 || editModalData.es_cambio_medidor === true;
+      const isTR = parseSafe(editModalData.lectura_anterior_punta) > 0 || parseSafe(editReadingValPunta) > 0;
+
       const payload = {
         lectura_anterior: parseSafe(editModalData.lectura_anterior),
         lectura_actual: parseSafe(editReadingVal),
@@ -142,7 +201,17 @@ export const useBillingForms = (dataHook) => {
         lectura_actual_punta: editReadingValPunta ? parseSafe(editReadingValPunta) : 0,
         factor_potencia: editFactorPotencia ? parseSafe(editFactorPotencia) : 0,
         justificacion: editJustificacion,
-        estado: 'Validado'
+        estado: 'Validado',
+        // Preserve meter change
+        es_cambio_medidor: isCambio ? 1 : 0,
+        ...(isCambio && {
+          lectura_final_viejo: parseSafe(editLecturaFinalAntiguo),
+          lectura_inicial_nuevo: parseSafe(editLecturaInicialNuevo),
+          ...(isTR && {
+            lectura_final_viejo_punta: parseSafe(editLecturaFinalAntiguoPunta),
+            lectura_inicial_nuevo_punta: parseSafe(editLecturaInicialNuevoPunta)
+          })
+        })
       };
 
       await api.put(`/lecturas/${editModalData.id}`, payload);
@@ -178,6 +247,11 @@ export const useBillingForms = (dataHook) => {
     currentReadingPunta, setCurrentReadingPunta,
     factorPotencia, setFactorPotencia,
     precioFactorPotencia, setPrecioFactorPotencia,
+    isCambioMedidor, setIsCambioMedidor,
+    lecturaFinalAntiguo, setLecturaFinalAntiguo,
+    lecturaInicialNuevo, setLecturaInicialNuevo,
+    lecturaFinalAntiguoPunta, setLecturaFinalAntiguoPunta,
+    lecturaInicialNuevoPunta, setLecturaInicialNuevoPunta,
     isSaving, handleSave, lecturaExistente,
     isModalOpen, setIsModalOpen,
     modalSearchTerm, setModalSearchTerm,
@@ -187,6 +261,10 @@ export const useBillingForms = (dataHook) => {
     editReadingValPunta, setEditReadingValPunta,
     editFactorPotencia, setEditFactorPotencia,
     editPrecioFactorPotencia, setEditPrecioFactorPotencia,
-    editJustificacion, setEditJustificacion
+    editJustificacion, setEditJustificacion,
+    editLecturaFinalAntiguo, setEditLecturaFinalAntiguo,
+    editLecturaInicialNuevo, setEditLecturaInicialNuevo,
+    editLecturaFinalAntiguoPunta, setEditLecturaFinalAntiguoPunta,
+    editLecturaInicialNuevoPunta, setEditLecturaInicialNuevoPunta
   };
 };

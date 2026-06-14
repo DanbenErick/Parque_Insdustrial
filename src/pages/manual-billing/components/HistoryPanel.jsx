@@ -6,7 +6,8 @@ import { EmptyStateIcon } from './shared/EmptyStateIcon';
 export const HistoryPanel = ({
   activePeriodo,
   lecturasPeriodoActivo,
-  setIsModalOpen
+  setIsModalOpen,
+  onRowClick
 }) => {
   return (
     <div className="bg-surface border border-outline-variant rounded-xl shadow-sm overflow-hidden h-full flex flex-col">
@@ -22,7 +23,7 @@ export const HistoryPanel = ({
         ) : (
           <ul className="space-y-1">
             {lecturasPeriodoActivo.slice(0, 5).map(record => (
-              <ReadingRow key={record.id} record={record} />
+              <ReadingRow key={record.id} record={record} onClick={() => onRowClick?.(record)} />
             ))}
           </ul>
         )}

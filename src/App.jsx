@@ -85,10 +85,10 @@ function App() {
     <>
       <Toaster position="bottom-right" theme={isDarkMode ? 'dark' : 'light'} richColors />
       <ReloadPrompt />
-      <div className="bg-surface font-body-md text-on-surface antialiased flex flex-col md:flex-row min-h-screen relative overflow-x-hidden">
+      <div className="bg-surface font-body-md text-on-surface antialiased flex flex-col md:flex-row h-[100dvh] w-full overflow-hidden relative">
 
         {/* Mobile Top Bar */}
-        <header className="md:hidden flex items-center justify-between p-4 bg-surface-dim text-white shadow-md z-40 sticky top-0 print:hidden">
+        <header className="md:hidden shrink-0 flex items-center justify-between p-4 bg-surface-dim text-white shadow-md z-40 print:hidden">
           <div className="flex items-center gap-3">
             <button onClick={() => setIsMobileMenuOpen(true)} className="p-1 hover:bg-white/10 rounded-lg transition-colors">
               <span className="material-symbols-outlined text-[28px]">menu</span>
@@ -118,7 +118,7 @@ function App() {
         />
 
         {/* Main Content Area */}
-        <div className="flex-1 ml-0 md:ml-[260px] flex flex-col h-screen overflow-hidden bg-background dark:bg-[#1a1c1e]">
+        <div className="flex-1 ml-0 md:ml-[260px] flex flex-col min-h-0 bg-background dark:bg-[#1a1c1e]">
           <TopBar screens={visibleScreens} />
 
           {/* Content */}

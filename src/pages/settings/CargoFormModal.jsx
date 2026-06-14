@@ -140,19 +140,27 @@ const CargoFormModal = ({ formData, setFormData, periodos, onClose, onSubmit, is
                 />
               </div>
 
-              {/* Toggle activo */}
-              <div className="md:col-span-2 pt-2 border-t border-outline-variant/30 mt-2">
+              {/* Toggle activo y global */}
+              <div className="md:col-span-2 pt-2 border-t border-outline-variant/30 mt-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <label className="flex items-center gap-2 cursor-pointer w-fit" onClick={handleToggleActive}>
                   <div className={`w-10 h-6 rounded-full relative shadow-inner transition-colors ${formData.es_activo ? 'bg-primary' : 'bg-surface-container-high'}`}>
                     <div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow-sm transition-all ${formData.es_activo ? 'right-1' : 'left-1'}`}></div>
                   </div>
-                  <span className="text-sm font-bold text-on-surface">Activo (Disponible para uso)</span>
+                  <span className="text-sm font-bold text-on-surface">Activo (Disponible)</span>
+                </label>
+                
+                <label className="flex items-center gap-2 cursor-pointer w-fit" onClick={() => setFormData(p => ({...p, es_global: !p.es_global}))}>
+                  <div className={`w-10 h-6 rounded-full relative shadow-inner transition-colors ${formData.es_global ? 'bg-orange-500' : 'bg-surface-container-high'}`}>
+                    <div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow-sm transition-all ${formData.es_global ? 'right-1' : 'left-1'}`}></div>
+                  </div>
+                  <span className="text-sm font-bold text-on-surface">Cargo Global (Aplica siempre)</span>
                 </label>
               </div>
             </div>
 
             {/* Periodos section */}
-            <div className="mt-lg pt-lg border-t border-outline-variant">
+            {!formData.es_global && (
+              <div className="mt-lg pt-lg border-t border-outline-variant">
               <div className="flex justify-between items-end mb-xs">
                 <div>
                   <h4 className="font-bold text-on-surface text-sm mb-xs">Períodos de Validez</h4>
@@ -212,6 +220,7 @@ const CargoFormModal = ({ formData, setFormData, periodos, onClose, onSubmit, is
                 })}
               </div>
             </div>
+            )}
           </div>
 
           {/* Footer — inside form */}

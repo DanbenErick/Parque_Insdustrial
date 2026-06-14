@@ -7,7 +7,7 @@ const Sidebar = ({ isMobileMenuOpen, onCloseMobileMenu, screens }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { activeYear, setActiveYear } = useYear();
+  const { activeYear, setActiveYear, availableYears, addYear } = useYear();
   const userRole = user?.nombre_rol || 'Socio';
   const currentPath = location.pathname.substring(1) || 'dashboard';
 
@@ -42,7 +42,7 @@ const Sidebar = ({ isMobileMenuOpen, onCloseMobileMenu, screens }) => {
             onChange={(e) => setActiveYear(parseInt(e.target.value))}
             className="w-full appearance-none bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-white text-sm font-bold focus:outline-none focus:border-primary/50 focus:bg-white/10 transition-colors cursor-pointer"
           >
-            {Array.from({ length: 4 }, (_, i) => new Date().getFullYear() - 1 + i).map(year => (
+            {availableYears.map(year => (
               <option key={year} value={year} className="bg-surface text-on-surface">Año {year}</option>
             ))}
           </select>

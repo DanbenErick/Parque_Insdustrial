@@ -143,10 +143,10 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
         </div>
 
         {/* Content */}
-        <div className="p-lg space-y-md">
-          <div className="text-center mb-sm">
-            <p className="text-on-surface-variant">Periodo a facturar:</p>
-            <p className="font-headline-md font-bold text-primary">{formatPeriod(periodoSeleccionado.mes_anio)}</p>
+        <div className="p-5 space-y-4">
+          <div className="text-center">
+            <p className="text-xs text-on-surface-variant">Periodo a facturar:</p>
+            <p className="text-xl font-bold text-primary">{formatPeriod(periodoSeleccionado.mes_anio)}</p>
           </div>
 
           {isLoading ? (
@@ -156,30 +156,30 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
           ) : (
             <>
               {/* Tarifa Info */}
-              <div className="bg-surface-container-lowest border border-outline-variant rounded-xl p-md flex items-center justify-between">
+              <div className="bg-surface-container-lowest border border-outline-variant rounded-lg p-3 flex items-center justify-between shadow-sm">
                 <div>
-                  <p className="text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1">Tarifa Aplicada</p>
-                  <p className="font-data-mono font-bold text-lg text-on-surface">S/ {Number(periodoSeleccionado.tarifa_kwh).toFixed(4)} <span className="text-sm font-normal">por kWh</span></p>
+                  <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Tarifa Aplicada</p>
+                  <p className="font-data-mono font-bold text-base text-on-surface">S/ {Number(periodoSeleccionado.tarifa_kwh).toFixed(4)} <span className="text-xs font-normal text-on-surface-variant">por kWh</span></p>
                 </div>
-                <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                   <span className="material-symbols-outlined text-primary">bolt</span>
                 </div>
               </div>
 
               {/* Toggle Modo */}
-              <div className="flex bg-surface-container-low p-1 rounded-xl mb-4 border border-outline-variant/30">
+              <div className="flex bg-surface-container-low p-1 rounded-lg border border-outline-variant/30 h-9">
                 <button 
-                  className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 ${modo === 'Masivo' ? 'bg-white shadow text-primary border border-outline-variant/20' : 'text-on-surface-variant hover:bg-surface-container'}`}
+                  className={`flex-1 text-xs font-bold rounded-md transition-colors flex items-center justify-center gap-1.5 ${modo === 'Masivo' ? 'bg-white shadow-sm text-primary border border-outline-variant/20' : 'text-on-surface-variant hover:bg-surface-container'}`}
                   onClick={() => setModo('Masivo')}
                 >
-                  <span className="material-symbols-outlined text-[18px]">groups</span>
+                  <span className="material-symbols-outlined text-[16px]">groups</span>
                   Masivo
                 </button>
                 <button 
-                  className={`flex-1 py-2 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 ${modo === 'Individual' ? 'bg-white shadow text-primary border border-outline-variant/20' : 'text-on-surface-variant hover:bg-surface-container'}`}
+                  className={`flex-1 text-xs font-bold rounded-md transition-colors flex items-center justify-center gap-1.5 ${modo === 'Individual' ? 'bg-white shadow-sm text-primary border border-outline-variant/20' : 'text-on-surface-variant hover:bg-surface-container'}`}
                   onClick={() => setModo('Individual')}
                 >
-                  <span className="material-symbols-outlined text-[18px]">person</span>
+                  <span className="material-symbols-outlined text-[16px]">person</span>
                   Individual
                 </button>
               </div>
@@ -187,20 +187,20 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
               {modo === 'Masivo' ? (
                 <>
                   {/* Status Grid */}
-                  <div className="grid grid-cols-3 gap-sm">
-                    <div className="bg-surface-container rounded-xl p-md text-center">
-                      <p className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Medidores</p>
-                      <p className="font-data-mono font-bold text-xl text-on-surface">{totalMedidores}</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="bg-surface-container rounded-lg p-2 text-center border border-transparent">
+                      <p className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Medidores</p>
+                      <p className="font-data-mono font-bold text-base text-on-surface leading-tight">{totalMedidores}</p>
                     </div>
-                    <div className="bg-success/10 border border-success/20 rounded-xl p-md text-center">
-                      <p className="text-[11px] font-bold text-success uppercase tracking-wider mb-1">Leídos</p>
-                      <p className="font-data-mono font-bold text-xl text-success">{cantidadLecturas}</p>
+                    <div className="bg-success/10 border border-success/20 rounded-lg p-2 text-center">
+                      <p className="text-[9px] font-bold text-success uppercase tracking-wider mb-0.5">Leídos</p>
+                      <p className="font-data-mono font-bold text-base text-success leading-tight">{cantidadLecturas}</p>
                     </div>
-                    <div className={`border rounded-xl p-md text-center ${lecturasFaltantes > 0 ? 'bg-error/10 border-error/20' : 'bg-surface-container border-transparent'}`}>
-                      <p className={`text-[11px] font-bold uppercase tracking-wider mb-1 ${lecturasFaltantes > 0 ? 'text-error' : 'text-on-surface-variant'}`}>
+                    <div className={`border rounded-lg p-2 text-center ${lecturasFaltantes > 0 ? 'bg-error/10 border-error/20' : 'bg-surface-container border-transparent'}`}>
+                      <p className={`text-[9px] font-bold uppercase tracking-wider mb-0.5 ${lecturasFaltantes > 0 ? 'text-error' : 'text-on-surface-variant'}`}>
                         Faltantes
                       </p>
-                      <p className={`font-data-mono font-bold text-xl ${lecturasFaltantes > 0 ? 'text-error' : 'text-on-surface'}`}>
+                      <p className={`font-data-mono font-bold text-base leading-tight ${lecturasFaltantes > 0 ? 'text-error' : 'text-on-surface'}`}>
                         {lecturasFaltantes}
                       </p>
                     </div>
@@ -208,52 +208,52 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
 
                   {/* Warnings */}
                   {totalMedidores === 0 ? (
-                    <div className="bg-error/10 border-l-4 border-error p-md rounded-r-lg flex items-start gap-3">
-                      <span className="material-symbols-outlined text-error">warning</span>
-                      <p className="text-sm text-error font-medium leading-tight">
-                        No hay lecturas registradas para facturar en este periodo.
+                    <div className="bg-error/10 border-l-[3px] border-error px-3 py-2 rounded-r flex items-start gap-2">
+                      <span className="material-symbols-outlined text-error text-[16px] mt-0.5">warning</span>
+                      <p className="text-[11px] text-error font-medium leading-tight">
+                        No hay lecturas registradas para facturar.
                       </p>
                     </div>
                   ) : lecturasFaltantes > 0 ? (
-                    <div className="bg-error/10 border-l-4 border-error p-md rounded-r-lg flex items-start gap-3">
-                      <span className="material-symbols-outlined text-error">warning</span>
-                      <p className="text-sm text-error font-medium leading-tight">
-                        No puedes generar las facturas porque faltan {lecturasFaltantes} lecturas por registrar. Ve al Módulo de Registro Manual para completarlas.
+                    <div className="bg-error/10 border-l-[3px] border-error px-3 py-2 rounded-r flex items-start gap-2">
+                      <span className="material-symbols-outlined text-error text-[16px] mt-0.5">warning</span>
+                      <p className="text-[11px] text-error font-medium leading-tight">
+                        Faltan {lecturasFaltantes} lecturas por registrar.
                       </p>
                     </div>
                   ) : (
-                    <div className="bg-success/10 border-l-4 border-success p-md rounded-r-lg flex items-start gap-3">
-                      <span className="material-symbols-outlined text-success">check_circle</span>
-                      <p className="text-sm text-success font-medium leading-tight">
+                    <div className="bg-success/10 border-l-[3px] border-success px-3 py-2 rounded-r flex items-start gap-2">
+                      <span className="material-symbols-outlined text-success text-[16px] mt-0.5">check_circle</span>
+                      <p className="text-[11px] text-success font-medium leading-tight">
                         Todas las lecturas del mes han sido registradas. Puedes proceder con la generación.
                       </p>
                     </div>
                   )}
                 </>
               ) : (
-                <div className="bg-surface-container-lowest border border-outline-variant p-4 rounded-xl">
-                  <label className="text-xs font-bold text-on-surface-variant uppercase tracking-wider block mb-2">Seleccione un Socio</label>
+                <div className="bg-surface-container-lowest border border-outline-variant p-3 rounded-lg">
+                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1.5">Seleccione un Socio</label>
                   <select 
                     value={selectedUsuarioId}
                     onChange={(e) => setSelectedUsuarioId(e.target.value)}
-                    className="w-full border border-outline-variant rounded-lg font-body-md bg-white focus:border-primary focus:ring-1 focus:ring-primary px-3 py-2 cursor-pointer outline-none"
+                    className="w-full border border-outline-variant rounded-md text-xs bg-white focus:border-primary focus:ring-1 focus:ring-primary px-2 py-1.5 cursor-pointer outline-none"
                   >
                     <option value="">-- Buscar Socio --</option>
                     {usuarios.map(u => (
                       <option key={u.id} value={u.id}>{u.nombre_razonsocial} ({u.documento_identidad})</option>
                     ))}
                   </select>
-                  <p className="text-xs text-on-surface-variant mt-3 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">info</span>
-                    Se verificará que el socio tenga una lectura registrada en este periodo.
+                  <p className="text-[10px] text-on-surface-variant mt-2 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[12px]">info</span>
+                    Se verificará que tenga lectura.
                   </p>
                 </div>
               )}
 
-              <div className="bg-secondary-container/30 border border-secondary/20 p-md rounded-lg flex items-start gap-3">
-                <span className="material-symbols-outlined text-secondary text-[20px]">info</span>
-                <p className="text-xs text-on-surface-variant leading-relaxed">
-                  <strong className="text-on-surface">Nota sobre multas:</strong> Si un socio incurre en multas por manipulación o reconexión, estas deben agregarse de manera manual editando su recibo correspondiente después de haberlos generado.
+              <div className="bg-secondary-container/30 border border-secondary/20 p-2.5 rounded-lg flex items-start gap-2">
+                <span className="material-symbols-outlined text-secondary text-[16px] mt-0.5">info</span>
+                <p className="text-[10px] text-on-surface-variant leading-tight">
+                  <strong className="text-on-surface">Nota sobre multas:</strong> Deben agregarse manualmente editando el recibo correspondiente después de generarlos.
                 </p>
               </div>
             </>
@@ -261,27 +261,27 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
         </div>
 
         {/* Footer Actions */}
-        <div className="p-md bg-surface-container-lowest border-t border-outline-variant flex gap-sm">
+        <div className="px-5 py-3 bg-surface-container-lowest border-t border-outline-variant flex gap-3">
           <button 
             onClick={onClose}
             disabled={isProcessing}
-            className="flex-1 py-2.5 rounded-xl font-bold border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-50"
+            className="flex-1 py-1.5 h-9 rounded-md font-bold text-xs border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-50"
           >
             Cancelar
           </button>
           <button 
             onClick={handleGenerate}
             disabled={isProcessing || isLoading || (modo === 'Masivo' ? (lecturasFaltantes > 0 || totalMedidores === 0) : !selectedUsuarioId)}
-            className="flex-[2] py-2.5 rounded-xl font-bold bg-primary text-on-primary hover:opacity-90 transition-opacity flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+            className="flex-[2] py-1.5 h-9 rounded-md font-bold text-xs bg-primary text-on-primary hover:opacity-90 transition-opacity flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             {isProcessing ? (
               <>
-                <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
+                <span className="material-symbols-outlined animate-spin text-[16px]">sync</span>
                 Generando...
               </>
             ) : (
               <>
-                <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+                <span className="material-symbols-outlined text-[16px]">receipt_long</span>
                 Proceder a Generar Facturas
               </>
             )}

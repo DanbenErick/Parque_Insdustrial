@@ -116,6 +116,23 @@ const Settings = () => {
     
     try {
       if (activeTab === 'profile') {
+        if (!profile.nombre_razonsocial?.trim() || !profile.cargo_representante?.trim() || !profile.telefono?.trim() || !profile.correo?.trim()) {
+          setIsSaving(false);
+          return toast.error('Todos los campos del perfil son obligatorios.');
+        }
+
+        const phoneRegex = /^9\d{8}$/;
+        if (!phoneRegex.test(profile.telefono)) {
+          setIsSaving(false);
+          return toast.error('El teléfono debe tener 9 dígitos y empezar con el número 9.');
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(profile.correo)) {
+          setIsSaving(false);
+          return toast.error('Ingrese un correo electrónico válido.');
+        }
+
         if (!user || !user.id) {
           throw new Error('No se pudo identificar al usuario actual.');
         }
@@ -217,11 +234,8 @@ const Settings = () => {
               {activeTab === 'profile' && (
                 <div className="animate-in fade-in space-y-6">
                   <div className="flex items-center gap-4 border-b border-outline-variant pb-4">
-                    <div className="w-16 h-16 bg-primary-container rounded-full flex items-center justify-center text-on-primary-container relative group cursor-pointer overflow-hidden">
-                      <span className="material-symbols-outlined text-[28px]">account_circle</span>
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="material-symbols-outlined text-white text-[20px]">photo_camera</span>
-                      </div>
+                    <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-on-primary shadow-sm">
+                      <span className="material-symbols-outlined text-[32px]">account_circle</span>
                     </div>
                     <div>
                       <h3 className="text-base font-bold text-on-surface">{user?.nombre_razonsocial || 'Administrador'}</h3>
@@ -240,7 +254,7 @@ const Settings = () => {
                         name="nombre_razonsocial"
                         value={profile.nombre_razonsocial}
                         onChange={handleProfileChange}
-                        className="w-full bg-surface-container border border-outline-variant rounded px-3 py-1.5 text-xs h-8 focus:border-primary outline-none transition-colors" 
+                        className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm" 
                       />
                     </div>
                     <div className="space-y-0.5">
@@ -250,7 +264,7 @@ const Settings = () => {
                         name="cargo_representante"
                         value={profile.cargo_representante}
                         onChange={handleProfileChange}
-                        className="w-full bg-surface-container border border-outline-variant rounded px-3 py-1.5 text-xs h-8 focus:border-primary outline-none transition-colors" 
+                        className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm" 
                       />
                     </div>
                     <div className="space-y-0.5">
@@ -258,9 +272,15 @@ const Settings = () => {
                       <input 
                         type="tel" 
                         name="telefono"
+                        maxLength="9"
                         value={profile.telefono}
-                        onChange={handleProfileChange}
-                        className="w-full bg-surface-container border border-outline-variant rounded px-3 py-1.5 text-xs h-8 focus:border-primary outline-none transition-colors" 
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/\D/g, '');
+                          if (val.length <= 9) {
+                            handleProfileChange({ target: { name: 'telefono', value: val } });
+                          }
+                        }}
+                        className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm" 
                       />
                     </div>
                     <div className="space-y-0.5">
@@ -270,7 +290,7 @@ const Settings = () => {
                         name="correo"
                         value={profile.correo}
                         onChange={handleProfileChange}
-                        className="w-full bg-surface-container border border-outline-variant rounded px-3 py-1.5 text-xs h-8 focus:border-primary outline-none transition-colors" 
+                        className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm" 
                       />
                     </div>
                   </div>
@@ -319,7 +339,7 @@ const Settings = () => {
                               value={passwordForm.clave_actual} 
                               onChange={handlePasswordInputChange}
                               placeholder="••••••••" 
-                              className="w-full bg-white border border-outline-variant rounded px-3 py-1.5 h-8 text-xs focus:border-primary outline-none" 
+                              className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 h-8 text-xs outline-none transition-colors shadow-sm" 
                             />
                           </div>
                           <div className="space-y-0.5">
@@ -327,11 +347,12 @@ const Settings = () => {
                             <input 
                               required
                               type="password" 
-                              name="clave_nueva" 
+                              name="clave_nueva"
+                              minLength="6"
                               value={passwordForm.clave_nueva} 
                               onChange={handlePasswordInputChange}
                               placeholder="Mínimo 6 caracteres" 
-                              className="w-full bg-white border border-outline-variant rounded px-3 py-1.5 h-8 text-xs focus:border-primary outline-none" 
+                              className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 h-8 text-xs outline-none transition-colors shadow-sm" 
                             />
                           </div>
                           <div className="space-y-0.5">
@@ -343,7 +364,7 @@ const Settings = () => {
                               value={passwordForm.clave_confirmar} 
                               onChange={handlePasswordInputChange}
                               placeholder="Repite la contraseña" 
-                              className="w-full bg-white border border-outline-variant rounded px-3 py-1.5 h-8 text-xs focus:border-primary outline-none" 
+                              className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 h-8 text-xs outline-none transition-colors shadow-sm" 
                             />
                           </div>
                         </div>
@@ -355,7 +376,7 @@ const Settings = () => {
                               setShowPasswordForm(false);
                               setPasswordForm({ clave_actual: '', clave_nueva: '', clave_confirmar: '' });
                             }}
-                            className="px-3 py-1.5 border border-outline text-on-surface h-8 text-xs font-bold rounded-md hover:bg-surface transition-colors"
+                            className="px-3 py-1.5 border border-outline-variant text-on-surface-variant hover:text-on-surface h-8 text-xs font-bold rounded-lg hover:bg-surface-container-highest transition-colors"
                           >
                             Cancelar
                           </button>

@@ -10,7 +10,8 @@ export const AllReadingsModal = ({
   modalSearchTerm,
   setModalSearchTerm,
   setIsModalOpen,
-  handleEditFromTable
+  handleEditFromTable,
+  onRowClick
 }) => {
   const filteredModalLecturas = useMemo(() => {
     const term = modalSearchTerm.trim().toLowerCase();
@@ -60,7 +61,7 @@ export const AllReadingsModal = ({
               </div>
             ) : (
               filteredModalLecturas.map(record => (
-                <ReadingRow key={record.id} record={record} onEdit={handleEditFromTable} showDateFull />
+                <ReadingRow key={record.id} record={record} onEdit={handleEditFromTable} onClick={() => onRowClick?.(record)} showDateFull />
               ))
             )}
           </ul>

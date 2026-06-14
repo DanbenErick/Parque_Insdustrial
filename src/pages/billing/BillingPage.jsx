@@ -209,21 +209,21 @@ const Billing = () => {
             </button>
 
             {isDropdownOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-surface border border-outline-variant rounded-lg shadow-lg z-50 py-2">
+              <div className="absolute right-0 mt-1 w-48 bg-surface border border-outline-variant rounded-md shadow-lg z-50 py-1 animate-in fade-in zoom-in-95 duration-100">
                 <button
-                  className="w-full text-left px-3 py-2 hover:bg-surface-container-low flex items-center gap-2 text-sm text-on-surface transition-colors"
+                  className="w-full text-left px-3 py-1.5 hover:bg-surface-container-high flex items-center gap-2 text-[11px] font-medium text-on-surface transition-colors"
                   onClick={handleGenerateFromDropdown}
                 >
-                  <span className="material-symbols-outlined text-[18px]">receipt_long</span>
-                  Generar del mes seleccionado
+                  <span className="material-symbols-outlined text-[15px] opacity-80">receipt_long</span>
+                  Generar Mes
                 </button>
-                <div className="h-px bg-outline-variant/50 my-1"></div>
+                <div className="h-px bg-outline-variant/50 my-1 mx-2"></div>
                 <button
-                  className="w-full text-left px-3 py-2 hover:bg-surface-container-low flex items-center gap-2 text-sm text-on-surface transition-colors"
+                  className="w-full text-left px-3 py-1.5 hover:bg-surface-container-high flex items-center gap-2 text-[11px] font-medium text-on-surface transition-colors"
                   onClick={handleExportAllFromDropdown}
                 >
-                  <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
-                  Descargar todas en PDF
+                  <span className="material-symbols-outlined text-[15px] text-error/80">picture_as_pdf</span>
+                  Descargar PDFs
                 </button>
               </div>
             )}

@@ -10,11 +10,43 @@ export const RegistrationForm = ({
   currentReadingPunta, setCurrentReadingPunta,
   factorPotencia, setFactorPotencia,
   precioFactorPotencia, setPrecioFactorPotencia,
+  isCambioMedidor, setIsCambioMedidor,
+  lecturaFinalAntiguo, setLecturaFinalAntiguo,
+  lecturaInicialNuevo, setLecturaInicialNuevo,
+  lecturaFinalAntiguoPunta, setLecturaFinalAntiguoPunta,
+  lecturaInicialNuevoPunta, setLecturaInicialNuevoPunta,
   isSaving, handleSave
 }) => {
   const isTR = selectedMember?.tipo === 'Tiempo Real';
-  const subTotalNormal = Math.max(0, parseSafe(currentReading) - parseSafe(selectedMember?.ultima_lectura));
-  const subTotalPunta = Math.max(0, parseSafe(currentReadingPunta) - parseSafe(selectedMember?.ultima_lectura_punta));
+  
+  const getMissingFields = () => {
+    const missing = [];
+    if (!currentReading) missing.push(isTR ? "L. Actual (N)" : "L. Actual");
+    if (isCambioMedidor) {
+      if (!lecturaFinalAntiguo) missing.push("L. Final (Dañado)");
+      if (!lecturaInicialNuevo) missing.push("L. Inicial (Nuevo)");
+    }
+    if (isTR) {
+      if (!currentReadingPunta) missing.push("L. Actual (P)");
+      if (!factorPotencia) missing.push("Reactivo");
+      if (!precioFactorPotencia) missing.push("Precio Reactivo");
+      if (isCambioMedidor) {
+        if (!lecturaFinalAntiguoPunta) missing.push("L. Final Punta (Dañado)");
+        if (!lecturaInicialNuevoPunta) missing.push("L. Inicial Punta (Nuevo)");
+      }
+    }
+    return missing;
+  };
+  
+  const missingFields = getMissingFields();
+
+  const subTotalNormal = isCambioMedidor 
+    ? Math.max(0, parseSafe(lecturaFinalAntiguo) - parseSafe(selectedMember?.ultima_lectura)) + Math.max(0, parseSafe(currentReading) - parseSafe(lecturaInicialNuevo))
+    : Math.max(0, parseSafe(currentReading) - parseSafe(selectedMember?.ultima_lectura));
+    
+  const subTotalPunta = isCambioMedidor && isTR
+    ? Math.max(0, parseSafe(lecturaFinalAntiguoPunta) - parseSafe(selectedMember?.ultima_lectura_punta)) + Math.max(0, parseSafe(currentReadingPunta) - parseSafe(lecturaInicialNuevoPunta))
+    : Math.max(0, parseSafe(currentReadingPunta) - parseSafe(selectedMember?.ultima_lectura_punta));
 
   return (
     <div className="bg-surface border border-primary/20 rounded-xl shadow-sm overflow-hidden animate-in slide-in-from-top-4 fade-in duration-300">
@@ -62,10 +94,52 @@ export const RegistrationForm = ({
           </div>
         ) : (
           <form onSubmit={handleSave} className="flex flex-col gap-3">
+            
+            <div className="flex items-center justify-between bg-surface-container-lowest px-3 py-2 rounded-lg border border-outline-variant/50">
+              <span className="text-xs font-bold text-on-surface-variant flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[16px]">swap_horiz</span>
+                ¿Hubo cambio de medidor este mes?
+              </span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" className="sr-only peer" checked={isCambioMedidor} onChange={(e) => setIsCambioMedidor(e.target.checked)} />
+                <div className="w-9 h-5 bg-surface-variant peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary"></div>
+              </label>
+            </div>
+
+            {isCambioMedidor && (
+              <div className="flex flex-col md:flex-row gap-2 items-center bg-error/5 p-3 rounded-lg border border-error/20 mb-1 animate-in fade-in zoom-in-95">
+                <div className="flex-1 w-full relative h-[48px]">
+                  <input
+                    type="number" step="0.01" required={isCambioMedidor}
+                    value={lecturaFinalAntiguo} onChange={(e) => setLecturaFinalAntiguo(e.target.value)} placeholder="0.00"
+                    className="w-full h-full bg-white border border-error/40 focus:border-error rounded-lg pl-3 pr-14 text-sm font-data-mono font-bold text-error focus:outline-none focus:ring-2 focus:ring-error/20 text-right shadow-sm transition-all"
+                  />
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col pointer-events-none">
+                    <span className="text-[9px] font-bold text-error uppercase tracking-wider leading-tight">L. Final (Dañado)</span>
+                  </div>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-error/50 pointer-events-none">kWh</span>
+                </div>
+                
+                <span className="material-symbols-outlined text-error/30 hidden md:block text-[18px]">arrow_forward</span>
+
+                <div className="flex-1 w-full relative h-[48px]">
+                  <input
+                    type="number" step="0.01" required={isCambioMedidor}
+                    value={lecturaInicialNuevo} onChange={(e) => setLecturaInicialNuevo(e.target.value)} placeholder="0.00"
+                    className="w-full h-full bg-white border border-primary/40 focus:border-primary rounded-lg pl-3 pr-14 text-sm font-data-mono font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 text-right shadow-sm transition-all"
+                  />
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col pointer-events-none">
+                    <span className="text-[9px] font-bold text-primary uppercase tracking-wider leading-tight">L. Inicial (Nuevo)</span>
+                  </div>
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-primary/50 pointer-events-none">kWh</span>
+                </div>
+              </div>
+            )}
+
             <div className="flex flex-col md:flex-row gap-2 items-center">
-              <div className="w-full md:w-auto md:min-w-[140px] bg-surface-container-lowest rounded-lg px-3 py-2 border border-outline-variant/50 flex flex-col h-[52px] justify-center">
+              <div className={`w-full md:w-auto md:min-w-[140px] bg-surface-container-lowest rounded-lg px-3 py-2 border ${isCambioMedidor ? 'border-error/40' : 'border-outline-variant/50'} flex flex-col h-[52px] justify-center`}>
                 <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">L. Anterior</span>
-                <span className="font-data-mono text-sm font-bold text-on-surface/60">
+                <span className={`font-data-mono text-sm font-bold ${isCambioMedidor ? 'text-error line-through opacity-70' : 'text-on-surface/60'}`}>
                   {fmtVal(selectedMember.ultima_lectura)} <span className="text-[9px]">kWh</span>
                 </span>
               </div>
@@ -90,7 +164,12 @@ export const RegistrationForm = ({
               <div className="bg-primary/5 rounded-lg px-3 py-1.5 flex justify-between items-center border border-primary/10 -mt-1">
                 <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Subtotal Normal</span>
                 <div className="flex items-center gap-3">
-                  <span className="text-[9px] text-on-surface-variant leading-none">{subTotalNormal.toFixed(2)} kWh × S/ {parseFloat(activePeriodo.tarifa_kwh).toFixed(4)}</span>
+                  <span className="text-[9px] text-on-surface-variant leading-none">
+                    {isCambioMedidor 
+                      ? `${(Math.max(0, parseSafe(lecturaFinalAntiguo) - parseSafe(selectedMember?.ultima_lectura))).toFixed(2)} + ${(Math.max(0, parseSafe(currentReading) - parseSafe(lecturaInicialNuevo))).toFixed(2)} = ${subTotalNormal.toFixed(2)} kWh`
+                      : `${subTotalNormal.toFixed(2)} kWh`
+                    } × S/ {parseFloat(activePeriodo.tarifa_kwh).toFixed(4)}
+                  </span>
                   <span className="font-data-mono font-bold text-primary text-sm leading-none">S/ {(subTotalNormal * parseFloat(activePeriodo.tarifa_kwh)).toFixed(2)}</span>
                 </div>
               </div>
@@ -98,10 +177,40 @@ export const RegistrationForm = ({
 
             {isTR && (
               <>
-                <div className="flex flex-col md:flex-row gap-2 items-center mt-1">
-                  <div className="w-full md:w-auto md:min-w-[140px] bg-surface-container-lowest rounded-lg px-3 py-2 border border-outline-variant/50 flex flex-col h-[52px] justify-center">
+                {isCambioMedidor && (
+                  <div className="flex flex-col md:flex-row gap-2 items-center bg-error/5 p-3 rounded-lg border border-error/20 mb-1 mt-3 animate-in fade-in zoom-in-95">
+                    <div className="flex-1 w-full relative h-[48px]">
+                      <input
+                        type="number" step="0.01" required={isCambioMedidor}
+                        value={lecturaFinalAntiguoPunta} onChange={(e) => setLecturaFinalAntiguoPunta(e.target.value)} placeholder="0.00"
+                        className="w-full h-full bg-white border border-error/40 focus:border-error rounded-lg pl-3 pr-16 text-sm font-data-mono font-bold text-error focus:outline-none focus:ring-2 focus:ring-error/20 text-right shadow-sm transition-all"
+                      />
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col pointer-events-none">
+                        <span className="text-[9px] font-bold text-error uppercase tracking-wider leading-tight">L. Final Punta (Dañado)</span>
+                      </div>
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-error/50 pointer-events-none">kWh</span>
+                    </div>
+                    
+                    <span className="material-symbols-outlined text-error/30 hidden md:block text-[18px]">arrow_forward</span>
+
+                    <div className="flex-1 w-full relative h-[48px]">
+                      <input
+                        type="number" step="0.01" required={isCambioMedidor}
+                        value={lecturaInicialNuevoPunta} onChange={(e) => setLecturaInicialNuevoPunta(e.target.value)} placeholder="0.00"
+                        className="w-full h-full bg-white border border-primary/40 focus:border-primary rounded-lg pl-3 pr-16 text-sm font-data-mono font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 text-right shadow-sm transition-all"
+                      />
+                      <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col pointer-events-none">
+                        <span className="text-[9px] font-bold text-primary uppercase tracking-wider leading-tight">L. Inicial Punta (Nuevo)</span>
+                      </div>
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-primary/50 pointer-events-none">kWh</span>
+                    </div>
+                  </div>
+                )}
+
+                <div className={`flex flex-col md:flex-row gap-2 items-center ${!isCambioMedidor ? 'mt-1' : ''}`}>
+                  <div className={`w-full md:w-auto md:min-w-[140px] bg-surface-container-lowest rounded-lg px-3 py-2 border ${isCambioMedidor ? 'border-error/40' : 'border-outline-variant/50'} flex flex-col h-[52px] justify-center`}>
                     <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">L. Ant. Punta</span>
-                    <span className="font-data-mono text-sm font-bold text-on-surface/60">
+                    <span className={`font-data-mono text-sm font-bold ${isCambioMedidor ? 'text-error line-through opacity-70' : 'text-on-surface/60'}`}>
                       {fmtVal(selectedMember.ultima_lectura_punta)} <span className="text-[9px]">kWh</span>
                     </span>
                   </div>
@@ -126,7 +235,12 @@ export const RegistrationForm = ({
                   <div className="bg-primary/5 rounded-lg px-3 py-1.5 flex justify-between items-center border border-primary/10 -mt-1">
                     <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Subtotal Punta</span>
                     <div className="flex items-center gap-3">
-                      <span className="text-[9px] text-on-surface-variant leading-none">{subTotalPunta.toFixed(2)} kWh × S/ {parseFloat(activePeriodo.tarifa_kwh_punta || 0).toFixed(4)}</span>
+                      <span className="text-[9px] text-on-surface-variant leading-none">
+                        {isCambioMedidor 
+                          ? `${(Math.max(0, parseSafe(lecturaFinalAntiguoPunta) - parseSafe(selectedMember?.ultima_lectura_punta))).toFixed(2)} + ${(Math.max(0, parseSafe(currentReadingPunta) - parseSafe(lecturaInicialNuevoPunta))).toFixed(2)} = ${subTotalPunta.toFixed(2)} kWh`
+                          : `${subTotalPunta.toFixed(2)} kWh`
+                        } × S/ {parseFloat(activePeriodo.tarifa_kwh_punta || 0).toFixed(4)}
+                      </span>
                       <span className="font-data-mono font-bold text-primary text-sm leading-none">S/ {(subTotalPunta * parseFloat(activePeriodo.tarifa_kwh_punta || 0)).toFixed(2)}</span>
                     </div>
                   </div>
@@ -171,10 +285,19 @@ export const RegistrationForm = ({
             )}
 
             <div className="mt-2">
+              {missingFields.length > 0 && (
+                <div className="mb-2 text-error text-[11px] font-bold flex items-start gap-1.5 bg-error/10 px-3 py-2 rounded-md border border-error/20 animate-in fade-in slide-in-from-top-1">
+                  <span className="material-symbols-outlined text-[14px] mt-0.5">error</span>
+                  <div>
+                    <span className="block text-error/80 uppercase tracking-wider text-[9px] mb-0.5">Campos obligatorios faltantes:</span>
+                    <span className="leading-tight">{missingFields.join(', ')}</span>
+                  </div>
+                </div>
+              )}
               <button
                 type="submit"
-                disabled={isSaving || !currentReading}
-                className={`w-full py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm ${currentReading ? 'bg-primary text-on-primary hover:opacity-90' : 'bg-surface-container-highest text-on-surface-variant cursor-not-allowed'}`}
+                disabled={isSaving || missingFields.length > 0}
+                className={`w-full py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm ${missingFields.length === 0 ? 'bg-primary text-on-primary hover:opacity-90 hover:shadow-md' : 'bg-surface-container-highest text-on-surface-variant cursor-not-allowed opacity-80'}`}
               >
                 {isSaving ? (
                   <><span className="material-symbols-outlined animate-spin text-[18px]">sync</span>Guardando...</>

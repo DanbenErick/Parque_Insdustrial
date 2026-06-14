@@ -28,7 +28,7 @@ const formatPeriodo = (periodoStr) => {
 };
 
 const PeriodosSettingsTab = () => {
-  const { activeYear } = useYear();
+  const { activeYear, addYear } = useYear();
   const [periodos, setPeriodos] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -65,6 +65,14 @@ const PeriodosSettingsTab = () => {
     setIsModalOpen(true);
   };
 
+  const handleAddYear = () => {
+    const newYear = window.prompt('Ingrese el nuevo año que desea agregar (ej. 2027):');
+    if (newYear && !isNaN(parseInt(newYear))) {
+      addYear(newYear);
+      toast.success(`Año ${newYear} seleccionado. Ahora puedes crear periodos en este año.`);
+    }
+  };
+
   return (
     <div className="animate-in fade-in space-y-4">
       <div className="flex justify-between items-end mb-4">
@@ -74,13 +82,22 @@ const PeriodosSettingsTab = () => {
             Historial de tarifas aplicadas por mes en el año {activeYear}. 
           </p>
         </div>
-        <button 
-          onClick={handleCreate}
-          className="flex items-center gap-1.5 bg-primary text-on-primary px-3 py-1.5 h-8 rounded-md text-xs font-bold shadow-sm hover:opacity-90 transition-opacity"
-        >
-          <span className="material-symbols-outlined text-[16px]">add_circle</span>
-          Nuevo Periodo
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={handleAddYear}
+            className="flex items-center gap-1.5 bg-surface-container-high text-on-surface px-3 py-1.5 h-8 rounded-md text-xs font-bold shadow-sm hover:bg-surface-container-highest transition-colors border border-outline-variant"
+          >
+            <span className="material-symbols-outlined text-[16px]">calendar_add_on</span>
+            Nuevo Año
+          </button>
+          <button 
+            onClick={handleCreate}
+            className="flex items-center gap-1.5 bg-primary text-on-primary px-3 py-1.5 h-8 rounded-md text-xs font-bold shadow-sm hover:opacity-90 transition-opacity"
+          >
+            <span className="material-symbols-outlined text-[16px]">add_circle</span>
+            Nuevo Periodo
+          </button>
+        </div>
       </div>
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden shadow-sm">
@@ -111,8 +128,7 @@ const PeriodosSettingsTab = () => {
                 <tr className="bg-surface-container-low border-b border-outline-variant text-[10px] uppercase tracking-wider">
                   <th className="py-2 px-4 font-bold text-on-surface-variant">Mes/Año</th>
                   <th className="py-2 px-4 font-bold text-on-surface-variant">Tarifa kWh</th>
-                  <th className="py-2 px-4 font-bold text-on-surface-variant">Mant. Normal</th>
-                  <th className="py-2 px-4 font-bold text-on-surface-variant">Mant. TR</th>
+                  <th className="py-2 px-4 font-bold text-on-surface-variant">Cuota Mant.</th>
                   <th className="py-2 px-4 font-bold text-on-surface-variant">Inicio / Fin</th>
                   <th className="py-2 px-4 font-bold text-on-surface-variant text-right">Acciones</th>
                 </tr>
@@ -128,9 +144,6 @@ const PeriodosSettingsTab = () => {
                     </td>
                     <td className="py-2.5 px-4 font-data-mono">
                       S/ {Number(p.tarifa_mantenimiento_normal).toFixed(2)}
-                    </td>
-                    <td className="py-2.5 px-4 font-data-mono text-primary">
-                      S/ {Number(p.tarifa_mantenimiento_tiempo_real).toFixed(2)}
                     </td>
                     <td className="py-2.5 px-4 text-[11px] text-on-surface-variant leading-tight">
                       {new Date(p.fecha_inicio).toLocaleDateString()} <br/>
