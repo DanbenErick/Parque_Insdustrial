@@ -30,12 +30,21 @@ api.interceptors.response.use(
   (error) => {
     // Si la sesión expiró o no está autorizada
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      // Ignorar el interceptor si estamos intentando iniciar sesión
+      if (error.config && error.config.url && error.config.url.includes('/auth/login')) {
+        return Promise.reject(error);
+      }
+
       localStorage.removeItem('luz_user');
       localStorage.removeItem('luz_token');
-      toast.error('Tu sesión ha expirado o es inválida. Por favor, inicia sesión nuevamente.');
-      setTimeout(() => {
-        window.location.href = '/login';
-      }, 2000);
+      
+      // Evitar recargar la página si ya estamos en la ruta de login
+      if (window.location.pathname !== '/login') {
+        toast.error('Tu sesión ha expirado o es inválida. Por favor, inicia sesión nuevamente.');
+        setTimeout(() => {
+          window.location.href = '/login';
+        }, 1500);
+      }
       return Promise.reject(error);
     }
 
