@@ -28,9 +28,21 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    // Si la sesión expiró o no está autorizada
+    // 1. Extraer el mensaje personalizado del backend si existe
+    const customMessage = error.response?.data?.error || error.response?.data?.message;
+    if (customMessage) {
+      error.message = customMessage;
+    } else if (error.message === 'Network Error') {
+      error.message = 'Error de conexión con el servidor.';
+      toast.error(error.message); // Mostrar tostada global si el server no responde
+    } else if (error.response && error.response.status === 401) {
+      // Mensaje fallback más amigable para 401 por si el backend no envía mensaje
+      error.message = 'Credenciales incorrectas o no autorizadas.';
+    }
+
+    // 2. Si la sesión expiró o no está autorizada
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      // Ignorar el interceptor si estamos intentando iniciar sesión
+      // Ignorar el interceptor de redirección si estamos intentando iniciar sesión
       if (error.config && error.config.url && error.config.url.includes('/auth/login')) {
         return Promise.reject(error);
       }
@@ -38,7 +50,7 @@ api.interceptors.response.use(
       localStorage.removeItem('luz_user');
       localStorage.removeItem('luz_token');
       
-      // Evitar recargar la página si ya estamos en la ruta de login
+      // Evitar redireccionar si ya estamos en la ruta de login
       if (window.location.pathname !== '/login') {
         toast.error('Tu sesión ha expirado o es inválida. Por favor, inicia sesión nuevamente.');
         setTimeout(() => {
@@ -48,14 +60,6 @@ api.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    // Si la API devuelve un mensaje de error personalizado, extraelo aquí
-    const customMessage = error.response?.data?.error;
-    if (customMessage) {
-      error.message = customMessage;
-    } else if (error.message === 'Network Error') {
-      error.message = 'Error de conexión con el servidor.';
-      toast.error(error.message); // Mostrar tostada global si el server no responde
-    }
     return Promise.reject(error);
   }
 );

@@ -145,10 +145,7 @@ function App() {
             </AnimatePresence>
           </div>
 
-          {/* Footer */}
-          <footer className="mt-auto bg-surface-container-highest flex justify-center items-center px-lg py-sm w-full border-t border-outline-variant print:hidden">
-            <span className="font-label-caps text-label-caps text-on-surface-variant font-bold">© 2026 Parque Industrial Jicamarca</span>
-          </footer>
+          {/* Footer removed per user request */}
         </div>
       </div>
     </>

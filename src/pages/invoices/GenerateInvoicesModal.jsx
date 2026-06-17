@@ -256,6 +256,13 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
                   <strong className="text-on-surface">Nota sobre multas:</strong> Deben agregarse manualmente editando el recibo correspondiente después de generarlos.
                 </p>
               </div>
+
+              <div className="bg-error/10 border-l-[3px] border-error px-3 py-2 rounded-r flex items-start gap-2 mt-4">
+                <span className="material-symbols-outlined text-error text-[16px] mt-0.5">warning</span>
+                <p className="text-[11px] text-error font-medium leading-tight">
+                  <strong className="font-bold">Importante:</strong> Al generar facturas para este periodo, cualquier recibo pendiente del mes anterior pasará automáticamente a estado "Vencido".
+                </p>
+              </div>
             </>
           )}
         </div>

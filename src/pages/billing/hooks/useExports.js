@@ -117,21 +117,36 @@ export const useExports = ({ filterParams, filterMes, activeYear, uniqueMonths, 
     const fechaVen = recibo.fecha_vencimiento
       ? new Date(recibo.fecha_vencimiento).toLocaleDateString('es-PE')
       : '-';
-    const text = `Hola *${recibo.socio}*, se ha generado tu recibo de luz del periodo *${recibo.periodo}*.\n\n*Total a pagar:* S/ ${total}\n*Vencimiento:* ${fechaVen}\n\nAdjunto tu recibo detallado en PDF. Gracias por tu pago puntual.`;
 
-    try {
-      toast.success('Descargando PDF para enviar por WhatsApp...', { duration: 2000 });
-      const response = await api.get(`/recibos/${recibo.id}/pdf-v3`, { responseType: 'blob' });
-      downloadBlob(
-        response.data,
-        `Recibo_${recibo.periodo}_${recibo.socio.replace(/\s+/g, '_')}.pdf`,
-        MIME_TYPES.PDF,
-      );
-    } catch {
-      toast.error('Error al descargar el PDF.');
-    }
+    const text = `👋 Hola *${recibo.socio}*,
 
-    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+Espero que tengas un excelente día. ☀️
+Te escribimos para enviarte tu recibo de luz correspondiente al periodo *${recibo.periodo}*.
+
+⚡ *Detalle de Facturación:*
+- *Monto Total a Pagar:* S/ ${total}
+- *Fecha de Vencimiento:* ${fechaVen}
+
+📄 *Nota:* Te estamos adjuntando en breve tu recibo detallado en PDF por este medio.
+
+¡Muchas gracias por tu pago puntual! 🙌`;
+
+    const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`;
+    window.open(waUrl, '_blank');
+
+    toast.success('Descargando PDF para enviar por WhatsApp...', { duration: 2000 });
+    
+    api.get(`/recibos/${recibo.id}/pdf-v3`, { responseType: 'blob' })
+      .then((response) => {
+        downloadBlob(
+          response.data,
+          `Recibo_${recibo.periodo}_${recibo.socio.replace(/\s+/g, '_')}.pdf`,
+          MIME_TYPES.PDF,
+        );
+      })
+      .catch(() => {
+        toast.error('Error al descargar el PDF.');
+      });
   }, []);
 
   return {

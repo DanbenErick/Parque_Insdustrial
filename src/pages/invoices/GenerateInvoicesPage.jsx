@@ -241,8 +241,17 @@ const GenerateInvoices = () => {
             </div>
           </div>
 
+          {!isProcessing && !showSuccess && (
+            <div className="bg-error/10 border-l-[3px] border-error px-4 py-3 rounded-r flex items-start gap-3 mt-4 animate-in fade-in">
+              <span className="material-symbols-outlined text-error text-[20px] mt-0.5">warning</span>
+              <p className="text-sm text-error font-medium leading-tight">
+                <strong className="font-bold">Importante:</strong> Al confirmar y generar facturas para este periodo, cualquier recibo pendiente del mes anterior pasará automáticamente a estado "Vencido".
+              </p>
+            </div>
+          )}
+
           {isProcessing && (
-            <div className="animate-in fade-in duration-500">
+            <div className="animate-in fade-in duration-500 mt-4">
               <div className="bg-inverse-surface text-surface-bright rounded-lg p-xl shadow-xl">
                 <div className="flex flex-col items-center text-center space-y-md">
                   <div className="relative w-24 h-24 flex items-center justify-center">

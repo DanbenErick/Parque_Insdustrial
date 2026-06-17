@@ -57,7 +57,11 @@ const ManualBilling = () => {
     editReadingValPunta, setEditReadingValPunta,
     editFactorPotencia, setEditFactorPotencia,
     editPrecioFactorPotencia, setEditPrecioFactorPotencia,
-    editJustificacion, setEditJustificacion
+    editJustificacion, setEditJustificacion,
+    editLecturaFinalAntiguo, setEditLecturaFinalAntiguo,
+    editLecturaInicialNuevo, setEditLecturaInicialNuevo,
+    editLecturaFinalAntiguoPunta, setEditLecturaFinalAntiguoPunta,
+    editLecturaInicialNuevoPunta, setEditLecturaInicialNuevoPunta
   } = billingForms;
 
   const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
@@ -158,10 +162,10 @@ const ManualBilling = () => {
             editFactorPotencia={editFactorPotencia} setEditFactorPotencia={setEditFactorPotencia}
             editPrecioFactorPotencia={editPrecioFactorPotencia} setEditPrecioFactorPotencia={setEditPrecioFactorPotencia}
             editJustificacion={editJustificacion} setEditJustificacion={setEditJustificacion}
-            editLecturaFinalAntiguo={formState.editLecturaFinalAntiguo} setEditLecturaFinalAntiguo={formState.setEditLecturaFinalAntiguo}
-            editLecturaInicialNuevo={formState.editLecturaInicialNuevo} setEditLecturaInicialNuevo={formState.setEditLecturaInicialNuevo}
-            editLecturaFinalAntiguoPunta={formState.editLecturaFinalAntiguoPunta} setEditLecturaFinalAntiguoPunta={formState.setEditLecturaFinalAntiguoPunta}
-            editLecturaInicialNuevoPunta={formState.editLecturaInicialNuevoPunta} setEditLecturaInicialNuevoPunta={formState.setEditLecturaInicialNuevoPunta}
+            editLecturaFinalAntiguo={editLecturaFinalAntiguo} setEditLecturaFinalAntiguo={setEditLecturaFinalAntiguo}
+            editLecturaInicialNuevo={editLecturaInicialNuevo} setEditLecturaInicialNuevo={setEditLecturaInicialNuevo}
+            editLecturaFinalAntiguoPunta={editLecturaFinalAntiguoPunta} setEditLecturaFinalAntiguoPunta={setEditLecturaFinalAntiguoPunta}
+            editLecturaInicialNuevoPunta={editLecturaInicialNuevoPunta} setEditLecturaInicialNuevoPunta={setEditLecturaInicialNuevoPunta}
             isSaving={isSaving}
           />
         )}

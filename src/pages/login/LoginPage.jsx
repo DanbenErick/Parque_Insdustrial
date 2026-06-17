@@ -6,9 +6,7 @@ import { useForm } from 'react-hook-form';
 
 const LoginBackground = React.memo(() => (
   <div className="absolute inset-0 z-0">
-    {/* CSS-only industrial background — no external dependencies */}
     <div className="w-full h-full bg-slate-900">
-      {/* Circuit-board / grid pattern */}
       <svg
         className="absolute inset-0 w-full h-full opacity-[0.07]"
         xmlns="http://www.w3.org/2000/svg"
@@ -24,13 +22,8 @@ const LoginBackground = React.memo(() => (
         <rect width="100%" height="100%" fill="url(#grid)" />
         <rect width="100%" height="100%" fill="url(#dots)" />
       </svg>
-      {/* Radial glow accent */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(99,102,241,0.35),transparent)]" />
-      {/* Bottom vignette */}
-      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
     </div>
-    {/* Primary color overlay */}
-    <div className="absolute inset-0 bg-primary/60 mix-blend-multiply"></div>
+    <div className="absolute inset-0 bg-primary/40 mix-blend-multiply"></div>
   </div>
 ));
 
@@ -49,6 +42,7 @@ const Login = () => {
   const [focusedInput, setFocusedInput] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [loginError, setLoginError] = useState(null);
 
   const { register, handleSubmit, formState: { errors }, resetField } = useForm({
     defaultValues: {
@@ -58,13 +52,16 @@ const Login = () => {
   });
 
   const onSubmit = async (data) => {
+    setLoginError(null);
     setIsLoading(true);
     try {
-      await login(data.username, data.password);
+      await login(data.username.trim(), data.password.trim());
       toast.success('¡Bienvenido!');
       navigate('/dashboard');
     } catch (error) {
-      toast.error(error.message || 'Error al iniciar sesión');
+      const errorMsg = error.message || 'Error al iniciar sesión';
+      setLoginError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setIsLoading(false);
     }
@@ -105,6 +102,16 @@ const Login = () => {
           
           <form className="space-y-5 w-full" onSubmit={handleSubmit(onSubmit)} noValidate>
             
+            {/* Mensaje de Error de Login */}
+            {loginError && (
+              <div className="bg-error/10 border-l-[3px] border-error px-3 py-2 rounded-r flex items-start gap-2 mb-4 animate-in fade-in slide-in-from-top-2">
+                <span className="material-symbols-outlined text-error text-[16px] mt-0.5">error</span>
+                <p className="text-[11px] text-error font-medium leading-tight">
+                  {loginError}
+                </p>
+              </div>
+            )}
+
             {/* Mac-Style Segmented Control */}
             {ROLES.length > 1 && (
               <div 
@@ -143,6 +150,7 @@ const Login = () => {
                     type="text" 
                     {...register("username", { 
                       required: "Este campo es requerido",
+                      setValueAs: v => v?.trim(),
                       validate: (value) => {
                         if (selectedRole !== 'Administrator') {
                           return /^[0-9]+$/.test(value) || "Solo se permiten números";
@@ -178,6 +186,7 @@ const Login = () => {
                     inputMode={selectedRole === 'Administrator' ? 'text' : 'numeric'}
                     {...register("password", { 
                       required: "La contraseña es requerida",
+                      setValueAs: v => v?.trim(),
                       validate: (value) => {
                         if (selectedRole !== 'Administrator') {
                           return /^\d{6}$/.test(value) || "El PIN debe tener exactamente 6 dígitos";
@@ -222,10 +231,7 @@ const Login = () => {
           
         </div>
         
-        {/* Footer */}
-        <div className="w-full text-center mt-4 text-[9px] font-bold text-white/60 uppercase tracking-widest drop-shadow-sm">
-           Parque Industrial Jicamarca © 2026
-        </div>
+        {/* Footer removed per user request */}
       </section>
     </main>
   );
