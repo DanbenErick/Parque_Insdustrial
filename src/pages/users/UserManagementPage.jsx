@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 
 import UserFormModal from './UserFormModal';
+import LoginHistoryTab from './LoginHistoryTab';
 import ConfirmActionModal from '../../components/ui/ConfirmActionModal';
 import PdfPreviewModal from '../../components/ui/PdfPreviewModal';
 
@@ -40,6 +41,7 @@ const getRoleColor = (rolName) => ROLE_COLORS[rolName] || 'bg-surface-variant te
 const UserManagement = () => {
   const { token } = useAuth();
 
+  const [activeTab, setActiveTab] = useState('usuarios'); // 'usuarios' | 'sesiones'
   const [usersList, setUsersList] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -223,33 +225,54 @@ const UserManagement = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
         <div>
-          <h1 className="text-2xl text-on-surface font-bold leading-tight">Gestión de Usuarios</h1>
-          <p className="text-sm text-on-surface-variant">Control centralizado de accesos para el Parque Industrial Jicamarca.</p>
+          <h1 className="text-2xl text-on-surface font-bold leading-tight">Gestión de Accesos y Auditoría</h1>
+          <p className="text-sm text-on-surface-variant">Control centralizado de permisos y registro de sesiones.</p>
         </div>
+        {activeTab === 'usuarios' && (
+          <button
+            onClick={openAddModal}
+            className="flex items-center gap-1.5 bg-primary text-on-primary px-4 py-1.5 h-8 rounded-md font-bold shadow-sm hover:opacity-90 active:scale-95 transition-all"
+          >
+            <span className="material-symbols-outlined text-[16px]">person_add</span>
+            <span className="text-xs">Añadir Usuario</span>
+          </button>
+        )}
+      </div>
+
+      {/* Tabs */}
+      <div className="flex border-b border-outline-variant mb-4">
         <button
-          onClick={openAddModal}
-          className="flex items-center gap-1.5 bg-primary text-on-primary px-4 py-1.5 h-8 rounded-md font-bold shadow-sm hover:opacity-90 active:scale-95 transition-all"
+          onClick={() => setActiveTab('usuarios')}
+          className={`px-6 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-colors relative ${activeTab === 'usuarios' ? 'text-primary' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/30'}`}
         >
-          <span className="material-symbols-outlined text-[16px]">person_add</span>
-          <span className="text-xs">Añadir Usuario</span>
+          Usuarios y Permisos
+          {activeTab === 'usuarios' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-t-full"></div>}
+        </button>
+        <button
+          onClick={() => setActiveTab('sesiones')}
+          className={`px-6 py-2.5 text-[11px] font-bold uppercase tracking-wider transition-colors relative ${activeTab === 'sesiones' ? 'text-primary' : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-variant/30'}`}
+        >
+          Historial de Sesiones
+          {activeTab === 'sesiones' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary rounded-t-full"></div>}
         </button>
       </div>
 
-      {/* Table Section */}
-      <div className="bg-surface border border-outline-variant rounded-2xl overflow-hidden shadow-sm">
-        {/* Table Header */}
-        <div className="px-4 py-3 border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-surface-container-lowest">
-          <div className="flex items-center gap-3">
-            <div className="flex flex-col">
-              <div className="flex items-center gap-2">
-                <h2 className="text-base text-on-surface font-bold tracking-tight">Personal y Socios</h2>
-                <span className="bg-surface-variant text-on-surface-variant text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  {filteredUsers.length}
-                </span>
+      {/* Content Area */}
+      {activeTab === 'usuarios' ? (
+        <div className="bg-surface border border-outline-variant rounded-2xl overflow-hidden shadow-sm animate-in fade-in">
+          {/* Table Header */}
+          <div className="px-4 py-3 border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-surface-container-lowest">
+            <div className="flex items-center gap-3">
+              <div className="flex flex-col">
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base text-on-surface font-bold tracking-tight">Personal y Administradores</h2>
+                  <span className="bg-surface-variant text-on-surface-variant text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    {filteredUsers.length}
+                  </span>
+                </div>
+                <span className="text-[11px] text-on-surface-variant font-medium">Directorio de cuentas con acceso al panel</span>
               </div>
-              <span className="text-[11px] text-on-surface-variant font-medium">Directorio completo de usuarios registrados</span>
             </div>
-          </div>
 
           <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
             <div className="relative flex-grow md:flex-grow-0">
@@ -357,7 +380,11 @@ const UserManagement = () => {
             </table>
           )}
         </div>
-      </div>
+      ) : null}
+
+      {activeTab === 'sesiones' && (
+        <LoginHistoryTab />
+      )}
 
       {/* ====== MODALS ====== */}
       <AnimatePresence>
