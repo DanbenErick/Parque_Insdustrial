@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const OVERLAY = { hidden: { opacity: 0 }, visible: { opacity: 1 } };
 const PANEL = { hidden: { scale: 0.95, opacity: 0 }, visible: { scale: 1, opacity: 1 } };
@@ -18,12 +17,10 @@ const ConfirmActionModal = ({
   onClose 
 }) => {
   return (
-    <motion.div
-      variants={OVERLAY} initial="hidden" animate="visible" exit="hidden" transition={TRANSITION}
+    <div
       className="fixed inset-0 z-[60] flex items-center justify-center p-md bg-black/60 backdrop-blur-sm !m-0"
     >
-      <motion.div
-        variants={PANEL} initial="hidden" animate="visible" exit="hidden" transition={TRANSITION}
+      <div
         className="bg-surface border border-outline-variant rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
       >
         <div className={`px-lg py-md flex justify-between items-center border-b-0 ${isDestructive ? 'bg-error' : 'bg-primary'}`}>
@@ -69,8 +66,8 @@ const ConfirmActionModal = ({
             {confirmText}
           </button>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
@@ -380,6 +379,7 @@ const UserManagement = () => {
             </table>
           )}
         </div>
+        </div>
       ) : null}
 
       {activeTab === 'sesiones' && (
@@ -387,7 +387,7 @@ const UserManagement = () => {
       )}
 
       {/* ====== MODALS ====== */}
-      <AnimatePresence>
+      
         {showAddModal && (
           <UserFormModal
             initialData={formData}
@@ -407,9 +407,9 @@ const UserManagement = () => {
             editingUser={editingUser}
           />
         )}
-      </AnimatePresence>
+      
 
-      <AnimatePresence>
+      
         {confirmModal.show && (
           <ConfirmActionModal
             title={confirmModal.isActivating ? 'Reactivar Usuario' : 'Desactivar Usuario'}
@@ -423,9 +423,9 @@ const UserManagement = () => {
             onClose={closeConfirmModal}
           />
         )}
-      </AnimatePresence>
+      
 
-      <AnimatePresence>
+      
         {showPdfModal && (
           <PdfPreviewModal
             pdfBlobUrl={pdfPreviewUrl}
@@ -434,7 +434,7 @@ const UserManagement = () => {
             onClose={closePdfModal}
           />
         )}
-      </AnimatePresence>
+      
     </main>
   );
 };

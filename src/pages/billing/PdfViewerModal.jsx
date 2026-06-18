@@ -1,5 +1,4 @@
 import React, { memo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 /**
  * PdfViewerModal — Full-screen PDF viewer with download capability.
@@ -14,14 +13,12 @@ const PdfViewerModal = memo(({ isOpen, pdfUrl, pdfId, onDownload, onClose }) => 
   }, [isOpen, onClose]);
 
   return (
-    <AnimatePresence>
+    <>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
         >
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+          <div
             className="bg-surface rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden"
           >
             <div className="flex items-center justify-between p-4 border-b border-outline-variant bg-surface-dim">
@@ -58,10 +55,10 @@ const PdfViewerModal = memo(({ isOpen, pdfUrl, pdfId, onDownload, onClose }) => 
                 </div>
               )}
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
-    </AnimatePresence>
+    
   );
 });
 

@@ -1,5 +1,4 @@
 import React, { useMemo } from 'react';
-import { motion } from 'framer-motion';
 import { formatPeriodo, MODAL_BACKDROP, MODAL_CONTENT } from '../utils';
 import { ReadingRow } from './shared/ReadingRow';
 
@@ -28,8 +27,8 @@ export const AllReadingsModal = ({
   }, [modalSearchTerm, lecturasPeriodoActivo, medidorDocMap]);
 
   return (
-    <motion.div {...MODAL_BACKDROP} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-      <motion.div {...MODAL_CONTENT} className="bg-surface w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
+    <div {...MODAL_BACKDROP} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+      <div {...MODAL_CONTENT} className="bg-surface w-full max-w-4xl rounded-2xl shadow-2xl flex flex-col max-h-[90vh]">
         <div className="px-xl py-md border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface-container-lowest rounded-t-2xl">
           <div>
             <h3 className="font-headline-sm text-primary font-bold flex items-center gap-2">
@@ -66,7 +65,7 @@ export const AllReadingsModal = ({
             )}
           </ul>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };

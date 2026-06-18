@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 import { useYear } from '../../context/YearContext';
@@ -124,14 +123,12 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
   };
 
   return (
-    <AnimatePresence>
+    <>
       {isOpen && (
-        <motion.div 
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+        <div
           className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4"
         >
-          <motion.div 
-            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+          <div
             className="bg-surface w-full max-w-lg rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-outline-variant"
           >
             <div className="px-5 py-4 border-b border-outline-variant flex justify-between items-center bg-surface relative">
@@ -283,10 +280,10 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                 </button>
               </div>
             </form>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
-    </AnimatePresence>
+    
   );
 };
 

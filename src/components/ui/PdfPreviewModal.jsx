@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const OVERLAY = { hidden: { opacity: 0 }, visible: { opacity: 1 } };
 const PANEL = { hidden: { scale: 0.95, opacity: 0 }, visible: { scale: 1, opacity: 1 } };
@@ -7,12 +6,10 @@ const TRANSITION = { duration: 0.2, ease: "easeOut" };
 
 const PdfPreviewModal = ({ pdfBlobUrl, onClose, downloadFileName = 'documento.pdf', title = 'Visor de PDF' }) => {
   return (
-    <motion.div
-      variants={OVERLAY} initial="hidden" animate="visible" exit="hidden" transition={TRANSITION}
+    <div
       className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4 !m-0"
     >
-      <motion.div
-        variants={PANEL} initial="hidden" animate="visible" exit="hidden" transition={TRANSITION}
+      <div
         className="bg-surface w-full max-w-6xl h-[90vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden"
       >
         <div className="px-lg py-sm border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
@@ -47,8 +44,8 @@ const PdfPreviewModal = ({ pdfBlobUrl, onClose, downloadFileName = 'documento.pd
             title="Reporte PDF"
           />
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 

@@ -1,16 +1,13 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const SuccessModal = ({ isOpen, onClose, lecturasCount, periodoName }) => {
   if (!isOpen) return null;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+    <div
       className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center"
     >
-      <motion.div 
-        initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+      <div
         className="bg-surface p-xl rounded-xl shadow-2xl max-w-md w-full text-center space-y-md border border-outline-variant"
       >
         <div className="w-20 h-20 bg-[#059669]/10 rounded-full flex items-center justify-center mx-auto mb-lg">
@@ -26,8 +23,8 @@ const SuccessModal = ({ isOpen, onClose, lecturasCount, periodoName }) => {
             Ir a Módulo de Facturación
           </button>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 

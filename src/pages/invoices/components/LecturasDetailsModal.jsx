@@ -1,16 +1,13 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const LecturasDetailsModal = ({ isOpen, onClose, lecturas }) => {
   if (!isOpen) return null;
 
   return (
-    <motion.div 
-      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+    <div
       className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-[100] flex items-center justify-center p-md"
     >
-      <motion.div 
-        initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+      <div
         className="bg-surface border border-outline-variant rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden"
       >
         <div className="px-lg py-md bg-surface-container-low border-b border-outline-variant flex justify-between items-center">
@@ -56,8 +53,8 @@ const LecturasDetailsModal = ({ isOpen, onClose, lecturas }) => {
               Cerrar
            </button>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 

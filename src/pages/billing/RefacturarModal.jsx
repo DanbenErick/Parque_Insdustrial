@@ -1,5 +1,4 @@
 import React, { memo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 /**
  * RefacturarModal — Modal for re-invoicing a receipt.
@@ -14,14 +13,12 @@ const RefacturarModal = memo(({ isOpen, motivo, isProcessing, onMotivoChange, on
   }, [isOpen, isProcessing, onClose]);
 
   return (
-    <AnimatePresence>
+    <>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+        <div
           className="fixed inset-0 z-[100] flex items-center justify-center bg-scrim/60 backdrop-blur-md p-4 transition-all duration-300"
         >
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+          <div
             className="bg-surface-container-lowest rounded-[32px] w-full max-w-lg shadow-[0_20px_60px_-15px_rgba(0,0,0,0.4)] overflow-hidden flex flex-col border border-outline-variant/30"
           >
             {/* Header with gradient */}
@@ -104,10 +101,10 @@ const RefacturarModal = memo(({ isOpen, motivo, isProcessing, onMotivoChange, on
                 </button>
               </div>
             </form>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
-    </AnimatePresence>
+    
   );
 });
 

@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -557,10 +556,10 @@ const Payments = () => {
       </div>
 
       {/* Modal Registrar Pago */}
-      <AnimatePresence>
+      
         {isModalOpen && (
-          <motion.div {...MODAL_BACKDROP} className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-            <motion.div {...MODAL_CONTENT} className="bg-surface rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
+          <div {...MODAL_BACKDROP} className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <div {...MODAL_CONTENT} className="bg-surface rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
 
               {/* Header */}
               <div className="px-4 py-3 border-b border-outline-variant bg-surface-container-lowest flex justify-between items-center">
@@ -730,16 +729,16 @@ const Payments = () => {
                 </button>
               </div>
 
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         )}
-      </AnimatePresence>
+      
 
       {/* Modal PDF (Portal) */}
-      <AnimatePresence>
+      
         {isPdfModalOpen && createPortal(
-          <motion.div {...MODAL_BACKDROP} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <motion.div {...MODAL_CONTENT} className="bg-surface rounded-2xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col h-[90vh]">
+          <div {...MODAL_BACKDROP} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div {...MODAL_CONTENT} className="bg-surface rounded-2xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col h-[90vh]">
               <div className="flex justify-between items-center p-6 border-b border-outline-variant">
                 <div>
                   <h3 className="font-headline-sm text-on-surface">Visor de PDF</h3>
@@ -768,22 +767,21 @@ const Payments = () => {
               <div className="flex-1 bg-surface-variant">
                 <iframe src={pdfUrl} className="w-full h-full border-none" title="Visor PDF" />
               </div>
-            </motion.div>
-          </motion.div>,
+            </div>
+          </div>,
           document.body,
         )}
-      </AnimatePresence>
+      
 
       {/* Drawer de Detalles del Pago (Portal) */}
-      <AnimatePresence>
+      
         {selectedPaymentForDetails && createPortal(
-          <motion.div
+          <div
             {...MODAL_BACKDROP}
             className="fixed inset-0 z-[100] flex justify-end bg-black/50 backdrop-blur-sm"
             onClick={(e) => { if (e.target === e.currentTarget) closeDetailsDrawer(); }}
           >
-            <motion.div
-              initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={DRAWER_SPRING}
+            <div
               className="w-full max-w-sm bg-surface h-full shadow-2xl flex flex-col"
             >
               <div className="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
@@ -885,11 +883,11 @@ const Payments = () => {
                   </button>
                 </div>
               </div>
-            </motion.div>
-          </motion.div>,
+            </div>
+          </div>,
           document.body,
         )}
-      </AnimatePresence>
+      
 
     </main>
   );

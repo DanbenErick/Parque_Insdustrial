@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axiosConfig';
@@ -289,22 +288,22 @@ const GenerateInvoices = () => {
         </div>
       </div>
 
-      <AnimatePresence>
+      
         <SuccessModal 
           isOpen={showSuccess} 
           onClose={handleSuccessClose} 
           lecturasCount={lecturasDelPeriodo.length} 
           periodoName={periodoSeleccionado?.mes_anio} 
         />
-      </AnimatePresence>
+      
 
-      <AnimatePresence>
+      
         <LecturasDetailsModal 
           isOpen={showDetailsModal} 
           onClose={() => setShowDetailsModal(false)} 
           lecturas={lecturasDelPeriodo} 
         />
-      </AnimatePresence>
+      
     </main>
   );
 };

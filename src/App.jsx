@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback, Suspense, lazy } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
 import { Toaster } from 'sonner';
 import { useAuth } from './context/AuthContext';
 import { useTheme } from './context/ThemeContext';
@@ -123,7 +122,7 @@ function App() {
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col">
-            <AnimatePresence mode="wait">
+            
               <Suspense fallback={<PageLoader />}>
                 <Routes location={location} key={location.pathname}>
                   <Route path="/" element={<Navigate to="/dashboard" />} />
@@ -142,7 +141,7 @@ function App() {
                   <Route path="*" element={<PageTransition><NotFoundPage /></PageTransition>} />
                 </Routes>
               </Suspense>
-            </AnimatePresence>
+            
           </div>
 
           {/* Footer removed per user request */}

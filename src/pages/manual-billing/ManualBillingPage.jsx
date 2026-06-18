@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { AnimatePresence } from 'framer-motion';
 import { useYear } from '../../context/YearContext';
 import PeriodFormModal from '../settings/PeriodFormModal';
 
@@ -136,7 +135,7 @@ const ManualBilling = () => {
         </div>
       </div>
 
-      <AnimatePresence>
+      
         {isModalOpen && (
           <AllReadingsModal 
             activePeriodo={activePeriodo}
@@ -149,9 +148,9 @@ const ManualBilling = () => {
             onRowClick={(record) => setSelectedDetailRecord(record)}
           />
         )}
-      </AnimatePresence>
+      
 
-      <AnimatePresence>
+      
         {editModalData && (
           <EditReadingModal 
             editModalData={editModalData}
@@ -169,7 +168,7 @@ const ManualBilling = () => {
             isSaving={isSaving}
           />
         )}
-      </AnimatePresence>
+      
       
       <ReadingDetailDrawer 
         record={selectedDetailRecord} 

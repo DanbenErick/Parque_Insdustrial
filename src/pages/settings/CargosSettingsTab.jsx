@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 import CargoFormModal from './CargoFormModal';
@@ -200,7 +199,7 @@ const CargosSettingsTab = () => {
       </div>
 
       {/* Modal — isolated in its own component to prevent table re-renders on form input */}
-      <AnimatePresence>
+      
         {isModalOpen && (
           <CargoFormModal
             formData={formData}
@@ -211,7 +210,7 @@ const CargosSettingsTab = () => {
             isSubmitting={isSubmitting}
           />
         )}
-      </AnimatePresence>
+      
     </div>
   );
 };

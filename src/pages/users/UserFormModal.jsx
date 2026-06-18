@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 
 const OVERLAY = { hidden: { opacity: 0 }, visible: { opacity: 1 } };
@@ -23,12 +22,10 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
   };
 
   return (
-    <motion.div
-      variants={OVERLAY} initial="hidden" animate="visible" exit="hidden" transition={TRANSITION}
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center p-md bg-black/60 backdrop-blur-sm"
     >
       <motion.form
-        variants={PANEL} initial="hidden" animate="visible" exit="hidden" transition={TRANSITION}
         onSubmit={handleSubmit(onFormSubmit)}
         className="bg-surface border border-outline-variant rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
       >
@@ -244,7 +241,7 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
           </button>
         </div>
       </motion.form>
-    </motion.div>
+    </div>
   );
 };
 

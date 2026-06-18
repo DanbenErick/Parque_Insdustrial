@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 
@@ -488,7 +487,7 @@ const TenantsAndSectors = () => {
       </section>
 
       {/* --- Modals and Drawers --- */}
-      <AnimatePresence>
+      
         {isModalOpen && (
           <TenantFormModal
             formData={formData}
@@ -501,9 +500,9 @@ const TenantsAndSectors = () => {
             onClose={() => setIsModalOpen(false)}
           />
         )}
-      </AnimatePresence>
+      
 
-      <AnimatePresence>
+      
         {confirmModal.show && (
           <ConfirmActionModal
             title={confirmModal.isActivating ? 'Reactivar Servicio' : 'Cortar Servicio'}
@@ -517,18 +516,18 @@ const TenantsAndSectors = () => {
             onClose={() => setConfirmModal({ show: false, user: null, isActivating: false })}
           />
         )}
-      </AnimatePresence>
+      
 
-      <AnimatePresence>
+      
         {pdfBlobUrl && (
           <PdfPreviewModal
             pdfBlobUrl={pdfBlobUrl}
             onClose={() => setPdfBlobUrl(null)}
           />
         )}
-      </AnimatePresence>
+      
 
-      <AnimatePresence>
+      
         {drawerTenant && (
           <TenantDetailDrawer
             drawerTenant={drawerTenant}
@@ -536,7 +535,7 @@ const TenantsAndSectors = () => {
             handleOpenEdit={handleOpenEdit}
           />
         )}
-      </AnimatePresence>
+      
     </main>
   );
 };

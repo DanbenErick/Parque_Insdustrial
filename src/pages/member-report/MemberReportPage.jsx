@@ -1,5 +1,4 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -390,11 +389,11 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
               </button>
             </div>
 
-            <AnimatePresence>
+            
               {isOpen && (
                 <>
-                  <motion.div {...DROPDOWN_BACKDROP} className="fixed inset-0 z-40" onClick={closeDropdown} />
-                  <motion.div {...DROPDOWN_CONTENT} className="absolute top-full left-0 right-0 mt-1 max-h-60 bg-white border border-outline-variant rounded-lg shadow-xl overflow-y-auto z-50 custom-scrollbar">
+                  <div {...DROPDOWN_BACKDROP} className="fixed inset-0 z-40" onClick={closeDropdown} />
+                  <div {...DROPDOWN_CONTENT} className="absolute top-full left-0 right-0 mt-1 max-h-60 bg-white border border-outline-variant rounded-lg shadow-xl overflow-y-auto z-50 custom-scrollbar">
                     <div
                       onClick={() => handleSelectMember('Todos')}
                       className={`px-md py-2.5 hover:bg-primary/5 cursor-pointer text-sm font-semibold transition-colors flex items-center gap-xs ${isAllView ? 'bg-primary/10 text-primary' : 'text-on-surface'}`}
@@ -417,10 +416,10 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
                         No se encontraron socios
                       </div>
                     )}
-                  </motion.div>
+                  </div>
                 </>
               )}
-            </AnimatePresence>
+            
           </div>
         </div>
         <div className="text-right">

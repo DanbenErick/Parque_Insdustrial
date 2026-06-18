@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const getInitials = (name) => {
   if (!name) return '??';
@@ -11,19 +10,11 @@ const TenantDetailDrawer = ({ drawerTenant, setDrawerTenant, handleOpenEdit }) =
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.3 }}
+      <div
         className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100] !m-0"
         onClick={() => setDrawerTenant(null)}
       />
-      <motion.div
-        initial={{ x: '100%' }}
-        animate={{ x: 0 }}
-        exit={{ x: '100%' }}
-        transition={{ duration: 0.3, ease: 'easeInOut' }}
+      <div
         className="fixed inset-y-0 right-0 w-full md:w-[450px] bg-surface shadow-2xl z-[110] flex flex-col border-l border-outline-variant !m-0"
       >
         {/* Header del Drawer */}
@@ -135,7 +126,7 @@ const TenantDetailDrawer = ({ drawerTenant, setDrawerTenant, handleOpenEdit }) =
             Editar Datos del Socio
           </button>
         </div>
-      </motion.div>
+      </div>
     </>
   );
 };

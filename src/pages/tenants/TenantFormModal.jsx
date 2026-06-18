@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const OVERLAY = { hidden: { opacity: 0 }, visible: { opacity: 1 } };
 const PANEL = { hidden: { scale: 0.95, opacity: 0 }, visible: { scale: 1, opacity: 1 } };
@@ -18,12 +17,10 @@ const TenantFormModal = ({
   onClose
 }) => {
   return (
-    <motion.div
-      variants={OVERLAY} initial="hidden" animate="visible" exit="hidden" transition={TRANSITION}
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-0 md:p-4 !m-0"
     >
-      <motion.div
-        variants={PANEL} initial="hidden" animate="visible" exit="hidden" transition={TRANSITION}
+      <div
         className="bg-surface-container-lowest w-full h-full md:h-auto max-w-2xl md:rounded-xl shadow-2xl overflow-hidden border-0 md:border border-outline-variant flex flex-col max-h-screen md:max-h-[90vh]"
       >
         <div className="flex justify-between items-start px-md py-3 border-b border-outline-variant bg-surface-container-lowest">
@@ -199,8 +196,8 @@ const TenantFormModal = ({
             </button>
           </div>
         </div>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 

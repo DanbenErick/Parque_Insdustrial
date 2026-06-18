@@ -1,5 +1,4 @@
 import React, { useMemo, useCallback } from 'react';
-import { motion } from 'framer-motion';
 
 const OVERLAY_VARIANTS = {
   hidden: { opacity: 0 },
@@ -70,20 +69,10 @@ const CargoFormModal = ({ formData, setFormData, periodos, onClose, onSubmit, is
   }, [setFormData]);
 
   return (
-    <motion.div
-      variants={OVERLAY_VARIANTS}
-      initial="hidden"
-      animate="visible"
-      exit="hidden"
-      transition={TRANSITION}
+    <div
       className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4"
     >
-      <motion.div
-        variants={MODAL_VARIANTS}
-        initial="hidden"
-        animate="visible"
-        exit="hidden"
-        transition={TRANSITION}
+      <div
         className="bg-surface rounded-xl shadow-xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]"
       >
         {/* Header */}
@@ -241,8 +230,8 @@ const CargoFormModal = ({ formData, setFormData, periodos, onClose, onSubmit, is
             </button>
           </div>
         </form>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };
 

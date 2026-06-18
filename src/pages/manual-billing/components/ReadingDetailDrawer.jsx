@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { formatDateLong, fmtVal, parseSafe } from '../utils';
 
 const DRAWER_VARIANTS = {
@@ -22,14 +21,12 @@ export const ReadingDetailDrawer = ({ record, onClose }) => {
   const isReactiva = parseSafe(record.factor_potencia) > 0;
 
   return (
-    <AnimatePresence>
-      <motion.div
-        variants={OVERLAY_VARIANTS} initial="hidden" animate="visible" exit="exit"
+    <>
+      <div
         className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
       />
-      <motion.div
-        variants={DRAWER_VARIANTS} initial="hidden" animate="visible" exit="exit"
+      <div
         className="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-surface border-l border-outline-variant shadow-2xl flex flex-col"
       >
         <div className="px-6 py-5 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest shrink-0">
@@ -162,7 +159,7 @@ export const ReadingDetailDrawer = ({ record, onClose }) => {
             </div>
           )}
         </div>
-      </motion.div>
-    </AnimatePresence>
+      </div>
+    </>
   );
 };

@@ -1,5 +1,4 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { MODAL_BACKDROP, MODAL_CONTENT, fmtVal, parseSafe } from '../utils';
 
 export const EditReadingModal = ({
@@ -16,8 +15,8 @@ export const EditReadingModal = ({
   const isValidJustification = editJustificacion.trim().split(/\s+/).filter(w => w.length > 0).length >= 3;
 
   return (
-    <motion.div {...MODAL_BACKDROP} className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-      <motion.div {...MODAL_CONTENT} className="bg-surface w-full max-w-xl rounded-2xl shadow-2xl flex flex-col">
+    <div {...MODAL_BACKDROP} className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
+      <div {...MODAL_CONTENT} className="bg-surface w-full max-w-xl rounded-2xl shadow-2xl flex flex-col">
         <div className="px-lg py-md border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest rounded-t-2xl">
           <h3 className="font-headline-sm text-primary font-bold flex items-center gap-2">
             <span className="material-symbols-outlined">edit_note</span> Modificar Lectura
@@ -147,7 +146,7 @@ export const EditReadingModal = ({
             </button>
           </div>
         </form>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
   );
 };

@@ -1,5 +1,4 @@
 import React, { memo, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 
 /**
  * DeudasModal — Modal for selecting debt report scope (monthly vs historic).
@@ -14,14 +13,12 @@ const DeudasModal = memo(({ isOpen, filterMes, onExport, onClose }) => {
   }, [isOpen, onClose]);
 
   return (
-    <AnimatePresence>
+    <>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}
+        <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
         >
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ duration: 0.2, ease: "easeOut" }}
+          <div
             className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden"
           >
             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -74,10 +71,10 @@ const DeudasModal = memo(({ isOpen, filterMes, onExport, onClose }) => {
                 </button>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
-    </AnimatePresence>
+    
   );
 });
 
