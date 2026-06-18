@@ -58,7 +58,7 @@ const PdfViewerModal = memo(({ isOpen, pdfUrl, pdfId, onDownload, onClose }) => 
           </div>
         </div>
       )}
-    
+    </>
   );
 });
 

@@ -104,7 +104,7 @@ const RefacturarModal = memo(({ isOpen, motivo, isProcessing, onMotivoChange, on
           </div>
         </div>
       )}
-    
+    </>
   );
 });
 

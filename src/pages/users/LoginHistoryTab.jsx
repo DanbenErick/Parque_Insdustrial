@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import api from '../../../api/axiosConfig';
+import api from '../../api/axiosConfig';
 import { toast } from 'sonner';
 
 const LoginHistoryTab = () => {

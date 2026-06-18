@@ -282,8 +282,8 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
             </form>
           </div>
         </div>
-      )}
-    
+        )}
+    </>
   );
 };
 

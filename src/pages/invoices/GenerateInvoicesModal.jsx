@@ -56,9 +56,9 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
                 <button onClick={onClose} className="mt-4 w-full bg-primary text-on-primary py-2 rounded-lg font-bold">Cerrar</button>
              </div>
           </div>
-        )}
-      
-    );
+      )}
+    </>
+  );
   }
 
   const formatPeriod = (periodStr) => {
@@ -292,8 +292,8 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
 
         </div>
       </div>
-    )}
-    
+      )}
+    </>
   );
 };
 

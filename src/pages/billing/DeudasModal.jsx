@@ -74,7 +74,7 @@ const DeudasModal = memo(({ isOpen, filterMes, onExport, onClose }) => {
           </div>
         </div>
       )}
-    
+    </>
   );
 });
 
