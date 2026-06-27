@@ -23,6 +23,10 @@ const Settings = () => {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
   const [isTenantImportOpen, setIsTenantImportOpen] = useState(false);
+  
+  // Estados para cuenta bancaria
+  const [isEditingAccount, setIsEditingAccount] = useState(false);
+  const [isSavingAccount, setIsSavingAccount] = useState(false);
 
   // Estados para el perfil
   const [profile, setProfile] = useState({
@@ -56,6 +60,19 @@ const Settings = () => {
         telefono: user.telefono || '',
         correo: user.correo || ''
       });
+
+      // Asegurar que tenemos los datos más recientes del perfil directamente desde el backend
+      api.get('/auth/me')
+        .then(res => {
+          const fullUser = res.data.usuario || res.data;
+          setProfile(prev => ({
+            nombre_razonsocial: fullUser.nombre_razonsocial || prev.nombre_razonsocial,
+            cargo_representante: fullUser.cargo_representante || prev.cargo_representante,
+            telefono: fullUser.telefono || prev.telefono,
+            correo: fullUser.correo || prev.correo
+          }));
+        })
+        .catch(() => { /* ignorar */ });
     }
 
     // Cargar preferencias locales
@@ -110,6 +127,19 @@ const Settings = () => {
       toast.error(error.response?.data?.error || 'Ocurrió un error al cambiar la contraseña');
     } finally {
       setIsChangingPassword(false);
+    }
+  };
+
+  const handleSaveAccount = async () => {
+    setIsSavingAccount(true);
+    try {
+      await api.put('/config', tarifas);
+      toast.success('Cuenta bancaria actualizada correctamente');
+      setIsEditingAccount(false);
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Error al guardar la cuenta bancaria');
+    } finally {
+      setIsSavingAccount(false);
     }
   };
 
@@ -317,14 +347,61 @@ const Settings = () => {
                     <h4 className="text-sm text-on-surface font-bold mb-2">Datos para Recibos</h4>
                     <div className="space-y-0.5 max-w-md">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Cuenta Bancaria Principal (Se mostrará en los recibos)</label>
-                      <input 
-                        type="text" 
-                        name="cuenta_bancaria"
-                        placeholder="Ej. BCP: 191-12345678-0-12 (Opcional)"
-                        value={tarifas.cuenta_bancaria}
-                        onChange={(e) => setTarifas(prev => ({ ...prev, cuenta_bancaria: e.target.value }))}
-                        className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm" 
-                      />
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          name="cuenta_bancaria"
+                          placeholder="Ej. BCP: 191-12345678-0-12 (Opcional)"
+                          value={tarifas.cuenta_bancaria}
+                          onChange={(e) => setTarifas(prev => ({ ...prev, cuenta_bancaria: e.target.value }))}
+                          disabled={!isEditingAccount}
+                          className={`flex-grow border rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm ${
+                            isEditingAccount 
+                              ? 'bg-surface-container-lowest border-outline-variant/50 hover:border-primary/50 focus:border-primary' 
+                              : 'bg-surface-container-highest border-transparent text-on-surface-variant cursor-not-allowed'
+                          }`} 
+                        />
+                        {!isEditingAccount ? (
+                          <button 
+                            type="button" 
+                            onClick={() => setIsEditingAccount(true)}
+                            className="px-3 py-1.5 h-8 border border-outline-variant text-on-surface hover:text-primary hover:border-primary hover:bg-primary/5 rounded-md transition-colors text-xs font-bold active:scale-95 flex items-center gap-1"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">edit</span>
+                            Editar
+                          </button>
+                        ) : (
+                          <div className="flex gap-1">
+                            <button 
+                              type="button" 
+                              onClick={() => {
+                                setIsEditingAccount(false);
+                                // Opcional: restaurar valor original si se cancela, pero como el estado ya cambió, necesitaríamos el original.
+                                // Por simplicidad, solo cerramos el modo de edición.
+                              }}
+                              className="px-2 h-8 border border-outline-variant text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest rounded-md transition-colors flex items-center justify-center active:scale-95"
+                              title="Cancelar"
+                            >
+                              <span className="material-symbols-outlined text-[16px]">close</span>
+                            </button>
+                            <button 
+                              type="button" 
+                              onClick={handleSaveAccount}
+                              disabled={isSavingAccount}
+                              className={`px-3 py-1.5 h-8 bg-primary text-on-primary rounded-md shadow-sm transition-all text-xs font-bold flex items-center gap-1 ${
+                                isSavingAccount ? 'opacity-70 cursor-not-allowed' : 'hover:opacity-90 active:scale-95'
+                              }`}
+                            >
+                              {isSavingAccount ? (
+                                <span className="material-symbols-outlined animate-spin text-[16px]">sync</span>
+                              ) : (
+                                <span className="material-symbols-outlined text-[16px]">save</span>
+                              )}
+                              Guardar
+                            </button>
+                          </div>
+                        )}
+                      </div>
                       <p className="text-[10px] text-on-surface-variant mt-1">Este número de cuenta aparecerá en la parte inferior de los recibos en PDF generados.</p>
                     </div>
                   </div>
