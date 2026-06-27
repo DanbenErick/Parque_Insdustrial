@@ -3,16 +3,22 @@ import { MODAL_BACKDROP, MODAL_CONTENT, fmtVal, parseSafe } from '../utils';
 
 export const EditReadingModal = ({
   editModalData,
+  medidorMap,
   setEditModalData,
   handleUpdateLectura,
   editReadingVal, setEditReadingVal,
   editReadingValPunta, setEditReadingValPunta,
   editFactorPotencia, setEditFactorPotencia,
-  editPrecioFactorPotencia, setEditPrecioFactorPotencia,
   editJustificacion, setEditJustificacion,
   isSaving
 }) => {
   const isValidJustification = editJustificacion.trim().split(/\s+/).filter(w => w.length > 0).length >= 3;
+  const medidorInfo = editModalData ? medidorMap?.get(editModalData.num_serie) : null;
+  const tipoStr = medidorInfo?.tipo || editModalData?.medidor_tipo || editModalData?.tipo || '';
+  const isTR = tipoStr === 'Hora Punta' || tipoStr === 'Tiempo Real' || 
+               parseSafe(editModalData?.lectura_anterior_punta) > 0 || 
+               parseSafe(editModalData?.factor_potencia) > 0 ||
+               parseSafe(editModalData?.lectura_actual_punta) > 0;
 
   return (
     <div {...MODAL_BACKDROP} className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
@@ -51,7 +57,7 @@ export const EditReadingModal = ({
               </div>
             </div>
 
-            {(parseSafe(editModalData.lectura_actual_punta) > 0 || parseSafe(editModalData.factor_potencia) > 0) && (
+            {isTR && (
               <>
                 <div className="flex-1">
                   <label className="text-[9px] font-bold text-orange-600 uppercase tracking-wider block mb-1">Nueva L. Punta</label>
@@ -65,14 +71,14 @@ export const EditReadingModal = ({
                   </div>
                 </div>
                 <div className="flex-1">
-                  <label className="text-[9px] font-bold text-purple-600 uppercase tracking-wider block mb-1">Nuevo Reactivo</label>
+                  <label className="text-[9px] font-bold text-purple-600 uppercase tracking-wider block mb-1">Nueva Potencia Consumida</label>
                   <div className="relative h-[48px]">
                     <input
                       type="number" step="0.01" required
                       value={editFactorPotencia} onChange={(e) => setEditFactorPotencia(e.target.value)} placeholder="0.00"
                       className="w-full h-full bg-white border border-purple-300 hover:border-purple-500 focus:border-purple-500 rounded-lg pl-3 pr-12 text-lg font-data-mono font-bold text-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-right shadow-sm transition-all"
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-on-surface-variant">kVARh</span>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-on-surface-variant">kW</span>
                   </div>
                 </div>
               </>
@@ -101,7 +107,7 @@ export const EditReadingModal = ({
                   </div>
                 </div>
                 
-                {parseSafe(editModalData.lectura_anterior_punta) > 0 && (
+                {isTR && (
                   <>
                     <div>
                       <label className="text-[9px] font-bold text-error uppercase tracking-wider block mb-1">Final Dañado (Punta)</label>

@@ -7,19 +7,18 @@ import TenantKPICards from './TenantKPICards';
 import TenantTableRow from './TenantTableRow';
 import TenantFormModal from './TenantFormModal';
 import TenantDetailDrawer from './TenantDetailDrawer';
+import TenantImportModal from './TenantImportModal';
 import ConfirmActionModal from '../../components/ui/ConfirmActionModal';
 import PdfPreviewModal from '../../components/ui/PdfPreviewModal';
 
 const INITIAL_FORM = {
   nombre_razonsocial: '',
   documento_identidad: '',
-  direccion: '',
-  actividad: '',
-  cargo_representante: '',
+  actividad: 'General',
   correo: '',
   telefono: '',
   clave_acceso: '',
-  medidores: [{ num_serie: '', tipo: 'Normal' }]
+  medidores: [{ num_serie: '', tipo: 'Normal', direccion: '' }]
 };
 
 const TenantsAndSectors = () => {
@@ -27,12 +26,13 @@ const TenantsAndSectors = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  
+
   // Modals / Drawers state
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ show: false, user: null, isActivating: false });
   const [drawerTenant, setDrawerTenant] = useState(null);
-  
+
   const [isSavingToggle, setIsSavingToggle] = useState(false);
   const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
@@ -42,7 +42,7 @@ const TenantsAndSectors = () => {
   const [filterEstado, setFilterEstado] = useState('Todos');
   const [filterRubro, setFilterRubro] = useState('Todos');
   const [showFilters, setShowFilters] = useState(false);
-  
+
   const [editId, setEditId] = useState(null);
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
@@ -83,7 +83,7 @@ const TenantsAndSectors = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     let finalValue = value;
-    
+
     if (name === 'documento_identidad') {
       finalValue = value.replace(/\D/g, '').slice(0, 11);
     } else if (name === 'telefono') {
@@ -107,7 +107,7 @@ const TenantsAndSectors = () => {
       const response = await api.get(url);
       // Backend may return { data: [...], meta: {...} } or [...] directly
       const rawData = Array.isArray(response.data) ? response.data : (response.data?.data || []);
-      
+
       const socios = rawData.map(tenant => {
         let parsedMedidores = [];
         try {
@@ -128,7 +128,10 @@ const TenantsAndSectors = () => {
           setGlobalStats({
             total: parseInt(statsRes.data.total) || 0,
             activos: parseInt(statsRes.data.activos) || 0,
-            inactivos: parseInt(statsRes.data.inactivos) || 0
+            inactivos: parseInt(statsRes.data.inactivos) || 0,
+            medidores_normal: parseInt(statsRes.data.medidores_normal) || 0,
+            medidores_tiempo_real: parseInt(statsRes.data.medidores_tiempo_real) || 0,
+            socios_sin_medidor: parseInt(statsRes.data.socios_sin_medidor) || 0
           });
         } catch {
           // Stats are non-critical — silently skip if endpoint fails
@@ -154,10 +157,10 @@ const TenantsAndSectors = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
-    const { nombre_razonsocial, documento_identidad, direccion, actividad, cargo_representante, correo, telefono } = formData;
+    const { nombre_razonsocial, documento_identidad, telefono } = formData;
 
-    if (!nombre_razonsocial || !documento_identidad || !direccion || !actividad || !cargo_representante || !correo || !telefono) {
-      return toast.error("Todos los campos de la empresa y del representante son obligatorios.");
+    if (!nombre_razonsocial || !documento_identidad || !telefono) {
+      return toast.error("Por favor complete los campos obligatorios del socio (Nombre, DNI y Teléfono).");
     }
 
     if (!editId && (!formData.medidores || formData.medidores.length === 0 || (!formData.medidores[0].num_serie && formData.medidores[0].tipo !== 'Sin Medidor'))) {
@@ -172,8 +175,10 @@ const TenantsAndSectors = () => {
     try {
       const payload = {
         ...formData,
+        cargo_representante: formData.nombre_razonsocial, // backend fallback
+        direccion: formData.medidores.length > 0 && formData.medidores[0].direccion ? formData.medidores[0].direccion : '-', // backend fallback
         rol_id: 3,
-        actividad_rubro: formData.actividad
+        actividad_rubro: formData.actividad || 'General'
       };
 
       if (!editId) {
@@ -206,12 +211,15 @@ const TenantsAndSectors = () => {
 
   const handleOpenEdit = (tenant) => {
     setEditId(tenant.id);
-    let parsedMedidores = [{ num_serie: '', tipo: 'Normal' }];
+    let parsedMedidores = [{ num_serie: '', tipo: 'Normal', direccion: tenant.direccion || '' }];
     try {
       if (tenant.medidores) {
         const parsed = JSON.parse(tenant.medidores);
-        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].num_serie) {
-          parsedMedidores = parsed;
+        if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].num_serie || parsed[0].tipo === 'Sin Medidor')) {
+          parsedMedidores = parsed.map(m => ({
+            ...m,
+            direccion: m.direccion || tenant.direccion || '' // Fallback a la dirección antigua del tenant
+          }));
         }
       }
     } catch { /* medidores column may contain malformed JSON — silently skip */ }
@@ -219,9 +227,7 @@ const TenantsAndSectors = () => {
     setFormData({
       nombre_razonsocial: tenant.nombre_razonsocial,
       documento_identidad: tenant.documento_identidad,
-      direccion: tenant.direccion || '',
-      actividad: tenant.actividad_rubro || '',
-      cargo_representante: tenant.cargo_representante || '',
+      actividad: tenant.actividad_rubro || 'General',
       correo: tenant.correo || '',
       telefono: tenant.telefono || '',
       clave_acceso: '',
@@ -300,19 +306,18 @@ const TenantsAndSectors = () => {
     <main className={`p-4 md:p-6 space-y-4 max-w-[1600px] mx-auto w-full flex-grow transition-opacity duration-300 ${isLoading && tenants.length === 0 ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
         <div>
-          <h2 className="text-2xl text-on-surface font-bold leading-tight">Directorio de Socios y Conexiones</h2>
-          <p className="text-sm text-on-surface-variant">Gestión de socios de predios, conexiones eléctricas y estado de suministro.</p>
+          <h2 className="text-2xl text-on-surface font-bold leading-tight">Directorio de Socios</h2>
+          <p className="text-sm text-on-surface-variant">Gestión de socios, conexiones eléctricas y estado de suministro.</p>
         </div>
-        <div className="flex flex-wrap gap-md">
-          <div className="flex items-end">
-            <button
-              onClick={handleOpenNew}
-              className="flex items-center gap-1.5 px-4 py-1.5 bg-primary text-on-primary font-bold rounded-md hover:opacity-90 transition-all shadow-sm h-8"
-            >
-              <span className="material-symbols-outlined text-[16px]">add</span>
-              <span className="text-xs">Registrar Socio</span>
-            </button>
-          </div>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+
+          <button
+            onClick={handleOpenNew}
+            className="group px-4 py-2 bg-primary text-on-primary font-bold rounded-xl shadow-sm hover:shadow-md hover:opacity-90 transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+          >
+            <span className="material-symbols-outlined text-[20px] group-hover:-translate-y-0.5 transition-transform">add_circle</span>
+            Nuevo Socio
+          </button>
         </div>
       </div>
 
@@ -416,10 +421,9 @@ const TenantsAndSectors = () => {
           <table className="w-full min-w-[900px] text-left border-collapse whitespace-nowrap">
             <thead className="sticky top-0 z-10 shadow-sm bg-surface-container-lowest text-on-surface-variant text-[11px] uppercase tracking-wider">
               <tr className="border-b border-outline-variant">
-                <th className="px-4 py-2 font-semibold bg-surface-container-lowest">Nombre de Empresa / Documento</th>
+                <th className="px-4 py-2 font-semibold bg-surface-container-lowest">Nombresß / Documento</th>
                 <th className="px-4 py-2 font-semibold bg-surface-container-lowest">Dirección</th>
                 <th className="px-4 py-2 font-semibold bg-surface-container-lowest">Medidor</th>
-                <th className="px-4 py-2 font-semibold bg-surface-container-lowest">Actividad / Representante</th>
                 <th className="px-4 py-2 font-semibold bg-surface-container-lowest">Estado</th>
                 <th className="px-4 py-2 font-semibold text-right bg-surface-container-lowest">Acciones</th>
               </tr>
@@ -436,7 +440,7 @@ const TenantsAndSectors = () => {
               ))}
               {filteredTenants.length === 0 && (
                 <tr>
-                  <td colSpan="6" className="px-5 py-12 text-center text-on-surface-variant">No se encontraron socios registrados.</td>
+                  <td colSpan="5" className="px-5 py-12 text-center text-on-surface-variant">No se encontraron socios registrados.</td>
                 </tr>
               )}
             </tbody>
@@ -487,55 +491,63 @@ const TenantsAndSectors = () => {
       </section>
 
       {/* --- Modals and Drawers --- */}
-      
-        {isModalOpen && (
-          <TenantFormModal
-            formData={formData}
-            setFormData={setFormData}
-            errors={errors}
-            handleInputChange={handleInputChange}
-            handleRegister={handleRegister}
-            isSubmitting={isSubmitting}
-            editId={editId}
-            onClose={() => setIsModalOpen(false)}
-          />
-        )}
-      
 
-      
-        {confirmModal.show && (
-          <ConfirmActionModal
-            title={confirmModal.isActivating ? 'Reactivar Servicio' : 'Cortar Servicio'}
-            message={`¿Estás seguro de que deseas ${confirmModal.isActivating ? 'reactivar' : 'cortar'} el servicio de ${confirmModal.user?.nombre_razonsocial}?`}
-            warningText={!confirmModal.isActivating ? 'El socio aparecerá como "Suspendido / Cortado" en todo el sistema.' : undefined}
-            confirmText={confirmModal.isActivating ? 'Sí, reactivar' : 'Sí, cortar'}
-            isDestructive={!confirmModal.isActivating}
-            isLoading={isSavingToggle}
-            icon={confirmModal.isActivating ? 'bolt' : 'power_off'}
-            onConfirm={executeToggleUser}
-            onClose={() => setConfirmModal({ show: false, user: null, isActivating: false })}
-          />
-        )}
-      
+      {isModalOpen && (
+        <TenantFormModal
+          formData={formData}
+          setFormData={setFormData}
+          errors={errors}
+          handleInputChange={handleInputChange}
+          handleRegister={handleRegister}
+          isSubmitting={isSubmitting}
+          editId={editId}
+          onClose={() => setIsModalOpen(false)}
+        />
+      )}
 
-      
-        {pdfBlobUrl && (
-          <PdfPreviewModal
-            pdfBlobUrl={pdfBlobUrl}
-            onClose={() => setPdfBlobUrl(null)}
-          />
-        )}
-      
+      {isImportModalOpen && (
+        <TenantImportModal
+          onClose={() => setIsImportModalOpen(false)}
+          onImportSuccess={() => {
+            fetchTenants();
+          }}
+        />
+      )}
 
-      
-        {drawerTenant && (
-          <TenantDetailDrawer
-            drawerTenant={drawerTenant}
-            setDrawerTenant={setDrawerTenant}
-            handleOpenEdit={handleOpenEdit}
-          />
-        )}
-      
+
+      {confirmModal.show && (
+        <ConfirmActionModal
+          title={confirmModal.isActivating ? 'Reactivar Servicio' : 'Cortar Servicio'}
+          message={`¿Estás seguro de que deseas ${confirmModal.isActivating ? 'reactivar' : 'cortar'} el servicio de ${confirmModal.user?.nombre_razonsocial}?`}
+          warningText={!confirmModal.isActivating ? 'El socio aparecerá como "Suspendido / Cortado" en todo el sistema.' : undefined}
+          confirmText={confirmModal.isActivating ? 'Sí, reactivar' : 'Sí, cortar'}
+          isDestructive={!confirmModal.isActivating}
+          isLoading={isSavingToggle}
+          icon={confirmModal.isActivating ? 'bolt' : 'power_off'}
+          onConfirm={executeToggleUser}
+          onClose={() => setConfirmModal({ show: false, user: null, isActivating: false })}
+        />
+      )}
+
+
+
+      {pdfBlobUrl && (
+        <PdfPreviewModal
+          pdfBlobUrl={pdfBlobUrl}
+          onClose={() => setPdfBlobUrl(null)}
+        />
+      )}
+
+
+
+      {drawerTenant && (
+        <TenantDetailDrawer
+          drawerTenant={drawerTenant}
+          setDrawerTenant={setDrawerTenant}
+          handleOpenEdit={handleOpenEdit}
+        />
+      )}
+
     </main>
   );
 };

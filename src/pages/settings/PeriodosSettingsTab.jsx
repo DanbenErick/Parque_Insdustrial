@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 import { useYear } from '../../context/YearContext';
 import PeriodFormModal from './PeriodFormModal';
+import PeriodDetailDrawer from './PeriodDetailDrawer';
 
 const formatPeriodo = (periodoStr) => {
   if (!periodoStr) return '';
@@ -33,6 +34,7 @@ const PeriodosSettingsTab = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPeriodo, setEditingPeriodo] = useState(null);
+  const [drawerPeriodo, setDrawerPeriodo] = useState(null);
 
   const fetchPeriodos = async () => {
     setIsLoading(true);
@@ -53,7 +55,7 @@ const PeriodosSettingsTab = () => {
   const periodosFiltrados = periodos.filter(p => {
     if (!p.mes_anio) return false;
     return p.mes_anio.includes(activeYear.toString());
-  }).sort((a, b) => new Date(b.fecha_inicio) - new Date(a.fecha_inicio));
+  }).sort((a, b) => b.mes_anio.localeCompare(a.mes_anio));
 
   const handleEdit = (p) => {
     setEditingPeriodo(p);
@@ -128,31 +130,38 @@ const PeriodosSettingsTab = () => {
                 <tr className="bg-surface-container-low border-b border-outline-variant text-[10px] uppercase tracking-wider">
                   <th className="py-2 px-4 font-bold text-on-surface-variant">Mes/Año</th>
                   <th className="py-2 px-4 font-bold text-on-surface-variant">Tarifa kWh</th>
-                  <th className="py-2 px-4 font-bold text-on-surface-variant">Cuota Mant.</th>
+                  <th className="py-2 px-4 font-bold text-on-surface-variant">Potencia</th>
                   <th className="py-2 px-4 font-bold text-on-surface-variant">Inicio / Fin</th>
+                  <th className="py-2 px-4 font-bold text-on-surface-variant">Registrado por</th>
                   <th className="py-2 px-4 font-bold text-on-surface-variant text-right">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant text-xs">
                 {periodosFiltrados.map((p) => (
-                  <tr key={p.id} className="hover:bg-surface-container-lowest transition-colors">
+                  <tr 
+                    key={p.id} 
+                    className="hover:bg-surface-container-lowest transition-colors cursor-pointer group"
+                    onClick={() => setDrawerPeriodo(p)}
+                  >
                     <td className="py-2.5 px-4">
-                      <span className="font-bold text-primary">{formatPeriodo(p.mes_anio)}</span>
+                      <span className="font-bold text-primary group-hover:underline">{formatPeriodo(p.mes_anio)}</span>
                     </td>
                     <td className="py-2.5 px-4 font-data-mono font-bold">
                       S/ {Number(p.tarifa_kwh).toFixed(4)}
                     </td>
-                    <td className="py-2.5 px-4 font-data-mono">
-                      S/ {Number(p.tarifa_mantenimiento_normal).toFixed(2)}
+                    <td className="py-2.5 px-4 font-data-mono font-bold text-purple-600">
+                      S/ {Number(p.costo_potencia || 0).toFixed(4)}
                     </td>
-                    <td className="py-2.5 px-4 text-[11px] text-on-surface-variant leading-tight">
-                      {new Date(p.fecha_inicio).toLocaleDateString()} <br/>
-                      <span className="text-[10px] opacity-70">a</span> {new Date(p.fecha_fin).toLocaleDateString()}
+                    <td className="py-2.5 px-4 text-[11px] text-on-surface-variant">
+                      {new Date(p.fecha_inicio).toLocaleDateString()} <span className="mx-1 opacity-70 font-medium">/</span> {new Date(p.fecha_fin).toLocaleDateString()}
+                    </td>
+                    <td className="py-2.5 px-4 text-[11px] font-medium text-on-surface-variant truncate max-w-[120px]" title={p.creador_nombre || 'Sistema'}>
+                      {p.creador_nombre ? p.creador_nombre.split(' ')[0] : 'Sistema'}
                     </td>
                     <td className="py-2.5 px-4 text-right">
                       <button 
-                        onClick={() => handleEdit(p)}
-                        className="p-1.5 text-primary hover:bg-primary/10 rounded-md transition-colors"
+                        onClick={(e) => { e.stopPropagation(); handleEdit(p); }}
+                        className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
                         title="Editar Periodo"
                       >
                         <span className="material-symbols-outlined text-[16px]">edit</span>
@@ -166,13 +175,21 @@ const PeriodosSettingsTab = () => {
         )}
       </div>
 
-      {/* Reutilizamos el modal para creación y edición */}
       <PeriodFormModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSuccess={fetchPeriodos}
         initialData={editingPeriodo}
-        existentes={periodosFiltrados}
+        onSuccess={fetchPeriodos}
+        existentes={periodos}
+      />
+
+      <PeriodDetailDrawer 
+        drawerPeriodo={drawerPeriodo}
+        setDrawerPeriodo={setDrawerPeriodo}
+        handleEdit={(p) => {
+          setEditingPeriodo(p);
+          setIsModalOpen(true);
+        }}
       />
     </div>
   );

@@ -224,8 +224,8 @@ const UserManagement = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
         <div>
-          <h1 className="text-2xl text-on-surface font-bold leading-tight">Gestión de Accesos y Auditoría</h1>
-          <p className="text-sm text-on-surface-variant">Control centralizado de permisos y registro de sesiones.</p>
+          <h1 className="text-2xl text-on-surface font-bold leading-tight">Modulo de Usuarios</h1>
+          <p className="text-sm text-on-surface-variant">Control de usuarios.</p>
         </div>
         {activeTab === 'usuarios' && (
           <button
@@ -273,112 +273,112 @@ const UserManagement = () => {
               </div>
             </div>
 
-          <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-            <div className="relative flex-grow md:flex-grow-0">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
-              <input
-                type="text" placeholder="Buscar usuario..."
-                value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
-                className="bg-surface-container-lowest border border-outline-variant rounded-xl pl-10 pr-4 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all w-full md:w-[260px] shadow-sm"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-[1px] bg-outline-variant mx-1 hidden sm:block"></div>
-              <button
-                onClick={() => handleExport('excel')}
-                className="group flex items-center gap-1.5 px-3 py-2 bg-[#107C41]/10 border border-transparent hover:border-[#107C41]/30 hover:bg-[#107C41]/20 text-[#107C41] font-bold text-xs rounded-xl transition-all shadow-sm"
-              >
-                <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">table_view</span>
-                <span className="hidden sm:inline">Excel</span>
-              </button>
-              <button
-                onClick={() => handleExport('pdf')}
-                className="group flex items-center gap-1.5 px-3 py-2 bg-error/10 border border-transparent hover:border-error/30 hover:bg-error/20 text-error font-bold text-xs rounded-xl transition-all shadow-sm"
-              >
-                <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">picture_as_pdf</span>
-                <span className="hidden sm:inline">PDF</span>
-              </button>
+            <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
+              <div className="relative flex-grow md:flex-grow-0">
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+                <input
+                  type="text" placeholder="Buscar usuario..."
+                  value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                  className="bg-surface-container-lowest border border-outline-variant rounded-xl pl-10 pr-4 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all w-full md:w-[260px] shadow-sm"
+                />
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-8 w-[1px] bg-outline-variant mx-1 hidden sm:block"></div>
+                <button
+                  onClick={() => handleExport('excel')}
+                  className="group flex items-center gap-1.5 px-3 py-2 bg-[#107C41]/10 border border-transparent hover:border-[#107C41]/30 hover:bg-[#107C41]/20 text-[#107C41] font-bold text-xs rounded-xl transition-all shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">table_view</span>
+                  <span className="hidden sm:inline">Excel</span>
+                </button>
+                <button
+                  onClick={() => handleExport('pdf')}
+                  className="group flex items-center gap-1.5 px-3 py-2 bg-error/10 border border-transparent hover:border-error/30 hover:bg-error/20 text-error font-bold text-xs rounded-xl transition-all shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">picture_as_pdf</span>
+                  <span className="hidden sm:inline">PDF</span>
+                </button>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          {isLoading ? (
-            <div className="p-10 text-center text-on-surface-variant">Cargando usuarios...</div>
-          ) : (
-            <table className="w-full text-left border-collapse table-auto whitespace-nowrap">
-              <thead>
-                <tr className="bg-surface-container-lowest border-b border-outline-variant text-on-surface-variant text-[11px] uppercase tracking-wider">
-                  <th className="px-4 py-2 font-semibold">Nombre / Entidad</th>
-                  <th className="px-4 py-2 font-semibold">Cargo & Rol</th>
-                  <th className="px-4 py-2 font-semibold">Documento</th>
-                  <th className="px-4 py-2 font-semibold">Estado</th>
-                  <th className="px-4 py-2 font-semibold">Dirección</th>
-                  <th className="px-4 py-2 font-semibold text-right">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-outline-variant/50 bg-surface">
-                {filteredUsers.map(user => (
-                  <tr key={user.id} className={`hover:bg-surface-container-lowest transition-all group ${!user.es_activo ? 'opacity-60 grayscale' : ''}`}>
-                    <td className="px-4 py-2">
-                      <div className="flex flex-col">
-                        <span className={`text-[11px] font-bold text-on-surface group-hover:text-primary transition-colors ${!user.es_activo && 'line-through'}`}>{user.nombre_razonsocial}</span>
-                        <span className="text-[10px] text-on-surface-variant">{user.correo || 'Sin correo'}</span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-2">
-                      <div className="flex flex-col items-start gap-0.5">
-                        <span className="font-bold text-[11px] text-on-surface">{user.cargo_representante || '-'}</span>
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${getRoleColor(user.nombre_rol)}`}>
-                          {user.nombre_rol}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-2 font-data-mono text-[11px] text-on-surface-variant">
-                      {user.documento_identidad}
-                    </td>
-                    <td className="px-4 py-2">
-                      <div className="flex items-center gap-2">
+          {/* Table */}
+          <div className="overflow-x-auto">
+            {isLoading ? (
+              <div className="p-10 text-center text-on-surface-variant">Cargando usuarios...</div>
+            ) : (
+              <table className="w-full text-left border-collapse table-auto whitespace-nowrap">
+                <thead>
+                  <tr className="bg-surface-container-lowest border-b border-outline-variant text-on-surface-variant text-[11px] uppercase tracking-wider">
+                    <th className="px-4 py-2 font-semibold">Nombre / Correo</th>
+                    <th className="px-4 py-2 font-semibold">Cargo & Rol</th>
+                    <th className="px-4 py-2 font-semibold">Documento</th>
+                    <th className="px-4 py-2 font-semibold">Estado</th>
+                    <th className="px-4 py-2 font-semibold">Dirección</th>
+                    <th className="px-4 py-2 font-semibold text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-outline-variant/50 bg-surface">
+                  {filteredUsers.map(user => (
+                    <tr key={user.id} className={`hover:bg-surface-container-lowest transition-all group ${!user.es_activo ? 'opacity-60 grayscale' : ''}`}>
+                      <td className="px-4 py-2">
+                        <div className="flex flex-col">
+                          <span className={`text-[11px] font-bold text-on-surface group-hover:text-primary transition-colors ${!user.es_activo && 'line-through'}`}>{user.nombre_razonsocial}</span>
+                          <span className="text-[10px] text-on-surface-variant">{user.correo || 'Sin correo'}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-2">
+                        <div className="flex flex-col items-start gap-0.5">
+                          <span className="font-bold text-[11px] text-on-surface">{user.cargo_representante || '-'}</span>
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${getRoleColor(user.nombre_rol)}`}>
+                            {user.nombre_rol}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 font-data-mono text-[11px] text-on-surface-variant">
+                        {user.documento_identidad}
+                      </td>
+                      <td className="px-4 py-2">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => toggleUserStatus(user)}
+                            disabled={user.rol_id === 1}
+                            className={`w-7 h-4 rounded-full relative transition-colors shadow-inner flex items-center px-0.5 ${user.rol_id === 1 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${user.es_activo ? 'bg-primary' : 'bg-surface-variant'}`}
+                          >
+                            <div className={`w-3 h-3 bg-white rounded-full shadow-sm transition-transform duration-200 ${user.es_activo ? 'translate-x-3' : 'translate-x-0'}`}></div>
+                          </button>
+                          <span className={`text-[9px] font-bold uppercase tracking-wider ${user.es_activo ? 'text-primary' : 'text-on-surface-variant'}`}>
+                            {user.es_activo ? 'Activo' : 'Inactivo'}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 text-[10px] text-on-surface-variant max-w-[200px] truncate" title={user.direccion}>
+                        {user.direccion || '-'}
+                      </td>
+                      <td className="px-4 py-2 text-right">
                         <button
-                          onClick={() => toggleUserStatus(user)}
-                          disabled={user.rol_id === 1}
-                          className={`w-7 h-4 rounded-full relative transition-colors shadow-inner flex items-center px-0.5 ${user.rol_id === 1 ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${user.es_activo ? 'bg-primary' : 'bg-surface-variant'}`}
+                          onClick={() => openEditModal(user)}
+                          className="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-full transition-colors inline-flex"
                         >
-                          <div className={`w-3 h-3 bg-white rounded-full shadow-sm transition-transform duration-200 ${user.es_activo ? 'translate-x-3' : 'translate-x-0'}`}></div>
+                          <span className="material-symbols-outlined text-[16px]">edit</span>
                         </button>
-                        <span className={`text-[9px] font-bold uppercase tracking-wider ${user.es_activo ? 'text-primary' : 'text-on-surface-variant'}`}>
-                          {user.es_activo ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="px-4 py-2 text-[10px] text-on-surface-variant max-w-[200px] truncate" title={user.direccion}>
-                      {user.direccion || '-'}
-                    </td>
-                    <td className="px-4 py-2 text-right">
-                      <button
-                        onClick={() => openEditModal(user)}
-                        className="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-full transition-colors inline-flex"
-                      >
-                        <span className="material-symbols-outlined text-[16px]">edit</span>
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {filteredUsers.length === 0 && (
-                  <tr>
-                    <td colSpan="6" className="text-center py-12 text-on-surface-variant">
-                      <div className="flex flex-col items-center justify-center">
-                        <span className="material-symbols-outlined text-4xl mb-2 opacity-50">search_off</span>
-                        <p>No se encontraron usuarios que coincidan con la búsqueda.</p>
-                      </div>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          )}
-        </div>
+                      </td>
+                    </tr>
+                  ))}
+                  {filteredUsers.length === 0 && (
+                    <tr>
+                      <td colSpan="6" className="text-center py-12 text-on-surface-variant">
+                        <div className="flex flex-col items-center justify-center">
+                          <span className="material-symbols-outlined text-4xl mb-2 opacity-50">search_off</span>
+                          <p>No se encontraron usuarios que coincidan con la búsqueda.</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       ) : null}
 
@@ -387,54 +387,54 @@ const UserManagement = () => {
       )}
 
       {/* ====== MODALS ====== */}
-      
-        {showAddModal && (
-          <UserFormModal
-            initialData={formData}
-            onSubmit={handleCreateSubmit}
-            onClose={closeAddModal}
-            isSaving={isSaving}
-            isEdit={false}
-          />
-        )}
-        {editingUser && (
-          <UserFormModal
-            initialData={formData}
-            onSubmit={handleEditSubmit}
-            onClose={closeEditModal}
-            isSaving={isSaving}
-            isEdit={true}
-            editingUser={editingUser}
-          />
-        )}
-      
 
-      
-        {confirmModal.show && (
-          <ConfirmActionModal
-            title={confirmModal.isActivating ? 'Reactivar Usuario' : 'Desactivar Usuario'}
-            message={`¿Estás seguro de que deseas ${confirmModal.isActivating ? 'reactivar' : 'desactivar'} el usuario ${confirmModal.user?.nombre_razonsocial}?`}
-            warningText={!confirmModal.isActivating ? 'El usuario no podrá iniciar sesión en el sistema.' : undefined}
-            confirmText={confirmModal.isActivating ? 'Sí, reactivar' : 'Sí, desactivar'}
-            isDestructive={!confirmModal.isActivating}
-            isLoading={isSaving}
-            icon={confirmModal.isActivating ? 'person_add' : 'person_off'}
-            onConfirm={executeToggleUser}
-            onClose={closeConfirmModal}
-          />
-        )}
-      
+      {showAddModal && (
+        <UserFormModal
+          initialData={formData}
+          onSubmit={handleCreateSubmit}
+          onClose={closeAddModal}
+          isSaving={isSaving}
+          isEdit={false}
+        />
+      )}
+      {editingUser && (
+        <UserFormModal
+          initialData={formData}
+          onSubmit={handleEditSubmit}
+          onClose={closeEditModal}
+          isSaving={isSaving}
+          isEdit={true}
+          editingUser={editingUser}
+        />
+      )}
 
-      
-        {showPdfModal && (
-          <PdfPreviewModal
-            pdfBlobUrl={pdfPreviewUrl}
-            title="Reporte de Usuarios"
-            downloadFileName={`usuarios_${new Date().toISOString().slice(0, 10)}.pdf`}
-            onClose={closePdfModal}
-          />
-        )}
-      
+
+
+      {confirmModal.show && (
+        <ConfirmActionModal
+          title={confirmModal.isActivating ? 'Reactivar Usuario' : 'Desactivar Usuario'}
+          message={`¿Estás seguro de que deseas ${confirmModal.isActivating ? 'reactivar' : 'desactivar'} el usuario ${confirmModal.user?.nombre_razonsocial}?`}
+          warningText={!confirmModal.isActivating ? 'El usuario no podrá iniciar sesión en el sistema.' : undefined}
+          confirmText={confirmModal.isActivating ? 'Sí, reactivar' : 'Sí, desactivar'}
+          isDestructive={!confirmModal.isActivating}
+          isLoading={isSaving}
+          icon={confirmModal.isActivating ? 'person_add' : 'person_off'}
+          onConfirm={executeToggleUser}
+          onClose={closeConfirmModal}
+        />
+      )}
+
+
+
+      {showPdfModal && (
+        <PdfPreviewModal
+          pdfBlobUrl={pdfPreviewUrl}
+          title="Reporte de Usuarios"
+          downloadFileName={`usuarios_${new Date().toISOString().slice(0, 10)}.pdf`}
+          onClose={closePdfModal}
+        />
+      )}
+
     </main>
   );
 };

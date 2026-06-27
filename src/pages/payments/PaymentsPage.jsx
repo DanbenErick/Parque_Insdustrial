@@ -411,7 +411,7 @@ const Payments = () => {
       {/* Page Title & Header */}
       <div className="mb-4 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
-          <h2 className="text-2xl text-on-surface font-bold leading-tight">Historial de Pagos Recibidos</h2>
+          <h2 className="text-2xl text-on-surface font-bold leading-tight">Modulo de Pagos</h2>
           <p className="text-sm text-on-surface-variant">Seguimiento detallado de ingresos por servicios energéticos</p>
         </div>
         <div className="flex flex-wrap items-end gap-3">
@@ -435,11 +435,10 @@ const Payments = () => {
           <button
             onClick={openModal}
             disabled={!isFilterSpecific}
-            className={`flex items-center px-3 py-1.5 h-8 font-bold rounded-md transition-opacity shadow-sm text-xs ${
-              !isFilterSpecific
+            className={`flex items-center px-3 py-1.5 h-8 font-bold rounded-md transition-opacity shadow-sm text-xs ${!isFilterSpecific
                 ? 'bg-surface-variant text-on-surface-variant cursor-not-allowed opacity-70'
                 : 'bg-primary text-on-primary hover:opacity-90 active:scale-95'
-            }`}
+              }`}
           >
             <span className="material-symbols-outlined mr-1 text-[16px]">add_card</span>
             Registrar Pago
@@ -556,338 +555,337 @@ const Payments = () => {
       </div>
 
       {/* Modal Registrar Pago */}
-      
-        {isModalOpen && (
-          <div {...MODAL_BACKDROP} className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-            <div {...MODAL_CONTENT} className="bg-surface rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
 
-              {/* Header */}
-              <div className="px-4 py-3 border-b border-outline-variant bg-surface-container-lowest flex justify-between items-center">
-                <h3 className="text-base text-primary font-bold flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[20px]">payments</span>
-                  Registrar Nuevo Pago
-                </h3>
-                <button
-                  onClick={closeModal}
-                  disabled={isSubmitting}
-                  className="w-7 h-7 rounded-full hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors disabled:opacity-50"
-                >
-                  <span className="material-symbols-outlined text-[18px]">close</span>
-                </button>
-              </div>
+      {isModalOpen && (
+        <div {...MODAL_BACKDROP} className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div {...MODAL_CONTENT} className="bg-surface rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden">
 
-              {/* Content */}
-              <div className="p-4">
-                <form id="registrar-pago-form" onSubmit={handleRegistrarPago} className="space-y-4">
-
-                  {/* Recibo Pendiente (Autocomplete) */}
-                  <div className="bg-surface-container-lowest border border-outline-variant p-3 rounded-lg">
-                    <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1.5">
-                      Socio o Recibo <span className="text-error">*</span>
-                    </label>
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
-                      <input
-                        type="text"
-                        className="w-full border border-outline-variant rounded-md text-xs bg-white focus:border-primary focus:ring-1 focus:ring-primary pl-8 pr-3 py-1.5 h-8 outline-none transition-colors hover:border-primary/50"
-                        placeholder="Buscar por nombre o N° recibo..."
-                        value={searchSocio}
-                        onChange={handleSocioSearch}
-                        onFocus={() => setIsAutocompleteOpen(true)}
-                      />
-
-                      {/* Dropdown de Autocomplete */}
-                      {isAutocompleteOpen && searchSocio && !selectedRecibo && (
-                        <div className="absolute z-10 w-full mt-1 bg-surface border border-outline-variant rounded-md shadow-xl max-h-60 overflow-y-auto custom-scrollbar">
-                          {filteredSocios.length === 0 ? (
-                            <div className="p-2 text-xs text-on-surface-variant text-center">No se encontraron recibos pendientes</div>
-                          ) : (
-                            filteredSocios.map(r => (
-                              <button
-                                key={r.id}
-                                type="button"
-                                onClick={() => handleSelectSocio(r)}
-                                className="w-full text-left px-3 py-2 hover:bg-surface-container-low border-b border-outline-variant/50 last:border-0 transition-colors flex flex-col"
-                              >
-                                <span className="font-bold text-xs text-on-surface">{r.socio}</span>
-                                <div className="flex justify-between items-center mt-0.5">
-                                  <span className="text-[10px] text-on-surface-variant flex items-center gap-1">
-                                    <span className="material-symbols-outlined text-[12px]">receipt_long</span>
-                                    {r.numero_comprobante}
-                                  </span>
-                                  <span className="text-[10px] font-bold font-data-mono text-error">
-                                    Deuda: S/ {parseFloat(r.saldo_pendiente || r.total).toFixed(2)}
-                                  </span>
-                                </div>
-                              </button>
-                            ))
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {/* Monto Pagado */}
-                    <div className="flex flex-col gap-0.5">
-                      <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-1">
-                        Monto Pagado (S/) <span className="text-error">*</span>
-                      </label>
-                      <div className="relative">
-                        <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px] pointer-events-none">attach_money</span>
-                        <input
-                          type="number"
-                          step="0.01"
-                          min="0.01"
-                          className={`w-full border rounded-md pl-8 pr-3 py-1.5 h-8 bg-white font-data-mono text-xs font-medium outline-none transition-colors ${
-                            (isPagoExcedido || isPagoParcial) ? 'border-error focus:ring-1 focus:ring-error' : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary'
-                          }`}
-                          value={monto}
-                          onChange={(e) => setMonto(e.target.value)}
-                          placeholder="0.00"
-                          required
-                          disabled={!selectedRecibo}
-                        />
-                      </div>
-                      {/* Validation messages */}
-                      <div className="min-h-[16px] pl-1 flex items-center">
-                        {isPagoExcedido ? (
-                          <span className="text-[10px] text-[#059669] font-medium flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[12px]">account_balance_wallet</span>
-                            Saldo a favor: S/ {(parseFloat(monto) - saldoPendiente).toFixed(2)}
-                          </span>
-                        ) : isPagoParcial ? (
-                          <span className="text-[10px] text-primary">Quedará saldo de S/ {(saldoPendiente - parseFloat(monto)).toFixed(2)}</span>
-                        ) : selectedRecibo && monto ? (
-                          <span className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 text-[#047857]">
-                            <span className="material-symbols-outlined text-[12px]">check_circle</span>
-                            Pago Completo
-                          </span>
-                        ) : null}
-                      </div>
-                    </div>
-
-                    {/* Método de Pago */}
-                    <div className="flex flex-col gap-0.5">
-                      <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-1">Método de Pago <span className="text-error">*</span></label>
-                      <div className="relative">
-                        <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">account_balance</span>
-                        <select
-                          className="appearance-none w-full border border-outline-variant rounded-md pl-8 pr-8 py-1.5 h-8 bg-white text-xs font-medium focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors cursor-pointer"
-                          value={metodoPago}
-                          onChange={(e) => setMetodoPago(e.target.value)}
-                          required
-                        >
-                          <option value="Transferencia">Transferencia</option>
-                          <option value="Efectivo">Efectivo</option>
-                          <option value="Cheque">Cheque</option>
-                          <option value="Depósito">Depósito en Cuenta</option>
-                        </select>
-                        <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[16px]">expand_more</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Nº Operación */}
-                  <div className="flex flex-col gap-0.5">
-                    <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-1">Nº Operación / Referencia</label>
-                    <div className="relative">
-                      <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">tag</span>
-                      <input
-                        type="text"
-                        className="w-full border border-outline-variant rounded-md pl-8 pr-3 py-1.5 h-8 bg-white font-data-mono text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
-                        value={numeroOperacion}
-                        onChange={(e) => setNumeroOperacion(e.target.value)}
-                        placeholder="Opcional"
-                      />
-                    </div>
-                  </div>
-                </form>
-              </div>
-
-              {/* Footer */}
-              <div className="p-3 bg-surface-container-lowest border-t border-outline-variant flex gap-2 mt-auto">
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  disabled={isSubmitting}
-                  className="flex-1 py-1.5 h-8 rounded-md text-xs font-bold border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-50"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  form="registrar-pago-form"
-                  disabled={isSubmitting || !selectedRecibo || !monto}
-                  className="flex-1 py-1.5 h-8 rounded-md text-xs font-bold bg-primary text-on-primary hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm"
-                >
-                  {isSubmitting ? (
-                    <><span className="material-symbols-outlined animate-spin text-[16px]">sync</span> Procesando...</>
-                  ) : (
-                    <><span className="material-symbols-outlined text-[16px]">save</span> Confirmar Pago</>
-                  )}
-                </button>
-              </div>
-
+            {/* Header */}
+            <div className="px-4 py-3 border-b border-outline-variant bg-surface-container-lowest flex justify-between items-center">
+              <h3 className="text-base text-primary font-bold flex items-center gap-2">
+                <span className="material-symbols-outlined text-[20px]">payments</span>
+                Registrar Nuevo Pago
+              </h3>
+              <button
+                onClick={closeModal}
+                disabled={isSubmitting}
+                className="w-7 h-7 rounded-full hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
             </div>
-          </div>
-        )}
-      
 
-      {/* Modal PDF (Portal) */}
-      
-        {isPdfModalOpen && createPortal(
-          <div {...MODAL_BACKDROP} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <div {...MODAL_CONTENT} className="bg-surface rounded-2xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col h-[90vh]">
-              <div className="flex justify-between items-center p-6 border-b border-outline-variant">
-                <div>
-                  <h3 className="font-headline-sm text-on-surface">Visor de PDF</h3>
-                  <p className="text-sm text-on-surface-variant">Historial de Pagos</p>
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleDownloadPdf}
-                    className="px-4 py-2 bg-primary text-on-primary rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Descargar
-                  </button>
-                  <button
-                    onClick={closePdfModal}
-                    className="p-2 hover:bg-surface-variant rounded-full transition-colors text-on-surface-variant"
-                  >
-                    <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-              <div className="flex-1 bg-surface-variant">
-                <iframe src={pdfUrl} className="w-full h-full border-none" title="Visor PDF" />
-              </div>
-            </div>
-          </div>,
-          document.body,
-        )}
-      
+            {/* Content */}
+            <div className="p-4">
+              <form id="registrar-pago-form" onSubmit={handleRegistrarPago} className="space-y-4">
 
-      {/* Drawer de Detalles del Pago (Portal) */}
-      
-        {selectedPaymentForDetails && createPortal(
-          <div
-            {...MODAL_BACKDROP}
-            className="fixed inset-0 z-[100] flex justify-end bg-black/50 backdrop-blur-sm"
-            onClick={(e) => { if (e.target === e.currentTarget) closeDetailsDrawer(); }}
-          >
-            <div
-              className="w-full max-w-sm bg-surface h-full shadow-2xl flex flex-col"
-            >
-              <div className="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
-                <h3 className="text-base text-on-surface font-bold flex items-center gap-2">
-                  <span className="material-symbols-outlined text-[20px] text-primary">receipt_long</span>
-                  Detalle del Pago
-                </h3>
-                <button
-                  onClick={closeDetailsDrawer}
-                  className="w-7 h-7 rounded-full hover:bg-surface-variant flex items-center justify-center text-on-surface-variant transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[18px]">close</span>
-                </button>
-              </div>
+                {/* Recibo Pendiente (Autocomplete) */}
+                <div className="bg-surface-container-lowest border border-outline-variant p-3 rounded-lg">
+                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1.5">
+                    Socio o Recibo <span className="text-error">*</span>
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
+                    <input
+                      type="text"
+                      className="w-full border border-outline-variant rounded-md text-xs bg-white focus:border-primary focus:ring-1 focus:ring-primary pl-8 pr-3 py-1.5 h-8 outline-none transition-colors hover:border-primary/50"
+                      placeholder="Buscar por nombre o N° recibo..."
+                      value={searchSocio}
+                      onChange={handleSocioSearch}
+                      onFocus={() => setIsAutocompleteOpen(true)}
+                    />
 
-              <div className="p-4 flex-1 overflow-y-auto space-y-4 custom-scrollbar">
-
-                {/* Header/Amount */}
-                <div className="bg-surface-container-low rounded-xl p-4 flex flex-col items-center justify-center border border-outline-variant/50">
-                  <span className="text-[10px] text-on-surface-variant font-bold tracking-wider mb-1.5 uppercase">MONTO PAGADO</span>
-                  <span className="font-data-mono text-3xl font-bold text-primary">
-                    S/ {fmtCurrency(selectedPaymentForDetails.monto_pagado)}
-                  </span>
-                  <div className="mt-3">
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#059669]/10 text-[#059669] border border-[#059669]/20 uppercase tracking-wider">
-                      {selectedPaymentForDetails.estado_validacion || 'Confirmado'}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Socio Info */}
-                <div>
-                  <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Información del Cliente</h4>
-                  <div className="bg-white border border-outline-variant rounded-lg p-3">
-                    <div className="font-bold text-xs text-on-surface">{selectedPaymentForDetails.socio}</div>
-                    <div className="text-[11px] text-on-surface-variant mt-0.5 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[14px]">folder</span>
-                      Recibo Asociado: <span className="font-data-mono font-bold text-xs">{selectedPaymentForDetails.numero_comprobante}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Payment Info */}
-                <div>
-                  <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Detalles de la Transacción</h4>
-                  <div className="bg-white border border-outline-variant rounded-lg divide-y divide-outline-variant">
-                    <DetailRow icon="calendar_today" label="Fecha y Hora" value={new Date(selectedPaymentForDetails.fecha_pago).toLocaleString('es-PE')} />
-                    <DetailRow icon="payments" label="Método de Pago" value={selectedPaymentForDetails.metodo_pago} />
-                    {selectedPaymentForDetails.numero_operacion && (
-                      <DetailRow icon="tag" label="N° de Operación" value={selectedPaymentForDetails.numero_operacion} valueClassName="font-data-mono text-xs font-bold text-on-surface" />
+                    {/* Dropdown de Autocomplete */}
+                    {isAutocompleteOpen && searchSocio && !selectedRecibo && (
+                      <div className="absolute z-10 w-full mt-1 bg-surface border border-outline-variant rounded-md shadow-xl max-h-60 overflow-y-auto custom-scrollbar">
+                        {filteredSocios.length === 0 ? (
+                          <div className="p-2 text-xs text-on-surface-variant text-center">No se encontraron recibos pendientes</div>
+                        ) : (
+                          filteredSocios.map(r => (
+                            <button
+                              key={r.id}
+                              type="button"
+                              onClick={() => handleSelectSocio(r)}
+                              className="w-full text-left px-3 py-2 hover:bg-surface-container-low border-b border-outline-variant/50 last:border-0 transition-colors flex flex-col"
+                            >
+                              <span className="font-bold text-xs text-on-surface">{r.socio}</span>
+                              <div className="flex justify-between items-center mt-0.5">
+                                <span className="text-[10px] text-on-surface-variant flex items-center gap-1">
+                                  <span className="material-symbols-outlined text-[12px]">receipt_long</span>
+                                  {r.numero_comprobante}
+                                </span>
+                                <span className="text-[10px] font-bold font-data-mono text-error">
+                                  Deuda: S/ {parseFloat(r.saldo_pendiente || r.total).toFixed(2)}
+                                </span>
+                              </div>
+                            </button>
+                          ))
+                        )}
+                      </div>
                     )}
                   </div>
                 </div>
 
-                {/* Status Info */}
-                {(() => {
-                  const isPartial = isPartialPayment(selectedPaymentForDetails.monto_pagado, selectedPaymentForDetails.recibo_total);
-                  const saldo = reciboSaldoMap.get(selectedPaymentForDetails.recibo_id) || 0;
-
-                  return (
-                    <div>
-                      <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Estado del Recibo</h4>
-                      <div className={`border rounded-lg p-3 ${isPartial ? 'bg-amber-50/50 border-amber-200' : 'bg-indigo-50/50 border-indigo-200'}`}>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-xs font-bold text-on-surface">Tipo de Abono</span>
-                          <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide ${isPartial ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>
-                            {isPartial ? 'Abono Parcial' : 'Pago Completo'}
-                          </span>
-                        </div>
-
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-[11px] text-on-surface-variant">Total del Recibo</span>
-                          <span className="font-data-mono text-xs font-bold">
-                            S/ {fmtCurrency(selectedPaymentForDetails.recibo_total)}
-                          </span>
-                        </div>
-
-                        {isPartial && (
-                          <div className="flex justify-between items-center pt-2 border-t border-amber-200/50">
-                            <span className="text-[11px] text-amber-900 font-bold">Deuda Actual Restante</span>
-                            <span className="font-data-mono text-xs font-bold text-amber-700">
-                              S/ {fmtCurrency(saldo)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Monto Pagado */}
+                  <div className="flex flex-col gap-0.5">
+                    <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-1">
+                      Monto Pagado (S/) <span className="text-error">*</span>
+                    </label>
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px] pointer-events-none">attach_money</span>
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0.01"
+                        className={`w-full border rounded-md pl-8 pr-3 py-1.5 h-8 bg-white font-data-mono text-xs font-medium outline-none transition-colors ${(isPagoExcedido || isPagoParcial) ? 'border-error focus:ring-1 focus:ring-error' : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary'
+                          }`}
+                        value={monto}
+                        onChange={(e) => setMonto(e.target.value)}
+                        placeholder="0.00"
+                        required
+                        disabled={!selectedRecibo}
+                      />
                     </div>
-                  );
-                })()}
+                    {/* Validation messages */}
+                    <div className="min-h-[16px] pl-1 flex items-center">
+                      {isPagoExcedido ? (
+                        <span className="text-[10px] text-[#059669] font-medium flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[12px]">account_balance_wallet</span>
+                          Saldo a favor: S/ {(parseFloat(monto) - saldoPendiente).toFixed(2)}
+                        </span>
+                      ) : isPagoParcial ? (
+                        <span className="text-[10px] text-primary">Quedará saldo de S/ {(saldoPendiente - parseFloat(monto)).toFixed(2)}</span>
+                      ) : selectedRecibo && monto ? (
+                        <span className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 text-[#047857]">
+                          <span className="material-symbols-outlined text-[12px]">check_circle</span>
+                          Pago Completo
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
 
-                {/* Actions */}
-                <div className="pt-6 mt-auto">
-                  <button
-                    onClick={handleViewRecibo}
-                    className="w-full py-1.5 h-8 bg-surface-container-low hover:bg-surface-variant border border-outline-variant text-on-surface text-xs font-bold rounded-md flex items-center justify-center gap-1.5 transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-[16px]">receipt_long</span>
-                    Ver Recibo Completo
-                  </button>
+                  {/* Método de Pago */}
+                  <div className="flex flex-col gap-0.5">
+                    <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-1">Método de Pago <span className="text-error">*</span></label>
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">account_balance</span>
+                      <select
+                        className="appearance-none w-full border border-outline-variant rounded-md pl-8 pr-8 py-1.5 h-8 bg-white text-xs font-medium focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors cursor-pointer"
+                        value={metodoPago}
+                        onChange={(e) => setMetodoPago(e.target.value)}
+                        required
+                      >
+                        <option value="Transferencia">Transferencia</option>
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Cheque">Cheque</option>
+                        <option value="Depósito">Depósito en Cuenta</option>
+                      </select>
+                      <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[16px]">expand_more</span>
+                    </div>
+                  </div>
                 </div>
+
+                {/* Nº Operación */}
+                <div className="flex flex-col gap-0.5">
+                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-1">Nº Operación / Referencia</label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">tag</span>
+                    <input
+                      type="text"
+                      className="w-full border border-outline-variant rounded-md pl-8 pr-3 py-1.5 h-8 bg-white font-data-mono text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                      value={numeroOperacion}
+                      onChange={(e) => setNumeroOperacion(e.target.value)}
+                      placeholder="Opcional"
+                    />
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            {/* Footer */}
+            <div className="p-3 bg-surface-container-lowest border-t border-outline-variant flex gap-2 mt-auto">
+              <button
+                type="button"
+                onClick={closeModal}
+                disabled={isSubmitting}
+                className="flex-1 py-1.5 h-8 rounded-md text-xs font-bold border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="submit"
+                form="registrar-pago-form"
+                disabled={isSubmitting || !selectedRecibo || !monto}
+                className="flex-1 py-1.5 h-8 rounded-md text-xs font-bold bg-primary text-on-primary hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm"
+              >
+                {isSubmitting ? (
+                  <><span className="material-symbols-outlined animate-spin text-[16px]">sync</span> Procesando...</>
+                ) : (
+                  <><span className="material-symbols-outlined text-[16px]">save</span> Confirmar Pago</>
+                )}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+
+      {/* Modal PDF (Portal) */}
+
+      {isPdfModalOpen && createPortal(
+        <div {...MODAL_BACKDROP} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+          <div {...MODAL_CONTENT} className="bg-surface rounded-2xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col h-[90vh]">
+            <div className="flex justify-between items-center p-6 border-b border-outline-variant">
+              <div>
+                <h3 className="font-headline-sm text-on-surface">Visor de PDF</h3>
+                <p className="text-sm text-on-surface-variant">Historial de Pagos</p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={handleDownloadPdf}
+                  className="px-4 py-2 bg-primary text-on-primary rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  Descargar
+                </button>
+                <button
+                  onClick={closePdfModal}
+                  className="p-2 hover:bg-surface-variant rounded-full transition-colors text-on-surface-variant"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
             </div>
-          </div>,
-          document.body,
-        )}
-      
+            <div className="flex-1 bg-surface-variant">
+              <iframe src={pdfUrl} className="w-full h-full border-none" title="Visor PDF" />
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
+
+
+      {/* Drawer de Detalles del Pago (Portal) */}
+
+      {selectedPaymentForDetails && createPortal(
+        <div
+          {...MODAL_BACKDROP}
+          className="fixed inset-0 z-[100] flex justify-end bg-black/50 backdrop-blur-sm"
+          onClick={(e) => { if (e.target === e.currentTarget) closeDetailsDrawer(); }}
+        >
+          <div
+            className="w-full max-w-sm bg-surface h-full shadow-2xl flex flex-col"
+          >
+            <div className="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
+              <h3 className="text-base text-on-surface font-bold flex items-center gap-2">
+                <span className="material-symbols-outlined text-[20px] text-primary">receipt_long</span>
+                Detalle del Pago
+              </h3>
+              <button
+                onClick={closeDetailsDrawer}
+                className="w-7 h-7 rounded-full hover:bg-surface-variant flex items-center justify-center text-on-surface-variant transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+
+            <div className="p-4 flex-1 overflow-y-auto space-y-4 custom-scrollbar">
+
+              {/* Header/Amount */}
+              <div className="bg-surface-container-low rounded-xl p-4 flex flex-col items-center justify-center border border-outline-variant/50">
+                <span className="text-[10px] text-on-surface-variant font-bold tracking-wider mb-1.5 uppercase">MONTO PAGADO</span>
+                <span className="font-data-mono text-3xl font-bold text-primary">
+                  S/ {fmtCurrency(selectedPaymentForDetails.monto_pagado)}
+                </span>
+                <div className="mt-3">
+                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#059669]/10 text-[#059669] border border-[#059669]/20 uppercase tracking-wider">
+                    {selectedPaymentForDetails.estado_validacion || 'Confirmado'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Socio Info */}
+              <div>
+                <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Información del Cliente</h4>
+                <div className="bg-white border border-outline-variant rounded-lg p-3">
+                  <div className="font-bold text-xs text-on-surface">{selectedPaymentForDetails.socio}</div>
+                  <div className="text-[11px] text-on-surface-variant mt-0.5 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[14px]">folder</span>
+                    Recibo Asociado: <span className="font-data-mono font-bold text-xs">{selectedPaymentForDetails.numero_comprobante}</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Payment Info */}
+              <div>
+                <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Detalles de la Transacción</h4>
+                <div className="bg-white border border-outline-variant rounded-lg divide-y divide-outline-variant">
+                  <DetailRow icon="calendar_today" label="Fecha y Hora" value={new Date(selectedPaymentForDetails.fecha_pago).toLocaleString('es-PE')} />
+                  <DetailRow icon="payments" label="Método de Pago" value={selectedPaymentForDetails.metodo_pago} />
+                  {selectedPaymentForDetails.numero_operacion && (
+                    <DetailRow icon="tag" label="N° de Operación" value={selectedPaymentForDetails.numero_operacion} valueClassName="font-data-mono text-xs font-bold text-on-surface" />
+                  )}
+                </div>
+              </div>
+
+              {/* Status Info */}
+              {(() => {
+                const isPartial = isPartialPayment(selectedPaymentForDetails.monto_pagado, selectedPaymentForDetails.recibo_total);
+                const saldo = reciboSaldoMap.get(selectedPaymentForDetails.recibo_id) || 0;
+
+                return (
+                  <div>
+                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Estado del Recibo</h4>
+                    <div className={`border rounded-lg p-3 ${isPartial ? 'bg-amber-50/50 border-amber-200' : 'bg-indigo-50/50 border-indigo-200'}`}>
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-xs font-bold text-on-surface">Tipo de Abono</span>
+                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide ${isPartial ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>
+                          {isPartial ? 'Abono Parcial' : 'Pago Completo'}
+                        </span>
+                      </div>
+
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-[11px] text-on-surface-variant">Total del Recibo</span>
+                        <span className="font-data-mono text-xs font-bold">
+                          S/ {fmtCurrency(selectedPaymentForDetails.recibo_total)}
+                        </span>
+                      </div>
+
+                      {isPartial && (
+                        <div className="flex justify-between items-center pt-2 border-t border-amber-200/50">
+                          <span className="text-[11px] text-amber-900 font-bold">Deuda Actual Restante</span>
+                          <span className="font-data-mono text-xs font-bold text-amber-700">
+                            S/ {fmtCurrency(saldo)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
+
+              {/* Actions */}
+              <div className="pt-6 mt-auto">
+                <button
+                  onClick={handleViewRecibo}
+                  className="w-full py-1.5 h-8 bg-surface-container-low hover:bg-surface-variant border border-outline-variant text-on-surface text-xs font-bold rounded-md flex items-center justify-center gap-1.5 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[16px]">receipt_long</span>
+                  Ver Recibo Completo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>,
+        document.body,
+      )}
+
 
     </main>
   );

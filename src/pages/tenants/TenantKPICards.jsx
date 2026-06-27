@@ -7,7 +7,7 @@ const TenantKPICards = ({ globalStats }) => {
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4 mb-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4 mb-4">
         {/* Card 1: Total Socios */}
         <div className="bg-surface border border-outline-variant hover:border-primary/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
           <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0 border border-primary/10">
@@ -18,7 +18,25 @@ const TenantKPICards = ({ globalStats }) => {
             <span className="font-data-mono text-lg text-on-surface font-bold leading-none mt-0.5 truncate">
               {globalStats.total}
             </span>
-            <span className="text-[9px] text-on-surface-variant/70 mt-1 truncate">Socios empadronados</span>
+            <span className="text-[10px] text-on-surface-variant mt-1 truncate font-medium">
+              <span className="font-bold text-on-surface">{globalStats.socios_sin_medidor || 0}</span> de ellos NO tienen medidor
+            </span>
+          </div>
+        </div>
+
+        {/* Card 2: Total Medidores */}
+        <div className="bg-surface border border-outline-variant hover:border-blue-500/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
+          <div className="w-10 h-10 rounded-full bg-blue-500/5 flex items-center justify-center text-blue-500 shrink-0 border border-blue-500/10">
+            <span className="material-symbols-outlined text-[20px]">speed</span>
+          </div>
+          <div className="flex flex-col justify-center overflow-hidden flex-1">
+            <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider leading-tight truncate">Total Medidores</span>
+            <span className="font-data-mono text-lg text-on-surface font-bold leading-none mt-0.5 truncate">
+              {(globalStats.medidores_normal || 0) + (globalStats.medidores_tiempo_real || 0)}
+            </span>
+            <span className="text-[9px] text-on-surface-variant mt-1 truncate font-medium">
+              Norm: <span className="font-bold text-on-surface">{globalStats.medidores_normal || 0}</span> | Punta: <span className="font-bold text-on-surface">{globalStats.medidores_tiempo_real || 0}</span> | Sin Med: <span className="font-bold text-error">{globalStats.socios_sin_medidor || 0}</span>
+            </span>
           </div>
         </div>
 

@@ -1,21 +1,26 @@
 import React from 'react';
+import { BadgeType } from './BadgeType';
 import { formatDateShort, formatDateLong, fmtVal, parseSafe } from '../../utils';
 
-export const ReadingRow = React.memo(({ record, onEdit = null, showDateFull = false, onClick = null }) => (
+export const ReadingRow = React.memo(({ record, medidorInfo, onEdit = null, showDateFull = false, onClick = null }) => (
   <li 
     onClick={onClick}
     className={`bg-surface hover:bg-surface-container-lowest border ${onEdit ? 'border-outline-variant/50 hover:border-primary/30 p-3 shadow-sm' : 'border-transparent hover:border-outline-variant/50 p-2'} rounded-lg transition-colors flex flex-col md:flex-row md:items-center justify-between gap-2 group ${onClick ? 'cursor-pointer' : ''}`}
   >
     <div className="flex flex-col gap-0.5 overflow-hidden flex-1">
-      <p className="font-bold text-on-surface text-[11px] sm:text-xs truncate group-hover:text-primary transition-colors" title={record.propietario}>{record.propietario}</p>
-      <div className="flex items-center gap-1.5 flex-wrap">
-        <span className="text-[9px] text-primary/80 font-data-mono font-bold bg-primary/5 px-1 py-0.5 rounded">{record.num_serie}</span>
+      <div className="flex items-center gap-2">
+        <p className="font-bold font-data-mono text-on-surface text-[12px] sm:text-[13px] truncate group-hover:text-primary transition-colors" title={record.num_serie}>{record.num_serie}</p>
+        {(medidorInfo?.tipo || record.medidor_tipo || record.tipo) && <BadgeType tipo={medidorInfo?.tipo || record.medidor_tipo || record.tipo} />}
         {record.es_cambio_medidor ? (
           <span className="text-[9px] text-orange-700 font-bold flex items-center gap-0.5 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-200/50" title="Hubo un cambio de medidor">
             <span className="material-symbols-outlined text-[10px]">swap_horiz</span>
             CAMBIO
           </span>
         ) : null}
+      </div>
+      <div className="flex items-center gap-1.5 flex-wrap mt-0.5">
+        <span className="material-symbols-outlined text-[12px] text-on-surface-variant">person</span>
+        <span className="text-[10px] text-on-surface-variant truncate max-w-[150px] sm:max-w-[200px]" title={record.propietario}>{record.propietario}</span>
         <span className="text-[9px] text-on-surface-variant hidden sm:inline">•</span>
         <span className="text-[9px] text-on-surface-variant flex items-center gap-1">
           {showDateFull ? formatDateLong(record.fecha_registro) : formatDateShort(record.fecha_registro)}
@@ -37,7 +42,7 @@ export const ReadingRow = React.memo(({ record, onEdit = null, showDateFull = fa
             )}
             {parseSafe(record.factor_potencia) > 0 && (
               <span className="font-data-mono font-bold text-purple-700 text-[9px] sm:text-[10px] leading-none bg-purple-50 border border-purple-200/50 px-1.5 py-0.5 rounded">
-                {fmtVal(record.factor_potencia)} kVARh {showDateFull && <span className="opacity-70">FP</span>}
+                {fmtVal(record.factor_potencia)} kW {showDateFull && <span className="opacity-70">PC</span>}
               </span>
             )}
           </div>

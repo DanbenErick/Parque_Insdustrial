@@ -347,7 +347,7 @@ const Reports = () => {
     <main className="p-4 md:p-lg space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow">
       {/* Header and Controls */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-        <h2 className="text-2xl text-on-surface font-bold leading-tight">Reportes de Consumo y Facturación Eléctrica</h2>
+        <h2 className="text-2xl text-on-surface font-bold leading-tight">Modulo de Reportes</h2>
 
         <div className="flex items-center gap-2 w-full md:w-auto">
           <div className="flex items-center bg-white border border-outline-variant rounded-md px-3 h-8 cursor-pointer hover:border-primary/50 transition-colors relative flex-1 md:flex-none">

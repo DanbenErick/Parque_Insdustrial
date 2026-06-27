@@ -1,6 +1,5 @@
 import React, { memo } from 'react';
 import { formatPeriod } from './billingUtils';
-import { FileText, RefreshCw } from 'lucide-react';
 
 /**
  * BillingTableRow — A single row in the billing table.
@@ -22,15 +21,34 @@ const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onV
   return (
     <tr className="hover:bg-surface-container-lowest transition-colors group">
       <td className="px-4 py-2">
-        <div className="flex flex-col">
+        <div className="flex flex-col gap-1.5">
           <button
             onClick={() => onViewDetail(recibo.id)}
-            className="font-bold text-on-surface text-[11px] hover:text-primary transition-colors text-left focus:outline-none"
+            className="text-left focus:outline-none w-full group/btn"
             title="Ver Detalle"
           >
-            <span className="truncate max-w-[180px] block">{recibo.socio || 'Desconocido'}</span>
+            <div className="flex flex-col gap-1">
+              {/* Medidor as the primary prominent element */}
+              <div className="flex items-center gap-1.5">
+                <span className={`inline-flex items-center gap-1 w-fit px-2 py-0.5 rounded text-[12px] font-extrabold uppercase tracking-wider ${
+                  recibo.medidor_num_serie 
+                    ? 'bg-primary/10 text-primary border border-primary/20' 
+                    : 'bg-surface-container-high text-on-surface-variant border border-outline-variant'
+                } group-hover/btn:bg-primary/20 transition-colors`}>
+                  <span className="material-symbols-outlined text-[14px]">
+                    {recibo.medidor_num_serie ? 'speed' : 'money_off'}
+                  </span>
+                  {recibo.medidor_num_serie || 'Sin medidor'}
+                </span>
+              </div>
+              
+              {/* Socio name as secondary text */}
+              <span className="truncate max-w-[200px] font-medium text-on-surface-variant text-[11px] mt-0.5">
+                {recibo.socio || 'Desconocido'}
+              </span>
+            </div>
           </button>
-          <span className="font-data-mono text-[10px] text-on-surface-variant">DNI/RUC: {recibo.documento_identidad}</span>
+          <span className="font-data-mono text-[10px] text-on-surface-variant/70">DNI/RUC: {recibo.documento_identidad}</span>
         </div>
       </td>
       <td className="px-4 py-2">
@@ -60,7 +78,7 @@ const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onV
               onClick={() => onViewPdf(recibo.id)}
               className="w-7 h-7 flex items-center justify-center text-error hover:bg-error/10 rounded-md transition-colors"
             >
-              <FileText size={16} strokeWidth={2.5} />
+              <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
             </button>
             <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
               Ver PDF
@@ -87,7 +105,7 @@ const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onV
                 onClick={() => onRefacturar(recibo.id)}
                 className="w-7 h-7 flex items-center justify-center text-orange-600 hover:bg-orange-100 rounded-md transition-colors"
               >
-                <RefreshCw size={16} strokeWidth={2.5} />
+                <span className="material-symbols-outlined text-[16px]">autorenew</span>
               </button>
               <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
                 Refacturar

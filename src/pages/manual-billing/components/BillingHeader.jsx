@@ -1,12 +1,12 @@
 import React from 'react';
 import { formatPeriodo } from '../utils';
 
-export const BillingHeader = ({ 
-  activePeriodo, 
-  setActivePeriodo, 
-  periodosFiltrados, 
-  activeYear, 
-  setIsPeriodModalOpen, 
+export const BillingHeader = ({
+  activePeriodo,
+  setActivePeriodo,
+  periodosFiltrados,
+  activeYear,
+  setIsPeriodModalOpen,
   resetForm,
   totalRegistrados,
   totalMedidores,
@@ -16,12 +16,12 @@ export const BillingHeader = ({
   return (
     <div className="mb-md flex flex-col md:flex-row justify-between md:items-end gap-md">
       <div>
-        <h2 className="font-headline-lg text-headline-lg text-primary font-bold">Registro de Lectura</h2>
-        <p className="font-body-md text-on-surface-variant">Busca el medidor e ingresa el consumo actual.</p>
+        <h2 className="text-2xl text-on-surface font-bold leading-tight">Módulo Lectura de Medidor</h2>
+        <p className="text-sm text-on-surface-variant">Busca el medidor e ingresa el consumo actual con facilidad.</p>
         {activePeriodo && periodosFiltrados.length > 0 ? (
           <div className="mt-4 flex items-center gap-3">
-            <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Mes a lecturar:</span>
-            <div className="relative inline-flex items-center bg-surface border border-outline-variant rounded-lg hover:border-primary/50 transition-colors shadow-sm">
+            <span className="text-xs font-bold text-on-surface-variant uppercase tracking-wider">Periodo a Trabajar:</span>
+            <div className="relative inline-flex items-center bg-white/50 backdrop-blur-md border border-outline-variant/60 rounded-xl hover:border-primary/50 hover:shadow-md transition-all duration-300">
               <select
                 value={activePeriodo.id}
                 onChange={(e) => {
@@ -63,8 +63,9 @@ export const BillingHeader = ({
       </div>
       {/* KPI Card */}
       <div className="flex">
-        <div className="bg-primary/5 border border-primary/20 rounded-xl px-4 py-2.5 flex items-center gap-4 shadow-sm">
-          <div>
+        <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-2xl px-5 py-3 flex items-center gap-5 shadow-lg backdrop-blur-xl transition-transform hover:scale-[1.02] duration-300">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] mix-blend-overlay"></div>
+          <div className="relative z-10">
             <p className="text-[10px] text-primary font-bold uppercase tracking-wider mb-0.5">Avance del Mes</p>
             <div className="flex items-baseline gap-1">
               <span className="font-data-mono text-xl font-bold text-primary leading-none">{totalRegistrados}</span>
@@ -76,7 +77,7 @@ export const BillingHeader = ({
               <circle className="text-primary/10" strokeWidth="3" stroke="currentColor" fill="transparent" r="16" cx="20" cy="20" />
               <circle className="text-primary transition-all duration-1000 ease-out" strokeWidth="3" strokeDasharray="100.5" strokeDashoffset={dashOffset} stroke="currentColor" fill="transparent" r="16" cx="20" cy="20" strokeLinecap="round" />
             </svg>
-            <span className="absolute text-[9px] font-bold text-primary">{porcentajeAvance}%</span>
+            <span className="absolute text-[10px] font-bold text-primary">{porcentajeAvance}%</span>
           </div>
         </div>
       </div>

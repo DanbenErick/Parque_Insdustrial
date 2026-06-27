@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import api from '../../../api/axiosConfig';
 import { toast } from 'sonner';
 import { parseSafe } from '../utils';
@@ -13,12 +13,13 @@ export const useBillingForms = (dataHook) => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMember, setSelectedMember] = useState(null);
+  const [currentSearchResults, setCurrentSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   
   // Forms state
   const [currentReading, setCurrentReading] = useState('');
   const [currentReadingPunta, setCurrentReadingPunta] = useState('');
   const [factorPotencia, setFactorPotencia] = useState('');
-  const [precioFactorPotencia, setPrecioFactorPotencia] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   
   // Cambio de Medidor State
@@ -41,7 +42,6 @@ export const useBillingForms = (dataHook) => {
   const [editReadingVal, setEditReadingVal] = useState('');
   const [editReadingValPunta, setEditReadingValPunta] = useState('');
   const [editFactorPotencia, setEditFactorPotencia] = useState('');
-  const [editPrecioFactorPotencia, setEditPrecioFactorPotencia] = useState('');
   const [editJustificacion, setEditJustificacion] = useState('');
 
   // Edit Cambio de Medidor
@@ -50,18 +50,32 @@ export const useBillingForms = (dataHook) => {
   const [editLecturaFinalAntiguoPunta, setEditLecturaFinalAntiguoPunta] = useState('');
   const [editLecturaInicialNuevoPunta, setEditLecturaInicialNuevoPunta] = useState('');
 
-  const medidoresBuscables = useMemo(() => {
-    return medidores.map(m => ({
-      member: m,
-      searchIndex: `${m.propietario || ''} ${m.documento_identidad || ''} ${m.num_serie || ''}`.toLowerCase()
-    }));
-  }, [medidores]);
+  useEffect(() => {
+    const term = searchTerm.trim();
+    if (!term) {
+      setCurrentSearchResults([]);
+      return;
+    }
+    
+    // Skip if search term was auto-filled by selecting a member
+    if (selectedMember && (searchTerm === selectedMember.propietario || searchTerm === selectedMember.num_serie)) {
+      return;
+    }
 
-  const currentSearchResults = useMemo(() => {
-    const term = searchTerm.trim().toLowerCase();
-    if (!term) return medidores;
-    return medidoresBuscables.filter(m => m.searchIndex.includes(term)).map(m => m.member);
-  }, [searchTerm, medidores, medidoresBuscables]);
+    const delayDebounceFn = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const res = await api.get(`/medidores?search=${encodeURIComponent(term)}`);
+        setCurrentSearchResults(res.data);
+      } catch (err) {
+        console.error('Error en búsqueda de medidores', err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm, selectedMember]);
 
   const lecturaExistente = selectedMember ? lecturasPeriodoActivoMap.get(selectedMember.num_serie) || null : null;
 
@@ -76,7 +90,6 @@ export const useBillingForms = (dataHook) => {
     setCurrentReading('');
     setCurrentReadingPunta('');
     setFactorPotencia('');
-    setPrecioFactorPotencia('');
     setIsCambioMedidor(false);
     setLecturaFinalAntiguo('');
     setLecturaInicialNuevo('0');
@@ -89,7 +102,6 @@ export const useBillingForms = (dataHook) => {
     setEditReadingVal(record.lectura_actual);
     setEditReadingValPunta(record.lectura_actual_punta || '');
     setEditFactorPotencia(record.factor_potencia || '');
-    setEditPrecioFactorPotencia(record.precio_factor_potencia || '');
     setEditJustificacion('');
     
     // Set meter change values if they exist
@@ -107,7 +119,6 @@ export const useBillingForms = (dataHook) => {
     setCurrentReading('');
     setCurrentReadingPunta('');
     setFactorPotencia('');
-    setPrecioFactorPotencia('');
     setIsCambioMedidor(false);
     setLecturaFinalAntiguo('');
     setLecturaInicialNuevo('0');
@@ -119,7 +130,7 @@ export const useBillingForms = (dataHook) => {
     e.preventDefault();
     if (!currentReading || !selectedMember || !activePeriodo) return;
     
-    const isTR = selectedMember.tipo === 'Tiempo Real';
+    const isTR = selectedMember.tipo === 'Hora Punta' || selectedMember.tipo === 'Tiempo Real';
 
     if (isCambioMedidor) {
       if (!lecturaFinalAntiguo || !lecturaInicialNuevo) {
@@ -142,7 +153,7 @@ export const useBillingForms = (dataHook) => {
         lectura_anterior_punta: parseSafe(selectedMember.ultima_lectura_punta),
         lectura_actual_punta: currentReadingPunta ? parseSafe(currentReadingPunta) : 0,
         factor_potencia: factorPotencia ? parseSafe(factorPotencia) : 0,
-        precio_factor_potencia: precioFactorPotencia ? parseSafe(precioFactorPotencia) : 0,
+        precio_factor_potencia: activePeriodo?.costo_potencia || 0,
         estado: 'Validado',
         // Campos de cambio de medidor
         es_cambio_medidor: isCambioMedidor,
@@ -200,6 +211,7 @@ export const useBillingForms = (dataHook) => {
         lectura_anterior_punta: parseSafe(editModalData.lectura_anterior_punta),
         lectura_actual_punta: editReadingValPunta ? parseSafe(editReadingValPunta) : 0,
         factor_potencia: editFactorPotencia ? parseSafe(editFactorPotencia) : 0,
+        precio_factor_potencia: activePeriodo?.costo_potencia || 0,
         justificacion: editJustificacion,
         estado: 'Validado',
         // Preserve meter change
@@ -216,13 +228,48 @@ export const useBillingForms = (dataHook) => {
 
       await api.put(`/lecturas/${editModalData.id}`, payload);
 
-      setLecturas(prev => prev.map(l => l.id === editModalData.id ? {
-        ...l,
-        lectura_actual: parseSafe(editReadingVal),
-        lectura_actual_punta: editReadingValPunta ? parseSafe(editReadingValPunta) : 0,
-        factor_potencia: editFactorPotencia ? parseSafe(editFactorPotencia) : 0,
-        fecha_registro: new Date().toISOString()
-      } : l));
+      let consumo_calculado = 0;
+      if (isCambio) {
+        let cv = parseSafe(editLecturaFinalAntiguo) - parseSafe(editModalData.lectura_anterior);
+        if (cv < 0) cv = 0;
+        let cn = parseSafe(editReadingVal) - parseSafe(editLecturaInicialNuevo);
+        if (cn < 0) cn = 0;
+        consumo_calculado = cv + cn;
+      } else {
+        consumo_calculado = parseSafe(editReadingVal) - parseSafe(editModalData.lectura_anterior);
+        if (consumo_calculado < 0) consumo_calculado = 0;
+      }
+
+      let consumo_calculado_punta = 0;
+      if (isTR) {
+        if (isCambio) {
+          let cvp = parseSafe(editLecturaFinalAntiguoPunta) - parseSafe(editModalData.lectura_anterior_punta);
+          if (cvp < 0) cvp = 0;
+          let cnp = parseSafe(editReadingValPunta) - parseSafe(editLecturaInicialNuevoPunta);
+          if (cnp < 0) cnp = 0;
+          consumo_calculado_punta = cvp + cnp;
+        } else {
+          consumo_calculado_punta = parseSafe(editReadingValPunta) - parseSafe(editModalData.lectura_anterior_punta);
+          if (consumo_calculado_punta < 0) consumo_calculado_punta = 0;
+        }
+      }
+
+      setLecturas(prev => prev.map(l => {
+        if (l.id === editModalData.id) {
+          return {
+            ...l,
+            ...payload, // Spreads all updated values including justificacion and lectura_actual
+            consumo_calculado,
+            consumo_calculado_punta,
+            fecha_registro: new Date().toISOString(),
+            // Optimistically set the original values if they weren't set already
+            lectura_actual_original: l.lectura_actual_original !== undefined && l.lectura_actual_original !== null ? l.lectura_actual_original : l.lectura_actual,
+            lectura_actual_punta_original: l.lectura_actual_punta_original !== undefined && l.lectura_actual_punta_original !== null ? l.lectura_actual_punta_original : l.lectura_actual_punta,
+            factor_potencia_original: l.factor_potencia_original !== undefined && l.factor_potencia_original !== null ? l.factor_potencia_original : l.factor_potencia,
+          };
+        }
+        return l;
+      }));
 
       setMedidores(prev => prev.map(m => m.num_serie === editModalData.num_serie ? { 
         ...m, 
@@ -246,7 +293,6 @@ export const useBillingForms = (dataHook) => {
     currentReading, setCurrentReading,
     currentReadingPunta, setCurrentReadingPunta,
     factorPotencia, setFactorPotencia,
-    precioFactorPotencia, setPrecioFactorPotencia,
     isCambioMedidor, setIsCambioMedidor,
     lecturaFinalAntiguo, setLecturaFinalAntiguo,
     lecturaInicialNuevo, setLecturaInicialNuevo,
@@ -260,11 +306,11 @@ export const useBillingForms = (dataHook) => {
     editReadingVal, setEditReadingVal,
     editReadingValPunta, setEditReadingValPunta,
     editFactorPotencia, setEditFactorPotencia,
-    editPrecioFactorPotencia, setEditPrecioFactorPotencia,
     editJustificacion, setEditJustificacion,
     editLecturaFinalAntiguo, setEditLecturaFinalAntiguo,
     editLecturaInicialNuevo, setEditLecturaInicialNuevo,
     editLecturaFinalAntiguoPunta, setEditLecturaFinalAntiguoPunta,
-    editLecturaInicialNuevoPunta, setEditLecturaInicialNuevoPunta
+    editLecturaInicialNuevoPunta, setEditLecturaInicialNuevoPunta,
+    isSearching
   };
 };

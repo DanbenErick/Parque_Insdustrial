@@ -5,7 +5,7 @@ import { ReadingRow } from './shared/ReadingRow';
 export const AllReadingsModal = ({
   activePeriodo,
   lecturasPeriodoActivo,
-  medidorDocMap,
+  medidorMap,
   modalSearchTerm,
   setModalSearchTerm,
   setIsModalOpen,
@@ -17,14 +17,15 @@ export const AllReadingsModal = ({
     if (!term) return lecturasPeriodoActivo;
     
     return lecturasPeriodoActivo.filter(record => {
-      const docId = medidorDocMap.get(record.num_serie) || '';
+      const medidor = medidorMap.get(record.num_serie);
+      const docId = medidor?.documento_identidad?.toLowerCase() || '';
       return (
         (record.propietario?.toLowerCase().includes(term)) ||
         (record.num_serie?.toLowerCase().includes(term)) ||
         docId.includes(term)
       );
     });
-  }, [modalSearchTerm, lecturasPeriodoActivo, medidorDocMap]);
+  }, [modalSearchTerm, lecturasPeriodoActivo, medidorMap]);
 
   return (
     <div {...MODAL_BACKDROP} className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
@@ -60,7 +61,7 @@ export const AllReadingsModal = ({
               </div>
             ) : (
               filteredModalLecturas.map(record => (
-                <ReadingRow key={record.id} record={record} onEdit={handleEditFromTable} onClick={() => onRowClick?.(record)} showDateFull />
+                <ReadingRow key={record.id} record={record} medidorInfo={medidorMap.get(record.num_serie)} onEdit={handleEditFromTable} onClick={() => onRowClick?.(record)} showDateFull />
               ))
             )}
           </ul>

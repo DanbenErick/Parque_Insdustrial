@@ -4,6 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axiosConfig';
 import PeriodosSettingsTab from './PeriodosSettingsTab';
 import CargosSettingsTab from './CargosSettingsTab';
+import BulkImportModal from './BulkImportModal';
+import TenantImportModal from '../tenants/TenantImportModal';
 
 const Settings = () => {
   const { user } = useAuth();
@@ -19,6 +21,8 @@ const Settings = () => {
     clave_confirmar: ''
   });
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
+  const [isTenantImportOpen, setIsTenantImportOpen] = useState(false);
 
   // Estados para el perfil
   const [profile, setProfile] = useState({
@@ -39,7 +43,8 @@ const Settings = () => {
   // Estados para tarifas base
   const [tarifas, setTarifas] = useState({
     monto_multa_base: 0,
-    monto_instalacion_base: 0
+    monto_instalacion_base: 0,
+    cuenta_bancaria: ''
   });
 
   // Cargar datos del usuario y configuración global
@@ -64,7 +69,8 @@ const Settings = () => {
     api.get('/config').then(res => {
       setTarifas({
         monto_multa_base: res.data.monto_multa_base || 0,
-        monto_instalacion_base: res.data.monto_instalacion_base || 0
+        monto_instalacion_base: res.data.monto_instalacion_base || 0,
+        cuenta_bancaria: res.data.cuenta_bancaria || ''
       });
     }).catch(() => { /* Config load failed silently */ });
   }, [user]);
@@ -137,7 +143,8 @@ const Settings = () => {
           throw new Error('No se pudo identificar al usuario actual.');
         }
         await api.put(`/usuarios/${user.id}`, profile);
-        toast.success('Perfil actualizado correctamente');
+        await api.put('/config', { ...tarifas }); // Guardar cuenta bancaria
+        toast.success('Perfil y configuración actualizados correctamente');
       } else if (activeTab === 'tarifas') {
         await api.put('/config', tarifas);
         toast.success('Tarifas globales guardadas exitosamente');
@@ -170,6 +177,7 @@ const Settings = () => {
   };
 
   return (
+    <>
     <main className="flex-grow flex flex-col relative overflow-hidden bg-background">
       <div className="flex-grow overflow-y-auto p-4 md:p-6 custom-scrollbar">
         <div className="max-w-6xl mx-auto space-y-4">
@@ -197,7 +205,7 @@ const Settings = () => {
 
           <div className="flex flex-col md:flex-row gap-4">
             {/* Sidebar nav for settings */}
-            <div className="w-full md:w-56 space-y-1">
+            <div className="w-full md:w-72 space-y-1">
               <button 
                 onClick={() => setActiveTab('profile')}
                 className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left text-xs ${activeTab === 'profile' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
@@ -225,6 +233,16 @@ const Settings = () => {
               >
                 <span className="material-symbols-outlined text-[16px]">request_quote</span>
                 Tarifas y Cobros
+              </button>
+
+              <div className="my-2 border-t border-outline-variant/30" />
+              <p className="text-[9px] font-bold text-on-surface-variant/50 uppercase tracking-widest px-3 mb-1">Herramientas</p>
+              <button 
+                onClick={() => setActiveTab('herramientas')}
+                className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left text-xs ${activeTab === 'herramientas' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
+              >
+                <span className="material-symbols-outlined text-[16px]">build</span>
+                Importar Datos
               </button>
             </div>
 
@@ -292,6 +310,22 @@ const Settings = () => {
                         onChange={handleProfileChange}
                         className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm" 
                       />
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-outline-variant/30 mt-6">
+                    <h4 className="text-sm text-on-surface font-bold mb-2">Datos para Recibos</h4>
+                    <div className="space-y-0.5 max-w-md">
+                      <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Cuenta Bancaria Principal (Se mostrará en los recibos)</label>
+                      <input 
+                        type="text" 
+                        name="cuenta_bancaria"
+                        placeholder="Ej. BCP: 191-12345678-0-12 (Opcional)"
+                        value={tarifas.cuenta_bancaria}
+                        onChange={(e) => setTarifas(prev => ({ ...prev, cuenta_bancaria: e.target.value }))}
+                        className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm" 
+                      />
+                      <p className="text-[10px] text-on-surface-variant mt-1">Este número de cuenta aparecerá en la parte inferior de los recibos en PDF generados.</p>
                     </div>
                   </div>
 
@@ -453,11 +487,86 @@ const Settings = () => {
                 <PeriodosSettingsTab />
               )}
 
+              {activeTab === 'herramientas' && (
+                <div className="animate-in fade-in space-y-6">
+                  <div>
+                    <h3 className="text-base font-bold text-on-surface mb-1">Herramientas de Importación</h3>
+                    <p className="text-[11px] text-on-surface-variant mb-6">Carga datos históricos o masivos desde archivos Excel.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Tarjeta de Importar Socios */}
+                    <div className="bg-surface border border-outline-variant rounded-2xl p-5 shadow-sm relative overflow-hidden group hover:border-primary/30 transition-colors flex flex-col">
+                      <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
+                      <div className="flex flex-col gap-4 flex-grow ml-2">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary shadow-inner shrink-0">
+                          <span className="material-symbols-outlined text-[24px]">group_add</span>
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-on-surface text-sm mb-1">Importar Socios Masivamente</h4>
+                          <p className="text-xs text-on-surface-variant leading-relaxed">Sube un Excel para registrar múltiples socios o inquilinos de una sola vez, junto con sus respectivos medidores si los tuvieran.</p>
+                        </div>
+                      </div>
+                      <div className="mt-5 ml-2">
+                        <button
+                          onClick={() => setIsTenantImportOpen(true)}
+                          className="w-full px-5 py-2.5 bg-surface-container-highest text-on-surface hover:text-primary font-bold text-xs rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-primary border border-outline-variant transition-all flex items-center justify-center gap-2"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">upload_file</span>
+                          Abrir Importador de Socios
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Tarjeta de Importar Facturación */}
+                    <div className="bg-surface border border-outline-variant rounded-2xl p-5 shadow-sm relative overflow-hidden group hover:border-primary/30 transition-colors flex flex-col">
+                      <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
+                      <div className="flex flex-col gap-4 flex-grow ml-2">
+                        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary shadow-inner shrink-0">
+                          <span className="material-symbols-outlined text-[24px]">database_upload</span>
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-on-surface text-sm mb-1">Importar Facturación Masiva</h4>
+                          <p className="text-xs text-on-surface-variant leading-relaxed">Herramienta integral para subir lecturas, generar recibos automáticamente y registrar pagos desde un solo archivo Excel.</p>
+                        </div>
+                      </div>
+                      <div className="mt-5 ml-2">
+                        <button
+                          onClick={() => setIsBulkImportOpen(true)}
+                          className="w-full px-5 py-2.5 bg-primary text-on-primary font-bold text-xs rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+                        >
+                          <span className="material-symbols-outlined text-[16px]">upload_file</span>
+                          Abrir Importador de Facturación
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
             </div>
           </div>
         </div>
       </div>
     </main>
+
+    <BulkImportModal
+      isOpen={isBulkImportOpen}
+      onClose={() => setIsBulkImportOpen(false)}
+      onImportSuccess={() => {
+        toast.success('Datos importados. Revisa las secciones de Lecturas, Facturación y Pagos.');
+      }}
+    />
+
+    {isTenantImportOpen && (
+      <TenantImportModal
+        onClose={() => setIsTenantImportOpen(false)}
+        onImportSuccess={() => {
+          // No cerramos el modal automáticamente para que el usuario pueda ver el resumen de errores si los hubiera
+        }}
+      />
+    )}
+    </>
   );
 };
 

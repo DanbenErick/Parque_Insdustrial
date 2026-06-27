@@ -8,6 +8,9 @@ export const useBillingData = (activeYear) => {
   const [lecturas, setLecturas] = useState([]); 
   const [activePeriodo, setActivePeriodo] = useState(null);
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [stats, setStats] = useState({ total_medidores: 0, total_registrados: 0 });
+
   const fetchPeriodos = useCallback(async () => {
     try {
       const res = await api.get('/periodos');
@@ -18,22 +21,29 @@ export const useBillingData = (activeYear) => {
   }, []);
 
   useEffect(() => {
-    const fetchData = async () => {
+    fetchPeriodos();
+  }, [fetchPeriodos]);
+
+  // Sync data for active period
+  useEffect(() => {
+    const fetchPeriodData = async () => {
+      if (!activePeriodo) return;
+      setIsLoading(true);
       try {
-        const [medidoresRes, periodosRes, lecturasRes] = await Promise.all([
-          api.get('/medidores'),
-          api.get('/periodos'),
-          api.get('/lecturas')
+        const [statsRes, lecturasRes] = await Promise.all([
+          api.get(`/periodos/${activePeriodo.mes_anio}/stats`),
+          api.get(`/lecturas?periodo=${activePeriodo.mes_anio}`)
         ]);
-        setMedidores(medidoresRes.data);
-        setPeriodos(periodosRes.data);
+        setStats(statsRes.data);
         setLecturas(lecturasRes.data);
       } catch (error) {
-        toast.error('Error al cargar datos iniciales');
+        toast.error('Error al sincronizar datos del periodo');
+      } finally {
+        setIsLoading(false);
       }
     };
-    fetchData();
-  }, []);
+    fetchPeriodData();
+  }, [activePeriodo]);
 
   const periodosFiltrados = useMemo(() => {
     if (!activeYear) return [];
@@ -55,8 +65,8 @@ export const useBillingData = (activeYear) => {
     activePeriodo ? lecturas.filter(l => l.periodo === activePeriodo.mes_anio) : [],
   [lecturas, activePeriodo]);
 
-  const totalRegistrados = lecturasPeriodoActivo.length;
-  const totalMedidores = medidores.length;
+  const totalRegistrados = stats.total_registrados || lecturasPeriodoActivo.length;
+  const totalMedidores = stats.total_medidores || 0;
   const porcentajeAvance = totalMedidores > 0 ? Math.min(100, Math.round((totalRegistrados / totalMedidores) * 100)) : 0;
   const dashOffset = 100.5 - (100.5 * porcentajeAvance) / 100;
 
@@ -68,10 +78,10 @@ export const useBillingData = (activeYear) => {
     return map;
   }, [lecturasPeriodoActivo]);
 
-  const medidorDocMap = useMemo(() => {
+  const medidorMap = useMemo(() => {
     const map = new Map();
     for (const m of medidores) {
-      map.set(m.num_serie, m.documento_identidad || '');
+      map.set(m.num_serie, m);
     }
     return map;
   }, [medidores]);
@@ -84,10 +94,12 @@ export const useBillingData = (activeYear) => {
     periodosFiltrados,
     lecturasPeriodoActivo,
     lecturasPeriodoActivoMap,
-    medidorDocMap,
+    medidorMap,
     totalRegistrados,
     totalMedidores,
     porcentajeAvance,
-    dashOffset
+    dashOffset,
+    fetchData: fetchPeriodos,
+    isLoading
   };
 };

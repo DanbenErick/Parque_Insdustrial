@@ -1,22 +1,35 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import api from '../api/axiosConfig';
+
 
 const TopBar = ({ screens }) => {
   const navigate = useNavigate();
-  const [showNotifications, setShowNotifications] = useState(false);
+
   const [globalSearchTerm, setGlobalSearchTerm] = useState('');
   const [globalSearchResults, setGlobalSearchResults] = useState([]);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
-  // Fetch real alerts from the API
-  const { data: alerts = [] } = useQuery({
-    queryKey: ['dashboard-alerts'],
-    queryFn: () => api.get('/dashboard/alerts').then((r) => r.data),
-    staleTime: 5 * 60 * 1000,
-  });
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
 
-  const hasAlerts = alerts.length > 0;
+  const toggleFullscreen = () => {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        console.warn(`Error al activar pantalla completa: ${err.message}`);
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  };
+
+
 
   const handleGlobalSearch = useCallback(
     (e) => {
@@ -85,17 +98,17 @@ const TopBar = ({ screens }) => {
       </div>
 
       <div className="flex items-center gap-md relative">
-        {/* Notifications button — badge only shows when there are real alerts */}
         <button
-          onClick={() => setShowNotifications(!showNotifications)}
-          className="relative p-2 hover:bg-surface-container rounded-full transition-colors"
-          aria-label={`Notificaciones${hasAlerts ? ` (${alerts.length})` : ''}`}
+          onClick={toggleFullscreen}
+          className="relative p-2 hover:bg-surface-container rounded-full transition-colors hidden sm:block"
+          title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
         >
-          <span className="material-symbols-outlined text-on-surface-variant">notifications</span>
-          {hasAlerts && (
-            <span className="absolute top-2 right-2 w-2 h-2 bg-error rounded-full animate-pulse" />
-          )}
+          <span className="material-symbols-outlined text-on-surface-variant">
+            {isFullscreen ? 'fullscreen_exit' : 'fullscreen'}
+          </span>
         </button>
+
+
 
         <button
           onClick={() => navigate('/settings')}
@@ -104,58 +117,7 @@ const TopBar = ({ screens }) => {
           <span className="material-symbols-outlined">settings</span>
         </button>
 
-        {/* Notifications Panel */}
-        {showNotifications && (
-          <div className="absolute top-12 right-0 w-80 bg-surface border border-outline-variant rounded-xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
-            <div className="p-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
-              <h3 className="font-headline-sm font-bold text-on-surface">
-                Notificaciones {hasAlerts && <span className="text-xs font-normal text-on-surface-variant">({alerts.length})</span>}
-              </h3>
-              <button
-                onClick={() => setShowNotifications(false)}
-                className="text-on-surface-variant hover:text-on-surface"
-                aria-label="Cerrar notificaciones"
-              >
-                <span className="material-symbols-outlined text-sm">close</span>
-              </button>
-            </div>
 
-            <div className="max-h-96 overflow-y-auto">
-              {alerts.length === 0 ? (
-                <div className="p-8 flex flex-col items-center gap-2 text-on-surface-variant opacity-60">
-                  <span className="material-symbols-outlined text-[32px]">notifications_off</span>
-                  <p className="text-sm font-medium">Sin notificaciones</p>
-                </div>
-              ) : (
-                alerts.map((alert, idx) => (
-                  <div
-                    key={idx}
-                    className="p-md border-b border-outline-variant/50 hover:bg-surface-container-lowest transition-colors cursor-pointer"
-                  >
-                    <div className="flex gap-sm">
-                      <span className={`material-symbols-outlined ${alert.tipo === 'error' ? 'text-error' : alert.tipo === 'success' ? 'text-secondary' : 'text-primary'}`}>
-                        {alert.icono || 'info'}
-                      </span>
-                      <div>
-                        <p className="font-body-sm font-bold text-on-surface">{alert.titulo}</p>
-                        <p className="text-xs text-on-surface-variant mt-1">{alert.mensaje}</p>
-                        {alert.tiempo && (
-                          <span className="text-[10px] text-on-surface-variant mt-2 block">{alert.tiempo}</span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {alerts.length > 0 && (
-              <div className="p-sm text-center border-t border-outline-variant bg-surface-container-low hover:bg-surface-container cursor-pointer transition-colors">
-                <span className="text-xs font-bold text-primary">Marcar todas como leídas</span>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </header>
   );

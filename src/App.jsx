@@ -82,7 +82,22 @@ function App() {
 
   return (
     <>
-      <Toaster position="bottom-right" theme={isDarkMode ? 'dark' : 'light'} richColors />
+      <Toaster 
+        position="top-center" 
+        expand={true}
+        duration={4000}
+        toastOptions={{
+          classNames: {
+            toast: 'w-full flex items-center gap-3 !rounded-xl !border-0 !shadow-2xl',
+            title: 'text-[16px] font-bold tracking-wide',
+            success: '!bg-green-600 !text-white',
+            error: '!bg-red-600 !text-white',
+            warning: '!bg-orange-600 !text-white',
+            info: '!bg-blue-600 !text-white',
+          },
+          style: { padding: '18px 24px' }
+        }}
+      />
       <ReloadPrompt />
       <div className="bg-surface font-body-md text-on-surface antialiased flex flex-col md:flex-row h-[100dvh] w-full overflow-hidden relative">
 

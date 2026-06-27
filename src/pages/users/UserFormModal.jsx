@@ -1,10 +1,6 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
 
-const OVERLAY = { hidden: { opacity: 0 }, visible: { opacity: 1 } };
-const PANEL = { hidden: { scale: 0.95, opacity: 0 }, visible: { scale: 1, opacity: 1 } };
-const TRANSITION = { duration: 0.2, ease: 'easeOut' };
-
 const LABEL_CLASS = 'text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex items-center gap-0.5 after:content-["*"] after:text-error';
 const INPUT_CLASS = 'w-full bg-surface-container border border-outline-variant rounded-md px-3 py-1.5 text-xs focus:outline-none transition-colors';
 const ERROR_CLASS = 'text-error text-[10px] mt-0.5 font-bold ml-1';
@@ -23,11 +19,11 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-md bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center p-md bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
     >
-      <motion.form
+      <form
         onSubmit={handleSubmit(onFormSubmit)}
-        className="bg-surface border border-outline-variant rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden"
+        className="bg-surface border border-outline-variant rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-200"
       >
         {/* Header */}
         <div className="px-5 py-4 border-b border-outline-variant flex justify-between items-center bg-surface">
@@ -59,7 +55,7 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
               </select>
             </div>
             <div className="space-y-1">
-              <label className={LABEL_CLASS}>DNI / RUC</label>
+              <label className={LABEL_CLASS}>Documento</label>
               <input 
                 type="text" 
                 placeholder="Ej. 76543210" 
@@ -79,10 +75,10 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
           </div>
 
           <div className="space-y-1">
-            <label className={LABEL_CLASS}>Nombre Completo o Razón Social</label>
+            <label className={LABEL_CLASS}>Nombre Completo</label>
             <input 
               type="text" 
-              placeholder="Ej. Juan Pérez o Corp Industrial S.A." 
+              placeholder="Ej. Juan Pérez" 
               className={`${INPUT_CLASS} ${errors.nombre_razonsocial ? 'border-error focus:ring-1 focus:ring-error focus:border-error' : 'focus:border-primary focus:ring-1 focus:ring-primary/20'}`}
               {...register("nombre_razonsocial", {
                 required: "El nombre es obligatorio",
@@ -227,20 +223,20 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
         </div>
 
         {/* Footer */}
-        <div className="px-5 py-4 border-t border-outline-variant bg-surface-container-lowest flex justify-end gap-3">
-          <button type="button" onClick={onClose} className="px-5 py-2 text-sm font-bold text-on-surface-variant hover:bg-surface-variant rounded-lg transition-colors">Cancelar</button>
+        <div className="p-4 border-t border-outline-variant bg-surface-container-lowest grid grid-cols-2 gap-3 w-full">
+          <button type="button" onClick={onClose} className="w-full px-4 py-2.5 text-sm font-bold border border-outline text-on-surface hover:bg-surface-variant rounded-xl transition-colors">Cancelar</button>
           <button
             type="submit" disabled={isSaving}
-            className="group px-6 py-2 text-sm bg-primary text-on-primary font-bold rounded-lg shadow-sm hover:shadow-md hover:opacity-90 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+            className="w-full px-4 py-2.5 text-sm bg-primary text-on-primary font-bold rounded-xl shadow-sm hover:shadow-md hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isSaving
               ? <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
-              : <span className="material-symbols-outlined text-[18px] group-hover:-translate-y-0.5 transition-transform">{isEdit ? 'save' : 'add_circle'}</span>
+              : <span className="material-symbols-outlined text-[18px] transition-transform">{isEdit ? 'save' : 'add_circle'}</span>
             }
             {isSaving ? 'Guardando' : isEdit ? 'Guardar Cambios' : 'Crear Usuario'}
           </button>
         </div>
-      </motion.form>
+      </form>
     </div>
   );
 };

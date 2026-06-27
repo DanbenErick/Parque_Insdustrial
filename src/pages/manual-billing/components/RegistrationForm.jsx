@@ -9,7 +9,6 @@ export const RegistrationForm = ({
   currentReading, setCurrentReading,
   currentReadingPunta, setCurrentReadingPunta,
   factorPotencia, setFactorPotencia,
-  precioFactorPotencia, setPrecioFactorPotencia,
   isCambioMedidor, setIsCambioMedidor,
   lecturaFinalAntiguo, setLecturaFinalAntiguo,
   lecturaInicialNuevo, setLecturaInicialNuevo,
@@ -17,7 +16,7 @@ export const RegistrationForm = ({
   lecturaInicialNuevoPunta, setLecturaInicialNuevoPunta,
   isSaving, handleSave
 }) => {
-  const isTR = selectedMember?.tipo === 'Tiempo Real';
+  const isTR = selectedMember?.tipo === 'Hora Punta' || selectedMember?.tipo === 'Tiempo Real';
   
   const getMissingFields = () => {
     const missing = [];
@@ -28,8 +27,7 @@ export const RegistrationForm = ({
     }
     if (isTR) {
       if (!currentReadingPunta) missing.push("L. Actual (P)");
-      if (!factorPotencia) missing.push("Reactivo");
-      if (!precioFactorPotencia) missing.push("Precio Reactivo");
+      if (!factorPotencia) missing.push("Potencia Consumida");
       if (isCambioMedidor) {
         if (!lecturaFinalAntiguoPunta) missing.push("L. Final Punta (Dañado)");
         if (!lecturaInicialNuevoPunta) missing.push("L. Inicial Punta (Nuevo)");
@@ -251,33 +249,21 @@ export const RegistrationForm = ({
                     <input
                       type="number" step="0.01" required
                       value={factorPotencia} onChange={(e) => setFactorPotencia(e.target.value)} placeholder="0.00"
-                      className="w-full h-full bg-orange-50/50 border border-orange-200 hover:border-orange-300 focus:border-orange-400 rounded-lg pl-3 pr-14 text-lg font-data-mono font-bold text-orange-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-right shadow-inner transition-all"
+                      className="w-full h-full bg-purple-50/50 border border-purple-200 hover:border-purple-300 focus:border-purple-400 rounded-lg pl-3 pr-16 text-lg font-data-mono font-bold text-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-right shadow-inner transition-all"
                     />
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col pointer-events-none">
-                      <span className="text-[9px] font-bold text-orange-700 uppercase tracking-wider leading-tight flex items-center gap-0.5"><span className="material-symbols-outlined text-[12px]">bolt</span> Reactivo</span>
+                      <span className="text-[9px] font-bold text-purple-700 uppercase tracking-wider leading-tight flex items-center gap-0.5"><span className="material-symbols-outlined text-[12px]">electric_meter</span> Potencia Consumida</span>
                     </div>
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-orange-600/70 pointer-events-none">kVARh</span>
-                  </div>
-
-                  <div className="flex-1 relative h-[52px]">
-                    <input
-                      type="number" step="0.0001" required
-                      value={precioFactorPotencia} onChange={(e) => setPrecioFactorPotencia(e.target.value)} placeholder="0.0000"
-                      className="w-full h-full bg-orange-50/50 border border-orange-200 hover:border-orange-300 focus:border-orange-400 rounded-lg pl-3 pr-8 text-lg font-data-mono font-bold text-orange-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-right shadow-inner transition-all"
-                    />
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col pointer-events-none">
-                      <span className="text-[9px] font-bold text-orange-700 uppercase tracking-wider leading-tight flex items-center gap-0.5"><span className="material-symbols-outlined text-[12px]">payments</span> Precio</span>
-                    </div>
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-orange-600/70 pointer-events-none">S/</span>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-purple-600/70 pointer-events-none">kW</span>
                   </div>
                 </div>
                 
-                {factorPotencia && precioFactorPotencia && !isNaN(factorPotencia) && !isNaN(precioFactorPotencia) && (
-                  <div className="bg-orange-50 rounded-lg px-3 py-1.5 flex justify-between items-center border border-orange-100 -mt-1">
-                    <span className="text-[10px] font-bold text-orange-900 uppercase tracking-wider">Subtotal Reactiva</span>
+                {factorPotencia && !isNaN(factorPotencia) && activePeriodo && (
+                  <div className="bg-purple-50 rounded-lg px-3 py-1.5 flex justify-between items-center border border-purple-100 mt-2">
+                    <span className="text-[10px] font-bold text-purple-900 uppercase tracking-wider">Subtotal Potencia</span>
                     <div className="flex items-center gap-3">
-                      <span className="text-[9px] text-orange-800/60 leading-none">{parseFloat(factorPotencia).toFixed(2)} × S/ {parseFloat(precioFactorPotencia).toFixed(4)}</span>
-                      <span className="font-data-mono font-bold text-orange-900 text-sm leading-none">S/ {(parseFloat(factorPotencia) * parseFloat(precioFactorPotencia)).toFixed(2)}</span>
+                      <span className="text-[9px] text-purple-800/60 leading-none">{parseFloat(factorPotencia).toFixed(2)} × S/ {parseFloat(activePeriodo.costo_potencia || 0).toFixed(4)}</span>
+                      <span className="font-data-mono font-bold text-purple-900 text-sm leading-none">S/ {(parseFloat(factorPotencia) * parseFloat(activePeriodo.costo_potencia || 0)).toFixed(2)}</span>
                     </div>
                   </div>
                 )}

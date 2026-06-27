@@ -24,12 +24,15 @@ const ManualBilling = () => {
     activePeriodo, setActivePeriodo,
     periodosFiltrados,
     lecturasPeriodoActivo,
-    medidorDocMap,
+    lecturasPeriodoActivoMap,
+    medidorMap,
     totalRegistrados,
     totalMedidores,
     porcentajeAvance,
     dashOffset,
-    fetchPeriodos
+    fetchPeriodos,
+    fetchData,
+    isLoading
   } = billingData;
 
   // Forms Hook
@@ -55,12 +58,12 @@ const ManualBilling = () => {
     editReadingVal, setEditReadingVal,
     editReadingValPunta, setEditReadingValPunta,
     editFactorPotencia, setEditFactorPotencia,
-    editPrecioFactorPotencia, setEditPrecioFactorPotencia,
     editJustificacion, setEditJustificacion,
     editLecturaFinalAntiguo, setEditLecturaFinalAntiguo,
     editLecturaInicialNuevo, setEditLecturaInicialNuevo,
     editLecturaFinalAntiguoPunta, setEditLecturaFinalAntiguoPunta,
-    editLecturaInicialNuevoPunta, setEditLecturaInicialNuevoPunta
+    editLecturaInicialNuevoPunta, setEditLecturaInicialNuevoPunta,
+    isSearching
   } = billingForms;
 
   const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
@@ -92,6 +95,8 @@ const ManualBilling = () => {
               currentSearchResults={currentSearchResults}
               selectedMember={selectedMember}
               handleSelectMember={handleSelectMember}
+              isSearching={isSearching}
+              lecturasPeriodoActivoMap={lecturasPeriodoActivoMap}
             />
 
             {selectedMember ? (
@@ -102,7 +107,6 @@ const ManualBilling = () => {
                 currentReading={currentReading} setCurrentReading={setCurrentReading}
                 currentReadingPunta={currentReadingPunta} setCurrentReadingPunta={setCurrentReadingPunta}
                 factorPotencia={factorPotencia} setFactorPotencia={setFactorPotencia}
-                precioFactorPotencia={precioFactorPotencia} setPrecioFactorPotencia={setPrecioFactorPotencia}
                 isCambioMedidor={isCambioMedidor} setIsCambioMedidor={setIsCambioMedidor}
                 lecturaFinalAntiguo={lecturaFinalAntiguo} setLecturaFinalAntiguo={setLecturaFinalAntiguo}
                 lecturaInicialNuevo={lecturaInicialNuevo} setLecturaInicialNuevo={setLecturaInicialNuevo}
@@ -111,13 +115,13 @@ const ManualBilling = () => {
                 isSaving={isSaving} handleSave={handleSave}
               />
             ) : (
-              <div className="bg-surface border border-outline-variant rounded-xl p-8 flex flex-col items-center justify-center text-center animate-in fade-in min-h-[250px] shadow-sm">
-                <div className="w-16 h-16 bg-primary/5 rounded-full flex items-center justify-center mb-4 shadow-inner ring-4 ring-primary/5">
-                  <span className="material-symbols-outlined text-[32px] text-primary/80">barcode_scanner</span>
+              <div className="bg-white/60 backdrop-blur-2xl border-2 border-dashed border-outline-variant/60 rounded-3xl p-10 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in-95 min-h-[350px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] group transition-all duration-500 hover:border-primary/40 hover:bg-white/80">
+                <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-primary/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
+                  <span className="material-symbols-outlined text-[40px] text-primary drop-shadow-sm">barcode_scanner</span>
                 </div>
-                <h3 className="text-base text-on-surface font-bold tracking-tight">Listo para Registrar</h3>
-                <p className="text-xs text-on-surface-variant mt-1.5 max-w-sm">
-                  Utiliza la barra de búsqueda rápida superior para encontrar un medidor por nombre, documento o serie.
+                <h3 className="text-xl text-on-surface font-extrabold tracking-tight mb-2 group-hover:text-primary transition-colors">Listo para Registrar</h3>
+                <p className="text-sm text-on-surface-variant/80 max-w-md font-medium leading-relaxed">
+                  Utiliza la barra de búsqueda rápida superior para encontrar un medidor por nombre, documento o número de serie.
                 </p>
               </div>
             )}
@@ -128,6 +132,7 @@ const ManualBilling = () => {
             <HistoryPanel 
               activePeriodo={activePeriodo}
               lecturasPeriodoActivo={lecturasPeriodoActivo}
+              medidorMap={medidorMap}
               setIsModalOpen={setIsModalOpen}
               onRowClick={(record) => setSelectedDetailRecord(record)}
             />
@@ -140,7 +145,7 @@ const ManualBilling = () => {
           <AllReadingsModal 
             activePeriodo={activePeriodo}
             lecturasPeriodoActivo={lecturasPeriodoActivo}
-            medidorDocMap={medidorDocMap}
+            medidorMap={medidorMap}
             modalSearchTerm={modalSearchTerm}
             setModalSearchTerm={setModalSearchTerm}
             setIsModalOpen={setIsModalOpen}
@@ -154,12 +159,12 @@ const ManualBilling = () => {
         {editModalData && (
           <EditReadingModal 
             editModalData={editModalData}
+            medidorMap={medidorMap}
             setEditModalData={setEditModalData}
             handleUpdateLectura={handleUpdateLectura}
             editReadingVal={editReadingVal} setEditReadingVal={setEditReadingVal}
             editReadingValPunta={editReadingValPunta} setEditReadingValPunta={setEditReadingValPunta}
             editFactorPotencia={editFactorPotencia} setEditFactorPotencia={setEditFactorPotencia}
-            editPrecioFactorPotencia={editPrecioFactorPotencia} setEditPrecioFactorPotencia={setEditPrecioFactorPotencia}
             editJustificacion={editJustificacion} setEditJustificacion={setEditJustificacion}
             editLecturaFinalAntiguo={editLecturaFinalAntiguo} setEditLecturaFinalAntiguo={setEditLecturaFinalAntiguo}
             editLecturaInicialNuevo={editLecturaInicialNuevo} setEditLecturaInicialNuevo={setEditLecturaInicialNuevo}
@@ -172,7 +177,12 @@ const ManualBilling = () => {
       
       <ReadingDetailDrawer 
         record={selectedDetailRecord} 
+        medidorInfo={selectedDetailRecord ? medidorMap.get(selectedDetailRecord.num_serie) : null}
         onClose={() => setSelectedDetailRecord(null)} 
+        onEdit={(record) => {
+          setSelectedDetailRecord(null); // Close the drawer first
+          handleEditFromTable(record);
+        }}
       />
 
       <PeriodFormModal isOpen={isPeriodModalOpen} onClose={() => setIsPeriodModalOpen(false)} onSuccess={fetchPeriodos} existentes={periodosFiltrados} />

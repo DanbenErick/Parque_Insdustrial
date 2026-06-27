@@ -101,31 +101,28 @@ const Dashboard = () => {
 
   return (
     <main
-      className={`p-4 md:p-lg space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow transition-opacity duration-300 ${
-        isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'
-      }`}
+      className={`p-4 md:p-lg space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow transition-opacity duration-300 ${isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'
+        }`}
     >
       {/* Header + View Mode Tabs */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
         <div className="flex flex-col">
-          <h2 className="text-2xl text-on-surface font-bold leading-tight">Indicadores de Consumo Eléctrico</h2>
+          <h2 className="text-2xl text-on-surface font-bold leading-tight">Modulo Central</h2>
           <p className="text-sm text-on-surface-variant">KPIs y gráficas basadas en las lecturas de los medidores.</p>
         </div>
 
         <div className="flex items-center bg-surface-container-lowest p-0.5 rounded-md border border-outline-variant shadow-sm h-8">
           <button
             onClick={handleSetYear}
-            className={`px-4 h-full text-xs font-bold rounded transition-all ${
-              chartViewMode === 'year' ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:text-primary'
-            }`}
+            className={`px-4 h-full text-xs font-bold rounded transition-all ${chartViewMode === 'year' ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:text-primary'
+              }`}
           >
             Año {activeYear}
           </button>
           <button
             onClick={handleSetGlobal}
-            className={`px-4 h-full text-xs font-bold rounded transition-all ${
-              chartViewMode === 'global' ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:text-primary'
-            }`}
+            className={`px-4 h-full text-xs font-bold rounded transition-all ${chartViewMode === 'global' ? 'bg-primary text-white shadow-sm' : 'text-on-surface-variant hover:text-primary'
+              }`}
           >
             Histórico Global
           </button>

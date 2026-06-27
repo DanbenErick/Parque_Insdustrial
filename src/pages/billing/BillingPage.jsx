@@ -55,10 +55,6 @@ const Billing = () => {
     activeYear,
   });
 
-  const pdf = usePdfViewer();
-  const refacturar = useRefacturar(refetchAll);
-  const exports = useExports({ filterParams, filterMes, activeYear, uniqueMonths: [], recibos });
-
   // --- Derived values ---
   const uniqueMonths = useMemo(
     () =>
@@ -69,6 +65,10 @@ const Billing = () => {
         .reverse(),
     [periodos, activeYear],
   );
+
+  const pdf = usePdfViewer();
+  const refacturar = useRefacturar(refetchAll);
+  const exports = useExports({ filterParams, filterMes, activeYear, uniqueMonths, recibos });
 
   const totalRecaudado = useMemo(() => parseFloat(globalStats?.totalRecaudado || 0), [globalStats]);
   const pendienteCobro = useMemo(() => parseFloat(globalStats?.pendienteCobro || 0), [globalStats]);
