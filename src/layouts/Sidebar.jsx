@@ -17,7 +17,7 @@ const Sidebar = ({ isMobileMenuOpen, onCloseMobileMenu, screens }) => {
   }, [navigate, onCloseMobileMenu]);
 
   return (
-    <aside className={`fixed left-0 top-0 h-full w-[280px] md:w-[260px] flex flex-col z-50 bg-surface-dim text-white shadow-2xl transition-transform duration-300 ease-in-out print:hidden ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+    <aside className="fixed left-0 top-0 h-full w-[260px] hidden md:flex flex-col z-50 bg-surface-dim text-white shadow-2xl print:hidden">
       {/* Logo Area */}
       <div className="h-20 px-6 flex items-center justify-between border-b border-white/10 bg-surface-dim">
         <div className="flex items-center gap-3">

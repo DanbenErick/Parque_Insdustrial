@@ -4,7 +4,7 @@ import React, { memo } from 'react';
  * BillingKPICards — KPI summary cards + progress bar.
  * Extracted from Billing.jsx to reduce component size.
  */
-const BillingKPICards = memo(({ totalRecaudado, pendienteCobro, deudaVencida, usuariosPendientes, usuariosVencidos }) => {
+const BillingKPICards = memo(({ totalRecaudado, pendienteCobro, deudaVencida, usuariosPendientes, usuariosVencidos, totalMedidores, sociosSinMedidor, faltanLecturar, pendientesFacturar }) => {
   const total = totalRecaudado + pendienteCobro + deudaVencida;
   const percentRecaudado = total > 0 ? ((totalRecaudado / total) * 100).toFixed(1) : '0';
   const emitidoPct = (totalRecaudado + pendienteCobro) > 0
@@ -18,7 +18,88 @@ const BillingKPICards = memo(({ totalRecaudado, pendienteCobro, deudaVencida, us
 
   return (
     <>
-      {/* KPI Cards */}
+      {/* Resumen de Operaciones - Dos Bloques */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+        
+        {/* Bloque 1: Inventario / Padrón */}
+        <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+          
+          <h3 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-4 flex items-center gap-1.5 relative z-10">
+            <span className="material-symbols-outlined text-[15px]">inventory_2</span>
+            Inventario de Socios
+          </h3>
+
+          <div className="grid grid-cols-2 gap-4 divide-x divide-outline-variant/50 relative z-10">
+            {/* Medidores Reales */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 border border-primary/20">
+                <span className="material-symbols-outlined text-[20px]">speed</span>
+              </div>
+              <div>
+                <p className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wide">Medidores Reales</p>
+                <div className="flex items-end gap-1 mt-0.5">
+                  <span className="font-data-mono text-xl font-bold text-on-surface leading-none">{totalMedidores}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Socios Sin Medidor */}
+            <div className="flex items-center gap-3 pl-4">
+              <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center text-warning shrink-0 border border-warning/20">
+                <span className="material-symbols-outlined text-[20px]">person_off</span>
+              </div>
+              <div>
+                <p className="text-[9px] font-bold text-warning uppercase tracking-wide">Sin Medidor</p>
+                <div className="flex items-end gap-1 mt-0.5">
+                  <span className="font-data-mono text-xl font-bold text-warning leading-none">{sociosSinMedidor}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bloque 2: Progreso / Pendientes */}
+        <div className="bg-error/5 border border-error/10 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+
+          <h3 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-4 flex items-center gap-1.5 relative z-10">
+            <span className="material-symbols-outlined text-[15px]">data_usage</span>
+            Progreso del Periodo
+          </h3>
+
+          <div className="grid grid-cols-2 gap-4 divide-x divide-outline-variant/50 relative z-10">
+            {/* Faltan Lecturar */}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center text-error shrink-0 relative border border-error/20">
+                <span className="material-symbols-outlined text-[20px]">assignment_late</span>
+                {faltanLecturar > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-error rounded-full animate-pulse border-2 border-surface"></span>
+                )}
+              </div>
+              <div>
+                <p className="text-[9px] font-bold text-error uppercase tracking-wide">Por Lecturar</p>
+                <div className="flex items-end gap-1 mt-0.5">
+                  <span className="font-data-mono text-xl font-bold text-error leading-none">{faltanLecturar}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Pendientes de Facturar */}
+            <div className="flex items-center gap-3 pl-4">
+              <div className="w-10 h-10 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary shrink-0 border border-tertiary/20">
+                <span className="material-symbols-outlined text-[20px]">receipt_long</span>
+              </div>
+              <div>
+                <p className="text-[9px] font-bold text-tertiary uppercase tracking-wide">Sin Facturar</p>
+                <div className="flex items-end gap-1 mt-0.5">
+                  <span className="font-data-mono text-xl font-bold text-tertiary leading-none">{pendientesFacturar}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Financial KPI Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
         {/* Card 1: Total Recaudado */}
         <div className="bg-surface border border-outline-variant hover:border-primary/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">

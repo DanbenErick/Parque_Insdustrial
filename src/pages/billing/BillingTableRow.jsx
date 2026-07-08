@@ -15,7 +15,7 @@ const ESTADO_CONFIG = {
   'Pago Parcial': { bg: 'bg-orange-100', text: 'text-orange-800' },
 };
 
-const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onViewDetail }) => {
+const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onViewDetail, onViewHistorial }) => {
   const estado = ESTADO_CONFIG[recibo.estado] || ESTADO_CONFIG.Vencido;
 
   return (
@@ -40,12 +40,32 @@ const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onV
                   </span>
                   {recibo.medidor_num_serie || 'Sin medidor'}
                 </span>
+                {recibo.medidor_num_serie && recibo.medidor_tipo && (
+                  <span className={`inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${
+                    recibo.medidor_tipo === 'Tiempo Real' ? 'bg-purple-500/10 text-purple-600 border border-purple-500/20' : 'bg-blue-500/10 text-blue-600 border border-blue-500/20'
+                  }`}>
+                    {recibo.medidor_tipo === 'Tiempo Real' ? 'Hora Punta' : recibo.medidor_tipo}
+                  </span>
+                )}
               </div>
               
               {/* Socio name as secondary text */}
-              <span className="truncate max-w-[200px] font-medium text-on-surface-variant text-[11px] mt-0.5">
-                {recibo.socio || 'Desconocido'}
-              </span>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="truncate max-w-[200px] font-medium text-on-surface-variant text-[11px]">
+                  {recibo.socio || 'Desconocido'}
+                </span>
+                {recibo.estado === 'Vencido' && (
+                  <div className="relative group/risk flex items-center justify-center">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-error"></span>
+                    </span>
+                    <span className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-error text-white text-[10px] font-bold rounded opacity-0 group-hover/risk:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-20">
+                      🚨 RIESGO DE CORTE
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </button>
           <span className="font-data-mono text-[10px] text-on-surface-variant/70">DNI/RUC: {recibo.documento_identidad}</span>
@@ -96,6 +116,18 @@ const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onV
             </button>
             <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
               WhatsApp
+            </span>
+          </div>
+
+          <div className="relative group/tooltip flex items-center justify-center">
+            <button
+              onClick={() => onViewHistorial(recibo.id)}
+              className="w-7 h-7 flex items-center justify-center text-primary hover:bg-primary/10 rounded-md transition-colors"
+            >
+              <span className="material-symbols-outlined text-[16px]">history</span>
+            </button>
+            <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
+              Historial de Cambios
             </span>
           </div>
 

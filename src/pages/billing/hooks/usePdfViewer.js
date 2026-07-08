@@ -30,20 +30,10 @@ export const usePdfViewer = () => {
     }
   }, []);
 
-  const openReportePdf = useCallback(async (filterParams, filterMes, uniqueMonths) => {
+  const openReportePdf = useCallback(async (filterParams) => {
     try {
       toast.info('Generando PDF, por favor espere...');
-      const params = { ...filterParams };
-      const selectedMes =
-        filterMes !== 'Todos' && filterMes !== 'TodosHistorico'
-          ? filterMes
-          : uniqueMonths.length > 0
-          ? uniqueMonths[0]
-          : null;
-
-      if (selectedMes) params.periodo = selectedMes;
-
-      const response = await api.get('/recibos/reporte/pdf', { params, responseType: 'blob' });
+      const response = await api.get('/recibos/reporte/pdf', { params: filterParams, responseType: 'blob' });
       const blob = new Blob([response.data], { type: MIME_TYPES.PDF });
       const url = window.URL.createObjectURL(blob);
 

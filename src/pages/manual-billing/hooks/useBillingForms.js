@@ -3,7 +3,7 @@ import api from '../../../api/axiosConfig';
 import { toast } from 'sonner';
 import { parseSafe } from '../utils';
 
-export const useBillingForms = (dataHook) => {
+export const useBillingForms = (dataHook, user) => {
   const { 
     medidores, setMedidores,
     activePeriodo, 
@@ -20,6 +20,8 @@ export const useBillingForms = (dataHook) => {
   const [currentReading, setCurrentReading] = useState('');
   const [currentReadingPunta, setCurrentReadingPunta] = useState('');
   const [factorPotencia, setFactorPotencia] = useState('');
+  const [maxDemandaFueraPunta, setMaxDemandaFueraPunta] = useState('');
+  const [maxDemandaPunta, setMaxDemandaPunta] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   
   // Cambio de Medidor State
@@ -42,6 +44,8 @@ export const useBillingForms = (dataHook) => {
   const [editReadingVal, setEditReadingVal] = useState('');
   const [editReadingValPunta, setEditReadingValPunta] = useState('');
   const [editFactorPotencia, setEditFactorPotencia] = useState('');
+  const [editMaxDemandaFueraPunta, setEditMaxDemandaFueraPunta] = useState('');
+  const [editMaxDemandaPunta, setEditMaxDemandaPunta] = useState('');
   const [editJustificacion, setEditJustificacion] = useState('');
 
   // Edit Cambio de Medidor
@@ -90,6 +94,8 @@ export const useBillingForms = (dataHook) => {
     setCurrentReading('');
     setCurrentReadingPunta('');
     setFactorPotencia('');
+    setMaxDemandaFueraPunta('');
+    setMaxDemandaPunta('');
     setIsCambioMedidor(false);
     setLecturaFinalAntiguo('');
     setLecturaInicialNuevo('0');
@@ -102,6 +108,8 @@ export const useBillingForms = (dataHook) => {
     setEditReadingVal(record.lectura_actual);
     setEditReadingValPunta(record.lectura_actual_punta || '');
     setEditFactorPotencia(record.factor_potencia || '');
+    setEditMaxDemandaFueraPunta(record.max_demanda_fuera_punta || '');
+    setEditMaxDemandaPunta(record.max_demanda_punta || '');
     setEditJustificacion('');
     
     // Set meter change values if they exist
@@ -119,6 +127,8 @@ export const useBillingForms = (dataHook) => {
     setCurrentReading('');
     setCurrentReadingPunta('');
     setFactorPotencia('');
+    setMaxDemandaFueraPunta('');
+    setMaxDemandaPunta('');
     setIsCambioMedidor(false);
     setLecturaFinalAntiguo('');
     setLecturaInicialNuevo('0');
@@ -153,6 +163,8 @@ export const useBillingForms = (dataHook) => {
         lectura_anterior_punta: parseSafe(selectedMember.ultima_lectura_punta),
         lectura_actual_punta: currentReadingPunta ? parseSafe(currentReadingPunta) : 0,
         factor_potencia: factorPotencia ? parseSafe(factorPotencia) : 0,
+        max_demanda_fuera_punta: maxDemandaFueraPunta ? parseSafe(maxDemandaFueraPunta) : 0,
+        max_demanda_punta: maxDemandaPunta ? parseSafe(maxDemandaPunta) : 0,
         precio_factor_potencia: activePeriodo?.costo_potencia || 0,
         estado: 'Validado',
         // Campos de cambio de medidor
@@ -175,8 +187,12 @@ export const useBillingForms = (dataHook) => {
         num_serie: selectedMember.num_serie,
         lectura_anterior: parseSafe(selectedMember.ultima_lectura),
         lectura_actual: parseSafe(currentReading),
+        factor_potencia: factorPotencia ? parseSafe(factorPotencia) : 0,
+        max_demanda_fuera_punta: maxDemandaFueraPunta ? parseSafe(maxDemandaFueraPunta) : 0,
+        max_demanda_punta: maxDemandaPunta ? parseSafe(maxDemandaPunta) : 0,
         periodo: activePeriodo.mes_anio,
         fecha_registro: new Date().toISOString(),
+        operario: user?.nombre_razonsocial || 'Tú',
         es_cambio_medidor: isCambioMedidor
       };
 
@@ -211,6 +227,8 @@ export const useBillingForms = (dataHook) => {
         lectura_anterior_punta: parseSafe(editModalData.lectura_anterior_punta),
         lectura_actual_punta: editReadingValPunta ? parseSafe(editReadingValPunta) : 0,
         factor_potencia: editFactorPotencia ? parseSafe(editFactorPotencia) : 0,
+        max_demanda_fuera_punta: editMaxDemandaFueraPunta ? parseSafe(editMaxDemandaFueraPunta) : 0,
+        max_demanda_punta: editMaxDemandaPunta ? parseSafe(editMaxDemandaPunta) : 0,
         precio_factor_potencia: activePeriodo?.costo_potencia || 0,
         justificacion: editJustificacion,
         estado: 'Validado',
@@ -293,6 +311,8 @@ export const useBillingForms = (dataHook) => {
     currentReading, setCurrentReading,
     currentReadingPunta, setCurrentReadingPunta,
     factorPotencia, setFactorPotencia,
+    maxDemandaFueraPunta, setMaxDemandaFueraPunta,
+    maxDemandaPunta, setMaxDemandaPunta,
     isCambioMedidor, setIsCambioMedidor,
     lecturaFinalAntiguo, setLecturaFinalAntiguo,
     lecturaInicialNuevo, setLecturaInicialNuevo,
@@ -306,6 +326,8 @@ export const useBillingForms = (dataHook) => {
     editReadingVal, setEditReadingVal,
     editReadingValPunta, setEditReadingValPunta,
     editFactorPotencia, setEditFactorPotencia,
+    editMaxDemandaFueraPunta, setEditMaxDemandaFueraPunta,
+    editMaxDemandaPunta, setEditMaxDemandaPunta,
     editJustificacion, setEditJustificacion,
     editLecturaFinalAntiguo, setEditLecturaFinalAntiguo,
     editLecturaInicialNuevo, setEditLecturaInicialNuevo,

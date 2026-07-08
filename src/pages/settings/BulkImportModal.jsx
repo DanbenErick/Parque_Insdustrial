@@ -216,17 +216,17 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
       <div className="bg-surface w-full max-w-3xl rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-outline-variant animate-in zoom-in-95 duration-200 max-h-[90vh]">
 
         {/* Header */}
-        <div className="px-6 py-5 border-b border-outline-variant flex justify-between items-center bg-surface relative overflow-hidden shrink-0">
+        <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-outline-variant flex justify-between items-start sm:items-center gap-4 bg-surface relative overflow-hidden shrink-0">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none" />
-          <div className="flex items-center gap-4 relative z-10">
-            <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-on-primary shadow-lg shadow-primary/20">
+          <div className="flex items-center gap-3 sm:gap-4 relative z-10">
+            <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-primary items-center justify-center text-on-primary shadow-lg shadow-primary/20 shrink-0">
               <span className="material-symbols-outlined text-[24px]">database_upload</span>
             </div>
             <div>
-              <h3 className="text-xl font-bold text-on-surface tracking-tight leading-none mb-1">
+              <h3 className="text-lg sm:text-xl font-bold text-on-surface tracking-tight leading-tight mb-1">
                 Importar Facturación Masiva
               </h3>
-              <p className="text-xs text-on-surface-variant font-medium">
+              <p className="text-[10px] sm:text-xs text-on-surface-variant font-medium leading-tight">
                 Carga lecturas, recibos y pagos desde un solo archivo Excel
               </p>
             </div>
@@ -234,29 +234,29 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
           <button
             type="button"
             onClick={() => { resetModal(); onClose(); }}
-            className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-variant flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors shadow-sm relative z-10 border border-outline-variant/50"
+            className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-variant flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors shadow-sm relative z-10 border border-outline-variant/50 shrink-0"
           >
             <span className="material-symbols-outlined text-[18px]">close</span>
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-6 flex flex-col gap-6 flex-1 overflow-y-auto custom-scrollbar bg-surface-container-lowest/50">
+        <div className="p-4 sm:p-6 flex flex-col gap-4 sm:gap-6 flex-1 overflow-y-auto custom-scrollbar bg-surface-container-lowest/50">
           {!results ? (
             <>
               {/* Paso 1: Descargar Plantilla */}
-              <div className="bg-surface border border-outline-variant rounded-2xl p-5 shadow-sm relative overflow-hidden group hover:border-primary/30 transition-colors flex items-center justify-between">
+              <div className="bg-surface border border-outline-variant rounded-2xl p-4 sm:p-5 shadow-sm relative overflow-hidden group hover:border-primary/30 transition-colors flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
                 <div className="ml-2">
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1 flex items-center gap-1.5">
                     <span className="material-symbols-outlined text-[14px]">download</span>
                     Paso 1: Descargar Plantilla
                   </h4>
-                  <p className="text-on-surface-variant text-xs mt-0.5">Incluye hoja de instrucciones y datos de ejemplo para todos los casos.</p>
+                  <p className="text-on-surface-variant text-xs mt-0.5 leading-tight">Incluye hoja de instrucciones y datos de ejemplo para todos los casos.</p>
                 </div>
                 <button
                   onClick={downloadTemplate}
-                  className="px-4 py-2.5 bg-surface-container-highest text-on-surface font-bold text-xs rounded-xl hover:bg-surface-variant border border-outline-variant flex items-center gap-2 transition-all shadow-sm group-hover:shadow hover:-translate-y-0.5"
+                  className="w-full sm:w-auto justify-center px-4 py-2.5 bg-surface-container-highest text-on-surface font-bold text-xs rounded-xl hover:bg-surface-variant border border-outline-variant flex items-center gap-2 transition-all shadow-sm group-hover:shadow hover:-translate-y-0.5"
                 >
                   <span className="material-symbols-outlined text-[16px] text-primary">download</span>
                   Descargar Plantilla
@@ -264,7 +264,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
               </div>
 
               {/* Paso 2: Subir archivo */}
-              <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-2xl p-5 shadow-inner relative overflow-hidden group">
+              <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-2xl p-4 sm:p-5 shadow-inner relative overflow-hidden group">
                 <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500 pointer-events-none" />
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-1.5 relative z-10">
                   <span className="material-symbols-outlined text-[16px]">upload</span>
@@ -272,7 +272,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
                 </h4>
 
                 <div
-                  className={`relative z-10 mt-2 border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center transition-all bg-surface/60 backdrop-blur-sm ${file ? 'border-primary shadow-md' : 'border-outline-variant hover:border-primary/50 hover:bg-surface cursor-pointer'}`}
+                  className={`relative z-10 mt-2 border-2 border-dashed rounded-xl p-6 sm:p-8 flex flex-col items-center justify-center text-center transition-all bg-surface/60 backdrop-blur-sm ${file ? 'border-primary shadow-md' : 'border-outline-variant hover:border-primary/50 hover:bg-surface cursor-pointer'}`}
                   onClick={() => !file && fileInputRef.current?.click()}
                 >
                   <input
@@ -381,7 +381,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
                   <span className="material-symbols-outlined text-[32px]">{results.failed.length === 0 ? 'check_circle' : 'info'}</span>
                 </div>
                 <h4 className="font-bold text-on-surface text-lg mb-4">Importación Completada</h4>
-                <div className="flex justify-center gap-10">
+                <div className="grid grid-cols-3 gap-2 sm:gap-10 mt-4">
                   <div className="text-center">
                     <p className="text-3xl font-data-mono font-bold text-on-surface">{results.successful.length + results.failed.length}</p>
                     <p className="text-xs text-on-surface-variant uppercase tracking-wider font-bold mt-1">Procesados</p>
@@ -452,12 +452,12 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-outline-variant bg-surface-container flex justify-end gap-3 shrink-0">
+        <div className="px-4 sm:px-6 py-4 border-t border-outline-variant bg-surface-container flex flex-col-reverse sm:flex-row justify-end gap-3 shrink-0">
           {results ? (
             <button
               type="button"
               onClick={() => { resetModal(); onClose(); }}
-              className="px-6 py-2.5 bg-primary text-on-primary text-sm font-bold rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5 transition-all"
+              className="w-full sm:w-auto px-6 py-2.5 bg-primary text-on-primary text-sm font-bold rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5 transition-all"
             >
               Cerrar
             </button>
@@ -466,7 +466,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
               <button
                 type="button"
                 onClick={() => { resetModal(); onClose(); }}
-                className="px-5 py-2.5 text-sm font-bold text-on-surface-variant hover:bg-surface-variant rounded-xl transition-colors"
+                className="w-full sm:w-auto px-5 py-2.5 text-sm font-bold text-on-surface-variant hover:bg-surface-variant rounded-xl transition-colors"
               >
                 Cancelar
               </button>
@@ -474,7 +474,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
                 type="button"
                 disabled={!parsedRows || parsedRows.length === 0 || isProcessing}
                 onClick={handleImport}
-                className="group px-6 py-2.5 text-sm bg-primary text-on-primary font-bold rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2 disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
+                className="w-full sm:w-auto justify-center group px-6 py-2.5 text-sm bg-primary text-on-primary font-bold rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2 disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
               >
                 {isProcessing
                   ? <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>

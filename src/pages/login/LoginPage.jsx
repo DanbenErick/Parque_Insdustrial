@@ -30,8 +30,7 @@ const LoginBackground = React.memo(() => (
 
 const ROLES = [
   { id: 'Administrator', label: 'Admin', icon: 'admin_panel_settings' },
-  // { id: 'Moderator', label: 'Operario', icon: 'shield_person' },
-  // { id: 'Member', label: 'Socio', icon: 'person' }
+  { id: 'Member', label: 'Socio', icon: 'person' }
 ];
 
 const Login = () => {

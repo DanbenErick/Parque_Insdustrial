@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
+import { useTenants } from './hooks/useTenants';
 
 import { exportToExcel, generatePDFPreview } from './tenantExportService';
 import TenantKPICards from './TenantKPICards';
@@ -22,26 +23,27 @@ const INITIAL_FORM = {
 };
 
 const TenantsAndSectors = () => {
-  const [tenants, setTenants] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filterEstado, setFilterEstado] = useState('Todos');
+  const [filterRubro, setFilterRubro] = useState('Todos');
+  const [showFilters, setShowFilters] = useState(false);
+
+  // Hook de React Query
+  const { tenants, isLoadingTenants: isLoading, globalStats, refetchAll } = useTenants(searchQuery, filterEstado, filterRubro);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Modals / Drawers state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ show: false, user: null, isActivating: false });
+  const [resetPasswordModal, setResetPasswordModal] = useState({ show: false, tenant: null });
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [drawerTenant, setDrawerTenant] = useState(null);
 
   const [isSavingToggle, setIsSavingToggle] = useState(false);
   const [pdfBlobUrl, setPdfBlobUrl] = useState(null);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
-
-  const [globalStats, setGlobalStats] = useState({ total: 0, activos: 0, inactivos: 0 });
-
-  const [filterEstado, setFilterEstado] = useState('Todos');
-  const [filterRubro, setFilterRubro] = useState('Todos');
-  const [showFilters, setShowFilters] = useState(false);
 
   const [editId, setEditId] = useState(null);
   const [formData, setFormData] = useState(INITIAL_FORM);
@@ -50,156 +52,88 @@ const TenantsAndSectors = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
 
-  // Validación
-  const validateField = (name, value) => {
-    let error = '';
-    switch (name) {
-      case 'documento_identidad':
-        if (value && value.length !== 8 && value.length !== 11) {
-          error = 'Debe tener 8 (DNI) u 11 (RUC) dígitos.';
-        }
-        break;
-      case 'telefono':
-        if (value && value.length !== 9) {
-          error = 'El celular debe tener 9 dígitos.';
-        }
-        break;
-      case 'correo':
-        if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
-          error = 'Ingrese un correo electrónico válido.';
-        }
-        break;
-      case 'clave_acceso':
-        if (value && value.length !== 6) {
-          error = 'La clave debe ser de 6 caracteres.';
-        }
-        break;
-      default:
-        break;
-    }
-    return error;
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    let finalValue = value;
-
-    if (name === 'documento_identidad') {
-      finalValue = value.replace(/\D/g, '').slice(0, 11);
-    } else if (name === 'telefono') {
-      finalValue = value.replace(/\D/g, '').slice(0, 9);
-    } else if (name === 'clave_acceso') {
-      finalValue = value.slice(0, 6);
-    }
-
-    setFormData(prev => ({ ...prev, [name]: finalValue }));
-    setErrors(prev => ({ ...prev, [name]: validateField(name, finalValue) }));
-  };
-
-  const fetchTenants = async (query = searchQuery, estado = filterEstado, rubro = filterRubro) => {
-    try {
-      setIsLoading(true);
-      let url = `/usuarios?rol_id=3`;
-      if (query.trim()) url += `&search=${encodeURIComponent(query.trim())}`;
-      if (estado !== 'Todos') url += `&estado=${estado === 'Activos' ? 'activos' : 'suspendidos'}`;
-      if (rubro !== 'Todos') url += `&rubro=${encodeURIComponent(rubro)}`;
-
-      const response = await api.get(url);
-      // Backend may return { data: [...], meta: {...} } or [...] directly
-      const rawData = Array.isArray(response.data) ? response.data : (response.data?.data || []);
-
-      const socios = rawData.map(tenant => {
-        let parsedMedidores = [];
-        try {
-          if (tenant.medidores) {
-            const parsed = JSON.parse(tenant.medidores);
-            if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].num_serie) {
-              parsedMedidores = parsed;
-            }
-          }
-        } catch { /* medidores column may contain malformed JSON — silently skip */ }
-        return { ...tenant, parsedMedidores };
-      });
-      setTenants(socios);
-
-      if (!query.trim() && estado === 'Todos' && rubro === 'Todos') {
-        try {
-          const statsRes = await api.get('/usuarios/stats?rol_id=3');
-          setGlobalStats({
-            total: parseInt(statsRes.data.total) || 0,
-            activos: parseInt(statsRes.data.activos) || 0,
-            inactivos: parseInt(statsRes.data.inactivos) || 0,
-            medidores_normal: parseInt(statsRes.data.medidores_normal) || 0,
-            medidores_tiempo_real: parseInt(statsRes.data.medidores_tiempo_real) || 0,
-            socios_sin_medidor: parseInt(statsRes.data.socios_sin_medidor) || 0
-          });
-        } catch {
-          // Stats are non-critical — silently skip if endpoint fails
-        }
-      }
-    } catch (error) {
-      console.error("Error al obtener socios:", error);
-      toast.error(`No se pudieron cargar los socios: ${error?.message || error}`);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchTenants();
-    setCurrentPage(1);
-  }, [filterEstado, filterRubro]);
+  // En TenantsPage ya no necesitamos handleInputChange ni validateField manual, 
+  // porque de eso se encarga react-hook-form en TenantFormModal.
 
   const handleSearchClick = () => {
-    fetchTenants(searchQuery);
     setCurrentPage(1);
+    // React Query automáticamente re-fetchea cuando searchQuery, filterEstado o filterRubro cambian,
+    // así que no necesitamos llamar a fetchTenants() manualmente aquí.
   };
 
-  const handleRegister = async (e) => {
-    e.preventDefault();
-    const { nombre_razonsocial, documento_identidad, telefono } = formData;
-
-    if (!nombre_razonsocial || !documento_identidad || !telefono) {
-      return toast.error("Por favor complete los campos obligatorios del socio (Nombre, DNI y Teléfono).");
-    }
-
-    if (!editId && (!formData.medidores || formData.medidores.length === 0 || (!formData.medidores[0].num_serie && formData.medidores[0].tipo !== 'Sin Medidor'))) {
-      return toast.error("El número de serie del medidor es obligatorio para nuevos socios (a menos que indique 'Sin Medidor').");
-    }
-
-    if (formData.documento_identidad.length !== 8 && formData.documento_identidad.length !== 11) {
-      return toast.error("El documento debe ser DNI (8 dígitos) o RUC (11 dígitos).");
-    }
-
+  const handleRegister = async (data) => {
     setIsSubmitting(true);
     try {
       const payload = {
-        ...formData,
-        cargo_representante: formData.nombre_razonsocial, // backend fallback
-        direccion: formData.medidores.length > 0 && formData.medidores[0].direccion ? formData.medidores[0].direccion : '-', // backend fallback
+        ...data,
+        cargo_representante: data.nombre_razonsocial, // backend fallback
+        direccion: data.medidores.length > 0 && data.medidores[0].direccion ? data.medidores[0].direccion : '-', // backend fallback
         rol_id: 3,
-        actividad_rubro: formData.actividad || 'General'
+        actividad_rubro: data.actividad || 'General'
       };
 
-      if (!editId) {
+      if (editId) {
+        if (!data.clave_acceso) delete payload.clave_acceso;
+        await api.put(`/usuarios/${editId}`, payload);
+        toast.success("Socio actualizado con éxito");
+      } else {
         payload.clave_acceso = '000000';
         await api.post('/usuarios', payload);
-        toast.success("Socio registrado exitosamente.");
-      } else {
-        if (!formData.clave_acceso) delete payload.clave_acceso;
-        await api.put(`/usuarios/${editId}`, payload);
-        toast.success("Socio actualizado exitosamente.");
+        toast.success("Socio registrado con éxito");
       }
-
       setIsModalOpen(false);
+      refetchAll(); // Refetch usando React Query
       setFormData(INITIAL_FORM);
-      setErrors({});
-      fetchTenants();
+      setEditId(null);
     } catch (error) {
-      toast.error(error.response?.data?.error || "Error al registrar socio");
+      toast.error(error.message || "Error al procesar la solicitud");
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleResetPassword = (tenant) => {
+    setResetPasswordModal({ show: true, tenant });
+  };
+
+  const executeResetPassword = async () => {
+    const tenant = resetPasswordModal.tenant;
+    if (!tenant) return;
+    
+    setIsResettingPassword(true);
+    try {
+      const response = await api.post(`/usuarios/${tenant.id}/reset-password`);
+      const { newPassword } = response.data;
+      
+      let phone = tenant.telefono?.replace(/\s+/g, '') || '';
+      if (phone) {
+        if (!phone.startsWith('+')) {
+          if (phone.length === 9) phone = '51' + phone;
+        } else {
+          phone = phone.replace('+', '');
+        }
+        const msg = `Hola *${tenant.nombre_razonsocial}*, tu contraseña ha sido restablecida. Tu nueva clave de acceso al sistema es: *${newPassword}*. Te recomendamos cambiarla luego de ingresar.`;
+        window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
+      } else {
+        toast.success(`Contraseña restablecida. La nueva clave es: ${newPassword}`, { duration: 10000 });
+      }
+      setResetPasswordModal({ show: false, tenant: null });
+    } catch (error) {
+      toast.error('Error al restablecer contraseña');
+    } finally {
+      setIsResettingPassword(false);
+    }
+  };
+
+  const handleWhatsApp = (tenant) => {
+    if (!tenant.telefono) return toast.error('El usuario no tiene número de teléfono registrado.');
+    let phone = tenant.telefono.replace(/\s+/g, '');
+    if (!phone.startsWith('+')) {
+      if (phone.length === 9) phone = '51' + phone;
+    } else {
+      phone = phone.replace('+', '');
+    }
+    window.open(`https://api.whatsapp.com/send?phone=${phone}`, '_blank');
   };
 
   const handleOpenNew = () => {
@@ -279,7 +213,7 @@ const TenantsAndSectors = () => {
           </button>
         </div>
       ), { duration: 5000, position: 'top-center' });
-      fetchTenants();
+      refetchAll();
     } catch (error) {
       toast.error(error.message);
     } finally {
@@ -421,7 +355,7 @@ const TenantsAndSectors = () => {
           <table className="w-full min-w-[900px] text-left border-collapse whitespace-nowrap">
             <thead className="sticky top-0 z-10 shadow-sm bg-surface-container-lowest text-on-surface-variant text-[11px] uppercase tracking-wider">
               <tr className="border-b border-outline-variant">
-                <th className="px-4 py-2 font-semibold bg-surface-container-lowest">Nombresß / Documento</th>
+                <th className="px-4 py-2 font-semibold bg-surface-container-lowest">Nombres / Documento</th>
                 <th className="px-4 py-2 font-semibold bg-surface-container-lowest">Dirección</th>
                 <th className="px-4 py-2 font-semibold bg-surface-container-lowest">Medidor</th>
                 <th className="px-4 py-2 font-semibold bg-surface-container-lowest">Estado</th>
@@ -436,6 +370,8 @@ const TenantsAndSectors = () => {
                   onOpenDrawer={setDrawerTenant}
                   onOpenEdit={handleOpenEdit}
                   onToggleStatus={toggleUserStatus}
+                  onWhatsApp={() => handleWhatsApp(tenant)}
+                  onResetPassword={() => handleResetPassword(tenant)}
                 />
               ))}
               {filteredTenants.length === 0 && (
@@ -494,14 +430,15 @@ const TenantsAndSectors = () => {
 
       {isModalOpen && (
         <TenantFormModal
-          formData={formData}
-          setFormData={setFormData}
-          errors={errors}
-          handleInputChange={handleInputChange}
-          handleRegister={handleRegister}
+          initialData={formData}
+          onSubmit={handleRegister}
           isSubmitting={isSubmitting}
           editId={editId}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            setIsModalOpen(false);
+            setFormData(INITIAL_FORM);
+            setEditId(null);
+          }}
         />
       )}
 
@@ -509,7 +446,7 @@ const TenantsAndSectors = () => {
         <TenantImportModal
           onClose={() => setIsImportModalOpen(false)}
           onImportSuccess={() => {
-            fetchTenants();
+            refetchAll();
           }}
         />
       )}
@@ -526,6 +463,20 @@ const TenantsAndSectors = () => {
           icon={confirmModal.isActivating ? 'bolt' : 'power_off'}
           onConfirm={executeToggleUser}
           onClose={() => setConfirmModal({ show: false, user: null, isActivating: false })}
+        />
+      )}
+
+      {resetPasswordModal.show && (
+        <ConfirmActionModal
+          title="Restablecer Contraseña"
+          message={`¿Estás seguro de que deseas restablecer la contraseña de ${resetPasswordModal.tenant?.nombre_razonsocial}?`}
+          warningText="Se le asignará una nueva clave por defecto y, si tiene número de teléfono registrado, se abrirá WhatsApp automáticamente para notificarle."
+          confirmText="Sí, restablecer clave"
+          isDestructive={true}
+          isLoading={isResettingPassword}
+          icon="key"
+          onConfirm={executeResetPassword}
+          onClose={() => setResetPasswordModal({ show: false, tenant: null })}
         />
       )}
 

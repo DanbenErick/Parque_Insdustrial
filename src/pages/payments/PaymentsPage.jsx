@@ -85,19 +85,32 @@ const DetailRow = React.memo(({ icon, label, value, valueClassName = 'text-xs fo
   </div>
 ));
 
-const PaymentRow = React.memo(({ pago, saldoPendiente, onSelect }) => {
+const PaymentRow = React.memo(({ pago, saldoPendiente, onSelect, onPrintTicket, onViewRecibo, onAnular, onWhatsApp }) => {
   const isPartial = isPartialPayment(pago.monto_pagado, pago.recibo_total);
 
   return (
-    <tr className="hover:bg-surface-container-lowest transition-colors group">
+    <tr className={`hover:bg-surface-container-lowest transition-colors group ${pago.estado_validacion === 'Anulado' ? 'opacity-50 grayscale' : ''}`}>
       <td className="px-4 py-2">
         <button
           onClick={() => onSelect(pago)}
-          className="font-bold text-on-surface text-[11px] hover:text-primary transition-colors text-left focus:outline-none"
+          className="font-bold text-on-surface text-[11px] hover:text-primary transition-colors text-left focus:outline-none block mb-0.5"
           title="Ver Detalles del Pago"
         >
           {pago.socio}
         </button>
+        {pago.medidor_num_serie ? (
+          <span className="text-[10px] text-on-surface-variant flex items-center gap-1 mt-0.5">
+            <span className="material-symbols-outlined text-[12px]">speed</span>
+            {pago.medidor_num_serie}
+          </span>
+        ) : (
+          <span className="text-[10px] text-on-surface-variant italic mt-0.5 block">Sin Medidor</span>
+        )}
+        {pago.saldo_a_favor_socio > 0 && (
+          <span className="text-[9px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-bold mt-1 inline-block">
+            💰 Saldo a favor: S/ {fmtCurrency(pago.saldo_a_favor_socio)}
+          </span>
+        )}
       </td>
       <td className="px-4 py-2">
         <div className="flex flex-col">
@@ -130,6 +143,56 @@ const PaymentRow = React.memo(({ pago, saldoPendiente, onSelect }) => {
           </div>
         )}
       </td>
+      <td className="px-4 py-2 text-right">
+        {pago.estado_validacion !== 'Anulado' && (
+          <div className="flex items-center justify-end gap-2">
+            <div className="relative group/tooltip flex items-center justify-center">
+              <button
+                onClick={(e) => { e.stopPropagation(); onPrintTicket(pago.id); }}
+              className="p-1.5 rounded-md text-primary hover:bg-primary/10 transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+            </button>
+            <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
+              Imprimir Ticket
+            </span>
+          </div>
+          <div className="relative group/tooltip flex items-center justify-center">
+            <button
+              onClick={(e) => { e.stopPropagation(); onWhatsApp(pago); }}
+              className="p-1.5 rounded-md text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">chat</span>
+            </button>
+            <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
+              Enviar por WhatsApp
+            </span>
+          </div>
+          <div className="relative group/tooltip flex items-center justify-center">
+            <button
+              onClick={(e) => { e.stopPropagation(); onViewRecibo(pago.recibo_id); }}
+              className="p-1.5 rounded-md text-secondary hover:bg-secondary/10 transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+            </button>
+            <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
+              Ver Recibo
+            </span>
+          </div>
+          <div className="relative group/tooltip flex items-center justify-center">
+            <button
+              onClick={(e) => { e.stopPropagation(); onAnular(pago.id); }}
+              className="p-1.5 rounded-md text-error hover:bg-error/10 transition-colors"
+            >
+              <span className="material-symbols-outlined text-[18px]">delete</span>
+            </button>
+            <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
+              Anular Pago
+            </span>
+          </div>
+        </div>
+      )}
+      </td>
     </tr>
   );
 });
@@ -147,10 +210,16 @@ const Payments = () => {
   const [pdfUrl, setPdfUrl] = useState('');
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [selectedPaymentForDetails, setSelectedPaymentForDetails] = useState(null);
-  const [filterMes, setFilterMes] = useState('Todos');
+  const [filterMes, setFilterMes] = useState('ULTIMO');
+  const [showAnulados, setShowAnulados] = useState(false);
 
   // ── React Query — data fetching ────────────────────────────────────
-  const filterParams = useMemo(() => buildFilterParams(filterMes, activeYear), [filterMes, activeYear]);
+
+  const filterParams = useMemo(() => {
+    const params = buildFilterParams(filterMes, activeYear);
+    if (showAnulados) params.includeAnulados = true;
+    return params;
+  }, [filterMes, activeYear, showAnulados]);
 
   const { data: fetchedData, isLoading } = useQuery({
     queryKey: ['pagos-data', filterParams],
@@ -184,11 +253,15 @@ const Payments = () => {
   const [metodoPago, setMetodoPago] = useState('Transferencia');
   const [numeroOperacion, setNumeroOperacion] = useState('');
   const [searchSocio, setSearchSocio] = useState('');
+  const [fechaPago, setFechaPago] = useState(() => {
+    const tzOffset = new Date().getTimezoneOffset() * 60000;
+    return new Date(Date.now() - tzOffset).toISOString().slice(0, 10);
+  });
   const [isAutocompleteOpen, setIsAutocompleteOpen] = useState(false);
 
   // ── Memoised derived data ──────────────────────────────────────────
   const recibosPendientes = useMemo(
-    () => allRecibos.filter(r => r.estado === 'Pendiente' || r.estado === 'Pago Parcial'),
+    () => allRecibos.filter(r => r.estado === 'Pendiente' || r.estado === 'Pago Parcial' || r.estado === 'Vencido'),
     [allRecibos],
   );
 
@@ -201,10 +274,24 @@ const Payments = () => {
     [periodos, activeYear],
   );
 
-  const totalRecaudado = useMemo(
-    () => pagos.reduce((acc, p) => acc + parseFloat(p.monto_pagado || 0), 0),
-    [pagos],
-  );
+  useEffect(() => {
+    if (filterMes === 'ULTIMO' && uniqueMonths.length > 0) {
+      setFilterMes(uniqueMonths[0]);
+    }
+  }, [uniqueMonths, filterMes]);
+
+  const { totalRecaudado, recaudadoEfectivo, recaudadoTransferencia } = useMemo(() => {
+    let total = 0;
+    let efectivo = 0;
+    let transferencia = 0;
+    pagos.forEach(p => {
+      const monto = parseFloat(p.monto_pagado || 0);
+      total += monto;
+      if (p.metodo_pago === 'Efectivo') efectivo += monto;
+      else if (p.metodo_pago === 'Transferencia') transferencia += monto;
+    });
+    return { totalRecaudado: total, recaudadoEfectivo: efectivo, recaudadoTransferencia: transferencia };
+  }, [pagos]);
 
   const { totalFacturado, facturasPagadas, totalFacturas } = useMemo(() => ({
     totalFacturado: allRecibos.reduce((sum, r) => sum + parseFloat(r.total || 0), 0),
@@ -254,8 +341,11 @@ const Payments = () => {
     if (searchSocio === '*') return recibosPendientes;
     const term = searchSocio.toLowerCase();
     return recibosPendientes.filter(r =>
-      r.socio.toLowerCase().includes(term) ||
-      r.numero_comprobante.toLowerCase().includes(term),
+      (r.socio || '').toLowerCase().includes(term) ||
+      (r.numero_comprobante || '').toLowerCase().includes(term) ||
+      (r.medidor_num_serie && r.medidor_num_serie.toLowerCase().includes(term)) ||
+      (r.num_medidor && r.num_medidor.toLowerCase().includes(term)) ||
+      (r.num_serie && r.num_serie.toLowerCase().includes(term))
     );
   }, [recibosPendientes, searchSocio]);
 
@@ -273,6 +363,8 @@ const Payments = () => {
     setMonto('');
     setMetodoPago('Transferencia');
     setNumeroOperacion('');
+    const tzOffset = new Date().getTimezoneOffset() * 60000;
+    setFechaPago(new Date(Date.now() - tzOffset).toISOString().slice(0, 10));
   }, []);
 
   const openModal = useCallback(() => setIsModalOpen(true), []);
@@ -291,7 +383,10 @@ const Payments = () => {
 
   const handleSelectSocio = useCallback((recibo) => {
     setSelectedRecibo(recibo.id);
-    setSearchSocio(recibo.socio);
+    const displayText = recibo.medidor_num_serie 
+      ? `${recibo.socio} (Medidor: ${recibo.medidor_num_serie})`
+      : recibo.socio;
+    setSearchSocio(displayText);
     setMonto(parseFloat(recibo.saldo_pendiente || recibo.total).toFixed(2));
     setIsAutocompleteOpen(false);
   }, []);
@@ -316,6 +411,7 @@ const Payments = () => {
         monto_pagado: parseFloat(monto),
         metodo_pago: metodoPago,
         numero_operacion: numeroOperacion,
+        fecha_pago: fechaPago,
       });
       toast.success('Pago registrado exitosamente');
       setIsModalOpen(false);
@@ -326,7 +422,7 @@ const Payments = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [selectedRecibo, monto, metodoPago, numeroOperacion, resetForm, refetchAll]);
+  }, [selectedRecibo, monto, metodoPago, numeroOperacion, fechaPago, resetForm, refetchAll]);
 
   const handleExportExcel = useCallback(async () => {
     try {
@@ -372,6 +468,51 @@ const Payments = () => {
     }
   }, [filteredPagos.length, filterMes, activeYear, searchTerm]);
 
+  const handleExportAllPdf = useCallback(async () => {
+    if (!filteredPagos.length) {
+      return toast.error('No hay pagos para exportar');
+    }
+    try {
+      toast.loading('Generando PDF masivo...', { id: 'pdfMasivo' });
+      const params = { ...buildFilterParams(filterMes, activeYear) };
+      if (searchTerm) params.search = searchTerm;
+
+      const response = await api.get('/pagos/export/all', { params, responseType: 'blob' });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `tickets_masivos_${params.periodo || params.year || 'historico'}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success('PDF masivo descargado exitosamente', { id: 'pdfMasivo' });
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Error al generar PDF masivo', { id: 'pdfMasivo' });
+    }
+  }, [filteredPagos.length, filterMes, activeYear, searchTerm]);
+
+  const handleWhatsApp = useCallback(async (pago) => {
+    if (!pago.telefono) {
+      return toast.error('El socio no tiene un número de teléfono registrado.');
+    }
+
+    let phone = pago.telefono.replace(/\s+/g, '');
+    if (!phone.startsWith('+')) {
+      if (phone.length === 9) phone = '51' + phone;
+    } else {
+      phone = phone.replace('+', '');
+    }
+
+    const monto = parseFloat(pago.monto_pagado).toLocaleString('en-US', { minimumFractionDigits: 2 });
+    const fecha = new Date(pago.fecha_pago).toLocaleDateString('es-PE');
+    const comprobante = pago.numero_comprobante || 'S/N';
+    const msg = `Hola *${pago.socio}*, confirmamos la recepción de su pago por *S/ ${monto}* el día *${fecha}* correspondiente al comprobante *${comprobante}*. ¡Gracias por su puntualidad!`;
+    
+    window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
+  }, []);
+
   const handleDownloadPdf = useCallback(() => {
     const link = document.createElement('a');
     link.href = pdfUrl;
@@ -385,6 +526,38 @@ const Payments = () => {
     setSelectedPaymentForDetails(null);
     navigate(`/receipt_detail?id=${reciboId}`, { state: { from: '/payments' } });
   }, [selectedPaymentForDetails, navigate]);
+
+  const handlePrintTicket = useCallback(async (pagoId) => {
+    try {
+      const response = await api.get(`/pagos/${pagoId}/ticket`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      window.open(url, '_blank');
+      // No revoke right away since window.open needs time to load it
+    } catch {
+      toast.error('Error al generar el ticket');
+    }
+  }, []);
+
+  const handleViewPdfRecibo = useCallback(async (reciboId) => {
+    try {
+      const response = await api.get(`/recibos/${reciboId}/pdf`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      window.open(url, '_blank');
+    } catch {
+      toast.error('Error al generar el recibo PDF');
+    }
+  }, []);
+
+  const handleAnularPago = useCallback(async (pagoId) => {
+    if (!window.confirm('¿Está seguro de anular este pago? Esta acción no se puede deshacer y ajustará los saldos pendientes.')) return;
+    try {
+      await api.post(`/pagos/${pagoId}/anular`);
+      toast.success('Pago anulado exitosamente');
+      refetchAll();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Error al anular el pago');
+    }
+  }, [refetchAll]);
 
   const isFilterSpecific = filterMes !== 'Todos' && filterMes !== 'TodosHistorico';
 
@@ -432,8 +605,17 @@ const Payments = () => {
               <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[16px]">expand_more</span>
             </div>
           </div>
-          <button
-            onClick={openModal}
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity">
+              <div className="relative">
+                <input type="checkbox" className="sr-only" checked={showAnulados} onChange={(e) => setShowAnulados(e.target.checked)} />
+                <div className={`block w-8 h-4 rounded-full transition-colors ${showAnulados ? 'bg-error' : 'bg-surface-variant'}`}></div>
+                <div className={`dot absolute left-1 top-0.5 bg-white w-3 h-3 rounded-full transition-transform ${showAnulados ? 'transform translate-x-3.5' : ''}`}></div>
+              </div>
+              <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Ver Anulados</span>
+            </label>
+            <button
+              onClick={openModal}
             disabled={!isFilterSpecific}
             className={`flex items-center px-3 py-1.5 h-8 font-bold rounded-md transition-opacity shadow-sm text-xs ${!isFilterSpecific
                 ? 'bg-surface-variant text-on-surface-variant cursor-not-allowed opacity-70'
@@ -443,6 +625,7 @@ const Payments = () => {
             <span className="material-symbols-outlined mr-1 text-[16px]">add_card</span>
             Registrar Pago
           </button>
+          </div>
         </div>
       </div>
 
@@ -454,31 +637,74 @@ const Payments = () => {
         <KpiCard icon="bolt" label="Transacciones Hoy" value={transaccionesHoy} subtitle="En las últimas 24 hrs" colorClass="secondary" />
       </div>
 
-      {/* Progress Bar */}
-      <div className="bg-surface border border-outline-variant rounded-xl p-4 mb-4 shadow-sm flex flex-col gap-2">
-        <div className="flex justify-between items-end">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-[18px] text-primary">monitoring</span>
-            <span className="text-xs font-bold text-on-surface uppercase tracking-wider">Avance de Recaudación</span>
+      {/* Progress Bars & Dashboards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        {/* Avance de Recaudación */}
+        <div className="bg-surface border border-outline-variant rounded-xl p-4 shadow-sm flex flex-col gap-2">
+          <div className="flex justify-between items-end">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px] text-primary">monitoring</span>
+              <span className="text-xs font-bold text-on-surface uppercase tracking-wider">Avance de Recaudación</span>
+            </div>
+            <span className="font-data-mono font-bold text-primary text-sm">{porcentajeRecaudado.toFixed(1)}%</span>
           </div>
-          <span className="font-data-mono font-bold text-primary text-sm">{porcentajeRecaudado.toFixed(1)}%</span>
+
+          <div className="relative w-full h-3 bg-surface-container-highest rounded-full overflow-hidden flex">
+            <div
+              className="h-full bg-primary transition-all duration-1000 ease-out"
+              style={{ width: `${Math.min(porcentajeRecaudado, 100)}%` }}
+            />
+          </div>
+
+          <div className="flex justify-between text-[10px] text-on-surface-variant font-medium mt-1">
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-[#059669]" />
+              <span>Recaudado (S/ {fmtCurrency(totalRecaudado)})</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span>Pendiente (S/ {fmtCurrency(totalFacturado - totalRecaudado)})</span>
+              <div className="w-2 h-2 rounded-full bg-surface-container-highest" />
+            </div>
+          </div>
         </div>
 
-        <div className="relative w-full h-3 bg-surface-container-highest rounded-full overflow-hidden flex">
-          <div
-            className="h-full bg-primary transition-all duration-1000 ease-out"
-            style={{ width: `${Math.min(porcentajeRecaudado, 100)}%` }}
-          />
-        </div>
-
-        <div className="flex justify-between text-[10px] text-on-surface-variant font-medium mt-1">
-          <div className="flex items-center gap-1">
-            <div className="w-2 h-2 rounded-full bg-[#059669]" />
-            <span>Recaudado (S/ {fmtCurrency(totalRecaudado)})</span>
+        {/* Desglose por Método de Pago */}
+        <div className="bg-surface border border-outline-variant rounded-xl p-4 shadow-sm flex flex-col gap-2">
+          <div className="flex justify-between items-end">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[18px] text-indigo-600">pie_chart</span>
+              <span className="text-xs font-bold text-on-surface uppercase tracking-wider">Ingresos por Método</span>
+            </div>
           </div>
-          <div className="flex items-center gap-1">
-            <span>Pendiente (S/ {fmtCurrency(totalFacturado - totalRecaudado)})</span>
-            <div className="w-2 h-2 rounded-full bg-surface-container-highest" />
+
+          <div className="relative w-full h-3 bg-surface-container-highest rounded-full overflow-hidden flex">
+            {totalRecaudado > 0 ? (
+              <>
+                <div
+                  className="h-full bg-emerald-500 transition-all duration-1000 ease-out"
+                  style={{ width: `${(recaudadoEfectivo / totalRecaudado) * 100}%` }}
+                  title="Efectivo"
+                />
+                <div
+                  className="h-full bg-indigo-500 transition-all duration-1000 ease-out"
+                  style={{ width: `${(recaudadoTransferencia / totalRecaudado) * 100}%` }}
+                  title="Transferencia"
+                />
+              </>
+            ) : (
+              <div className="w-full h-full bg-surface-container-highest" />
+            )}
+          </div>
+
+          <div className="flex justify-between text-[10px] text-on-surface-variant font-medium mt-1">
+            <div className="flex items-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span>Efectivo (S/ {fmtCurrency(recaudadoEfectivo)})</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span>Transferencia (S/ {fmtCurrency(recaudadoTransferencia)})</span>
+              <div className="w-2 h-2 rounded-full bg-indigo-500" />
+            </div>
           </div>
         </div>
       </div>
@@ -510,7 +736,14 @@ const Payments = () => {
               className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-error/10 text-error hover:bg-error/20 font-bold text-xs rounded-md transition-colors border border-error/20"
             >
               <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
-              PDF
+              Reporte PDF
+            </button>
+            <button
+              onClick={handleExportAllPdf}
+              className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-primary/10 text-primary hover:bg-primary/20 font-bold text-xs rounded-md transition-colors border border-primary/20"
+            >
+              <span className="material-symbols-outlined text-[16px]">print</span>
+              Tickets A5
             </button>
           </div>
         </div>
@@ -523,6 +756,7 @@ const Payments = () => {
                 <th className="px-4 py-2 font-semibold">Detalle / Fecha</th>
                 <th className="px-4 py-2 font-semibold text-center">Estado</th>
                 <th className="px-4 py-2 font-semibold text-right">Monto</th>
+                <th className="px-4 py-2 font-semibold text-right">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/50 bg-surface">
@@ -534,7 +768,7 @@ const Payments = () => {
                 </tr>
               ) : filteredPagos.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="text-center p-8 text-on-surface-variant">
+                  <td colSpan="5" className="text-center p-8 text-on-surface-variant">
                     <span className="material-symbols-outlined text-[32px] opacity-20 mb-2 block">search_off</span>
                     <p className="font-bold">No se encontraron pagos</p>
                   </td>
@@ -546,6 +780,13 @@ const Payments = () => {
                     pago={pago}
                     saldoPendiente={reciboSaldoMap.get(pago.recibo_id) || 0}
                     onSelect={setSelectedPaymentForDetails}
+                    onPrintTicket={handlePrintTicket}
+                    onViewRecibo={handleViewPdfRecibo}
+                    onAnular={() => {
+                      setSelectedPaymentForDetails(pago);
+                      setIsAnularModalOpen(true);
+                    }}
+                    onWhatsApp={handleWhatsApp}
                   />
                 ))
               )}
@@ -565,6 +806,11 @@ const Payments = () => {
               <h3 className="text-base text-primary font-bold flex items-center gap-2">
                 <span className="material-symbols-outlined text-[20px]">payments</span>
                 Registrar Nuevo Pago
+                {filterMes && filterMes !== 'Todos' && filterMes !== 'TodosHistorico' && filterMes !== 'ULTIMO' && (
+                  <span className="ml-2 text-xs font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20">
+                    {filterMes}
+                  </span>
+                )}
               </h3>
               <button
                 onClick={closeModal}
@@ -582,21 +828,21 @@ const Payments = () => {
                 {/* Recibo Pendiente (Autocomplete) */}
                 <div className="bg-surface-container-lowest border border-outline-variant p-3 rounded-lg">
                   <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1.5">
-                    Socio o Recibo <span className="text-error">*</span>
+                    Socio, Recibo o Medidor <span className="text-error">*</span>
                   </label>
                   <div className="relative">
                     <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
                     <input
                       type="text"
                       className="w-full border border-outline-variant rounded-md text-xs bg-white focus:border-primary focus:ring-1 focus:ring-primary pl-8 pr-3 py-1.5 h-8 outline-none transition-colors hover:border-primary/50"
-                      placeholder="Buscar por nombre o N° recibo..."
+                      placeholder="Buscar por nombre, N° recibo o medidor..."
                       value={searchSocio}
                       onChange={handleSocioSearch}
                       onFocus={() => setIsAutocompleteOpen(true)}
                     />
 
                     {/* Dropdown de Autocomplete */}
-                    {isAutocompleteOpen && searchSocio && !selectedRecibo && (
+                    {isAutocompleteOpen && !selectedRecibo && (
                       <div className="absolute z-10 w-full mt-1 bg-surface border border-outline-variant rounded-md shadow-xl max-h-60 overflow-y-auto custom-scrollbar">
                         {filteredSocios.length === 0 ? (
                           <div className="p-2 text-xs text-on-surface-variant text-center">No se encontraron recibos pendientes</div>
@@ -613,6 +859,13 @@ const Payments = () => {
                                 <span className="text-[10px] text-on-surface-variant flex items-center gap-1">
                                   <span className="material-symbols-outlined text-[12px]">receipt_long</span>
                                   {r.numero_comprobante}
+                                  {r.medidor_num_serie && (
+                                    <>
+                                      <span className="mx-1">•</span>
+                                      <span className="material-symbols-outlined text-[12px]">speed</span>
+                                      {r.medidor_num_serie}
+                                    </>
+                                  )}
                                 </span>
                                 <span className="text-[10px] font-bold font-data-mono text-error">
                                   Deuda: S/ {parseFloat(r.saldo_pendiente || r.total).toFixed(2)}
@@ -686,18 +939,34 @@ const Payments = () => {
                   </div>
                 </div>
 
-                {/* Nº Operación */}
-                <div className="flex flex-col gap-0.5">
-                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-1">Nº Operación / Referencia</label>
-                  <div className="relative">
-                    <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">tag</span>
-                    <input
-                      type="text"
-                      className="w-full border border-outline-variant rounded-md pl-8 pr-3 py-1.5 h-8 bg-white font-data-mono text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
-                      value={numeroOperacion}
-                      onChange={(e) => setNumeroOperacion(e.target.value)}
-                      placeholder="Opcional"
-                    />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Nº Operación */}
+                  <div className="flex flex-col gap-0.5">
+                    <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-1">Nº Operación / Referencia</label>
+                    <div className="relative">
+                      <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">tag</span>
+                      <input
+                        type="text"
+                        className="w-full border border-outline-variant rounded-md pl-8 pr-3 py-1.5 h-8 bg-white font-data-mono text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                        value={numeroOperacion}
+                        onChange={(e) => setNumeroOperacion(e.target.value)}
+                        placeholder="Opcional"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Fecha de Pago */}
+                  <div className="flex flex-col gap-0.5">
+                    <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-1">Fecha de Pago <span className="text-error">*</span></label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        className="w-full border border-outline-variant rounded-md px-3 py-1.5 h-8 bg-white font-data-mono text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                        value={fechaPago}
+                        onChange={(e) => setFechaPago(e.target.value)}
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
               </form>

@@ -11,6 +11,7 @@ import {
   PdfViewerModal,
   RefacturarModal,
   DeudasModal,
+  HistorialModal,
   formatPeriod,
 } from './index';
 
@@ -29,12 +30,13 @@ const Billing = () => {
   const [periodoToGenerate, setPeriodoToGenerate] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showDeudasModal, setShowDeudasModal] = useState(false);
+  const [historialReceiptId, setHistorialReceiptId] = useState(null);
 
   // --- Filter State ---
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [filterEstado, setFilterEstado] = useState('Todos');
-  const [filterMes, setFilterMes] = useState('Todos');
+  const [filterMes, setFilterMes] = useState('ULTIMO');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
 
@@ -75,6 +77,11 @@ const Billing = () => {
   const usuariosPendientes = useMemo(() => parseInt(globalStats?.usuariosPendientes || 0, 10), [globalStats]);
   const deudaVencida = useMemo(() => parseFloat(globalStats?.deudaVencida || 0), [globalStats]);
   const usuariosVencidos = useMemo(() => parseInt(globalStats?.usuariosVencidos || 0, 10), [globalStats]);
+  
+  const totalMedidores = useMemo(() => parseInt(globalStats?.totalMedidores || 0, 10), [globalStats]);
+  const sociosSinMedidor = useMemo(() => parseInt(globalStats?.sociosSinMedidor || 0, 10), [globalStats]);
+  const faltanLecturar = useMemo(() => parseInt(globalStats?.faltanLecturar || 0, 10), [globalStats]);
+  const pendientesFacturar = useMemo(() => parseInt(globalStats?.pendientesFacturar || 0, 10), [globalStats]);
 
   // --- Pagination ---
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -94,6 +101,13 @@ const Billing = () => {
     const timer = setTimeout(() => setDebouncedSearchTerm(searchTerm), 500);
     return () => clearTimeout(timer);
   }, [searchTerm]);
+
+  // Set latest period as default
+  useEffect(() => {
+    if (filterMes === 'ULTIMO' && uniqueMonths.length > 0) {
+      setFilterMes(uniqueMonths[0]);
+    }
+  }, [uniqueMonths, filterMes]);
 
   // Reset page when filters change
   useEffect(() => {
@@ -139,8 +153,8 @@ const Billing = () => {
     if (!recibos || recibos.length === 0) {
       return toast.error('No hay recibos para exportar');
     }
-    await pdf.openReportePdf(filterParams, filterMes, uniqueMonths);
-  }, [recibos, pdf, filterParams, filterMes, uniqueMonths]);
+    await pdf.openReportePdf(filterParams);
+  }, [recibos, pdf, filterParams]);
 
   const handleExportExcelDeudas = useCallback(
     async (tipo) => {
@@ -164,7 +178,18 @@ const Billing = () => {
   // =========================================================================
 
   return (
-    <main className="p-4 md:p-xl space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow">
+    <main className="p-4 md:p-xl space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow relative">
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="absolute inset-0 z-[100] flex items-center justify-center bg-surface/60 backdrop-blur-sm rounded-xl">
+          <div className="bg-surface border border-outline-variant shadow-2xl rounded-2xl p-8 flex flex-col items-center animate-in fade-in zoom-in duration-200">
+            <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+            <h3 className="text-lg font-bold text-on-surface">Cargando datos...</h3>
+            <p className="text-sm text-on-surface-variant mt-1">Obteniendo información del periodo seleccionado</p>
+          </div>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
         <div>
@@ -192,42 +217,19 @@ const Billing = () => {
             </div>
           </div>
 
-          {/* Generar Facturas dropdown */}
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              disabled={filterMes === 'Todos' || filterMes === 'TodosHistorico'}
-              className={`flex items-center px-3 py-1.5 h-8 font-bold rounded-md transition-opacity shadow-sm text-xs ${
-                filterMes === 'Todos' || filterMes === 'TodosHistorico'
-                  ? 'bg-surface-variant text-on-surface-variant cursor-not-allowed opacity-70'
-                  : 'bg-primary text-on-primary hover:opacity-90 active:scale-95'
-              }`}
-            >
-              <span className="material-symbols-outlined mr-1 text-[16px]">add</span>
-              Generar Facturas
-              <span className="material-symbols-outlined ml-1 text-[16px]">{isDropdownOpen ? 'expand_less' : 'expand_more'}</span>
-            </button>
-
-            {isDropdownOpen && (
-              <div className="absolute right-0 mt-1 w-48 bg-surface border border-outline-variant rounded-md shadow-lg z-50 py-1 animate-in fade-in zoom-in-95 duration-100">
-                <button
-                  className="w-full text-left px-3 py-1.5 hover:bg-surface-container-high flex items-center gap-2 text-[11px] font-medium text-on-surface transition-colors"
-                  onClick={handleGenerateFromDropdown}
-                >
-                  <span className="material-symbols-outlined text-[15px] opacity-80">receipt_long</span>
-                  Generar Mes
-                </button>
-                <div className="h-px bg-outline-variant/50 my-1 mx-2"></div>
-                <button
-                  className="w-full text-left px-3 py-1.5 hover:bg-surface-container-high flex items-center gap-2 text-[11px] font-medium text-on-surface transition-colors"
-                  onClick={handleExportAllFromDropdown}
-                >
-                  <span className="material-symbols-outlined text-[15px] text-error/80">picture_as_pdf</span>
-                  Descargar PDFs
-                </button>
-              </div>
-            )}
-          </div>
+          {/* Generar Facturas Button */}
+          <button
+            onClick={handleGenerateFromDropdown}
+            disabled={filterMes === 'Todos' || filterMes === 'TodosHistorico'}
+            className={`flex items-center px-3 py-1.5 h-8 font-bold rounded-md transition-opacity shadow-sm text-xs ${
+              filterMes === 'Todos' || filterMes === 'TodosHistorico'
+                ? 'bg-surface-variant text-on-surface-variant cursor-not-allowed opacity-70'
+                : 'bg-primary text-on-primary hover:opacity-90 active:scale-95'
+            }`}
+          >
+            <span className="material-symbols-outlined mr-1 text-[16px]">receipt_long</span>
+            Generar Facturas
+          </button>
         </div>
       </div>
 
@@ -238,6 +240,10 @@ const Billing = () => {
         deudaVencida={deudaVencida}
         usuariosPendientes={usuariosPendientes}
         usuariosVencidos={usuariosVencidos}
+        totalMedidores={totalMedidores}
+        sociosSinMedidor={sociosSinMedidor}
+        faltanLecturar={faltanLecturar}
+        pendientesFacturar={pendientesFacturar}
       />
 
       {/* Table Area */}
@@ -285,10 +291,19 @@ const Billing = () => {
             </button>
             <button
               onClick={handleExportPDF}
-              className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-error/10 text-error hover:bg-error/20 font-bold text-xs rounded-md transition-colors border border-error/20"
+              className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-error/10 text-error hover:bg-error/20 font-bold text-xs rounded-md transition-colors border border-error/20 tooltip-trigger"
+              title="Reporte Tabla"
             >
-              <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
-              PDF
+              <span className="material-symbols-outlined text-[16px]">list_alt</span>
+              Reporte
+            </button>
+            <button
+              onClick={exports.handleExportAllPdfV2}
+              className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-primary/10 text-primary hover:bg-primary/20 font-bold text-xs rounded-md transition-colors border border-primary/20 tooltip-trigger"
+              title="Descargar todos los recibos para imprimir"
+            >
+              <span className="material-symbols-outlined text-[16px]">print</span>
+              Imprimir Recibos
             </button>
           </div>
         </div>
@@ -373,6 +388,7 @@ const Billing = () => {
                     onWhatsApp={exports.handleWhatsApp}
                     onRefacturar={refacturar.open}
                     onViewDetail={setDrawerReceiptId}
+                    onViewHistorial={setHistorialReceiptId}
                   />
                 ))
               )}
@@ -438,7 +454,7 @@ const Billing = () => {
       />
 
       {drawerReceiptId && (
-        <ReceiptDetail receiptId={drawerReceiptId} onClose={() => setDrawerReceiptId(null)} />
+        <ReceiptDetail receiptId={drawerReceiptId} onClose={() => { setDrawerReceiptId(null); refetchAll(); }} />
       )}
 
       <GenerateInvoicesModal
@@ -463,6 +479,12 @@ const Billing = () => {
         onMotivoChange={refacturar.setMotivo}
         onSubmit={refacturar.submit}
         onClose={refacturar.close}
+      />
+
+      <HistorialModal
+        isOpen={!!historialReceiptId}
+        reciboId={historialReceiptId}
+        onClose={() => setHistorialReceiptId(null)}
       />
     </main>
   );

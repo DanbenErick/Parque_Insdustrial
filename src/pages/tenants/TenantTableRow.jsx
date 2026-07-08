@@ -1,11 +1,12 @@
 import React from 'react';
+import Badge from '../../components/ui/Badge';
 
 const getInitials = (name) => {
   if (!name) return '??';
   return name.substring(0, 2).toUpperCase();
 };
 
-const TenantTableRow = ({ tenant, onOpenDrawer, onOpenEdit, onToggleStatus }) => {
+const TenantTableRow = ({ tenant, onOpenDrawer, onOpenEdit, onToggleStatus, onWhatsApp, onResetPassword }) => {
   const deudaTotal = parseFloat(tenant.deuda_total || 0);
   const saldoFavor = parseFloat(tenant.saldo_a_favor || 0);
   const medidores = tenant.parsedMedidores || [];
@@ -45,10 +46,10 @@ const TenantTableRow = ({ tenant, onOpenDrawer, onOpenEdit, onToggleStatus }) =>
             {medidores.map((m, i) => {
               const isHoraPunta = m.tipo === 'Hora Punta' || m.tipo === 'Tiempo Real';
               const isSinMedidor = m.tipo === 'Sin Medidor';
-              
-              let badgeColor = 'bg-blue-500/10 text-blue-600'; // Normal default
-              if (isHoraPunta) badgeColor = 'bg-purple-500/10 text-purple-600';
-              if (isSinMedidor) badgeColor = 'bg-slate-500/10 text-slate-600';
+
+              let badgeVariant = 'info'; // Normal default
+              if (isHoraPunta) badgeVariant = 'purple';
+              if (isSinMedidor) badgeVariant = 'slate';
 
               const displayTipo = isHoraPunta ? 'Hora Punta' : (m.tipo || 'Normal');
 
@@ -57,25 +58,49 @@ const TenantTableRow = ({ tenant, onOpenDrawer, onOpenEdit, onToggleStatus }) =>
                   <span className="font-data-mono text-[10px] font-bold text-on-surface">
                     {m.num_serie}
                   </span>
-                  <span className={`text-[8px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded ${badgeColor}`}>
-                    {displayTipo}
-                  </span>
+                  <Badge variant={badgeVariant}>{displayTipo}</Badge>
                 </div>
               );
             })}
           </div>
         ) : (
-          <span className="text-[9px] font-bold uppercase tracking-wider bg-surface-variant text-on-surface-variant px-1.5 py-0.5 rounded">Sin medidor</span>
+          <button onClick={() => onOpenEdit(tenant)} className="text-[9px] font-bold uppercase tracking-wider text-secondary hover:text-secondary-container bg-secondary/10 hover:bg-secondary/20 px-2 py-1 rounded transition-colors">+ Asignar Medidor</button>
         )}
       </td>
 
       <td className="px-4 py-2">
-        <span className={`inline-flex px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide ${tenant.es_activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+        <Badge variant={tenant.es_activo ? 'success' : 'error'}>
           {tenant.es_activo ? 'Activo' : 'Suspendido'}
-        </span>
+        </Badge>
       </td>
       <td className="px-4 py-2 text-right">
         <div className="flex items-center justify-end gap-2">
+          <div className="relative group/btn flex items-center justify-center">
+            <button
+              onClick={() => onWhatsApp()}
+              className="w-7 h-7 flex items-center justify-center rounded-md transition-colors text-[#25D366] hover:bg-[#25D366]/10"
+            >
+              <span className="material-symbols-outlined text-[15px]">chat</span>
+            </button>
+            <div className="absolute bottom-full right-0 mb-2 hidden group-hover/btn:block w-max bg-gray-800 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg z-50">
+              WhatsApp
+              <div className="absolute top-full right-2 -mt-px border-[4px] border-transparent border-t-gray-800"></div>
+            </div>
+          </div>
+          
+          <div className="relative group/btn flex items-center justify-center">
+            <button
+              onClick={() => onResetPassword()}
+              className="w-7 h-7 flex items-center justify-center rounded-md transition-colors text-secondary hover:bg-secondary/10"
+            >
+              <span className="material-symbols-outlined text-[15px]">key</span>
+            </button>
+            <div className="absolute bottom-full right-0 mb-2 hidden group-hover/btn:block w-max bg-gray-800 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg z-50">
+              Restablecer Clave
+              <div className="absolute top-full right-2 -mt-px border-[4px] border-transparent border-t-gray-800"></div>
+            </div>
+          </div>
+
           <div className="relative group/btn flex items-center justify-center">
             <button
               onClick={() => onOpenEdit(tenant)}
@@ -88,7 +113,7 @@ const TenantTableRow = ({ tenant, onOpenDrawer, onOpenEdit, onToggleStatus }) =>
               <div className="absolute top-full right-2 -mt-px border-[4px] border-transparent border-t-gray-800"></div>
             </div>
           </div>
-          
+
           <div className="relative group/btn flex items-center justify-center">
             <button
               onClick={() => onToggleStatus(tenant)}

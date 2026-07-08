@@ -6,7 +6,8 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
   if (!record) return null;
 
   const isCambioMedidor = Boolean(record.es_cambio_medidor);
-  const isPunta = parseSafe(record.lectura_actual_punta) > 0;
+  const tipoMedidor = medidorInfo?.tipo || record.medidor_tipo || record.tipo;
+  const isPunta = tipoMedidor === 'Hora Punta' || tipoMedidor === 'Tiempo Real';
   const isReactiva = parseSafe(record.factor_potencia) > 0;
 
   const factor = parseSafe(record.factor_multiplicador) || 1;
@@ -17,6 +18,8 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
   const consumoNormal = parseSafe(record.consumo_calculado);
   const consumoPunta = parseSafe(record.consumo_calculado_punta);
   const reactivaKvarh = parseSafe(record.factor_potencia);
+  const maxDemandaN = parseSafe(record.max_demanda_fuera_punta);
+  const maxDemandaP = parseSafe(record.max_demanda_punta);
 
   const montoNormal = consumoNormal * tarifaNormal * factor;
   const montoPunta = consumoPunta * tarifaPunta * factor;
@@ -108,7 +111,7 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
                       )}
                       {record.factor_potencia_original !== null && (
                         <div className="flex items-center gap-1.5 bg-white/50 px-2 py-1 rounded text-xs font-data-mono font-bold text-amber-900">
-                          <span className="text-[10px] uppercase opacity-70">Potencia:</span> {fmtVal(record.factor_potencia_original)} kW
+                          <span className="text-[10px] uppercase opacity-70">E. Reactiva:</span> {fmtVal(record.factor_potencia_original)} kVARh
                         </div>
                       )}
                     </div>
@@ -256,13 +259,39 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
               </div>
             )}
 
-            {/* Potencia Consumida */}
+            {/* Maxima Demanda (if any) */}
+            {(maxDemandaN > 0 || maxDemandaP > 0) && (
+              <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+                <div className="bg-blue-50/50 px-4 py-3 border-b border-blue-100 flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-blue-600 text-[18px]">speed</span>
+                    <span className="font-bold text-sm text-blue-800">Máxima Demanda</span>
+                  </div>
+                </div>
+                <div className="p-4 grid grid-cols-2 md:grid-cols-2 gap-4">
+                  {maxDemandaN > 0 && (
+                    <div>
+                      <p className="text-[10px] font-bold uppercase text-blue-600 mb-1">Fuera Punta</p>
+                      <p className="font-data-mono font-bold text-lg text-blue-600">{fmtVal(maxDemandaN)} <span className="text-[10px]">kW</span></p>
+                    </div>
+                  )}
+                  {maxDemandaP > 0 && (
+                    <div>
+                      <p className="text-[10px] font-bold uppercase text-orange-600 mb-1">Punta</p>
+                      <p className="font-data-mono font-bold text-lg text-orange-600">{fmtVal(maxDemandaP)} <span className="text-[10px]">kW</span></p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Energia Reactiva Capacitiva */}
             {isReactiva && (
               <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
                 <div className="bg-purple-50 px-4 py-3 border-b border-purple-100 flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-purple-600 text-[18px]">electric_meter</span>
-                    <span className="font-bold text-sm text-purple-800">Potencia Consumida</span>
+                    <span className="font-bold text-sm text-purple-800">Energía Reactiva Capacitiva</span>
                   </div>
                   <span className="text-xs font-bold text-purple-700 bg-white px-2 py-1 rounded border border-purple-200">
                     Costo: S/ {fmtVal(precioReactiva)}
@@ -270,8 +299,8 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
                 </div>
                 <div className="p-4 grid grid-cols-2 md:grid-cols-3 gap-4">
                   <div className="col-span-2 md:col-span-2">
-                    <p className="text-[10px] font-bold uppercase text-purple-600 mb-1">Potencia Registrada</p>
-                    <p className="font-data-mono font-bold text-lg text-purple-600">{fmtVal(record.factor_potencia)} <span className="text-[10px]">kW</span></p>
+                    <p className="text-[10px] font-bold uppercase text-purple-600 mb-1">Energía Registrada</p>
+                    <p className="font-data-mono font-bold text-lg text-purple-600">{fmtVal(record.factor_potencia)} <span className="text-[10px]">kVARh</span></p>
                   </div>
                   <div className="col-span-2 md:col-span-1 bg-purple-500/5 rounded-lg p-2 border border-purple-500/10 flex flex-col justify-center">
                     <p className="text-[10px] font-bold uppercase text-purple-800 mb-0.5">Subtotal</p>

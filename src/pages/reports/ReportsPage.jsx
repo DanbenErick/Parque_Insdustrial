@@ -305,7 +305,8 @@ const Reports = () => {
       lectura_actual: l.lectura_actual,
       consumo: l.consumo_calculado,
       total: matchingRecibo ? matchingRecibo.total : 0,
-      estado: matchingRecibo ? matchingRecibo.estado : 'Pendiente'
+      estado: matchingRecibo ? matchingRecibo.estado : 'Pendiente',
+      medidor_tipo: l.medidor_tipo
     };
   }), [filteredLecturas, filteredRecibos]);
 

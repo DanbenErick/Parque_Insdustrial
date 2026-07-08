@@ -129,7 +129,8 @@ const PeriodosSettingsTab = () => {
               <thead>
                 <tr className="bg-surface-container-low border-b border-outline-variant text-[10px] uppercase tracking-wider">
                   <th className="py-2 px-4 font-bold text-on-surface-variant">Mes/Año</th>
-                  <th className="py-2 px-4 font-bold text-on-surface-variant">Tarifa kWh</th>
+                  <th className="py-2 px-4 font-bold text-on-surface-variant">Energía (N/HP)</th>
+                  <th className="py-2 px-4 font-bold text-on-surface-variant">Punta</th>
                   <th className="py-2 px-4 font-bold text-on-surface-variant">Potencia</th>
                   <th className="py-2 px-4 font-bold text-on-surface-variant">Inicio / Fin</th>
                   <th className="py-2 px-4 font-bold text-on-surface-variant">Registrado por</th>
@@ -146,8 +147,14 @@ const PeriodosSettingsTab = () => {
                     <td className="py-2.5 px-4">
                       <span className="font-bold text-primary group-hover:underline">{formatPeriodo(p.mes_anio)}</span>
                     </td>
-                    <td className="py-2.5 px-4 font-data-mono font-bold">
-                      S/ {Number(p.tarifa_kwh).toFixed(4)}
+                    <td className="py-2.5 px-4 font-data-mono">
+                      <div className="flex flex-col">
+                        <span className="font-bold text-primary" title="Energía - Medidor Normal">N: S/ {Number(p.tarifa_kwh).toFixed(4)}</span>
+                        <span className="font-bold text-orange-600 text-[10px]" title="Energía - Medidor Hora Punta">HP: S/ {Number(p.tarifa_kwh_tr || p.tarifa_kwh).toFixed(4)}</span>
+                      </div>
+                    </td>
+                    <td className="py-2.5 px-4 font-data-mono font-bold text-orange-600">
+                      S/ {Number(p.tarifa_kwh_punta || 0).toFixed(4)}
                     </td>
                     <td className="py-2.5 px-4 font-data-mono font-bold text-purple-600">
                       S/ {Number(p.costo_potencia || 0).toFixed(4)}

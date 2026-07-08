@@ -9,7 +9,13 @@ export const EditReadingModal = ({
   editReadingVal, setEditReadingVal,
   editReadingValPunta, setEditReadingValPunta,
   editFactorPotencia, setEditFactorPotencia,
+  editMaxDemandaFueraPunta, setEditMaxDemandaFueraPunta,
+  editMaxDemandaPunta, setEditMaxDemandaPunta,
   editJustificacion, setEditJustificacion,
+  editLecturaFinalAntiguo, setEditLecturaFinalAntiguo,
+  editLecturaInicialNuevo, setEditLecturaInicialNuevo,
+  editLecturaFinalAntiguoPunta, setEditLecturaFinalAntiguoPunta,
+  editLecturaInicialNuevoPunta, setEditLecturaInicialNuevoPunta,
   isSaving
 }) => {
   const isValidJustification = editJustificacion.trim().split(/\s+/).filter(w => w.length > 0).length >= 3;
@@ -58,32 +64,61 @@ export const EditReadingModal = ({
             </div>
 
             {isTR && (
-              <>
+              <div className="flex-1">
+                <label className="text-[9px] font-bold text-orange-600 uppercase tracking-wider block mb-1">Nueva L. Punta</label>
+                <div className="relative h-[48px]">
+                  <input
+                    type="number" step="0.01" required
+                    value={editReadingValPunta} onChange={(e) => setEditReadingValPunta(e.target.value)} placeholder="0.00"
+                    className="w-full h-full bg-white border border-orange-300 hover:border-orange-500 focus:border-orange-500 rounded-lg pl-3 pr-12 text-lg font-data-mono font-bold text-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-right shadow-sm transition-all"
+                  />
+                  <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-on-surface-variant">kWh</span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {isTR && (
+            <>
+              <div className="flex flex-col md:flex-row gap-4">
                 <div className="flex-1">
-                  <label className="text-[9px] font-bold text-orange-600 uppercase tracking-wider block mb-1">Nueva L. Punta</label>
+                  <label className="text-[9px] font-bold text-blue-600 uppercase tracking-wider block mb-1">Máx. Demanda Fuera Punta</label>
                   <div className="relative h-[48px]">
                     <input
                       type="number" step="0.01" required
-                      value={editReadingValPunta} onChange={(e) => setEditReadingValPunta(e.target.value)} placeholder="0.00"
-                      className="w-full h-full bg-white border border-orange-300 hover:border-orange-500 focus:border-orange-500 rounded-lg pl-3 pr-12 text-lg font-data-mono font-bold text-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-right shadow-sm transition-all"
+                      value={editMaxDemandaFueraPunta} onChange={(e) => setEditMaxDemandaFueraPunta(e.target.value)} placeholder="0.00"
+                      className="w-full h-full bg-white border border-blue-300 hover:border-blue-500 focus:border-blue-500 rounded-lg pl-3 pr-12 text-lg font-data-mono font-bold text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-right shadow-sm transition-all"
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-on-surface-variant">kWh</span>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-on-surface-variant">kW</span>
                   </div>
                 </div>
                 <div className="flex-1">
-                  <label className="text-[9px] font-bold text-purple-600 uppercase tracking-wider block mb-1">Nueva Potencia Consumida</label>
+                  <label className="text-[9px] font-bold text-orange-600 uppercase tracking-wider block mb-1">Máx. Demanda Punta</label>
+                  <div className="relative h-[48px]">
+                    <input
+                      type="number" step="0.01" required
+                      value={editMaxDemandaPunta} onChange={(e) => setEditMaxDemandaPunta(e.target.value)} placeholder="0.00"
+                      className="w-full h-full bg-white border border-orange-300 hover:border-orange-500 focus:border-orange-500 rounded-lg pl-3 pr-12 text-lg font-data-mono font-bold text-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-right shadow-sm transition-all"
+                    />
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-on-surface-variant">kW</span>
+                  </div>
+                </div>
+              </div>
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="flex-1">
+                  <label className="text-[9px] font-bold text-purple-600 uppercase tracking-wider block mb-1">Energía Reactiva Capacitiva</label>
                   <div className="relative h-[48px]">
                     <input
                       type="number" step="0.01" required
                       value={editFactorPotencia} onChange={(e) => setEditFactorPotencia(e.target.value)} placeholder="0.00"
                       className="w-full h-full bg-white border border-purple-300 hover:border-purple-500 focus:border-purple-500 rounded-lg pl-3 pr-12 text-lg font-data-mono font-bold text-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-right shadow-sm transition-all"
                     />
-                    <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-on-surface-variant">kW</span>
+                    <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-on-surface-variant">kVARh</span>
                   </div>
                 </div>
-              </>
-            )}
-          </div>
+              </div>
+            </>
+          )}
 
           {/* EDITAR DATOS DE CAMBIO DE MEDIDOR */}
           {(editModalData.es_cambio_medidor === 1 || editModalData.es_cambio_medidor === true) && (

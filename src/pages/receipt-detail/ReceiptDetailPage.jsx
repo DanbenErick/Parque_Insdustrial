@@ -145,7 +145,7 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
   const handleDownloadPdf = useCallback(async () => {
     if (!id || !recibo) return;
     try {
-      const response = await api.get(`/recibos/${id}/pdf-v3`, { responseType: 'blob' });
+      const response = await api.get(`/recibos/${id}/pdf`, { responseType: 'blob' });
       const blob = new Blob([response.data], { type: 'application/pdf' });
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');

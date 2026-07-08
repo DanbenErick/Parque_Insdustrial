@@ -3,10 +3,15 @@ import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-
 import { Toaster } from 'sonner';
 import { useAuth } from './context/AuthContext';
 import { useTheme } from './context/ThemeContext';
+import PwaInstallPrompt from './components/ui/PwaInstallPrompt';
+import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Layouts
 import Sidebar from './layouts/Sidebar';
 import TopBar from './layouts/TopBar';
+import SocioSidebar from './layouts/SocioSidebar';
+import SocioTopBar from './layouts/SocioTopBar';
+import MobileBottomNav from './components/layout/MobileBottomNav';
 
 // Shared components
 import PageTransition from './components/ui/PageTransition';
@@ -34,6 +39,12 @@ const SettingsPage = lazy(() => import('./pages/settings/SettingsPage'));
 const SupportPage = lazy(() => import('./pages/support/SupportPage'));
 const UserManagementPage = lazy(() => import('./pages/users/UserManagementPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
+
+// Socio Pages
+const SocioDashboardPage = lazy(() => import('./pages/socio/SocioDashboardPage'));
+const SocioBillingPage = lazy(() => import('./pages/socio/SocioBillingPage'));
+const SocioPaymentsPage = lazy(() => import('./pages/socio/SocioPaymentsPage'));
+const SocioProfilePage = lazy(() => import('./pages/socio/SocioProfilePage'));
 
 function App() {
   const { user, isAuthenticated, isLoading } = useAuth();
@@ -102,19 +113,36 @@ function App() {
       <div className="bg-surface font-body-md text-on-surface antialiased flex flex-col md:flex-row h-[100dvh] w-full overflow-hidden relative">
 
         {/* Mobile Top Bar */}
-        <header className="md:hidden shrink-0 flex items-center justify-between p-4 bg-surface-dim text-white shadow-md z-40 print:hidden">
-          <div className="flex items-center gap-3">
-            <button onClick={() => setIsMobileMenuOpen(true)} className="p-1 hover:bg-white/10 rounded-lg transition-colors">
-              <span className="material-symbols-outlined text-[28px]">menu</span>
-            </button>
-            <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center overflow-hidden">
-              <img src="/logo.png" alt="Jicamarca Logo" className="w-[85%] h-[85%] object-contain" />
+        {Number(user?.rol_id) === 3 ? (
+          <header className="md:hidden shrink-0 flex items-center justify-between p-4 bg-white border-b border-outline-variant/30 text-emerald-900 shadow-sm z-40 print:hidden">
+            <div className="flex items-center gap-3">
+              <button onClick={() => setIsMobileMenuOpen(true)} className="p-1 hover:bg-emerald-50 rounded-lg transition-colors text-emerald-600">
+                <span className="material-symbols-outlined text-[28px]">menu</span>
+              </button>
+              <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center overflow-hidden border border-emerald-100">
+                <img src="/logo.png" alt="Logo" className="w-[85%] h-[85%] object-contain drop-shadow-sm" />
+              </div>
+              <span className="font-bold text-[14px]">Portal Cliente</span>
             </div>
-          </div>
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center font-bold text-on-primary text-xs uppercase">
-            {user?.nombre_razonsocial ? user.nombre_razonsocial.substring(0, 2) : 'AD'}
-          </div>
-        </header>
+            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center font-bold text-emerald-700 text-xs uppercase shadow-inner">
+              {user?.nombre_razonsocial ? user.nombre_razonsocial.substring(0, 1) : 'S'}
+            </div>
+          </header>
+        ) : (
+          <header className="md:hidden shrink-0 flex items-center justify-between p-4 bg-surface text-on-surface shadow-sm border-b border-outline-variant/50 z-40 print:hidden">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+                <img src="/logo.png" alt="Logo" className="w-[85%] h-[85%] object-contain" />
+              </div>
+              <div className="flex flex-col">
+                <span className="font-bold text-on-surface text-[14px] leading-tight tracking-tight">Parque Industrial</span>
+              </div>
+            </div>
+            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center font-bold text-on-primary text-xs uppercase shadow-inner shadow-primary/20">
+              {user?.nombre_razonsocial ? user.nombre_razonsocial.substring(0, 2) : 'AD'}
+            </div>
+          </header>
+        )}
 
         {/* Mobile Overlay */}
         {isMobileMenuOpen && (
@@ -125,33 +153,48 @@ function App() {
         )}
 
         {/* Sidebar */}
-        <Sidebar
-          isMobileMenuOpen={isMobileMenuOpen}
-          onCloseMobileMenu={closeMobileMenu}
-          screens={visibleScreens}
-        />
+        {Number(user?.rol_id) === 3 ? (
+          <SocioSidebar
+            isMobileMenuOpen={isMobileMenuOpen}
+            onCloseMobileMenu={closeMobileMenu}
+          />
+        ) : (
+          <Sidebar
+            isMobileMenuOpen={isMobileMenuOpen}
+            onCloseMobileMenu={closeMobileMenu}
+            screens={visibleScreens}
+          />
+        )}
 
         {/* Main Content Area */}
         <div className="flex-1 ml-0 md:ml-[260px] flex flex-col min-h-0 bg-background dark:bg-[#1a1c1e]">
-          <TopBar screens={visibleScreens} />
+          {Number(user?.rol_id) === 3 ? (
+            <SocioTopBar />
+          ) : (
+            <>
+              <TopBar screens={visibleScreens} />
+              <MobileBottomNav screens={visibleScreens} />
+            </>
+          )}
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col">
+          <div className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col pb-[70px] md:pb-0">
             
               <Suspense fallback={<PageLoader />}>
                 <Routes location={location} key={location.pathname}>
                   <Route path="/" element={<Navigate to="/dashboard" />} />
-                  <Route path="/dashboard" element={<PageTransition><DashboardPage /></PageTransition>} />
-                  <Route path="/tenants" element={<PageTransition><TenantsPage /></PageTransition>} />
-                  <Route path="/billing" element={<PageTransition><BillingPage /></PageTransition>} />
-                  <Route path="/payments" element={<PageTransition><PaymentsPage /></PageTransition>} />
-                  <Route path="/reports" element={<PageTransition><ReportsPage /></PageTransition>} />
-                  <Route path="/generate_invoices" element={<PageTransition><GenerateInvoicesPage /></PageTransition>} />
-                  <Route path="/manual_billing" element={<PageTransition><ManualBillingPage /></PageTransition>} />
-                  <Route path="/receipt_detail" element={<PageTransition><ReceiptDetailPage /></PageTransition>} />
-                  <Route path="/users" element={<PageTransition><UserManagementPage /></PageTransition>} />
-                  <Route path="/settings" element={<PageTransition><SettingsPage /></PageTransition>} />
-                  <Route path="/support" element={<PageTransition><SupportPage /></PageTransition>} />
+                  <Route path="/dashboard" element={<ProtectedRoute requiredRoute="dashboard"><PageTransition>{Number(user?.rol_id) === 3 ? <SocioDashboardPage /> : <DashboardPage />}</PageTransition></ProtectedRoute>} />
+                  <Route path="/tenants" element={<ProtectedRoute requiredRoute="tenants"><PageTransition><TenantsPage /></PageTransition></ProtectedRoute>} />
+                  <Route path="/billing" element={<ProtectedRoute requiredRoute="billing"><PageTransition>{Number(user?.rol_id) === 3 ? <SocioBillingPage /> : <BillingPage />}</PageTransition></ProtectedRoute>} />
+                  <Route path="/payments" element={<ProtectedRoute requiredRoute="payments"><PageTransition>{Number(user?.rol_id) === 3 ? <SocioPaymentsPage /> : <PaymentsPage />}</PageTransition></ProtectedRoute>} />
+                  <Route path="/profile" element={<ProtectedRoute requiredRoute="profile"><PageTransition>{Number(user?.rol_id) === 3 ? <SocioProfilePage /> : <Navigate to="/dashboard" />}</PageTransition></ProtectedRoute>} />
+                  <Route path="/reports" element={<ProtectedRoute requiredRoute="reports"><PageTransition><ReportsPage /></PageTransition></ProtectedRoute>} />
+                  <Route path="/generate_invoices" element={<ProtectedRoute requiredRoute="billing"><PageTransition><GenerateInvoicesPage /></PageTransition></ProtectedRoute>} />
+                  <Route path="/manual_billing" element={<ProtectedRoute requiredRoute="manual_billing"><PageTransition><ManualBillingPage /></PageTransition></ProtectedRoute>} />
+                  <Route path="/receipt_detail" element={<ProtectedRoute requiredRoute="billing"><PageTransition><ReceiptDetailPage /></PageTransition></ProtectedRoute>} />
+                  <Route path="/users" element={<ProtectedRoute requiredRoute="users"><PageTransition><UserManagementPage /></PageTransition></ProtectedRoute>} />
+                  <Route path="/settings" element={<ProtectedRoute requiredRoute="settings"><PageTransition><SettingsPage /></PageTransition></ProtectedRoute>} />
+                  <Route path="/support" element={<ProtectedRoute requiredRoute="support"><PageTransition><SupportPage /></PageTransition></ProtectedRoute>} />
                   <Route path="/login" element={<Navigate to="/dashboard" />} />
                   <Route path="*" element={<PageTransition><NotFoundPage /></PageTransition>} />
                 </Routes>
@@ -162,6 +205,7 @@ function App() {
           {/* Footer removed per user request */}
         </div>
       </div>
+      <PwaInstallPrompt />
     </>
   );
 }

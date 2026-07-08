@@ -3,4 +3,5 @@ export { default as BillingTableRow } from './BillingTableRow';
 export { default as PdfViewerModal } from './PdfViewerModal';
 export { default as RefacturarModal } from './RefacturarModal';
 export { default as DeudasModal } from './DeudasModal';
+export { default as HistorialModal } from './HistorialModal';
 export { buildFilterParams, formatPeriod, downloadBlob, MIME_TYPES } from './billingUtils';

@@ -21,8 +21,15 @@ const ReportTableRow = React.memo(({ member }) => {
             <span className="text-on-surface-variant px-0.5">•</span>
             <span className="text-on-surface-variant">Act: <span className="font-data-mono">{parseFloat(m.lectura_actual).toLocaleString('es-PE', { minimumFractionDigits: 1 })}</span></span>
           </div>
-          <div className="text-[11px] font-bold text-primary mt-0.5">
-            Consumo: {parseFloat(m.consumo).toLocaleString('es-PE', { minimumFractionDigits: 1 })} kWh
+          <div className="flex items-center gap-2 mt-1">
+            <div className="text-[11px] font-bold text-primary">
+              Consumo: {parseFloat(m.consumo).toLocaleString('es-PE', { minimumFractionDigits: 1 })} kWh
+            </div>
+            {m.medidor_tipo && (
+              <span className="bg-primary/10 text-primary text-[8px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded">
+                {m.medidor_tipo === 'Tiempo Real' ? 'Hora Punta' : m.medidor_tipo}
+              </span>
+            )}
           </div>
         </div>
       </td>

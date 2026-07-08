@@ -26,6 +26,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
   // Form State
   const [mes, setMes] = useState('01');
   const [tarifaKwh, setTarifaKwh] = useState('');
+  const [tarifaKwhTr, setTarifaKwhTr] = useState('');
   const [tarifaKwhPunta, setTarifaKwhPunta] = useState('');
   const [tarifaMantenimientoNormal, setTarifaMantenimientoNormal] = useState('');
   const [tarifaMantenimientoTiempoReal, setTarifaMantenimientoTiempoReal] = useState('');
@@ -48,6 +49,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
         const m = parts[0].length === 4 ? parts[1] : parts[0];
         setMes(m);
         setTarifaKwh(initialData.tarifa_kwh);
+        setTarifaKwhTr(initialData.tarifa_kwh_tr || initialData.tarifa_kwh); // Fallback for old data
         setTarifaKwhPunta(initialData.tarifa_kwh_punta || '');
         setTarifaMantenimientoNormal(initialData.tarifa_mantenimiento_normal || '');
         setTarifaMantenimientoTiempoReal(initialData.tarifa_mantenimiento_tiempo_real || '');
@@ -69,13 +71,35 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
           if (firstAvailable) initialMes = firstAvailable.val;
         }
 
+        // Copy prices from the last period if it exists
+        let defaultTarifaKwh = '';
+        let defaultTarifaKwhTr = '';
+        let defaultTarifaKwhPunta = '';
+        let defaultTarifaMantenimientoNormal = '';
+        let defaultTarifaMantenimientoTiempoReal = '';
+        let defaultCostoPotencia = '';
+        let defaultFactorMultiplicador = '1.0000';
+
+        if (existentes && existentes.length > 0) {
+          const sortedExistentes = [...existentes].sort((a, b) => a.mes_anio.localeCompare(b.mes_anio));
+          const ultimoPeriodo = sortedExistentes[sortedExistentes.length - 1];
+          defaultTarifaKwh = ultimoPeriodo.tarifa_kwh || '';
+          defaultTarifaKwhTr = ultimoPeriodo.tarifa_kwh_tr || ultimoPeriodo.tarifa_kwh || '';
+          defaultTarifaKwhPunta = ultimoPeriodo.tarifa_kwh_punta || '';
+          defaultTarifaMantenimientoNormal = ultimoPeriodo.tarifa_mantenimiento_normal || '';
+          defaultTarifaMantenimientoTiempoReal = ultimoPeriodo.tarifa_mantenimiento_tiempo_real || '';
+          defaultCostoPotencia = ultimoPeriodo.costo_potencia || '';
+          defaultFactorMultiplicador = ultimoPeriodo.factor_multiplicador || '1.0000';
+        }
+
         setMes(initialMes);
-        setTarifaKwh('');
-        setTarifaKwhPunta('');
-        setTarifaMantenimientoNormal('');
-        setTarifaMantenimientoTiempoReal('');
-        setCostoPotencia('');
-        setFactorMultiplicador('1.0000');
+        setTarifaKwh(defaultTarifaKwh);
+        setTarifaKwhTr(defaultTarifaKwhTr);
+        setTarifaKwhPunta(defaultTarifaKwhPunta);
+        setTarifaMantenimientoNormal(defaultTarifaMantenimientoNormal);
+        setTarifaMantenimientoTiempoReal(defaultTarifaMantenimientoTiempoReal);
+        setCostoPotencia(defaultCostoPotencia);
+        setFactorMultiplicador(defaultFactorMultiplicador);
         setFechaInicio('');
         setFechaFin('');
         setFechaEmision('');
@@ -133,6 +157,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
     const payload = {
       mes_anio: `${activeYear}-${mes}`,
       tarifa_kwh: parseFloat(tarifaKwh),
+      tarifa_kwh_tr: tarifaKwhTr ? parseFloat(tarifaKwhTr) : parseFloat(tarifaKwh),
       tarifa_kwh_punta: tarifaKwhPunta ? parseFloat(tarifaKwhPunta) : 0,
       costo_potencia: costoPotencia ? parseFloat(costoPotencia) : 0,
       tarifa_mantenimiento_normal: tarifaMantenimientoNormal ? parseFloat(tarifaMantenimientoNormal) : 0,
@@ -235,63 +260,97 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                 </div>
               </div>
 
-              {/* Sección: Tarifas y Costos */}
-              <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-2xl p-5 shadow-inner relative overflow-hidden group">
-                <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500" />
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-[16px]">payments</span>
-                  Tarifas y Costos
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
-                  <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
-                    <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[14px] text-primary">bolt</span> Energía (kWh)
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
-                      <input 
-                        type="number" 
-                        step="0.0001"
-                        required
-                        value={tarifaKwh}
-                        onChange={(e) => setTarifaKwh(e.target.value)}
-                        placeholder="0.00" 
-                        className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-2 text-sm font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm transition-all"
-                      />
-                    </div>
-                  </div>
-                  <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
-                    <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[14px] text-orange-600">schedule</span> Punta (kWh)
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
-                      <input 
-                        type="number" 
-                        step="0.0001"
-                        value={tarifaKwhPunta}
-                        onChange={(e) => setTarifaKwhPunta(e.target.value)}
-                        placeholder="0.00" 
-                        className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-2 text-sm font-data-mono font-bold text-on-surface focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 shadow-sm transition-all"
-                      />
+              {/* Sección de Tarifas */}
+              <div className="flex flex-col gap-6">
+                
+                {/* Tarifas - Medidor Normal (100% ancho) */}
+                <div className="w-full bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-2xl p-5 shadow-inner relative overflow-hidden group">
+                  <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500" />
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-1.5 relative z-10">
+                    <span className="material-symbols-outlined text-[16px]">payments</span>
+                    Medidor Normal
+                  </h4>
+                  
+                  <div className="flex flex-col relative z-10">
+                    <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
+                      <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px] text-primary">bolt</span> Energía (kWh)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
+                        <input 
+                          type="number" 
+                          step="0.0001"
+                          required
+                          value={tarifaKwh}
+                          onChange={(e) => setTarifaKwh(e.target.value)}
+                          placeholder="0.00" 
+                          className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-2 text-sm font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm transition-all"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
-                <div className="mt-4">
-                  <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
-                    <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[14px] text-purple-600">electric_meter</span> Costo Potencia (Hora Punta)
-                    </label>
-                    <div className="relative">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
-                      <input 
-                        type="number" 
-                        step="0.0001"
-                        value={costoPotencia}
-                        onChange={(e) => setCostoPotencia(e.target.value)}
-                        placeholder="0.00" 
-                        className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-2 text-sm font-data-mono font-bold text-on-surface focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 shadow-sm transition-all"
-                      />
+
+                {/* Tarifas - Medidor Hora Punta (100% ancho) */}
+                <div className="w-full bg-gradient-to-br from-orange-500/10 via-orange-500/5 to-transparent border border-orange-500/20 rounded-2xl p-5 shadow-inner relative overflow-hidden group">
+                  <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-all duration-500" />
+                  <h4 className="text-[10px] font-bold uppercase tracking-widest text-orange-600 mb-4 flex items-center gap-1.5 relative z-10">
+                    <span className="material-symbols-outlined text-[16px]">electric_meter</span>
+                    Medidor Hora Punta
+                  </h4>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
+                    <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
+                      <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px] text-primary">bolt</span> Energía (kWh)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
+                        <input 
+                          type="number" 
+                          step="0.0001"
+                          required
+                          value={tarifaKwhTr}
+                          onChange={(e) => setTarifaKwhTr(e.target.value)}
+                          placeholder="0.00" 
+                          className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-2 text-sm font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm transition-all"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
+                      <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px] text-orange-600">schedule</span> Punta (kWh)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
+                        <input 
+                          type="number" 
+                          step="0.0001"
+                          value={tarifaKwhPunta}
+                          onChange={(e) => setTarifaKwhPunta(e.target.value)}
+                          placeholder="0.00" 
+                          className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-2 text-sm font-data-mono font-bold text-on-surface focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 shadow-sm transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow sm:col-span-2">
+                      <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px] text-purple-600">electric_meter</span> Costo Potencia (Hora Punta)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
+                        <input 
+                          type="number" 
+                          step="0.0001"
+                          value={costoPotencia}
+                          onChange={(e) => setCostoPotencia(e.target.value)}
+                          placeholder="0.00" 
+                          className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-2 text-sm font-data-mono font-bold text-on-surface focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 shadow-sm transition-all"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>

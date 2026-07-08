@@ -78,28 +78,22 @@ export const useExports = ({ filterParams, filterMes, activeYear, uniqueMonths, 
 
   const handleExportAllPdfV2 = useCallback(async () => {
     try {
-      const params = { ...filterParams };
-      const selectedMes =
-        filterMes !== 'Todos' && filterMes !== 'TodosHistorico'
-          ? filterMes
-          : uniqueMonths.length > 0
-          ? uniqueMonths[0]
-          : null;
-
-      if (selectedMes) params.periodo = selectedMes;
-
       toast.loading('Generando PDF masivo...', { id: 'pdfMasivo' });
-      const response = await api.get('/recibos/export/all-v2', { params, responseType: 'blob' });
+      const response = await api.get('/recibos/export/all', { params: filterParams, responseType: 'blob' });
       downloadBlob(
         response.data,
-        `recibos_masivos_${params.periodo || 'todos'}.pdf`,
+        `recibos_masivos_${filterParams.periodo || filterParams.year || 'historico'}.pdf`,
         MIME_TYPES.PDF,
       );
       toast.success('PDF masivo generado con éxito', { id: 'pdfMasivo' });
-    } catch {
-      toast.error('Error al generar el PDF masivo', { id: 'pdfMasivo' });
+    } catch (error) {
+      if (error.response?.status === 404) {
+        toast.error('No hay recibos generados para este periodo.', { id: 'pdfMasivo' });
+      } else {
+        toast.error('Error al generar el PDF masivo', { id: 'pdfMasivo' });
+      }
     }
-  }, [filterParams, filterMes, uniqueMonths]);
+  }, [filterParams]);
 
   const handleWhatsApp = useCallback(async (recibo) => {
     if (!recibo.telefono) {
@@ -136,7 +130,7 @@ Te escribimos para enviarte tu recibo de luz correspondiente al periodo *${recib
 
     toast.success('Descargando PDF para enviar por WhatsApp...', { duration: 2000 });
     
-    api.get(`/recibos/${recibo.id}/pdf-v3`, { responseType: 'blob' })
+    api.get(`/recibos/${recibo.id}/pdf`, { responseType: 'blob' })
       .then((response) => {
         downloadBlob(
           response.data,

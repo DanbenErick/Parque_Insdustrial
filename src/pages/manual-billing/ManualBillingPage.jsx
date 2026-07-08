@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useYear } from '../../context/YearContext';
+import { useAuth } from '../../context/AuthContext';
 import PeriodFormModal from '../settings/PeriodFormModal';
 
 // Hooks
@@ -17,6 +18,7 @@ import { ReadingDetailDrawer } from './components/ReadingDetailDrawer';
 
 const ManualBilling = () => {
   const { activeYear } = useYear();
+  const { user } = useAuth();
   
   // Data Hook
   const billingData = useBillingData(activeYear);
@@ -36,7 +38,7 @@ const ManualBilling = () => {
   } = billingData;
 
   // Forms Hook
-  const billingForms = useBillingForms(billingData);
+  const billingForms = useBillingForms(billingData, user);
   const {
     searchTerm, handleSearchChange,
     selectedMember, handleSelectMember, resetForm,
@@ -44,7 +46,8 @@ const ManualBilling = () => {
     currentReading, setCurrentReading,
     currentReadingPunta, setCurrentReadingPunta,
     factorPotencia, setFactorPotencia,
-    precioFactorPotencia, setPrecioFactorPotencia,
+    maxDemandaFueraPunta, setMaxDemandaFueraPunta,
+    maxDemandaPunta, setMaxDemandaPunta,
     isCambioMedidor, setIsCambioMedidor,
     lecturaFinalAntiguo, setLecturaFinalAntiguo,
     lecturaInicialNuevo, setLecturaInicialNuevo,
@@ -58,6 +61,8 @@ const ManualBilling = () => {
     editReadingVal, setEditReadingVal,
     editReadingValPunta, setEditReadingValPunta,
     editFactorPotencia, setEditFactorPotencia,
+    editMaxDemandaFueraPunta, setEditMaxDemandaFueraPunta,
+    editMaxDemandaPunta, setEditMaxDemandaPunta,
     editJustificacion, setEditJustificacion,
     editLecturaFinalAntiguo, setEditLecturaFinalAntiguo,
     editLecturaInicialNuevo, setEditLecturaInicialNuevo,
@@ -107,6 +112,8 @@ const ManualBilling = () => {
                 currentReading={currentReading} setCurrentReading={setCurrentReading}
                 currentReadingPunta={currentReadingPunta} setCurrentReadingPunta={setCurrentReadingPunta}
                 factorPotencia={factorPotencia} setFactorPotencia={setFactorPotencia}
+                maxDemandaFueraPunta={maxDemandaFueraPunta} setMaxDemandaFueraPunta={setMaxDemandaFueraPunta}
+                maxDemandaPunta={maxDemandaPunta} setMaxDemandaPunta={setMaxDemandaPunta}
                 isCambioMedidor={isCambioMedidor} setIsCambioMedidor={setIsCambioMedidor}
                 lecturaFinalAntiguo={lecturaFinalAntiguo} setLecturaFinalAntiguo={setLecturaFinalAntiguo}
                 lecturaInicialNuevo={lecturaInicialNuevo} setLecturaInicialNuevo={setLecturaInicialNuevo}
@@ -165,6 +172,8 @@ const ManualBilling = () => {
             editReadingVal={editReadingVal} setEditReadingVal={setEditReadingVal}
             editReadingValPunta={editReadingValPunta} setEditReadingValPunta={setEditReadingValPunta}
             editFactorPotencia={editFactorPotencia} setEditFactorPotencia={setEditFactorPotencia}
+            editMaxDemandaFueraPunta={editMaxDemandaFueraPunta} setEditMaxDemandaFueraPunta={setEditMaxDemandaFueraPunta}
+            editMaxDemandaPunta={editMaxDemandaPunta} setEditMaxDemandaPunta={setEditMaxDemandaPunta}
             editJustificacion={editJustificacion} setEditJustificacion={setEditJustificacion}
             editLecturaFinalAntiguo={editLecturaFinalAntiguo} setEditLecturaFinalAntiguo={setEditLecturaFinalAntiguo}
             editLecturaInicialNuevo={editLecturaInicialNuevo} setEditLecturaInicialNuevo={setEditLecturaInicialNuevo}
