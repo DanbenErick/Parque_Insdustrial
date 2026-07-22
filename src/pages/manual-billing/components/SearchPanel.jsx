@@ -31,6 +31,15 @@ export const SearchPanel = ({
           placeholder="Busca por Nombre, RUC, o Serie de medidor..."
           className="w-full bg-transparent border-none text-base font-medium text-on-surface placeholder:text-on-surface-variant/50 focus:outline-none focus:ring-0 h-full"
         />
+        {searchTerm && (
+          <button
+            onClick={() => handleSearchChange({ target: { value: '' } })}
+            className="px-3 text-on-surface-variant hover:text-error transition-colors flex items-center justify-center focus:outline-none"
+            title="Limpiar búsqueda"
+          >
+            <span className="material-symbols-outlined text-[20px]">close</span>
+          </button>
+        )}
         <div className="pr-5 hidden md:flex items-center shrink-0">
           <span className="text-[10px] font-extrabold text-primary bg-primary/10 px-2.5 py-1 rounded-lg border border-primary/20 uppercase tracking-widest shadow-sm">Búsqueda rápida</span>
         </div>

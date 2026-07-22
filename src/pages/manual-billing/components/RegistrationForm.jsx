@@ -20,27 +20,59 @@ export const RegistrationForm = ({
 }) => {
   const isTR = selectedMember?.tipo === 'Hora Punta' || selectedMember?.tipo === 'Tiempo Real';
   
-  const getMissingFields = () => {
-    const missing = [];
-    if (!currentReading) missing.push(isTR ? "L. Actual (N)" : "L. Actual");
+  const getValidationErrors = () => {
+    const errors = [];
+    if (!currentReading) errors.push(isTR ? "Falta L. Actual (N)" : "Falta L. Actual");
     if (isCambioMedidor) {
-      if (!lecturaFinalAntiguo) missing.push("L. Final (Dañado)");
-      if (!lecturaInicialNuevo) missing.push("L. Inicial (Nuevo)");
+      if (!lecturaFinalAntiguo) errors.push("Falta L. Final (Dañado)");
+      if (!lecturaInicialNuevo) errors.push("Falta L. Inicial (Nuevo)");
     }
     if (isTR) {
-      if (!currentReadingPunta) missing.push("L. Actual (P)");
-      if (!factorPotencia) missing.push("Energía Reactiva Capacitiva");
-      if (!maxDemandaFueraPunta) missing.push("Máx. Demanda (N)");
-      if (!maxDemandaPunta) missing.push("Máx. Demanda (P)");
+      if (!currentReadingPunta) errors.push("Falta L. Actual (P)");
+      if (!factorPotencia) errors.push("Falta Energía Reactiva Capacitiva");
+      if (!maxDemandaFueraPunta) errors.push("Falta Máx. Demanda (N)");
+      if (!maxDemandaPunta) errors.push("Falta Máx. Demanda (P)");
       if (isCambioMedidor) {
-        if (!lecturaFinalAntiguoPunta) missing.push("L. Final Punta (Dañado)");
-        if (!lecturaInicialNuevoPunta) missing.push("L. Inicial Punta (Nuevo)");
+        if (!lecturaFinalAntiguoPunta) errors.push("Falta L. Final Punta (Dañado)");
+        if (!lecturaInicialNuevoPunta) errors.push("Falta L. Inicial Punta (Nuevo)");
       }
     }
-    return missing;
+    
+    // Validaciones lógicas (Valores menores al anterior)
+    if (isCambioMedidor) {
+      if (lecturaFinalAntiguo && parseSafe(lecturaFinalAntiguo) < parseSafe(selectedMember?.ultima_lectura)) {
+        const diff = parseSafe(lecturaFinalAntiguo) - parseSafe(selectedMember?.ultima_lectura);
+        errors.push(`La L. Final (Dañado) es menor a la del mes anterior (Diferencia: ${diff.toFixed(2)} kWh)`);
+      }
+      if (currentReading && lecturaInicialNuevo && parseSafe(currentReading) < parseSafe(lecturaInicialNuevo)) {
+        const diff = parseSafe(currentReading) - parseSafe(lecturaInicialNuevo);
+        errors.push(`La lectura es menor a la Inicial del Nuevo (Diferencia: ${diff.toFixed(2)} kWh)`);
+      }
+      if (isTR) {
+        if (lecturaFinalAntiguoPunta && parseSafe(lecturaFinalAntiguoPunta) < parseSafe(selectedMember?.ultima_lectura_punta)) {
+          const diff = parseSafe(lecturaFinalAntiguoPunta) - parseSafe(selectedMember?.ultima_lectura_punta);
+          errors.push(`La L. Final Punta (Dañado) es menor a la del mes anterior (Diferencia: ${diff.toFixed(2)} kWh)`);
+        }
+        if (currentReadingPunta && lecturaInicialNuevoPunta && parseSafe(currentReadingPunta) < parseSafe(lecturaInicialNuevoPunta)) {
+          const diff = parseSafe(currentReadingPunta) - parseSafe(lecturaInicialNuevoPunta);
+          errors.push(`La lectura Punta es menor a la Inicial del Nuevo (Diferencia: ${diff.toFixed(2)} kWh)`);
+        }
+      }
+    } else {
+      if (currentReading && parseSafe(currentReading) < parseSafe(selectedMember?.ultima_lectura)) {
+        const diff = parseSafe(currentReading) - parseSafe(selectedMember?.ultima_lectura);
+        errors.push(`La lectura es menor al del mes anterior (Diferencia: ${diff.toFixed(2)} kWh)`);
+      }
+      if (isTR && currentReadingPunta && parseSafe(currentReadingPunta) < parseSafe(selectedMember?.ultima_lectura_punta)) {
+        const diff = parseSafe(currentReadingPunta) - parseSafe(selectedMember?.ultima_lectura_punta);
+        errors.push(`La lectura Punta es menor al del mes anterior (Diferencia: ${diff.toFixed(2)} kWh)`);
+      }
+    }
+    
+    return errors;
   };
   
-  const missingFields = getMissingFields();
+  const validationErrors = getValidationErrors();
 
   const subTotalNormal = isCambioMedidor 
     ? Math.max(0, parseSafe(lecturaFinalAntiguo) - parseSafe(selectedMember?.ultima_lectura)) + Math.max(0, parseSafe(currentReading) - parseSafe(lecturaInicialNuevo))
@@ -87,11 +119,22 @@ export const RegistrationForm = ({
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-4 bg-white px-3 py-2 rounded-lg border border-green-200/50 shadow-sm shrink-0 w-full md:w-auto justify-between md:justify-end">
-              <span className="text-[10px] text-green-600/70 font-bold uppercase tracking-wider">Registrado</span>
-              <span className="font-data-mono text-lg font-bold text-green-700 leading-none">
-                {fmtVal(lecturaExistente.lectura_actual)} <span className="text-[10px]">W</span>
-              </span>
+            <div className="flex flex-col md:flex-row items-center gap-4 bg-white px-4 py-3 rounded-xl border border-green-200/60 shadow-sm shrink-0 w-full md:w-auto justify-between md:justify-end">
+              <div className="flex flex-col items-center md:items-end">
+                <span className="text-[10px] text-green-600/70 font-bold uppercase tracking-wider mb-0.5">L. Registrada</span>
+                <span className="font-data-mono text-xl font-black text-green-700 leading-none">
+                  {fmtVal(lecturaExistente.lectura_actual)} <span className="text-[11px] font-bold text-green-600/80">kWh</span>
+                </span>
+              </div>
+              {lecturaExistente.consumo_calculado !== undefined && (
+                <div className="flex flex-col items-center md:items-end border-t md:border-t-0 md:border-l border-green-200/60 pt-2 md:pt-0 md:pl-4 mt-2 md:mt-0 w-full md:w-auto">
+                  <span className="text-[10px] text-green-600/70 font-bold uppercase tracking-wider mb-0.5">Consumo (Dif.)</span>
+                  <span className="font-data-mono text-xl font-black text-green-600 leading-none flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[16px] text-green-500">add_circle</span>
+                    {fmtVal(lecturaExistente.consumo_calculado)} <span className="text-[11px] font-bold text-green-600/80">kWh</span>
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         ) : (
@@ -163,16 +206,28 @@ export const RegistrationForm = ({
             </div>
 
             {currentReading && !isNaN(currentReading) && activePeriodo && (
-              <div className="bg-primary/5 rounded-lg px-3 py-1.5 flex justify-between items-center border border-primary/10 -mt-1">
-                <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Subtotal Normal</span>
-                <div className="flex items-center gap-3">
-                  <span className="text-[9px] text-on-surface-variant leading-none">
-                    {isCambioMedidor 
-                      ? `${(Math.max(0, parseSafe(lecturaFinalAntiguo) - parseSafe(selectedMember?.ultima_lectura))).toFixed(2)} + ${(Math.max(0, parseSafe(currentReading) - parseSafe(lecturaInicialNuevo))).toFixed(2)} = ${subTotalNormal.toFixed(2)} kWh`
-                      : `${subTotalNormal.toFixed(2)} kWh`
-                    } × S/ {parseFloat(activePeriodo.tarifa_kwh).toFixed(4)}
+              <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl p-3 flex flex-col sm:flex-row justify-between items-center border border-primary/20 shadow-sm mt-2 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+                <div className="absolute right-0 top-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                <div className="flex items-center gap-3 z-10 w-full sm:w-auto mb-3 sm:mb-0">
+                  <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-primary shadow-sm border border-primary/10 shrink-0">
+                    <span className="material-symbols-outlined text-[18px]">payments</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-extrabold text-primary uppercase tracking-widest leading-none mb-1">Subtotal Normal</span>
+                    <span className="text-xs text-primary font-black bg-white/80 px-2.5 py-1 rounded-md border border-primary/20 inline-block w-max shadow-sm tracking-wide font-data-mono">
+                      <span className="text-[9px] text-primary/60 uppercase tracking-widest mr-1">Consumo:</span>
+                      {isCambioMedidor 
+                        ? `${(Math.max(0, parseSafe(lecturaFinalAntiguo) - parseSafe(selectedMember?.ultima_lectura))).toFixed(2)} + ${(Math.max(0, parseSafe(currentReading) - parseSafe(lecturaInicialNuevo))).toFixed(2)} = ${subTotalNormal.toFixed(2)} kWh`
+                        : `${subTotalNormal.toFixed(2)} kWh`
+                      } <span className="text-primary/60 font-bold mx-0.5">×</span> S/ {parseFloat(activePeriodo.tarifa_kwh).toFixed(4)}
+                    </span>
+                  </div>
+                </div>
+                <div className="flex flex-col items-end z-10 w-full sm:w-auto bg-white px-4 py-2 rounded-lg border border-primary/10 shadow-sm">
+                  <span className="text-[9px] text-on-surface-variant font-bold uppercase tracking-wider mb-0.5">Importe Calculado</span>
+                  <span className="font-data-mono font-black text-primary text-xl leading-none">
+                    S/ {(subTotalNormal * parseFloat(activePeriodo.tarifa_kwh)).toFixed(2)}
                   </span>
-                  <span className="font-data-mono font-bold text-primary text-sm leading-none">S/ {(subTotalNormal * parseFloat(activePeriodo.tarifa_kwh)).toFixed(2)}</span>
                 </div>
               </div>
             )}
@@ -234,16 +289,28 @@ export const RegistrationForm = ({
                 </div>
 
                 {currentReadingPunta && !isNaN(currentReadingPunta) && activePeriodo && (
-                  <div className="bg-primary/5 rounded-lg px-3 py-1.5 flex justify-between items-center border border-primary/10 -mt-1">
-                    <span className="text-[10px] font-bold text-primary uppercase tracking-wider">Subtotal Punta</span>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[9px] text-on-surface-variant leading-none">
-                        {isCambioMedidor 
-                          ? `${(Math.max(0, parseSafe(lecturaFinalAntiguoPunta) - parseSafe(selectedMember?.ultima_lectura_punta))).toFixed(2)} + ${(Math.max(0, parseSafe(currentReadingPunta) - parseSafe(lecturaInicialNuevoPunta))).toFixed(2)} = ${subTotalPunta.toFixed(2)} kWh`
-                          : `${subTotalPunta.toFixed(2)} kWh`
-                        } × S/ {parseFloat(activePeriodo.tarifa_kwh_punta || 0).toFixed(4)}
+                  <div className="bg-gradient-to-br from-orange-500/10 to-orange-500/5 rounded-xl p-3 flex flex-col sm:flex-row justify-between items-center border border-orange-500/20 shadow-sm mt-2 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+                    <div className="absolute right-0 top-0 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                    <div className="flex items-center gap-3 z-10 w-full sm:w-auto mb-3 sm:mb-0">
+                      <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-orange-600 shadow-sm border border-orange-500/10 shrink-0">
+                        <span className="material-symbols-outlined text-[18px]">bolt</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[11px] font-extrabold text-orange-700 uppercase tracking-widest leading-none mb-1">Subtotal Punta</span>
+                        <span className="text-xs text-orange-700 font-black bg-white/80 px-2.5 py-1 rounded-md border border-orange-500/30 inline-block w-max shadow-sm tracking-wide font-data-mono">
+                          <span className="text-[9px] text-orange-600/60 uppercase tracking-widest mr-1">Consumo:</span>
+                          {isCambioMedidor 
+                            ? `${(Math.max(0, parseSafe(lecturaFinalAntiguoPunta) - parseSafe(selectedMember?.ultima_lectura_punta))).toFixed(2)} + ${(Math.max(0, parseSafe(currentReadingPunta) - parseSafe(lecturaInicialNuevoPunta))).toFixed(2)} = ${subTotalPunta.toFixed(2)} kWh`
+                            : `${subTotalPunta.toFixed(2)} kWh`
+                          } <span className="text-orange-600/60 font-bold mx-0.5">×</span> S/ {parseFloat(activePeriodo.tarifa_kwh_punta || 0).toFixed(4)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end z-10 w-full sm:w-auto bg-white px-4 py-2 rounded-lg border border-orange-500/10 shadow-sm">
+                      <span className="text-[9px] text-orange-700/70 font-bold uppercase tracking-wider mb-0.5">Importe Calculado</span>
+                      <span className="font-data-mono font-black text-orange-600 text-xl leading-none">
+                        S/ {(subTotalPunta * parseFloat(activePeriodo.tarifa_kwh_punta || 0)).toFixed(2)}
                       </span>
-                      <span className="font-data-mono font-bold text-primary text-sm leading-none">S/ {(subTotalPunta * parseFloat(activePeriodo.tarifa_kwh_punta || 0)).toFixed(2)}</span>
                     </div>
                   </div>
                 )}
@@ -288,11 +355,25 @@ export const RegistrationForm = ({
                 </div>
                 
                 {factorPotencia && !isNaN(factorPotencia) && activePeriodo && (
-                  <div className="bg-purple-50 rounded-lg px-3 py-1.5 flex justify-between items-center border border-purple-100 mt-2">
-                    <span className="text-[10px] font-bold text-purple-900 uppercase tracking-wider">Subtotal Reactiva</span>
-                    <div className="flex items-center gap-3">
-                      <span className="text-[9px] text-purple-800/60 leading-none">{parseFloat(factorPotencia).toFixed(2)} × S/ {parseFloat(activePeriodo.costo_potencia || 0).toFixed(4)}</span>
-                      <span className="font-data-mono font-bold text-purple-900 text-sm leading-none">S/ {(parseFloat(factorPotencia) * parseFloat(activePeriodo.costo_potencia || 0)).toFixed(2)}</span>
+                  <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-xl p-3 flex flex-col sm:flex-row justify-between items-center border border-purple-500/20 shadow-sm mt-2 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
+                    <div className="absolute right-0 top-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                    <div className="flex items-center gap-3 z-10 w-full sm:w-auto mb-3 sm:mb-0">
+                      <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-purple-600 shadow-sm border border-purple-500/10 shrink-0">
+                        <span className="material-symbols-outlined text-[18px]">electric_meter</span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[11px] font-extrabold text-purple-700 uppercase tracking-widest leading-none mb-1">Subtotal Reactiva</span>
+                        <span className="text-xs text-purple-800 font-black bg-white/80 px-2.5 py-1 rounded-md border border-purple-500/30 inline-block w-max shadow-sm tracking-wide font-data-mono">
+                          <span className="text-[9px] text-purple-600/60 uppercase tracking-widest mr-1">Reactiva:</span>
+                          {parseFloat(factorPotencia).toFixed(2)} kVARh <span className="text-purple-600/60 font-bold mx-0.5">×</span> S/ {parseFloat(activePeriodo.costo_potencia || 0).toFixed(4)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col items-end z-10 w-full sm:w-auto bg-white px-4 py-2 rounded-lg border border-purple-500/10 shadow-sm">
+                      <span className="text-[9px] text-purple-700/70 font-bold uppercase tracking-wider mb-0.5">Importe Calculado</span>
+                      <span className="font-data-mono font-black text-purple-600 text-xl leading-none">
+                        S/ {(parseFloat(factorPotencia) * parseFloat(activePeriodo.costo_potencia || 0)).toFixed(2)}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -300,19 +381,23 @@ export const RegistrationForm = ({
             )}
 
             <div className="mt-2">
-              {missingFields.length > 0 && (
+              {validationErrors.length > 0 && (
                 <div className="mb-2 text-error text-[11px] font-bold flex items-start gap-1.5 bg-error/10 px-3 py-2 rounded-md border border-error/20 animate-in fade-in slide-in-from-top-1">
                   <span className="material-symbols-outlined text-[14px] mt-0.5">error</span>
-                  <div>
-                    <span className="block text-error/80 uppercase tracking-wider text-[9px] mb-0.5">Campos obligatorios faltantes:</span>
-                    <span className="leading-tight">{missingFields.join(', ')}</span>
+                  <div className="flex flex-col">
+                    <span className="block text-error/80 uppercase tracking-wider text-[9px] mb-0.5">Errores de validación:</span>
+                    <ul className="list-disc pl-3">
+                      {validationErrors.map((err, i) => (
+                        <li key={i} className="leading-tight mb-0.5">{err}</li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
               )}
               <button
                 type="submit"
-                disabled={isSaving || missingFields.length > 0}
-                className={`w-full py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm ${missingFields.length === 0 ? 'bg-primary text-on-primary hover:opacity-90 hover:shadow-md' : 'bg-surface-container-highest text-on-surface-variant cursor-not-allowed opacity-80'}`}
+                disabled={isSaving || validationErrors.length > 0}
+                className={`w-full py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm ${validationErrors.length === 0 ? 'bg-primary text-on-primary hover:opacity-90 hover:shadow-md' : 'bg-surface-container-highest text-on-surface-variant cursor-not-allowed opacity-80'}`}
               >
                 {isSaving ? (
                   <><span className="material-symbols-outlined animate-spin text-[18px]">sync</span>Guardando...</>

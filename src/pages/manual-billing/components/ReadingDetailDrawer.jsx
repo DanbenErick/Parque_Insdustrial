@@ -15,8 +15,18 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
   const tarifaPunta = parseSafe(record.tarifa_kwh_punta) || 0;
   const precioReactiva = parseSafe(record.precio_factor_potencia) || 0;
 
-  const consumoNormal = parseSafe(record.consumo_calculado);
-  const consumoPunta = parseSafe(record.consumo_calculado_punta);
+  const calcConsumoNormal = isCambioMedidor 
+    ? Math.max(0, parseSafe(record.lectura_final_viejo) - parseSafe(record.lectura_anterior)) + Math.max(0, parseSafe(record.lectura_actual) - parseSafe(record.lectura_inicial_nuevo))
+    : Math.max(0, parseSafe(record.lectura_actual) - parseSafe(record.lectura_anterior));
+
+  const calcConsumoPunta = isPunta 
+    ? (isCambioMedidor 
+        ? Math.max(0, parseSafe(record.lectura_final_viejo_punta) - parseSafe(record.lectura_anterior_punta)) + Math.max(0, parseSafe(record.lectura_actual_punta) - parseSafe(record.lectura_inicial_nuevo_punta))
+        : Math.max(0, parseSafe(record.lectura_actual_punta) - parseSafe(record.lectura_anterior_punta)))
+    : 0;
+
+  const consumoNormal = parseSafe(record.consumo_calculado) || calcConsumoNormal;
+  const consumoPunta = parseSafe(record.consumo_calculado_punta) || calcConsumoPunta;
   const reactivaKvarh = parseSafe(record.factor_potencia);
   const maxDemandaN = parseSafe(record.max_demanda_fuera_punta);
   const maxDemandaP = parseSafe(record.max_demanda_punta);

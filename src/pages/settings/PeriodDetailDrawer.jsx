@@ -93,7 +93,7 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-surface border border-outline-variant rounded-xl p-3 shadow-sm hover:border-primary/30 transition-colors group">
                   <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px] text-primary">bolt</span> Energía (Normal)
+                    <span className="material-symbols-outlined text-[14px] text-primary">bolt</span> Costo Energía (Normal)
                   </p>
                   <p className="font-data-mono font-bold text-base text-on-surface group-hover:text-primary transition-colors">
                     S/ {Number(drawerPeriodo.tarifa_kwh).toFixed(4)}
@@ -101,7 +101,7 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
                 </div>
                 <div className="bg-surface border border-outline-variant rounded-xl p-3 shadow-sm hover:border-orange-500/30 transition-colors group">
                   <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px] text-orange-600">bolt</span> Energía (H. Punta)
+                    <span className="material-symbols-outlined text-[14px] text-orange-600">bolt</span> Costo Energía (H. Punta)
                   </p>
                   <p className="font-data-mono font-bold text-base text-on-surface group-hover:text-orange-600 transition-colors">
                     S/ {Number(drawerPeriodo.tarifa_kwh_tr || drawerPeriodo.tarifa_kwh).toFixed(4)}
@@ -109,7 +109,7 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
                 </div>
                 <div className="bg-surface border border-outline-variant rounded-xl p-3 shadow-sm hover:border-orange-500/30 transition-colors group">
                   <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px] text-orange-600">schedule</span> Punta (kWh)
+                    <span className="material-symbols-outlined text-[14px] text-orange-600">schedule</span> Costo Punta (kWh)
                   </p>
                   <p className="font-data-mono font-bold text-base text-on-surface group-hover:text-orange-600 transition-colors">
                     S/ {Number(drawerPeriodo.tarifa_kwh_punta || 0).toFixed(4)}

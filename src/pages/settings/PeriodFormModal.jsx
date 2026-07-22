@@ -274,7 +274,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                   <div className="flex flex-col relative z-10">
                     <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px] text-primary">bolt</span> Energía (kWh)
+                        <span className="material-symbols-outlined text-[14px] text-primary">bolt</span> Costo Energía (kWh)
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
@@ -303,7 +303,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
                     <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px] text-primary">bolt</span> Energía (kWh)
+                        <span className="material-symbols-outlined text-[14px] text-primary">bolt</span> Costo Energía (kWh)
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
@@ -321,7 +321,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                     
                     <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px] text-orange-600">schedule</span> Punta (kWh)
+                        <span className="material-symbols-outlined text-[14px] text-orange-600">schedule</span> Costo Punta (kWh)
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>

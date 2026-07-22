@@ -20,7 +20,7 @@ const TenantFormModal = ({
       correo: '',
       telefono: '',
       clave_acceso: '',
-      medidores: [{ num_serie: '', tipo: 'Normal', direccion: '' }]
+      medidores: [{ num_serie: '', tipo: 'Normal', direccion: '', lectura_inicial: 0, lectura_inicial_punta: 0 }]
     }
   });
 
@@ -137,7 +137,7 @@ const TenantFormModal = ({
                   </div>
                   <h4 className="font-bold text-on-surface text-sm tracking-wide">MEDIDORES ASIGNADOS</h4>
                 </div>
-                <button type="button" onClick={() => append({ num_serie: '', tipo: 'Normal', direccion: '' })} className="flex items-center gap-1.5 px-3 py-1.5 bg-tertiary/10 text-tertiary rounded-lg hover:bg-tertiary/20 transition-colors font-bold text-xs shadow-sm">
+                <button type="button" onClick={() => append({ num_serie: '', tipo: 'Normal', direccion: '', lectura_inicial: 0, lectura_inicial_punta: 0 })} className="flex items-center gap-1.5 px-3 py-1.5 bg-tertiary/10 text-tertiary rounded-lg hover:bg-tertiary/20 transition-colors font-bold text-xs shadow-sm">
                   <span className="material-symbols-outlined text-[16px]">add_circle</span> Añadir Medidor
                 </button>
               </div>
@@ -195,6 +195,34 @@ const TenantFormModal = ({
                           type="text"
                         />
                       </div>
+
+                      {!isSinMedidor && (
+                        <div className="flex flex-col gap-1 md:col-span-6">
+                          <label className={LABEL_CLASS}>Lectura Inicial (kWh)</label>
+                          <input
+                            {...register(`medidores.${index}.lectura_inicial`, { valueAsNumber: true })}
+                            className={`${INPUT_CLASS} font-data-mono text-right`}
+                            placeholder="0.00"
+                            type="number"
+                            step="0.01"
+                          />
+                          <p className="text-[10px] text-on-surface-variant leading-tight">Valor con el que inicia el medidor en el sistema.</p>
+                        </div>
+                      )}
+
+                      {tipoValue === 'Hora Punta' && (
+                        <div className="flex flex-col gap-1 md:col-span-6">
+                          <label className={LABEL_CLASS}>Lectura Inicial Punta (kWh)</label>
+                          <input
+                            {...register(`medidores.${index}.lectura_inicial_punta`, { valueAsNumber: true })}
+                            className={`${INPUT_CLASS} font-data-mono text-right border-amber-200`}
+                            placeholder="0.00"
+                            type="number"
+                            step="0.01"
+                          />
+                          <p className="text-[10px] text-on-surface-variant leading-tight">Valor inicial en horario punta.</p>
+                        </div>
+                      )}
                     </div>
                   );
                 })}

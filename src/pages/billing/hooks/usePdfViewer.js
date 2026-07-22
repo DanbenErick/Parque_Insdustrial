@@ -13,7 +13,8 @@ export const usePdfViewer = () => {
 
   const openPdf = useCallback(async (id, version = 'v3') => {
     try {
-      const endpoint = version === 'v1' ? 'pdf' : `pdf-${version}`;
+      // El backend ahora utiliza /pdf para generar el recibo actual
+      const endpoint = 'pdf';
       const response = await api.get(`/recibos/${id}/${endpoint}`, { responseType: 'blob' });
       const blob = new Blob([response.data], { type: MIME_TYPES.PDF });
       const url = window.URL.createObjectURL(blob);

@@ -26,6 +26,55 @@ export const EditReadingModal = ({
                parseSafe(editModalData?.factor_potencia) > 0 ||
                parseSafe(editModalData?.lectura_actual_punta) > 0;
 
+  const getValidationErrors = () => {
+    const errors = [];
+    if (!editReadingVal) errors.push(isTR ? "Falta Nueva L. Normal" : "Falta Nueva Lectura");
+    
+    const isCambio = editModalData.es_cambio_medidor === 1 || editModalData.es_cambio_medidor === true;
+
+    if (isCambio) {
+      if (!editLecturaFinalAntiguo) errors.push("Falta L. Final Dañado");
+      if (!editLecturaInicialNuevo) errors.push("Falta L. Inicial Nuevo");
+      
+      if (editLecturaFinalAntiguo && parseSafe(editLecturaFinalAntiguo) < parseSafe(editModalData.lectura_anterior)) {
+        const diff = parseSafe(editLecturaFinalAntiguo) - parseSafe(editModalData.lectura_anterior);
+        errors.push(`La L. Final Dañado es menor a la del mes anterior (Diferencia: ${diff.toFixed(2)} kWh)`);
+      }
+      if (editReadingVal && editLecturaInicialNuevo && parseSafe(editReadingVal) < parseSafe(editLecturaInicialNuevo)) {
+        const diff = parseSafe(editReadingVal) - parseSafe(editLecturaInicialNuevo);
+        errors.push(`La nueva lectura es menor a la Inicial Nuevo (Diferencia: ${diff.toFixed(2)} kWh)`);
+      }
+      
+      if (isTR) {
+        if (!editLecturaFinalAntiguoPunta) errors.push("Falta L. Final Dañado (Punta)");
+        if (!editLecturaInicialNuevoPunta) errors.push("Falta L. Inicial Nuevo (Punta)");
+        
+        if (editLecturaFinalAntiguoPunta && parseSafe(editLecturaFinalAntiguoPunta) < parseSafe(editModalData.lectura_anterior_punta)) {
+          const diff = parseSafe(editLecturaFinalAntiguoPunta) - parseSafe(editModalData.lectura_anterior_punta);
+          errors.push(`La L. Final Dañado (Punta) es menor a la del mes anterior (Diferencia: ${diff.toFixed(2)} kWh)`);
+        }
+        if (editReadingValPunta && editLecturaInicialNuevoPunta && parseSafe(editReadingValPunta) < parseSafe(editLecturaInicialNuevoPunta)) {
+          const diff = parseSafe(editReadingValPunta) - parseSafe(editLecturaInicialNuevoPunta);
+          errors.push(`La nueva lectura Punta es menor a la Inicial Nuevo (Diferencia: ${diff.toFixed(2)} kWh)`);
+        }
+      }
+    } else {
+      if (editReadingVal && parseSafe(editReadingVal) < parseSafe(editModalData.lectura_anterior)) {
+        const diff = parseSafe(editReadingVal) - parseSafe(editModalData.lectura_anterior);
+        errors.push(`La lectura es menor al del mes anterior (Diferencia: ${diff.toFixed(2)} kWh)`);
+      }
+      if (isTR && editReadingValPunta && parseSafe(editReadingValPunta) < parseSafe(editModalData.lectura_anterior_punta)) {
+        const diff = parseSafe(editReadingValPunta) - parseSafe(editModalData.lectura_anterior_punta);
+        errors.push(`La lectura Punta es menor al del mes anterior (Diferencia: ${diff.toFixed(2)} kWh)`);
+      }
+    }
+    
+    if (!isValidJustification) errors.push("Justificación incompleta (mínimo 3 palabras)");
+    return errors;
+  };
+
+  const validationErrors = getValidationErrors();
+
   return (
     <div {...MODAL_BACKDROP} className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
       <div {...MODAL_CONTENT} className="bg-surface w-full max-w-xl rounded-2xl shadow-2xl flex flex-col">
@@ -46,7 +95,7 @@ export const EditReadingModal = ({
             </div>
             <div className="flex items-center gap-3">
               <span className="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant">L. Original</span>
-              <span className="font-data-mono font-bold text-primary bg-white px-2 py-1 rounded border border-primary/20 shadow-sm">{fmtVal(editModalData.lectura_actual)} <span className="text-[10px]">W</span></span>
+              <span className="font-data-mono font-bold text-primary bg-white px-2 py-1 rounded border border-primary/20 shadow-sm">{fmtVal(editModalData.lectura_actual)} <span className="text-[10px]">kWh</span></span>
             </div>
           </div>
 
@@ -178,11 +227,25 @@ export const EditReadingModal = ({
             />
           </div>
 
+          {validationErrors.length > 0 && (
+            <div className="mt-2 mb-2 text-error text-[11px] font-bold flex items-start gap-1.5 bg-error/10 px-3 py-2 rounded-md border border-error/20">
+              <span className="material-symbols-outlined text-[14px] mt-0.5">error</span>
+              <div className="flex flex-col">
+                <span className="block text-error/80 uppercase tracking-wider text-[9px] mb-0.5">Errores de validación:</span>
+                <ul className="list-disc pl-3">
+                  {validationErrors.map((err, i) => (
+                    <li key={i} className="leading-tight mb-0.5">{err}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
           <div className="flex gap-3 pt-4 border-t border-outline-variant/50">
             <button type="button" onClick={() => setEditModalData(null)} className="w-1/3 py-2 rounded-lg font-bold border border-outline-variant text-on-surface-variant hover:bg-surface-container-highest transition-colors text-sm">
               Cancelar
             </button>
-            <button type="submit" disabled={isSaving || !editReadingVal || !isValidJustification} className={`flex-grow py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm ${editReadingVal && isValidJustification ? 'bg-primary text-on-primary hover:opacity-90' : 'bg-surface-container-highest text-on-surface-variant cursor-not-allowed'}`}>
+            <button type="submit" disabled={isSaving || validationErrors.length > 0} className={`flex-grow py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm ${validationErrors.length === 0 ? 'bg-primary text-on-primary hover:opacity-90' : 'bg-surface-container-highest text-on-surface-variant cursor-not-allowed'}`}>
               {isSaving ? <><span className="material-symbols-outlined animate-spin text-[18px]">sync</span> Actualizando...</> : <><span className="material-symbols-outlined text-[18px]">save</span> Guardar Cambios</>}
             </button>
           </div>

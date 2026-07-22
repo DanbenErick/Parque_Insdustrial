@@ -142,6 +142,16 @@ export const useBillingForms = (dataHook, user) => {
     
     const isTR = selectedMember.tipo === 'Hora Punta' || selectedMember.tipo === 'Tiempo Real';
 
+    const calcConsumoNormal = isCambioMedidor 
+      ? Math.max(0, parseSafe(lecturaFinalAntiguo) - parseSafe(selectedMember.ultima_lectura)) + Math.max(0, parseSafe(currentReading) - parseSafe(lecturaInicialNuevo))
+      : Math.max(0, parseSafe(currentReading) - parseSafe(selectedMember.ultima_lectura));
+
+    const calcConsumoPunta = isTR 
+      ? (isCambioMedidor 
+          ? Math.max(0, parseSafe(lecturaFinalAntiguoPunta) - parseSafe(selectedMember.ultima_lectura_punta)) + Math.max(0, parseSafe(currentReadingPunta) - parseSafe(lecturaInicialNuevoPunta))
+          : Math.max(0, parseSafe(currentReadingPunta) - parseSafe(selectedMember.ultima_lectura_punta)))
+      : 0;
+
     if (isCambioMedidor) {
       if (!lecturaFinalAntiguo || !lecturaInicialNuevo) {
         toast.error('Complete los datos del medidor antiguo y nuevo (Normal)');
@@ -160,8 +170,10 @@ export const useBillingForms = (dataHook, user) => {
         periodo_id: activePeriodo.id,
         lectura_anterior: parseSafe(selectedMember.ultima_lectura),
         lectura_actual: parseSafe(currentReading),
+        consumo_calculado: calcConsumoNormal,
         lectura_anterior_punta: parseSafe(selectedMember.ultima_lectura_punta),
         lectura_actual_punta: currentReadingPunta ? parseSafe(currentReadingPunta) : 0,
+        consumo_calculado_punta: calcConsumoPunta,
         factor_potencia: factorPotencia ? parseSafe(factorPotencia) : 0,
         max_demanda_fuera_punta: maxDemandaFueraPunta ? parseSafe(maxDemandaFueraPunta) : 0,
         max_demanda_punta: maxDemandaPunta ? parseSafe(maxDemandaPunta) : 0,
@@ -219,13 +231,25 @@ export const useBillingForms = (dataHook, user) => {
     setIsSaving(true);
     try {
       const isCambio = editModalData.es_cambio_medidor === 1 || editModalData.es_cambio_medidor === true;
-      const isTR = parseSafe(editModalData.lectura_anterior_punta) > 0 || parseSafe(editReadingValPunta) > 0;
+      const isTR = editModalData.medidor_tipo === 'Hora Punta' || editModalData.medidor_tipo === 'Tiempo Real';
+
+      const calcConsumoNormal = isCambio 
+        ? Math.max(0, parseSafe(editLecturaFinalAntiguo) - parseSafe(editModalData.lectura_anterior)) + Math.max(0, parseSafe(editReadingVal) - parseSafe(editLecturaInicialNuevo))
+        : Math.max(0, parseSafe(editReadingVal) - parseSafe(editModalData.lectura_anterior));
+
+      const calcConsumoPunta = isTR 
+        ? (isCambio 
+            ? Math.max(0, parseSafe(editLecturaFinalAntiguoPunta) - parseSafe(editModalData.lectura_anterior_punta)) + Math.max(0, parseSafe(editReadingValPunta) - parseSafe(editLecturaInicialNuevoPunta))
+            : Math.max(0, parseSafe(editReadingValPunta) - parseSafe(editModalData.lectura_anterior_punta)))
+        : 0;
 
       const payload = {
         lectura_anterior: parseSafe(editModalData.lectura_anterior),
         lectura_actual: parseSafe(editReadingVal),
+        consumo_calculado: calcConsumoNormal,
         lectura_anterior_punta: parseSafe(editModalData.lectura_anterior_punta),
         lectura_actual_punta: editReadingValPunta ? parseSafe(editReadingValPunta) : 0,
+        consumo_calculado_punta: calcConsumoPunta,
         factor_potencia: editFactorPotencia ? parseSafe(editFactorPotencia) : 0,
         max_demanda_fuera_punta: editMaxDemandaFueraPunta ? parseSafe(editMaxDemandaFueraPunta) : 0,
         max_demanda_punta: editMaxDemandaPunta ? parseSafe(editMaxDemandaPunta) : 0,
