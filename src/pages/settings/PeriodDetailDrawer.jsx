@@ -115,12 +115,21 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
                     S/ {Number(drawerPeriodo.tarifa_kwh_punta || 0).toFixed(4)}
                   </p>
                 </div>
-                <div className="col-span-2 bg-surface border border-outline-variant rounded-xl p-3 shadow-sm hover:border-purple-500/30 transition-colors group">
+                <div className="bg-surface border border-outline-variant rounded-xl p-3 shadow-sm hover:border-purple-500/30 transition-colors group">
                   <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px] text-purple-600">electric_meter</span> Costo Potencia (Hora Punta)
+                    <span className="material-symbols-outlined text-[14px] text-purple-600">electric_meter</span> Costo Potencia (Punta)
                   </p>
                   <p className="font-data-mono font-bold text-base text-on-surface group-hover:text-purple-600 transition-colors">
                     S/ {Number(drawerPeriodo.costo_potencia || 0).toFixed(4)}
+                  </p>
+                </div>
+                
+                <div className="bg-surface border border-outline-variant rounded-xl p-3 shadow-sm hover:border-indigo-500/30 transition-colors group">
+                  <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[14px] text-indigo-600">electric_meter</span> Costo Potencia (F. Punta)
+                  </p>
+                  <p className="font-data-mono font-bold text-base text-on-surface group-hover:text-indigo-600 transition-colors">
+                    S/ {Number(drawerPeriodo.costo_potencia_fuera_punta || 0).toFixed(4)}
                   </p>
                 </div>
               </div>

@@ -28,16 +28,10 @@ const LoginBackground = React.memo(() => (
 ));
 
 
-const ROLES = [
-  { id: 'Administrator', label: 'Admin', icon: 'admin_panel_settings' },
-  { id: 'Member', label: 'Socio', icon: 'person' }
-];
-
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   
-  const [selectedRole, setSelectedRole] = useState('Administrator');
   const [focusedInput, setFocusedInput] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -68,12 +62,6 @@ const Login = () => {
 
   const getIconClass = (inputId) => {
     return focusedInput === inputId ? 'text-primary' : 'text-on-surface-variant';
-  };
-
-  const handleRoleChange = (roleId) => {
-    setSelectedRole(roleId);
-    resetField('username');
-    resetField('password');
   };
 
   return (
@@ -111,54 +99,27 @@ const Login = () => {
               </div>
             )}
 
-            {/* Mac-Style Segmented Control */}
-            {ROLES.length > 1 && (
-              <div 
-                className="bg-surface-container-low/80 p-1 rounded-lg flex w-full border border-outline-variant/50 mb-5 relative"
-                role="tablist"
-                aria-label="Seleccionar rol de usuario"
-              >
-                {ROLES.map((role) => (
-                  <button 
-                    key={role.id}
-                    type="button" 
-                    role="tab"
-                    aria-selected={selectedRole === role.id}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-md font-bold text-[9px] uppercase tracking-wide transition-all duration-300 z-10 ${selectedRole === role.id ? 'text-primary shadow-sm bg-white border border-outline-variant/30' : 'text-on-surface-variant hover:text-on-surface hover:bg-white/30'}`}
-                    onClick={() => handleRoleChange(role.id)}
-                  >
-                    <span className="material-symbols-outlined text-[14px]">{role.icon}</span>
-                    {role.label}
-                  </button>
-                ))}
-              </div>
-            )}
+
 
             {/* Inputs Container */}
             <div className="space-y-3.5">
               <div className="group">
                 <label className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 block ml-1 transition-colors group-focus-within:text-primary" htmlFor="username">
-                  {selectedRole === 'Administrator' ? 'Usuario o Correo' : 'DNI / RUC'}
+                  Usuario, Correo o DNI/RUC
                 </label>
                 <div className="relative flex items-center">
                   <span className={`material-symbols-outlined absolute left-3 text-[18px] transition-colors ${getIconClass('username')}`}>
-                    {selectedRole === 'Administrator' ? 'mail' : 'badge'}
+                    person
                   </span>
                   <input 
                     id="username" 
                     type="text" 
                     {...register("username", { 
                       required: "Este campo es requerido",
-                      setValueAs: v => v?.trim(),
-                      validate: (value) => {
-                        if (selectedRole !== 'Administrator') {
-                          return /^[0-9]+$/.test(value) || "Solo se permiten números";
-                        }
-                        return true;
-                      }
+                      setValueAs: v => v?.trim()
                     })}
                     className={`w-full h-10 pl-9 pr-3 bg-surface-container-lowest hover:bg-white focus:bg-white border ${errors.username ? 'border-error focus:border-error focus:ring-error' : 'border-outline-variant/80 focus:border-primary focus:ring-primary'} focus:ring-1 rounded-lg outline-none transition-all text-sm font-medium text-on-surface placeholder:text-on-surface-variant/50 shadow-sm`}
-                    placeholder={selectedRole === 'Administrator' ? 'usuario@empresa.com' : 'Ej. 76543210'}
+                    placeholder="ej. admin o 76543210"
                     onFocus={() => setFocusedInput('username')}
                     onBlur={(e) => {
                       register('username').onBlur(e);
@@ -172,29 +133,21 @@ const Login = () => {
 
               <div className="group">
                 <label className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 block ml-1 transition-colors group-focus-within:text-primary" htmlFor="password">
-                  {selectedRole === 'Administrator' ? 'Contraseña' : 'PIN de Acceso (6 dígitos)'}
+                  Contraseña o PIN
                 </label>
                 <div className="relative flex items-center">
                   <span className={`material-symbols-outlined absolute left-3 text-[18px] transition-colors ${getIconClass('password')}`}>
-                    {selectedRole === 'Administrator' ? 'lock' : 'dialpad'}
+                    lock
                   </span>
                   <input 
                     id="password" 
                     type={showPassword ? 'text' : 'password'}
-                    maxLength={selectedRole === 'Administrator' ? undefined : 6}
-                    inputMode={selectedRole === 'Administrator' ? 'text' : 'numeric'}
                     {...register("password", { 
                       required: "La contraseña es requerida",
-                      setValueAs: v => v?.trim(),
-                      validate: (value) => {
-                        if (selectedRole !== 'Administrator') {
-                          return /^\d{6}$/.test(value) || "El PIN debe tener exactamente 6 dígitos";
-                        }
-                        return true;
-                      }
+                      setValueAs: v => v?.trim()
                     })}
                     className={`w-full h-10 pl-9 pr-10 bg-surface-container-lowest hover:bg-white focus:bg-white border ${errors.password ? 'border-error focus:border-error focus:ring-error' : 'border-outline-variant/80 focus:border-primary focus:ring-primary'} focus:ring-1 rounded-lg outline-none transition-all text-sm font-medium text-on-surface placeholder:text-on-surface-variant/50 shadow-sm tracking-wider`}
-                    placeholder={selectedRole === 'Administrator' ? '••••••••' : '••••••'}
+                    placeholder="••••••••"
                     onFocus={() => setFocusedInput('password')}
                     onBlur={(e) => {
                       register('password').onBlur(e);

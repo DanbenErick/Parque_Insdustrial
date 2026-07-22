@@ -5,6 +5,14 @@ const LABEL_CLASS = 'text-xs font-semibold text-on-surface-variant';
 const INPUT_CLASS = 'border border-outline-variant rounded px-3 py-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all';
 const ERROR_INPUT_CLASS = 'border rounded px-3 py-1.5 text-sm focus:border-error focus:ring-1 focus:ring-error/20 bg-error/5 border-error';
 
+const METER_THEMES = [
+  { bg: 'bg-blue-50/30', border: 'border-blue-200', text: 'text-blue-700', headerBg: 'bg-blue-100/50', icon: 'electric_meter' },
+  { bg: 'bg-emerald-50/30', border: 'border-emerald-200', text: 'text-emerald-700', headerBg: 'bg-emerald-100/50', icon: 'speed' },
+  { bg: 'bg-purple-50/30', border: 'border-purple-200', text: 'text-purple-700', headerBg: 'bg-purple-100/50', icon: 'bolt' },
+  { bg: 'bg-orange-50/30', border: 'border-orange-200', text: 'text-orange-700', headerBg: 'bg-orange-100/50', icon: 'analytics' },
+  { bg: 'bg-rose-50/30', border: 'border-rose-200', text: 'text-rose-700', headerBg: 'bg-rose-100/50', icon: 'offline_bolt' }
+];
+
 const TenantFormModal = ({
   initialData,
   onSubmit,
@@ -105,7 +113,7 @@ const TenantFormModal = ({
                   <label className={LABEL_CLASS}>Correo Electrónico (Opcional)</label>
                   <input 
                     {...register('correo', { 
-                      pattern: { value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, message: 'Correo inválido' }
+                      validate: (value) => !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || 'Correo inválido'
                     })} 
                     className={errors.correo ? ERROR_INPUT_CLASS : INPUT_CLASS} 
                     placeholder="email@empresa.com" 
@@ -146,16 +154,31 @@ const TenantFormModal = ({
                 {fields.map((field, index) => {
                   const tipoValue = watch(`medidores.${index}.tipo`);
                   const isSinMedidor = tipoValue === 'Sin Medidor';
+                  const theme = METER_THEMES[index % METER_THEMES.length];
                   
                   return (
-                    <div key={field.id} className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 bg-surface-container-lowest rounded-xl border border-outline-variant/80 relative shadow-sm group">
-                      {fields.length > 1 && (
-                        <button type="button" onClick={() => remove(index)} className="absolute -top-3 -right-3 text-error bg-surface shadow-md hover:bg-error hover:text-white transition-colors p-1.5 rounded-full border border-outline-variant z-10">
-                          <span className="material-symbols-outlined text-[16px]">close</span>
-                        </button>
-                      )}
+                    <div key={field.id} className={`flex flex-col rounded-xl border ${theme.border} ${theme.bg} overflow-hidden shadow-sm transition-all duration-300`}>
                       
-                      <div className="flex flex-col gap-1 md:col-span-4">
+                      {/* Cabecera del Medidor */}
+                      <div className={`px-4 py-2.5 border-b ${theme.border} ${theme.headerBg} flex justify-between items-center`}>
+                        <div className={`flex items-center gap-2 ${theme.text} font-bold`}>
+                          <div className={`w-6 h-6 rounded-full bg-white flex items-center justify-center border ${theme.border} shadow-sm`}>
+                            <span className="text-[11px] font-black">{index + 1}</span>
+                          </div>
+                          <span className="material-symbols-outlined text-[18px]">{theme.icon}</span>
+                          <span className="text-xs tracking-wider uppercase">Datos del Medidor</span>
+                        </div>
+                        {fields.length > 1 && (
+                          <button type="button" onClick={() => remove(index)} className="text-error bg-white/80 hover:bg-error hover:text-white transition-colors p-1 rounded-md border border-error/20 flex items-center justify-center shadow-sm">
+                            <span className="material-symbols-outlined text-[16px]">delete</span>
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Cuerpo del Medidor */}
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4">
+                        
+                        <div className="flex flex-col gap-1 md:col-span-4">
                         <label className={LABEL_CLASS}>Número de Serie {index > 0 ? '*' : '(Opcional)'}</label>
                         <input
                           {...register(`medidores.${index}.num_serie`, {
@@ -224,6 +247,7 @@ const TenantFormModal = ({
                         </div>
                       )}
                     </div>
+                  </div>
                   );
                 })}
               </div>

@@ -183,11 +183,11 @@ function App() {
               <Suspense fallback={<PageLoader />}>
                 <Routes location={location} key={location.pathname}>
                   <Route path="/" element={<Navigate to="/dashboard" />} />
-                  <Route path="/dashboard" element={<ProtectedRoute requiredRoute="dashboard"><PageTransition>{Number(user?.rol_id) === 3 ? <SocioDashboardPage /> : <DashboardPage />}</PageTransition></ProtectedRoute>} />
+                  <Route path="/dashboard" element={<ProtectedRoute requiredRoute={Number(user?.rol_id) === 3 ? null : "dashboard"}><PageTransition>{Number(user?.rol_id) === 3 ? <SocioDashboardPage /> : <DashboardPage />}</PageTransition></ProtectedRoute>} />
                   <Route path="/tenants" element={<ProtectedRoute requiredRoute="tenants"><PageTransition><TenantsPage /></PageTransition></ProtectedRoute>} />
-                  <Route path="/billing" element={<ProtectedRoute requiredRoute="billing"><PageTransition>{Number(user?.rol_id) === 3 ? <SocioBillingPage /> : <BillingPage />}</PageTransition></ProtectedRoute>} />
-                  <Route path="/payments" element={<ProtectedRoute requiredRoute="payments"><PageTransition>{Number(user?.rol_id) === 3 ? <SocioPaymentsPage /> : <PaymentsPage />}</PageTransition></ProtectedRoute>} />
-                  <Route path="/profile" element={<ProtectedRoute requiredRoute="profile"><PageTransition>{Number(user?.rol_id) === 3 ? <SocioProfilePage /> : <Navigate to="/dashboard" />}</PageTransition></ProtectedRoute>} />
+                  <Route path="/billing" element={<ProtectedRoute requiredRoute={Number(user?.rol_id) === 3 ? null : "billing"}><PageTransition>{Number(user?.rol_id) === 3 ? <SocioBillingPage /> : <BillingPage />}</PageTransition></ProtectedRoute>} />
+                  <Route path="/payments" element={<ProtectedRoute requiredRoute={Number(user?.rol_id) === 3 ? null : "payments"}><PageTransition>{Number(user?.rol_id) === 3 ? <SocioPaymentsPage /> : <PaymentsPage />}</PageTransition></ProtectedRoute>} />
+                  <Route path="/profile" element={<ProtectedRoute requiredRoute={Number(user?.rol_id) === 3 ? null : "profile"}><PageTransition>{Number(user?.rol_id) === 3 ? <SocioProfilePage /> : <Navigate to="/dashboard" />}</PageTransition></ProtectedRoute>} />
                   <Route path="/reports" element={<ProtectedRoute requiredRoute="reports"><PageTransition><ReportsPage /></PageTransition></ProtectedRoute>} />
                   <Route path="/generate_invoices" element={<ProtectedRoute requiredRoute="billing"><PageTransition><GenerateInvoicesPage /></PageTransition></ProtectedRoute>} />
                   <Route path="/manual_billing" element={<ProtectedRoute requiredRoute="manual_billing"><PageTransition><ManualBillingPage /></PageTransition></ProtectedRoute>} />
