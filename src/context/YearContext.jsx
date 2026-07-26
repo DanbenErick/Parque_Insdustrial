@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
+import { useAuth } from './AuthContext';
 
 const YearContext = createContext();
 
@@ -7,9 +8,14 @@ export const YearProvider = ({ children }) => {
   const currentYear = new Date().getFullYear();
   const [activeYear, setActiveYear] = useState(currentYear);
   const [availableYears, setAvailableYears] = useState([currentYear]);
+  const { user, isAuthenticated } = useAuth();
 
   // Fetch all periods to extract unique years that have data
+  // Only for Admin and Operario — Socios (rol_id=3) don't have access to /periodos
   useEffect(() => {
+    const isSocio = Number(user?.rol_id) === 3;
+    if (!isAuthenticated || isSocio) return;
+
     const fetchYears = async () => {
       try {
         const res = await api.get('/periodos');
@@ -25,7 +31,7 @@ export const YearProvider = ({ children }) => {
       }
     };
     fetchYears();
-  }, []);
+  }, [isAuthenticated, user?.rol_id]);
 
   // Function to manually add a year to the list (so it can be selected and populated)
   const addYear = (year) => {

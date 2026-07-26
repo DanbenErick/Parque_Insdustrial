@@ -21,7 +21,7 @@ const SocioBillingPage = () => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `Recibo_${recibo.periodo}_${(user?.nombre_razonsocial || '').replace(/\\s+/g, '_')}.pdf`;
+      link.download = `Recibo_${recibo.periodo}_${(user?.nombre_razonsocial || '').replace(/\s+/g, '_')}.pdf`;
       document.body.appendChild(link);
       link.click();
       window.URL.revokeObjectURL(url);

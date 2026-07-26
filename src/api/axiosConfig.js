@@ -42,14 +42,13 @@ api.interceptors.response.use(
 
     // 2. Si la sesión expiró o no está autorizada
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      // Ignorar el interceptor de redirección si estamos intentando iniciar sesión
-      if (error.config && error.config.url && error.config.url.includes('/auth/login')) {
+      
+      // No cerrar sesión globalmente si es un error de contraseña incorrecta en login o change-password
+      const url = error.config?.url || '';
+      if (url.includes('/auth/login') || url.includes('/auth/change-password')) {
         return Promise.reject(error);
       }
 
-      localStorage.removeItem('luz_user');
-      localStorage.removeItem('luz_token');
-      
       // Evitar redireccionar si ya estamos en la ruta de login
       if (window.location.pathname !== '/login') {
         toast.error('Tu sesión ha expirado o es inválida. Por favor, inicia sesión nuevamente.');
@@ -57,7 +56,10 @@ api.interceptors.response.use(
           window.location.href = '/login';
         }, 1500);
       }
-      return Promise.reject(error);
+      
+      // Limpiamos todo
+      localStorage.removeItem('luz_token');
+      localStorage.removeItem('luz_user');
     }
 
     return Promise.reject(error);

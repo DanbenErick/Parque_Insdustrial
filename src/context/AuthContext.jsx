@@ -68,24 +68,36 @@ export const AuthProvider = ({ children }) => {
       return;
     }
 
-    // Step 2: background validation (optional — only invalidates on 401)
+    // Step 2: background validation — only invalidates on 401 or 403
+    // NOTE: the server returns 403 (not 401) for invalid/expired tokens via jwt.verify
     api.get('/auth/me')
       .then((res) => {
         const data = res.data;
-        const freshUser = pickUser(data.usuario || data);
-        if (data.rutas) freshUser.rutas = data.rutas;
-        if (data.permisos) freshUser.permisos = data.permisos;
-        
+        const source = data.usuario || data;
+        const freshUser = pickUser(source);
+        // /auth/me returns rutas_json / permisos_json (DB column names)
+        // while login returns them aliased as rutas / permisos — normalise both
+        const rutas    = source.rutas    ?? source.rutas_json    ?? null;
+        const permisos = source.permisos ?? source.permisos_json ?? null;
+        if (rutas)    freshUser.rutas    = rutas;
+        if (permisos) freshUser.permisos = permisos;
+
         setUser((prev) => {
+          // Keep rutas/permisos from prev if the fresh response didn't include them
           const mergedUser = { ...prev, ...freshUser };
+          if (!mergedUser.rutas    && prev?.rutas)    mergedUser.rutas    = prev.rutas;
+          if (!mergedUser.permisos && prev?.permisos) mergedUser.permisos = prev.permisos;
           localStorage.setItem('luz_user', JSON.stringify(mergedUser));
           return mergedUser;
         });
       })
       .catch((error) => {
-        if (error?.response?.status === 401) {
+        const status = error?.response?.status;
+        // Clear session for both 401 and 403 (server uses 403 for invalid/expired JWT)
+        if (status === 401 || status === 403) {
           clearSession();
         }
+        // For network errors or other statuses, keep the session as-is
       })
       .finally(() => {
         setIsLoading(false);
@@ -99,9 +111,15 @@ export const AuthProvider = ({ children }) => {
     });
 
     const data = response.data;
-    const minimalUser = pickUser(data.usuario || data);
-    if (data.rutas) minimalUser.rutas = data.rutas;
-    if (data.permisos) minimalUser.permisos = data.permisos;
+    // Login response wraps user data inside { usuario: {...}, token: '...' }
+    const source = data.usuario || data;
+    const minimalUser = pickUser(source);
+    // rutas and permisos are already aliased by the server in the login response
+    // but also check the root-level data for safety
+    const rutas    = source.rutas    ?? source.rutas_json    ?? data.rutas    ?? null;
+    const permisos = source.permisos ?? source.permisos_json ?? data.permisos ?? null;
+    if (rutas)    minimalUser.rutas    = rutas;
+    if (permisos) minimalUser.permisos = permisos;
 
     setUser(minimalUser);
     setIsAuthenticated(true);
@@ -109,7 +127,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('luz_user', JSON.stringify(minimalUser));
     localStorage.setItem('luz_token', data.token);
 
-    return { success: true };
+    return { success: true, user: minimalUser };
   };
 
   const logout = useCallback(() => {
