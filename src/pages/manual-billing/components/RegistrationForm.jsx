@@ -315,7 +315,14 @@ export const RegistrationForm = ({
                   </div>
                 )}
 
-                <div className="flex flex-col md:flex-row gap-3 mt-1">
+                <div className={`flex flex-col md:flex-row gap-2 items-center mt-1`}>
+                  <div className={`w-full md:w-auto md:min-w-[140px] bg-surface-container-lowest rounded-lg px-3 py-2 border border-outline-variant/50 flex flex-col h-[52px] justify-center`}>
+                    <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">Ant. M. Dem. (N)</span>
+                    <span className={`font-data-mono text-sm font-bold text-on-surface/60`}>
+                      {fmtVal(selectedMember.ultima_demanda_maxima_fuera_punta)} <span className="text-[9px]">kW</span>
+                    </span>
+                  </div>
+                  <span className="material-symbols-outlined text-primary/30 hidden md:block text-[18px]">arrow_forward</span>
                   <div className="flex-1 relative h-[52px]">
                     <input
                       type="number" step="0.01" required
@@ -327,6 +334,16 @@ export const RegistrationForm = ({
                     </div>
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-blue-600/70 pointer-events-none">kW</span>
                   </div>
+                </div>
+
+                <div className={`flex flex-col md:flex-row gap-2 items-center mt-1`}>
+                  <div className={`w-full md:w-auto md:min-w-[140px] bg-surface-container-lowest rounded-lg px-3 py-2 border border-outline-variant/50 flex flex-col h-[52px] justify-center`}>
+                    <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider">Ant. M. Dem. (P)</span>
+                    <span className={`font-data-mono text-sm font-bold text-on-surface/60`}>
+                      {fmtVal(selectedMember.ultima_demanda_maxima_punta)} <span className="text-[9px]">kW</span>
+                    </span>
+                  </div>
+                  <span className="material-symbols-outlined text-primary/30 hidden md:block text-[18px]">arrow_forward</span>
                   <div className="flex-1 relative h-[52px]">
                     <input
                       type="number" step="0.01" required

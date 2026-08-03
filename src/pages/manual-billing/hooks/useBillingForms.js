@@ -193,16 +193,28 @@ export const useBillingForms = (dataHook, user) => {
 
       await api.post('/lecturas', payload);
 
+      const consumo_calculado = parseSafe(currentReading) - parseSafe(selectedMember.ultima_lectura);
+      const consumo_calculado_punta = currentReadingPunta ? parseSafe(currentReadingPunta) - parseSafe(selectedMember.ultima_lectura_punta || 0) : 0;
+
       const newLectura = {
         id: Date.now(), 
         propietario: selectedMember.propietario,
         num_serie: selectedMember.num_serie,
+        tipo: selectedMember.tipo,
         lectura_anterior: parseSafe(selectedMember.ultima_lectura),
         lectura_actual: parseSafe(currentReading),
+        consumo_calculado,
+        lectura_anterior_punta: parseSafe(selectedMember.ultima_lectura_punta || 0),
+        lectura_actual_punta: currentReadingPunta ? parseSafe(currentReadingPunta) : 0,
+        consumo_calculado_punta,
         factor_potencia: factorPotencia ? parseSafe(factorPotencia) : 0,
         max_demanda_fuera_punta: maxDemandaFueraPunta ? parseSafe(maxDemandaFueraPunta) : 0,
         max_demanda_punta: maxDemandaPunta ? parseSafe(maxDemandaPunta) : 0,
         periodo: activePeriodo.mes_anio,
+        tarifa_kwh: activePeriodo.tarifa_kwh,
+        tarifa_kwh_punta: activePeriodo.tarifa_kwh_punta,
+        factor_multiplicador: activePeriodo.factor_multiplicador,
+        precio_factor_potencia: activePeriodo?.costo_potencia || 0,
         fecha_registro: new Date().toISOString(),
         operario: user?.nombre_razonsocial || 'Tú',
         es_cambio_medidor: isCambioMedidor
@@ -214,7 +226,9 @@ export const useBillingForms = (dataHook, user) => {
       setMedidores(prev => prev.map(m => m.id === selectedMember.id ? { 
         ...m, 
         ultima_lectura: currentReading,
-        ...(currentReadingPunta ? { ultima_lectura_punta: currentReadingPunta } : {})
+        ...(currentReadingPunta ? { ultima_lectura_punta: currentReadingPunta } : {}),
+        ...(maxDemandaFueraPunta ? { ultima_demanda_maxima_fuera_punta: maxDemandaFueraPunta } : {}),
+        ...(maxDemandaPunta ? { ultima_demanda_maxima_punta: maxDemandaPunta } : {})
       } : m));
       resetForm();
     } catch (error) {
