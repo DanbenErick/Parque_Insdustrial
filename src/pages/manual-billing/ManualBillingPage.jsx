@@ -46,6 +46,7 @@ const ManualBilling = () => {
     currentReading, setCurrentReading,
     currentReadingPunta, setCurrentReadingPunta,
     factorPotencia, setFactorPotencia,
+    precioReactiva, setPrecioReactiva,
     maxDemandaFueraPunta, setMaxDemandaFueraPunta,
     maxDemandaPunta, setMaxDemandaPunta,
     isCambioMedidor, setIsCambioMedidor,
@@ -112,6 +113,7 @@ const ManualBilling = () => {
                 currentReading={currentReading} setCurrentReading={setCurrentReading}
                 currentReadingPunta={currentReadingPunta} setCurrentReadingPunta={setCurrentReadingPunta}
                 factorPotencia={factorPotencia} setFactorPotencia={setFactorPotencia}
+                precioReactiva={precioReactiva} setPrecioReactiva={setPrecioReactiva}
                 maxDemandaFueraPunta={maxDemandaFueraPunta} setMaxDemandaFueraPunta={setMaxDemandaFueraPunta}
                 maxDemandaPunta={maxDemandaPunta} setMaxDemandaPunta={setMaxDemandaPunta}
                 isCambioMedidor={isCambioMedidor} setIsCambioMedidor={setIsCambioMedidor}

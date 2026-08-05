@@ -32,6 +32,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
   const [tarifaMantenimientoTiempoReal, setTarifaMantenimientoTiempoReal] = useState('');
   const [costoPotencia, setCostoPotencia] = useState('');
   const [costoPotenciaFueraPunta, setCostoPotenciaFueraPunta] = useState('');
+  const [precioEnergiaReactiva, setPrecioEnergiaReactiva] = useState('');
   const [factorMultiplicador, setFactorMultiplicador] = useState('1.0000');
   const [fechaInicio, setFechaInicio] = useState('');
   const [fechaFin, setFechaFin] = useState('');
@@ -56,6 +57,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
         setTarifaMantenimientoTiempoReal(initialData.tarifa_mantenimiento_tiempo_real || '');
         setCostoPotencia(initialData.costo_potencia || '');
         setCostoPotenciaFueraPunta(initialData.costo_potencia_fuera_punta || '');
+        setPrecioEnergiaReactiva(initialData.precio_energia_reactiva || '');
         setFactorMultiplicador(initialData.factor_multiplicador || '1.0000');
         setFechaInicio(initialData.fecha_inicio ? initialData.fecha_inicio.split('T')[0] : '');
         setFechaFin(initialData.fecha_fin ? initialData.fecha_fin.split('T')[0] : '');
@@ -81,6 +83,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
         let defaultTarifaMantenimientoTiempoReal = '';
         let defaultCostoPotencia = '';
         let defaultCostoPotenciaFueraPunta = '';
+        let defaultPrecioEnergiaReactiva = '';
         let defaultFactorMultiplicador = '1.0000';
 
         if (existentes && existentes.length > 0) {
@@ -93,6 +96,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
           defaultTarifaMantenimientoTiempoReal = ultimoPeriodo.tarifa_mantenimiento_tiempo_real || '';
           defaultCostoPotencia = ultimoPeriodo.costo_potencia || '';
           defaultCostoPotenciaFueraPunta = ultimoPeriodo.costo_potencia_fuera_punta || '';
+          defaultPrecioEnergiaReactiva = ultimoPeriodo.precio_energia_reactiva || '';
           defaultFactorMultiplicador = ultimoPeriodo.factor_multiplicador || '1.0000';
         }
 
@@ -104,6 +108,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
         setTarifaMantenimientoTiempoReal(defaultTarifaMantenimientoTiempoReal);
         setCostoPotencia(defaultCostoPotencia);
         setCostoPotenciaFueraPunta(defaultCostoPotenciaFueraPunta);
+        setPrecioEnergiaReactiva(defaultPrecioEnergiaReactiva);
         setFactorMultiplicador(defaultFactorMultiplicador);
         setFechaInicio('');
         setFechaFin('');
@@ -166,6 +171,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
       tarifa_kwh_punta: tarifaKwhPunta ? parseFloat(tarifaKwhPunta) : 0,
       costo_potencia: costoPotencia ? parseFloat(costoPotencia) : 0,
       costo_potencia_fuera_punta: costoPotenciaFueraPunta ? parseFloat(costoPotenciaFueraPunta) : 0,
+      precio_energia_reactiva: precioEnergiaReactiva ? parseFloat(precioEnergiaReactiva) : 0,
       tarifa_mantenimiento_normal: tarifaMantenimientoNormal ? parseFloat(tarifaMantenimientoNormal) : 0,
       tarifa_mantenimiento_tiempo_real: tarifaMantenimientoTiempoReal ? parseFloat(tarifaMantenimientoTiempoReal) : 0,
       factor_multiplicador: parseFloat(factorMultiplicador) || 1.0000,
@@ -372,6 +378,23 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                           onChange={(e) => setCostoPotenciaFueraPunta(e.target.value)}
                           placeholder="0.00" 
                           className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-2 text-sm font-data-mono font-bold text-on-surface focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-sm transition-all"
+                        />
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
+                      <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-[14px] text-pink-600">electric_meter</span> Costo Energía Reactiva
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
+                        <input 
+                          type="number" 
+                          step="0.0001"
+                          value={precioEnergiaReactiva}
+                          onChange={(e) => setPrecioEnergiaReactiva(e.target.value)}
+                          placeholder="0.00" 
+                          className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-2 text-sm font-data-mono font-bold text-on-surface focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 shadow-sm transition-all"
                         />
                       </div>
                     </div>

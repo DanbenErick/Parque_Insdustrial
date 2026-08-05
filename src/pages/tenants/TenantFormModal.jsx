@@ -258,7 +258,7 @@ const TenantFormModal = ({
                               type="number"
                               step="0.01"
                             />
-                            <p className="text-[10px] text-on-surface-variant leading-tight">Potencia máxima registrada en horario fuera de punta.</p>
+                            <p className="text-[10px] text-on-surface-variant leading-tight">Potencia máxima registrada en horario fuera de punta. (Informativo: no se suma, cada mes tiene su demanda)</p>
                           </div>
                           
                           <div className="flex flex-col gap-1 md:col-span-6">
@@ -270,7 +270,7 @@ const TenantFormModal = ({
                               type="number"
                               step="0.01"
                             />
-                            <p className="text-[10px] text-on-surface-variant leading-tight">Potencia máxima registrada en horario punta.</p>
+                            <p className="text-[10px] text-on-surface-variant leading-tight">Potencia máxima registrada en horario punta. (Informativo: no se suma, cada mes tiene su demanda)</p>
                           </div>
                         </>
                       )}

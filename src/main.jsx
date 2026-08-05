@@ -9,6 +9,13 @@ import { YearProvider } from './context/YearContext'
 import './index.css'
 import App from './App.jsx'
 
+// Desactivar el cambio de valor por scroll en los input[type="number"]
+document.addEventListener('wheel', (e) => {
+  if (e.target.type === 'number') {
+    e.preventDefault();
+  }
+}, { passive: false });
+
 // Crear un cliente de Query con configuraciones por defecto
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -22,6 +22,7 @@ export const useBillingForms = (dataHook, user) => {
   const [factorPotencia, setFactorPotencia] = useState('');
   const [maxDemandaFueraPunta, setMaxDemandaFueraPunta] = useState('');
   const [maxDemandaPunta, setMaxDemandaPunta] = useState('');
+  const [precioReactiva, setPrecioReactiva] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   
   // Cambio de Medidor State
@@ -46,6 +47,7 @@ export const useBillingForms = (dataHook, user) => {
   const [editFactorPotencia, setEditFactorPotencia] = useState('');
   const [editMaxDemandaFueraPunta, setEditMaxDemandaFueraPunta] = useState('');
   const [editMaxDemandaPunta, setEditMaxDemandaPunta] = useState('');
+  const [editPrecioReactiva, setEditPrecioReactiva] = useState('');
   const [editJustificacion, setEditJustificacion] = useState('');
 
   // Edit Cambio de Medidor
@@ -94,6 +96,7 @@ export const useBillingForms = (dataHook, user) => {
     setCurrentReading('');
     setCurrentReadingPunta('');
     setFactorPotencia('');
+    setPrecioReactiva(activePeriodo?.precio_energia_reactiva || '');
     setMaxDemandaFueraPunta('');
     setMaxDemandaPunta('');
     setIsCambioMedidor(false);
@@ -101,7 +104,7 @@ export const useBillingForms = (dataHook, user) => {
     setLecturaInicialNuevo('0');
     setLecturaFinalAntiguoPunta('');
     setLecturaInicialNuevoPunta('0');
-  }, []);
+  }, [activePeriodo]);
 
   const handleEditFromTable = useCallback((record) => {
     setEditModalData(record);
@@ -110,6 +113,7 @@ export const useBillingForms = (dataHook, user) => {
     setEditFactorPotencia(record.factor_potencia || '');
     setEditMaxDemandaFueraPunta(record.max_demanda_fuera_punta || '');
     setEditMaxDemandaPunta(record.max_demanda_punta || '');
+    setEditPrecioReactiva(record.precio_factor_potencia || '');
     setEditJustificacion('');
     
     // Set meter change values if they exist
@@ -127,6 +131,7 @@ export const useBillingForms = (dataHook, user) => {
     setCurrentReading('');
     setCurrentReadingPunta('');
     setFactorPotencia('');
+    setPrecioReactiva('');
     setMaxDemandaFueraPunta('');
     setMaxDemandaPunta('');
     setIsCambioMedidor(false);
@@ -177,7 +182,7 @@ export const useBillingForms = (dataHook, user) => {
         factor_potencia: factorPotencia ? parseSafe(factorPotencia) : 0,
         max_demanda_fuera_punta: maxDemandaFueraPunta ? parseSafe(maxDemandaFueraPunta) : 0,
         max_demanda_punta: maxDemandaPunta ? parseSafe(maxDemandaPunta) : 0,
-        precio_factor_potencia: activePeriodo?.costo_potencia || 0,
+        precio_factor_potencia: precioReactiva ? parseSafe(precioReactiva) : 0,
         estado: 'Validado',
         // Campos de cambio de medidor
         es_cambio_medidor: isCambioMedidor,
@@ -214,7 +219,7 @@ export const useBillingForms = (dataHook, user) => {
         tarifa_kwh: activePeriodo.tarifa_kwh,
         tarifa_kwh_punta: activePeriodo.tarifa_kwh_punta,
         factor_multiplicador: activePeriodo.factor_multiplicador,
-        precio_factor_potencia: activePeriodo?.costo_potencia || 0,
+        precio_factor_potencia: precioReactiva ? parseSafe(precioReactiva) : 0,
         fecha_registro: new Date().toISOString(),
         operario: user?.nombre_razonsocial || 'Tú',
         es_cambio_medidor: isCambioMedidor
@@ -267,7 +272,7 @@ export const useBillingForms = (dataHook, user) => {
         factor_potencia: editFactorPotencia ? parseSafe(editFactorPotencia) : 0,
         max_demanda_fuera_punta: editMaxDemandaFueraPunta ? parseSafe(editMaxDemandaFueraPunta) : 0,
         max_demanda_punta: editMaxDemandaPunta ? parseSafe(editMaxDemandaPunta) : 0,
-        precio_factor_potencia: activePeriodo?.costo_potencia || 0,
+        precio_factor_potencia: editPrecioReactiva ? parseSafe(editPrecioReactiva) : 0,
         justificacion: editJustificacion,
         estado: 'Validado',
         // Preserve meter change
@@ -351,6 +356,7 @@ export const useBillingForms = (dataHook, user) => {
     factorPotencia, setFactorPotencia,
     maxDemandaFueraPunta, setMaxDemandaFueraPunta,
     maxDemandaPunta, setMaxDemandaPunta,
+    precioReactiva, setPrecioReactiva,
     isCambioMedidor, setIsCambioMedidor,
     lecturaFinalAntiguo, setLecturaFinalAntiguo,
     lecturaInicialNuevo, setLecturaInicialNuevo,
@@ -366,6 +372,7 @@ export const useBillingForms = (dataHook, user) => {
     editFactorPotencia, setEditFactorPotencia,
     editMaxDemandaFueraPunta, setEditMaxDemandaFueraPunta,
     editMaxDemandaPunta, setEditMaxDemandaPunta,
+    editPrecioReactiva, setEditPrecioReactiva,
     editJustificacion, setEditJustificacion,
     editLecturaFinalAntiguo, setEditLecturaFinalAntiguo,
     editLecturaInicialNuevo, setEditLecturaInicialNuevo,
