@@ -111,7 +111,7 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
                     <div className="flex flex-wrap gap-3">
                       {record.lectura_actual_original !== null && (
                         <div className="flex items-center gap-1.5 bg-white/50 px-2 py-1 rounded text-xs font-data-mono font-bold text-amber-900">
-                          <span className="text-[10px] uppercase opacity-70">Normal:</span> {fmtVal(record.lectura_actual_original)} kWh
+                          <span className="text-[10px] uppercase opacity-70">F. Punta:</span> {fmtVal(record.lectura_actual_original)} kWh
                         </div>
                       )}
                       {record.lectura_actual_punta_original !== null && (
@@ -190,7 +190,7 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
               <div className="bg-surface-container-lowest px-4 py-3 border-b border-outline-variant flex justify-between items-center">
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary text-[18px]">bolt</span>
-                  <span className="font-bold text-sm text-on-surface">Normal</span>
+                  <span className="font-bold text-sm text-on-surface">Fuera Punta</span>
                 </div>
                 {tarifaNormal > 0 && (
                   <span className="text-xs font-bold text-on-surface-variant bg-surface px-2 py-1 rounded border border-outline-variant/50">

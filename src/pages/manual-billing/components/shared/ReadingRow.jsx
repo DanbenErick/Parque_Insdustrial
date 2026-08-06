@@ -31,7 +31,7 @@ export const ReadingRow = React.memo(({ record, medidorInfo, onEdit = null, show
     <div className="flex flex-col md:flex-row items-start md:items-center justify-between md:justify-end gap-4 md:gap-6 mt-2 md:mt-0 pt-3 md:pt-0 border-t md:border-t-0 border-outline-variant/50 max-w-full md:max-w-[70%]">
       <div className="text-left md:text-right flex flex-col md:items-end min-w-0 w-full">
         <div className="font-data-mono font-bold text-primary text-sm sm:text-base leading-none">
-          {fmtVal(record.lectura_actual)}<span className="text-[9px] sm:text-[10px] font-normal opacity-70 ml-0.5 sm:ml-1">kWh {showDateFull && '(N)'}</span>
+          {fmtVal(record.lectura_actual)}<span className="text-[9px] sm:text-[10px] font-normal opacity-70 ml-0.5 sm:ml-1">kWh {showDateFull && '(F.P.)'}</span>
         </div>
         {record.consumo_calculado !== undefined && record.consumo_calculado !== null && (
           <div className="font-data-mono font-bold text-green-600 text-[9px] sm:text-[10px] mt-1 bg-green-50 px-1.5 py-0.5 rounded border border-green-200/50 inline-block w-max">

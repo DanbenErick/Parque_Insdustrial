@@ -93,7 +93,7 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-surface border border-outline-variant rounded-xl p-3 shadow-sm hover:border-primary/30 transition-colors group">
                   <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px] text-primary">bolt</span> Costo Energía (Normal)
+                    <span className="material-symbols-outlined text-[14px] text-primary">bolt</span> Costo Energía (Fuera Punta)
                   </p>
                   <p className="font-data-mono font-bold text-base text-on-surface group-hover:text-primary transition-colors">
                     S/ {Number(drawerPeriodo.tarifa_kwh).toFixed(4)}

@@ -64,12 +64,25 @@ const TenantsAndSectors = () => {
   const handleRegister = async (data) => {
     setIsSubmitting(true);
     try {
+      // Si estamos editando un socio, es posible que estemos viendo solo un medidor en pantalla.
+      // Debemos preservar los demás medidores que no están en el formulario para que no se borren en el backend.
+      let finalMedidores = data.medidores.map(m => ({ ...m, id: m.medidor_id }));
+      if (editId) {
+        const originalTenant = tenants.find(t => t.id === editId);
+        if (originalTenant && originalTenant.parsedMedidores) {
+           const formIds = finalMedidores.map(m => m.id);
+           const hiddenMedidores = originalTenant.parsedMedidores.filter(om => !formIds.includes(om.id));
+           finalMedidores = [...finalMedidores, ...hiddenMedidores];
+        }
+      }
+
       const payload = {
         ...data,
         cargo_representante: data.nombre_razonsocial, // backend fallback
-        direccion: data.medidores.length > 0 && data.medidores[0].direccion ? data.medidores[0].direccion : '-', // backend fallback
+        direccion: finalMedidores.length > 0 && finalMedidores[0].direccion ? finalMedidores[0].direccion : '-', // backend fallback
         rol_id: 3,
-        actividad_rubro: data.actividad || 'General'
+        actividad_rubro: data.actividad || 'General',
+        medidores: finalMedidores // Restaurar medidores completos
       };
 
       if (editId) {
@@ -143,17 +156,29 @@ const TenantsAndSectors = () => {
     setIsModalOpen(true);
   };
 
-  const handleOpenEdit = (tenant) => {
+  const handleOpenEdit = (tenant, specificMedidor) => {
     setEditId(tenant.id);
     let parsedMedidores = [{ num_serie: '', tipo: 'Normal', direccion: tenant.direccion || '' }];
     try {
       if (tenant.medidores) {
         const parsed = JSON.parse(tenant.medidores);
         if (Array.isArray(parsed) && parsed.length > 0 && (parsed[0].num_serie || parsed[0].tipo === 'Sin Medidor')) {
-          parsedMedidores = parsed.map(m => ({
-            ...m,
-            direccion: m.direccion || tenant.direccion || '' // Fallback a la dirección antigua del tenant
-          }));
+          if (specificMedidor) {
+            // Si editamos un medidor en específico, mostramos solo ese medidor
+            const medidorToEdit = parsed.find(m => m.id === specificMedidor.id) || specificMedidor;
+            parsedMedidores = [{
+              ...medidorToEdit,
+              medidor_id: medidorToEdit.id,
+              direccion: medidorToEdit.direccion || tenant.direccion || ''
+            }];
+          } else {
+            // Comportamiento normal para crear socio o si no hay specificMedidor
+            parsedMedidores = parsed.map(m => ({
+              ...m,
+              medidor_id: m.id, // Guardar el id real en medidor_id para que react-hook-form no lo sobreescriba con su UUID
+              direccion: m.direccion || tenant.direccion || '' // Fallback a la dirección antigua del tenant
+            }));
+          }
         }
       }
     } catch { /* medidores column may contain malformed JSON — silently skip */ }
@@ -222,7 +247,22 @@ const TenantsAndSectors = () => {
     }
   };
 
-  const filteredTenants = tenants;
+  const flattenedTenants = useMemo(() => {
+    const flattened = [];
+    tenants.forEach(tenant => {
+      const medidores = tenant.parsedMedidores || [];
+      if (medidores.length === 0) {
+        flattened.push({ ...tenant, specificMedidor: null });
+      } else {
+        medidores.forEach((m, index) => {
+          flattened.push({ ...tenant, specificMedidor: m, medidorIndex: index });
+        });
+      }
+    });
+    return flattened;
+  }, [tenants]);
+
+  const filteredTenants = flattenedTenants;
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredTenants.slice(indexOfFirstItem, indexOfLastItem);
@@ -365,10 +405,11 @@ const TenantsAndSectors = () => {
             <tbody className="divide-y divide-outline-variant/50 bg-surface text-body-sm">
               {currentItems.map((tenant) => (
                 <TenantTableRow
-                  key={tenant.id}
+                  key={`${tenant.id}-${tenant.specificMedidor ? tenant.specificMedidor.id : 'none'}`}
                   tenant={tenant}
+                  specificMedidor={tenant.specificMedidor}
                   onOpenDrawer={setDrawerTenant}
-                  onOpenEdit={handleOpenEdit}
+                  onOpenEdit={(t) => handleOpenEdit(t, tenant.specificMedidor)}
                   onToggleStatus={toggleUserStatus}
                   onWhatsApp={() => handleWhatsApp(tenant)}
                   onResetPassword={() => handleResetPassword(tenant)}

@@ -155,7 +155,7 @@ export const EditReadingModal = ({
                 </div>
               </div>
               <div className="flex flex-col md:flex-row gap-4">
-                <div className="flex-[2]">
+                <div className="w-full">
                   <label className="text-[9px] font-bold text-purple-600 uppercase tracking-wider block mb-1">Energía Reactiva Capacitiva</label>
                   <div className="relative h-[48px]">
                     <input
@@ -164,17 +164,6 @@ export const EditReadingModal = ({
                       className="w-full h-full bg-white border border-purple-300 hover:border-purple-500 focus:border-purple-500 rounded-lg pl-3 pr-12 text-lg font-data-mono font-bold text-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-right shadow-sm transition-all"
                     />
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-on-surface-variant">kVARh</span>
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <label className="text-[9px] font-bold text-purple-600 uppercase tracking-wider block mb-1">Precio Reactiva</label>
-                  <div className="relative h-[48px]">
-                    <input
-                      type="number" step="0.0001" required
-                      value={editPrecioReactiva} onChange={(e) => setEditPrecioReactiva(e.target.value)} placeholder="0.0000"
-                      className="w-full h-full bg-white border border-purple-300 hover:border-purple-500 focus:border-purple-500 rounded-lg pl-8 pr-3 text-lg font-data-mono font-bold text-purple-600 focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-right shadow-sm transition-all"
-                    />
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-purple-600">S/</span>
                   </div>
                 </div>
               </div>

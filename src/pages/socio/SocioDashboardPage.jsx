@@ -68,7 +68,7 @@ const SocioDashboardPage = () => {
       labels: ultimos.map(r => r.periodo),
       datasets: [
         {
-          label: 'Consumo Normal (kWh)',
+          label: 'Consumo Fuera Punta (kWh)',
           data: ultimos.map(r => Number(r.consumo_calculado || 0)),
           backgroundColor: 'rgba(16, 185, 129, 0.8)', 
           borderRadius: 4,

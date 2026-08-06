@@ -129,7 +129,7 @@ const PeriodosSettingsTab = () => {
               <thead>
                 <tr className="bg-surface-container-low border-b border-outline-variant text-[10px] uppercase tracking-wider">
                   <th className="py-2 px-4 font-bold text-on-surface-variant">Mes/Año</th>
-                  <th className="py-2 px-4 font-bold text-on-surface-variant text-primary">M. Normal (Energía)</th>
+                  <th className="py-2 px-4 font-bold text-on-surface-variant text-primary">M. Fuera Punta (Energía)</th>
                   <th className="py-2 px-4 font-bold text-on-surface-variant text-orange-600">M. Punta (Energía)</th>
                   <th className="py-2 px-4 font-bold text-on-surface-variant text-orange-600">M. Punta (Punta)</th>
                   <th className="py-2 px-4 font-bold text-on-surface-variant">Potencia (P/FP)</th>

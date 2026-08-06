@@ -159,7 +159,7 @@ export const useBillingForms = (dataHook, user) => {
 
     if (isCambioMedidor) {
       if (!lecturaFinalAntiguo || !lecturaInicialNuevo) {
-        toast.error('Complete los datos del medidor antiguo y nuevo (Normal)');
+        toast.error('Complete los datos del medidor antiguo y nuevo (Fuera Punta)');
         return;
       }
       if (isTR && (!lecturaFinalAntiguoPunta || !lecturaInicialNuevoPunta)) {

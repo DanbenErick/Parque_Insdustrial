@@ -35,7 +35,7 @@ const TenantKPICards = ({ globalStats }) => {
               {(globalStats.medidores_normal || 0) + (globalStats.medidores_tiempo_real || 0)}
             </span>
             <span className="text-[9px] text-on-surface-variant mt-1 truncate font-medium">
-              Norm: <span className="font-bold text-on-surface">{globalStats.medidores_normal || 0}</span> | Punta: <span className="font-bold text-on-surface">{globalStats.medidores_tiempo_real || 0}</span> | Sin Med: <span className="font-bold text-error">{globalStats.socios_sin_medidor || 0}</span>
+              F. Punta: <span className="font-bold text-on-surface">{globalStats.medidores_normal || 0}</span> | Punta: <span className="font-bold text-on-surface">{globalStats.medidores_tiempo_real || 0}</span> | Sin Med: <span className="font-bold text-error">{globalStats.socios_sin_medidor || 0}</span>
             </span>
           </div>
         </div>

@@ -145,9 +145,11 @@ const TenantFormModal = ({
                   </div>
                   <h4 className="font-bold text-on-surface text-sm tracking-wide">MEDIDORES ASIGNADOS</h4>
                 </div>
-                <button type="button" onClick={() => append({ num_serie: '', tipo: 'Normal', direccion: '', lectura_inicial: 0, lectura_inicial_punta: 0, demanda_maxima_fuera_punta: 0, demanda_maxima_punta: 0 })} className="flex items-center gap-1.5 px-3 py-1.5 bg-tertiary/10 text-tertiary rounded-lg hover:bg-tertiary/20 transition-colors font-bold text-xs shadow-sm">
-                  <span className="material-symbols-outlined text-[16px]">add_circle</span> Añadir Medidor
-                </button>
+                {!editId && (
+                  <button type="button" onClick={() => append({ num_serie: '', tipo: 'Normal', direccion: '', lectura_inicial: 0, lectura_inicial_punta: 0, demanda_maxima_fuera_punta: 0, demanda_maxima_punta: 0 })} className="flex items-center gap-1.5 px-3 py-1.5 bg-tertiary/10 text-tertiary rounded-lg hover:bg-tertiary/20 transition-colors font-bold text-xs shadow-sm">
+                    <span className="material-symbols-outlined text-[16px]">add_circle</span> Añadir Medidor
+                  </button>
+                )}
               </div>
 
               <div className="p-5 flex flex-col gap-4 bg-surface">
@@ -158,17 +160,17 @@ const TenantFormModal = ({
                   
                   return (
                     <div key={field.id} className={`flex flex-col rounded-xl border ${theme.border} ${theme.bg} overflow-hidden shadow-sm transition-all duration-300`}>
-                      
+                      <input type="hidden" {...register(`medidores.${index}.medidor_id`)} />
                       {/* Cabecera del Medidor */}
                       <div className={`px-4 py-2.5 border-b ${theme.border} ${theme.headerBg} flex justify-between items-center`}>
                         <div className={`flex items-center gap-2 ${theme.text} font-bold`}>
                           <div className={`w-6 h-6 rounded-full bg-white flex items-center justify-center border ${theme.border} shadow-sm`}>
-                            <span className="text-[11px] font-black">{index + 1}</span>
+                            <span className="text-[11px] font-black">{editId ? '✓' : index + 1}</span>
                           </div>
                           <span className="material-symbols-outlined text-[18px]">{theme.icon}</span>
                           <span className="text-xs tracking-wider uppercase">Datos del Medidor</span>
                         </div>
-                        {fields.length > 1 && (
+                        {!editId && fields.length > 1 && (
                           <button type="button" onClick={() => remove(index)} className="text-error bg-white/80 hover:bg-error hover:text-white transition-colors p-1 rounded-md border border-error/20 flex items-center justify-center shadow-sm">
                             <span className="material-symbols-outlined text-[16px]">delete</span>
                           </button>
@@ -198,7 +200,7 @@ const TenantFormModal = ({
                             {...register(`medidores.${index}.tipo`)} 
                             className={`${INPUT_CLASS} appearance-none w-full bg-surface`}
                           >
-                            <option value="Normal">Normal</option>
+                            <option value="Normal">Fuera Punta</option>
                             <option value="Hora Punta">Hora Punta</option>
                             <option value="Sin Medidor">Sin Medidor (Solo Cuotas)</option>
                           </select>

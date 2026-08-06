@@ -23,16 +23,13 @@ export const RegistrationForm = ({
   
   const getValidationErrors = () => {
     const errors = [];
-    if (!currentReading) errors.push(isTR ? "Falta L. Actual (N)" : "Falta L. Actual");
+    if (!currentReading) errors.push(isTR ? "Falta L. Actual (F.P.)" : "Falta L. Actual");
     if (isCambioMedidor) {
       if (!lecturaFinalAntiguo) errors.push("Falta L. Final (Dañado)");
       if (!lecturaInicialNuevo) errors.push("Falta L. Inicial (Nuevo)");
     }
     if (isTR) {
       if (!currentReadingPunta) errors.push("Falta L. Actual (P)");
-      if (!factorPotencia) errors.push("Falta Energía Reactiva Capacitiva");
-      if (!maxDemandaFueraPunta) errors.push("Falta Máx. Demanda (N)");
-      if (!maxDemandaPunta) errors.push("Falta Máx. Demanda (P)");
       if (isCambioMedidor) {
         if (!lecturaFinalAntiguoPunta) errors.push("Falta L. Final Punta (Dañado)");
         if (!lecturaInicialNuevoPunta) errors.push("Falta L. Inicial Punta (Nuevo)");
@@ -199,7 +196,7 @@ export const RegistrationForm = ({
                   className="w-full h-full bg-white border border-primary/40 hover:border-primary focus:border-primary rounded-lg pl-3 pr-14 text-xl font-data-mono font-bold text-primary focus:outline-none focus:ring-2 focus:ring-primary/20 text-right shadow-sm transition-all"
                 />
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col pointer-events-none">
-                  <span className="text-[9px] font-bold text-primary uppercase tracking-wider leading-tight">L. Actual {isTR && '(N)'}</span>
+                  <span className="text-[9px] font-bold text-primary uppercase tracking-wider leading-tight">L. Actual {isTR && '(F.P.)'}</span>
                   {activePeriodo && <span className="text-[8px] text-primary/70 font-bold leading-tight mt-0.5">S/ {parseFloat(activePeriodo.tarifa_kwh).toFixed(4)}</span>}
                 </div>
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-primary/50 pointer-events-none">kWh</span>
@@ -214,7 +211,7 @@ export const RegistrationForm = ({
                     <span className="material-symbols-outlined text-[18px]">payments</span>
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-[11px] font-extrabold text-primary uppercase tracking-widest leading-none mb-1">Subtotal Normal</span>
+                    <span className="text-[11px] font-extrabold text-primary uppercase tracking-widest leading-none mb-1">Subtotal Fuera Punta</span>
                     <span className="text-xs text-primary font-black bg-white/80 px-2.5 py-1 rounded-md border border-primary/20 inline-block w-max shadow-sm tracking-wide font-data-mono">
                       <span className="text-[9px] text-primary/60 uppercase tracking-widest mr-1">Consumo:</span>
                       {isCambioMedidor 
@@ -319,7 +316,7 @@ export const RegistrationForm = ({
                 <div className="mt-1">
                   <div className="w-full relative h-[52px]">
                     <input
-                      type="number" step="0.01" required
+                      type="number" step="0.01"
                       value={maxDemandaFueraPunta} onChange={(e) => setMaxDemandaFueraPunta(e.target.value)} placeholder="0.00"
                       className="w-full h-full bg-blue-50/50 border border-blue-200 hover:border-blue-300 focus:border-blue-400 rounded-lg pl-3 pr-16 text-lg font-data-mono font-bold text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-right shadow-inner transition-all"
                     />
@@ -357,7 +354,7 @@ export const RegistrationForm = ({
                 <div className="mt-1">
                   <div className="w-full relative h-[52px]">
                     <input
-                      type="number" step="0.01" required
+                      type="number" step="0.01"
                       value={maxDemandaPunta} onChange={(e) => setMaxDemandaPunta(e.target.value)} placeholder="0.00"
                       className="w-full h-full bg-orange-50/50 border border-orange-200 hover:border-orange-300 focus:border-orange-400 rounded-lg pl-3 pr-16 text-lg font-data-mono font-bold text-orange-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-right shadow-inner transition-all"
                     />
@@ -393,9 +390,9 @@ export const RegistrationForm = ({
                 )}
 
                 <div className="flex flex-col md:flex-row gap-3 mt-1">
-                  <div className="flex-[2] relative h-[52px]">
+                  <div className="w-full relative h-[52px]">
                     <input
-                      type="number" step="0.01" required
+                      type="number" step="0.01"
                       value={factorPotencia} onChange={(e) => setFactorPotencia(e.target.value)} placeholder="0.00"
                       className="w-full h-full bg-purple-50/50 border border-purple-200 hover:border-purple-300 focus:border-purple-400 rounded-lg pl-3 pr-16 text-lg font-data-mono font-bold text-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-right shadow-inner transition-all"
                     />
@@ -404,20 +401,9 @@ export const RegistrationForm = ({
                     </div>
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-purple-600/70 pointer-events-none">kVARh</span>
                   </div>
-
-                  <div className="flex-1 relative h-[52px]">
-                    <input
-                      type="number" step="0.0001" required
-                      value={precioReactiva} onChange={(e) => setPrecioReactiva(e.target.value)} placeholder="0.0000"
-                      className="w-full h-full bg-purple-50/50 border border-purple-200 hover:border-purple-300 focus:border-purple-400 rounded-lg pl-8 pr-3 text-lg font-data-mono font-bold text-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-right shadow-inner transition-all"
-                    />
-                    <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col pointer-events-none">
-                      <span className="text-[9px] font-bold text-purple-700 uppercase tracking-wider leading-tight flex items-center gap-0.5">S/</span>
-                    </div>
-                  </div>
                 </div>
                 
-                {factorPotencia && !isNaN(factorPotencia) && precioReactiva && !isNaN(precioReactiva) && activePeriodo && (
+                {factorPotencia && !isNaN(factorPotencia) && activePeriodo && (
                   <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-xl p-3 flex flex-col sm:flex-row justify-between items-center border border-purple-500/20 shadow-sm mt-2 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
                     <div className="absolute right-0 top-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
                     <div className="flex items-center gap-3 z-10 w-full sm:w-auto mb-3 sm:mb-0">
@@ -428,14 +414,14 @@ export const RegistrationForm = ({
                         <span className="text-[11px] font-extrabold text-purple-700 uppercase tracking-widest leading-none mb-1">Subtotal Reactiva</span>
                         <span className="text-xs text-purple-800 font-black bg-white/80 px-2.5 py-1 rounded-md border border-purple-500/30 inline-block w-max shadow-sm tracking-wide font-data-mono">
                           <span className="text-[9px] text-purple-600/60 uppercase tracking-widest mr-1">Reactiva:</span>
-                          {parseFloat(factorPotencia).toFixed(2)} kVARh <span className="text-purple-600/60 font-bold mx-0.5">×</span> S/ {parseFloat(precioReactiva || 0).toFixed(4)}
+                          {parseFloat(factorPotencia).toFixed(2)} kVARh <span className="text-purple-600/60 font-bold mx-0.5">×</span> S/ {parseFloat(activePeriodo.precio_energia_reactiva || 0).toFixed(4)}
                         </span>
                       </div>
                     </div>
                     <div className="flex flex-col items-end z-10 w-full sm:w-auto bg-white px-4 py-2 rounded-lg border border-purple-500/10 shadow-sm">
                       <span className="text-[9px] text-purple-700/70 font-bold uppercase tracking-wider mb-0.5">Importe Calculado</span>
                       <span className="font-data-mono font-black text-purple-600 text-xl leading-none">
-                        S/ {(parseFloat(factorPotencia) * parseFloat(precioReactiva || 0)).toFixed(2)}
+                        S/ {(parseFloat(factorPotencia) * parseFloat(activePeriodo.precio_energia_reactiva || 0)).toFixed(2)}
                       </span>
                     </div>
                   </div>

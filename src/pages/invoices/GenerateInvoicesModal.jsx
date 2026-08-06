@@ -35,16 +35,22 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
           opts.push({
             usuarioId: u.id,
             medidorId: m.id,
+            nombre: u.nombre_razonsocial,
+            medidorStr: `Medidor: ${m.num_serie} (${m.tipo})`,
             label: `${u.nombre_razonsocial} - Medidor: ${m.num_serie} (${m.tipo})`,
-            searchValue: `${u.nombre_razonsocial} ${m.num_serie} ${m.tipo}`.toLowerCase()
+            direccion: m.direccion || 'Sin dirección',
+            searchValue: `${u.nombre_razonsocial} ${m.num_serie} ${m.tipo} ${m.direccion || ''}`.toLowerCase()
           });
         });
       } else {
         opts.push({
           usuarioId: u.id,
           medidorId: null,
+          nombre: u.nombre_razonsocial,
+          medidorStr: 'Sin Medidor',
           label: `${u.nombre_razonsocial} (Sin Medidor)`,
-          searchValue: `${u.nombre_razonsocial} sin medidor`.toLowerCase()
+          direccion: u.direccion || 'Sin dirección',
+          searchValue: `${u.nombre_razonsocial} sin medidor ${u.direccion || ''}`.toLowerCase()
         });
       }
     });
@@ -359,12 +365,34 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
                               <li 
                                 key={idx}
                                 onClick={() => handleSelectOption(opt)}
-                                className={`px-3 py-2.5 text-sm cursor-pointer hover:bg-primary/5 hover:text-primary transition-colors flex items-center gap-2 ${selectedUsuarioId === opt.usuarioId && selectedMedidorId === opt.medidorId ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface'}`}
+                                className={`px-4 py-3 cursor-pointer hover:bg-primary/5 transition-colors border-b border-outline-variant/20 last:border-0 ${selectedUsuarioId === opt.usuarioId && selectedMedidorId === opt.medidorId ? 'bg-primary/10' : ''}`}
                               >
-                                <span className="material-symbols-outlined text-[18px] opacity-70">
-                                  {opt.medidorId ? 'electric_meter' : 'person_off'}
-                                </span>
-                                <span className="truncate">{opt.label}</span>
+                                <div className="flex flex-col gap-1.5 w-full">
+                                  {/* Nombre y Dirección destacados */}
+                                  <div className="flex flex-col gap-0.5">
+                                    <div className={`font-bold text-sm whitespace-normal leading-snug ${selectedUsuarioId === opt.usuarioId && selectedMedidorId === opt.medidorId ? 'text-primary' : 'text-on-surface'}`}>
+                                      {opt.nombre}
+                                    </div>
+                                    <div className={`flex items-start gap-1.5 ${selectedUsuarioId === opt.usuarioId && selectedMedidorId === opt.medidorId ? 'text-primary' : 'text-primary/90'}`}>
+                                      <span className="material-symbols-outlined text-[16px] mt-0.5">
+                                        location_on
+                                      </span>
+                                      <span className="font-bold text-[13px] whitespace-normal leading-snug">
+                                        {opt.direccion}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  
+                                  {/* Medidor en segundo plano */}
+                                  <div className="flex items-start gap-1.5 text-on-surface-variant text-[11px] font-medium border-t border-outline-variant/20 pt-1.5">
+                                    <span className="material-symbols-outlined text-[14px] opacity-70">
+                                      {opt.medidorId ? 'electric_meter' : 'person_off'}
+                                    </span>
+                                    <span className="whitespace-normal leading-tight">
+                                      {opt.medidorStr}
+                                    </span>
+                                  </div>
+                                </div>
                               </li>
                             ))}
                           </ul>

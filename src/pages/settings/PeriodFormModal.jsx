@@ -275,12 +275,12 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
               {/* Sección de Tarifas */}
               <div className="flex flex-col gap-6">
                 
-                {/* Tarifas - Medidor Normal (100% ancho) */}
+                {/* Tarifas - Medidor Fuera Punta (100% ancho) */}
                 <div className="w-full bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-2xl p-5 shadow-inner relative overflow-hidden group">
                   <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500" />
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-1.5 relative z-10">
                     <span className="material-symbols-outlined text-[16px]">payments</span>
-                    Medidor Normal
+                    Medidor Fuera Punta
                   </h4>
                   
                   <div className="flex flex-col relative z-10">
