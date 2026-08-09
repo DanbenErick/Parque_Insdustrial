@@ -47,7 +47,7 @@ const TenantTableRow = ({ tenant, specificMedidor, onOpenDrawer, onOpenEdit, onT
               {specificMedidor.num_serie || 'Sin Serie'}
             </span>
             <Badge variant={specificMedidor.tipo === 'Hora Punta' || specificMedidor.tipo === 'Tiempo Real' ? 'purple' : specificMedidor.tipo === 'Sin Medidor' ? 'slate' : 'info'}>
-              {specificMedidor.tipo === 'Hora Punta' || specificMedidor.tipo === 'Tiempo Real' ? 'Hora Punta' : (specificMedidor.tipo === 'Normal' ? 'Fuera Punta' : (specificMedidor.tipo || 'Fuera Punta'))}
+              {specificMedidor.tipo === 'Hora Punta' || specificMedidor.tipo === 'Tiempo Real' ? 'Hora Punta' : (specificMedidor.tipo === 'Normal' ? 'Medidor Normal' : (specificMedidor.tipo || 'Medidor Normal'))}
             </Badge>
           </div>
         ) : (

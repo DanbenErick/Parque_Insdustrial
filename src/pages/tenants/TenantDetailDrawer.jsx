@@ -99,7 +99,7 @@ const TenantDetailDrawer = ({ drawerTenant, setDrawerTenant, handleOpenEdit }) =
                     let badgeColor = 'bg-blue-50 text-blue-700 border-blue-200';
                     if (isHoraPunta) badgeColor = 'bg-purple-50 text-purple-700 border-purple-200';
                     if (isSinMedidor) badgeColor = 'bg-slate-50 text-slate-700 border-slate-200';
-                    const displayTipo = isHoraPunta ? 'Hora Punta' : (m.tipo === 'Normal' ? 'Fuera Punta' : (m.tipo || 'Fuera Punta'));
+                    const displayTipo = isHoraPunta ? 'Hora Punta' : (m.tipo === 'Normal' ? 'Medidor Normal' : (m.tipo || 'Medidor Normal'));
 
                     return (
                       <div key={i} className="flex items-center justify-between border border-outline-variant/30 bg-surface-container-lowest rounded-lg p-3">

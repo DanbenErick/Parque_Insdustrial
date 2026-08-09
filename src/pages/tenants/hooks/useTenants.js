@@ -13,7 +13,7 @@ export const useTenants = (searchQuery, filterEstado, filterRubro) => {
   } = useQuery({
     queryKey: ['tenants', searchQuery, filterEstado, filterRubro],
     queryFn: async () => {
-      let url = `/usuarios?rol_id=3`;
+      let url = `/usuarios?rol_id=3&limit=100000`;
       if (searchQuery.trim()) url += `&search=${encodeURIComponent(searchQuery.trim())}`;
       if (filterEstado !== 'Todos') url += `&estado=${filterEstado === 'Activos' ? 'activos' : 'suspendidos'}`;
       if (filterRubro !== 'Todos') url += `&rubro=${encodeURIComponent(filterRubro)}`;

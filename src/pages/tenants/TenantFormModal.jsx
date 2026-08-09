@@ -1,5 +1,6 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
+import api from '../../api/axiosConfig';
 
 const LABEL_CLASS = 'text-xs font-semibold text-on-surface-variant';
 const INPUT_CLASS = 'border border-outline-variant rounded px-3 py-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all';
@@ -20,7 +21,7 @@ const TenantFormModal = ({
   editId,
   onClose
 }) => {
-  const { register, control, handleSubmit, formState: { errors }, reset, watch } = useForm({
+  const { register, control, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm({
     defaultValues: initialData || {
       nombre_razonsocial: '',
       documento_identidad: '',
@@ -42,6 +43,24 @@ const TenantFormModal = ({
       reset(initialData);
     }
   }, [initialData, reset]);
+
+  // Al abrir en modo creación, generar DNI temporal automáticamente
+  const generarDniTemporal = useCallback(async () => {
+    try {
+      const { data } = await api.get('/usuarios/generar-dni-temporal');
+      setValue('documento_identidad', data.dni, { shouldValidate: true });
+    } catch {
+      // Fallback local si el endpoint falla
+      const aleatorio = Math.floor(Math.random() * 1000000).toString().padStart(6, '0');
+      setValue('documento_identidad', `99${aleatorio}`, { shouldValidate: true });
+    }
+  }, [setValue]);
+
+  useEffect(() => {
+    if (!editId) {
+      generarDniTemporal();
+    }
+  }, [editId, generarDniTemporal]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-0 md:p-4 !m-0">
@@ -84,11 +103,24 @@ const TenantFormModal = ({
                   {errors.nombre_razonsocial && <span className="text-[10px] text-error font-bold">{errors.nombre_razonsocial.message}</span>}
                 </div>
                 <div className="flex flex-col gap-1">
-                  <label className={LABEL_CLASS}>RUC o DNI *</label>
+                  <div className="flex items-center justify-between">
+                    <label className={LABEL_CLASS}>RUC o DNI *</label>
+                    {!editId && (
+                      <button
+                        type="button"
+                        onClick={generarDniTemporal}
+                        className="text-[10px] font-bold text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-2 py-0.5 rounded transition-colors flex items-center gap-1"
+                        title="Genera un DNI temporal de 8 dígitos. Podrás cambiarlo después."
+                      >
+                        <span className="material-symbols-outlined text-[12px]">casino</span>
+                        Generar temporal
+                      </button>
+                    )}
+                  </div>
                   <input 
                     {...register('documento_identidad', { 
                       required: 'El documento es obligatorio',
-                      pattern: { value: /^(\d{8}|\d{11})$/, message: 'Debe tener 8 u 11 dígitos' }
+                      pattern: { value: /(^\d{8}$|^\d{11}$)/, message: 'Debe tener 8 u 11 dígitos' }
                     })} 
                     className={`${errors.documento_identidad ? ERROR_INPUT_CLASS : INPUT_CLASS} font-data-mono`} 
                     placeholder="8 u 11 dígitos" 
@@ -200,7 +232,7 @@ const TenantFormModal = ({
                             {...register(`medidores.${index}.tipo`)} 
                             className={`${INPUT_CLASS} appearance-none w-full bg-surface`}
                           >
-                            <option value="Normal">Fuera Punta</option>
+                            <option value="Normal">Medidor Normal</option>
                             <option value="Hora Punta">Hora Punta</option>
                             <option value="Sin Medidor">Sin Medidor (Solo Cuotas)</option>
                           </select>
