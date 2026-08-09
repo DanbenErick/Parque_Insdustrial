@@ -9,7 +9,7 @@ import { useBillingForms } from './hooks/useBillingForms';
 
 // Components
 import { BillingHeader } from './components/BillingHeader';
-import { SearchPanel } from './components/SearchPanel';
+import { MedidoresTable } from './components/MedidoresTable';
 import { RegistrationForm } from './components/RegistrationForm';
 import { HistoryPanel } from './components/HistoryPanel';
 import { AllReadingsModal } from './components/AllReadingsModal';
@@ -27,6 +27,7 @@ const ManualBilling = () => {
     periodosFiltrados,
     lecturasPeriodoActivo,
     lecturasPeriodoActivoMap,
+    medidores,
     medidorMap,
     totalRegistrados,
     totalMedidores,
@@ -42,7 +43,6 @@ const ManualBilling = () => {
   const {
     searchTerm, handleSearchChange,
     selectedMember, handleSelectMember, resetForm,
-    currentSearchResults, isSearchFocused, setIsSearchFocused,
     currentReading, setCurrentReading,
     currentReadingPunta, setCurrentReadingPunta,
     factorPotencia, setFactorPotencia,
@@ -68,8 +68,7 @@ const ManualBilling = () => {
     editLecturaFinalAntiguo, setEditLecturaFinalAntiguo,
     editLecturaInicialNuevo, setEditLecturaInicialNuevo,
     editLecturaFinalAntiguoPunta, setEditLecturaFinalAntiguoPunta,
-    editLecturaInicialNuevoPunta, setEditLecturaInicialNuevoPunta,
-    isSearching
+    editLecturaInicialNuevoPunta, setEditLecturaInicialNuevoPunta
   } = billingForms;
 
   const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
@@ -90,21 +89,9 @@ const ManualBilling = () => {
           dashOffset={dashOffset}
         />
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-lg">
-          {/* Left Column: Search & Form */}
-          <div className="lg:col-span-7 space-y-lg">
-            <SearchPanel 
-              searchTerm={searchTerm}
-              handleSearchChange={handleSearchChange}
-              isSearchFocused={isSearchFocused}
-              setIsSearchFocused={setIsSearchFocused}
-              currentSearchResults={currentSearchResults}
-              selectedMember={selectedMember}
-              handleSelectMember={handleSelectMember}
-              isSearching={isSearching}
-              lecturasPeriodoActivoMap={lecturasPeriodoActivoMap}
-            />
-
+        <div className="flex flex-col gap-lg">
+          {/* Top Section: Search & Form / Table */}
+          <div className="w-full">
             {selectedMember ? (
                 <RegistrationForm 
                 selectedMember={selectedMember}
@@ -124,20 +111,18 @@ const ManualBilling = () => {
                 isSaving={isSaving} handleSave={handleSave}
               />
             ) : (
-              <div className="bg-white/60 backdrop-blur-2xl border-2 border-dashed border-outline-variant/60 rounded-3xl p-10 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in-95 min-h-[350px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] group transition-all duration-500 hover:border-primary/40 hover:bg-white/80">
-                <div className="w-20 h-20 bg-gradient-to-br from-primary/10 to-primary/5 rounded-2xl flex items-center justify-center mb-6 shadow-inner border border-primary/20 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500">
-                  <span className="material-symbols-outlined text-[40px] text-primary drop-shadow-sm">barcode_scanner</span>
-                </div>
-                <h3 className="text-xl text-on-surface font-extrabold tracking-tight mb-2 group-hover:text-primary transition-colors">Listo para Registrar</h3>
-                <p className="text-sm text-on-surface-variant/80 max-w-md font-medium leading-relaxed">
-                  Utiliza la barra de búsqueda rápida superior para encontrar un medidor por nombre, documento o número de serie.
-                </p>
-              </div>
+              <MedidoresTable 
+                medidores={medidores}
+                searchTerm={searchTerm}
+                handleSearchChange={handleSearchChange}
+                handleSelectMember={handleSelectMember}
+                lecturasPeriodoActivoMap={lecturasPeriodoActivoMap}
+              />
             )}
           </div>
 
-          {/* Right Column: History */}
-          <div className="lg:col-span-5 h-full">
+          {/* Bottom Section: History */}
+          <div className="w-full">
             <HistoryPanel 
               activePeriodo={activePeriodo}
               lecturasPeriodoActivo={lecturasPeriodoActivo}

@@ -138,12 +138,25 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
                 <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1">Socio / Propietario</p>
                 <h4 className="text-lg font-bold text-on-surface">{record.propietario}</h4>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="bg-surface-container px-3 py-1 rounded-full text-xs font-data-mono font-bold border border-outline-variant">
-                  {record.num_serie}
-                </span>
-                {(medidorInfo?.tipo || record.medidor_tipo || record.tipo) && (
-                  <BadgeType tipo={medidorInfo?.tipo || record.medidor_tipo || record.tipo} />
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="bg-surface-container px-3 py-1 rounded-full text-xs font-data-mono font-bold border border-outline-variant">
+                    {record.num_serie}
+                  </span>
+                  {(medidorInfo?.tipo || record.medidor_tipo || record.tipo) && (
+                    <BadgeType tipo={medidorInfo?.tipo || record.medidor_tipo || record.tipo} />
+                  )}
+                </div>
+                {(medidorInfo?.direccion || record.medidor_direccion) && (
+                  <div className="mt-1 bg-indigo-50 border border-indigo-200 rounded-lg p-2.5 flex items-start gap-2.5 shadow-sm max-w-[280px]">
+                    <div className="bg-indigo-100 text-indigo-700 p-1.5 rounded-md shrink-0 flex">
+                      <span className="material-symbols-outlined text-[18px]">location_on</span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[9px] font-bold uppercase tracking-wider text-indigo-600/80 leading-tight mb-0.5">Dirección del Medidor</span>
+                      <span className="text-[12px] font-bold text-indigo-900 leading-snug">{medidorInfo?.direccion || record.medidor_direccion}</span>
+                    </div>
+                  </div>
                 )}
               </div>
             </div>

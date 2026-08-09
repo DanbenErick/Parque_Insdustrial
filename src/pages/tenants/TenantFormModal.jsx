@@ -177,11 +177,9 @@ const TenantFormModal = ({
                   </div>
                   <h4 className="font-bold text-on-surface text-sm tracking-wide">MEDIDORES ASIGNADOS</h4>
                 </div>
-                {!editId && (
-                  <button type="button" onClick={() => append({ num_serie: '', tipo: 'Normal', direccion: '', lectura_inicial: 0, lectura_inicial_punta: 0, demanda_maxima_fuera_punta: 0, demanda_maxima_punta: 0 })} className="flex items-center gap-1.5 px-3 py-1.5 bg-tertiary/10 text-tertiary rounded-lg hover:bg-tertiary/20 transition-colors font-bold text-xs shadow-sm">
-                    <span className="material-symbols-outlined text-[16px]">add_circle</span> Añadir Medidor
-                  </button>
-                )}
+                <button type="button" onClick={() => append({ num_serie: '', tipo: 'Normal', direccion: '', lectura_inicial: 0, lectura_inicial_punta: 0, demanda_maxima_fuera_punta: 0, demanda_maxima_punta: 0 })} className="flex items-center gap-1.5 px-3 py-1.5 bg-tertiary/10 text-tertiary rounded-lg hover:bg-tertiary/20 transition-colors font-bold text-xs shadow-sm">
+                  <span className="material-symbols-outlined text-[16px]">add_circle</span> Añadir Medidor
+                </button>
               </div>
 
               <div className="p-5 flex flex-col gap-4 bg-surface">
@@ -202,7 +200,7 @@ const TenantFormModal = ({
                           <span className="material-symbols-outlined text-[18px]">{theme.icon}</span>
                           <span className="text-xs tracking-wider uppercase">Datos del Medidor</span>
                         </div>
-                        {!editId && fields.length > 1 && (
+                        {fields.length > 1 && (
                           <button type="button" onClick={() => remove(index)} className="text-error bg-white/80 hover:bg-error hover:text-white transition-colors p-1 rounded-md border border-error/20 flex items-center justify-center shadow-sm">
                             <span className="material-symbols-outlined text-[16px]">delete</span>
                           </button>

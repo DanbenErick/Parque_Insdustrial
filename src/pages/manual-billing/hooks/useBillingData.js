@@ -20,9 +20,19 @@ export const useBillingData = (activeYear) => {
     }
   }, []);
 
+  const fetchMedidores = useCallback(async () => {
+    try {
+      const res = await api.get('/medidores');
+      setMedidores(res.data);
+    } catch (error) {
+      console.error('Error al cargar medidores', error);
+    }
+  }, []);
+
   useEffect(() => {
     fetchPeriodos();
-  }, [fetchPeriodos]);
+    fetchMedidores();
+  }, [fetchPeriodos, fetchMedidores]);
 
   // Sync data for active period
   useEffect(() => {
@@ -100,6 +110,7 @@ export const useBillingData = (activeYear) => {
     porcentajeAvance,
     dashOffset,
     fetchData: fetchPeriodos,
-    isLoading
+    isLoading,
+    setStats
   };
 };

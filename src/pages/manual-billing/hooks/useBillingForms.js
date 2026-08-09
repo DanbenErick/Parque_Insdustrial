@@ -8,12 +8,12 @@ export const useBillingForms = (dataHook, user) => {
     medidores, setMedidores,
     activePeriodo, 
     lecturasPeriodoActivoMap,
-    setLecturas 
+    setLecturas,
+    setStats
   } = dataHook;
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMember, setSelectedMember] = useState(null);
-  const [currentSearchResults, setCurrentSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   
   // Forms state
@@ -35,7 +35,6 @@ export const useBillingForms = (dataHook, user) => {
   const [lecturaInicialNuevoPunta, setLecturaInicialNuevoPunta] = useState('0');
   
   // UI state
-  const [isSearchFocused, setIsSearchFocused] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalSearchTerm, setModalSearchTerm] = useState('');
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
@@ -56,32 +55,7 @@ export const useBillingForms = (dataHook, user) => {
   const [editLecturaFinalAntiguoPunta, setEditLecturaFinalAntiguoPunta] = useState('');
   const [editLecturaInicialNuevoPunta, setEditLecturaInicialNuevoPunta] = useState('');
 
-  useEffect(() => {
-    const term = searchTerm.trim();
-    if (!term) {
-      setCurrentSearchResults([]);
-      return;
-    }
-    
-    // Skip if search term was auto-filled by selecting a member
-    if (selectedMember && (searchTerm === selectedMember.propietario || searchTerm === selectedMember.num_serie)) {
-      return;
-    }
-
-    const delayDebounceFn = setTimeout(async () => {
-      setIsSearching(true);
-      try {
-        const res = await api.get(`/medidores?search=${encodeURIComponent(term)}`);
-        setCurrentSearchResults(res.data);
-      } catch (err) {
-        console.error('Error en búsqueda de medidores', err);
-      } finally {
-        setIsSearching(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(delayDebounceFn);
-  }, [searchTerm, selectedMember]);
+  // Búsqueda manejada ahora localmente por MedidoresTable
 
   const lecturaExistente = selectedMember ? lecturasPeriodoActivoMap.get(selectedMember.num_serie) || null : null;
 
@@ -226,6 +200,13 @@ export const useBillingForms = (dataHook, user) => {
       };
 
       setLecturas(prev => [newLectura, ...prev]);
+      
+      // Actualizar contador en vivo
+      setStats(prev => ({
+        ...prev,
+        total_registrados: (prev?.total_registrados || 0) + 1
+      }));
+      
       toast.success('Lectura guardada con éxito');
 
       setMedidores(prev => prev.map(m => m.id === selectedMember.id ? { 
@@ -348,9 +329,8 @@ export const useBillingForms = (dataHook, user) => {
   };
 
   return {
-    searchTerm, setSearchTerm, handleSearchChange,
+    searchTerm, handleSearchChange, setSearchTerm,
     selectedMember, handleSelectMember, setSelectedMember, resetForm,
-    currentSearchResults, isSearchFocused, setIsSearchFocused,
     currentReading, setCurrentReading,
     currentReadingPunta, setCurrentReadingPunta,
     factorPotencia, setFactorPotencia,
