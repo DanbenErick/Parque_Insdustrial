@@ -117,6 +117,7 @@ const ManualBilling = () => {
                 handleSearchChange={handleSearchChange}
                 handleSelectMember={handleSelectMember}
                 lecturasPeriodoActivoMap={lecturasPeriodoActivoMap}
+                activePeriodo={activePeriodo}
               />
             )}
           </div>

@@ -1,15 +1,20 @@
 import React, { useState, useMemo } from 'react';
 import { BadgeType } from './shared/BadgeType';
+import { DeudaPersonalizadaModal } from './DeudaPersonalizadaModal';
 
 export const MedidoresTable = ({
   medidores,
   searchTerm,
   handleSearchChange,
   handleSelectMember,
-  lecturasPeriodoActivoMap
+  lecturasPeriodoActivoMap,
+  activePeriodo
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  
+  const [modalDeudaOpen, setModalDeudaOpen] = useState(false);
+  const [selectedForDeuda, setSelectedForDeuda] = useState(null);
 
   // Filtrado local por término de búsqueda
   const filteredMedidores = useMemo(() => {
@@ -114,15 +119,28 @@ export const MedidoresTable = ({
                       )}
                     </td>
                     <td className="px-4 py-2 text-right">
-                      {!isLecturado && (
+                      <div className="flex items-center justify-end gap-2">
                         <button
-                          onClick={() => handleSelectMember(medidor)}
-                          className="px-2.5 py-1 bg-surface text-on-surface border border-outline-variant rounded-md text-[10px] font-bold hover:bg-primary hover:text-white hover:border-primary transition-colors inline-flex items-center gap-1 shadow-sm"
+                          onClick={() => {
+                            setSelectedForDeuda(medidor);
+                            setModalDeudaOpen(true);
+                          }}
+                          className="px-2.5 py-1 bg-surface-variant text-on-surface-variant border border-outline-variant rounded-md text-[10px] font-bold hover:bg-error hover:text-white hover:border-error transition-colors inline-flex items-center gap-1 shadow-sm"
+                          title="Añadir deuda personalizada"
                         >
-                          Seleccionar
-                          <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                          <span className="material-symbols-outlined text-[14px]">payments</span>
+                          Deuda
                         </button>
-                      )}
+                        {!isLecturado && (
+                          <button
+                            onClick={() => handleSelectMember(medidor)}
+                            className="px-2.5 py-1 bg-surface text-on-surface border border-outline-variant rounded-md text-[10px] font-bold hover:bg-primary hover:text-white hover:border-primary transition-colors inline-flex items-center gap-1 shadow-sm"
+                          >
+                            Seleccionar
+                            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 );
@@ -166,6 +184,16 @@ export const MedidoresTable = ({
           </div>
         </div>
       )}
+
+      <DeudaPersonalizadaModal 
+        isOpen={modalDeudaOpen}
+        onClose={() => {
+          setModalDeudaOpen(false);
+          setSelectedForDeuda(null);
+        }}
+        selectedMedidor={selectedForDeuda}
+        activePeriodo={activePeriodo}
+      />
     </div>
   );
 };
