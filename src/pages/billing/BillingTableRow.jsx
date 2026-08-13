@@ -15,7 +15,7 @@ const ESTADO_CONFIG = {
   'Pago Parcial': { bg: 'bg-orange-100', text: 'text-orange-800' },
 };
 
-const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onViewDetail, onViewHistorial }) => {
+const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onViewDetail, onViewHistorial, onDeuda }) => {
   const estado = ESTADO_CONFIG[recibo.estado] || ESTADO_CONFIG.Vencido;
 
   return (
@@ -132,17 +132,30 @@ const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onV
           </div>
 
           {recibo.estado !== 'Pagado' && recibo.estado !== 'Anulado' && (
-            <div className="relative group/tooltip flex items-center justify-center">
-              <button
-                onClick={() => onRefacturar(recibo.id)}
-                className="w-7 h-7 flex items-center justify-center text-orange-600 hover:bg-orange-100 rounded-md transition-colors"
-              >
-                <span className="material-symbols-outlined text-[16px]">autorenew</span>
-              </button>
-              <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
-                Refacturar
-              </span>
-            </div>
+            <>
+              <div className="relative group/tooltip flex items-center justify-center">
+                <button
+                  onClick={() => onDeuda(recibo)}
+                  className="w-7 h-7 flex items-center justify-center text-teal-600 hover:bg-teal-100 rounded-md transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[16px]">payments</span>
+                </button>
+                <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
+                  Añadir Deuda
+                </span>
+              </div>
+              <div className="relative group/tooltip flex items-center justify-center">
+                <button
+                  onClick={() => onRefacturar(recibo.id)}
+                  className="w-7 h-7 flex items-center justify-center text-orange-600 hover:bg-orange-100 rounded-md transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[16px]">autorenew</span>
+                </button>
+                <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
+                  Refacturar
+                </span>
+              </div>
+            </>
           )}
         </div>
       </td>

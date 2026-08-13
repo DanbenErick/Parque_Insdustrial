@@ -69,6 +69,10 @@ export const DeudaPersonalizadaModal = ({ isOpen, onClose, selectedMedidor, acti
             <div>
               <p className="text-xs text-on-surface-variant font-medium">Socio / Propietario</p>
               <p className="text-sm font-bold text-on-surface line-clamp-1">{selectedMedidor?.propietario || 'Socio'}</p>
+              <p className="text-[10px] text-on-surface-variant font-medium line-clamp-1 mt-0.5">
+                <span className="material-symbols-outlined text-[10px] align-middle mr-1">location_on</span>
+                {selectedMedidor?.socio_direccion || selectedMedidor?.direccion || 'Sin dirección'}
+              </p>
             </div>
           </div>
 

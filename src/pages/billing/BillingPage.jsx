@@ -14,6 +14,7 @@ import {
   HistorialModal,
   formatPeriod,
 } from './index';
+import { DeudaPersonalizadaModal } from '../manual-billing/components/DeudaPersonalizadaModal';
 
 // Custom hooks
 import { useBillingData } from './hooks/useBillingData';
@@ -31,6 +32,9 @@ const Billing = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [showDeudasModal, setShowDeudasModal] = useState(false);
   const [historialReceiptId, setHistorialReceiptId] = useState(null);
+
+  const [deudaModalOpen, setDeudaModalOpen] = useState(false);
+  const [deudaReciboData, setDeudaReciboData] = useState(null);
 
   // --- Filter State ---
   const [searchTerm, setSearchTerm] = useState('');
@@ -389,6 +393,10 @@ const Billing = () => {
                     onRefacturar={refacturar.open}
                     onViewDetail={setDrawerReceiptId}
                     onViewHistorial={setHistorialReceiptId}
+                    onDeuda={(r) => {
+                      setDeudaReciboData(r);
+                      setDeudaModalOpen(true);
+                    }}
                   />
                 ))
               )}
@@ -479,6 +487,19 @@ const Billing = () => {
         onMotivoChange={refacturar.setMotivo}
         onSubmit={refacturar.submit}
         onClose={refacturar.close}
+      />
+
+      <DeudaPersonalizadaModal 
+        isOpen={deudaModalOpen}
+        onClose={() => {
+          setDeudaModalOpen(false);
+          setDeudaReciboData(null);
+        }}
+        selectedMedidor={{
+          usuario_id: deudaReciboData?.usuario_id,
+          propietario: deudaReciboData?.socio
+        }}
+        activePeriodo={{ id: deudaReciboData?.periodo_id }}
       />
 
       <HistorialModal

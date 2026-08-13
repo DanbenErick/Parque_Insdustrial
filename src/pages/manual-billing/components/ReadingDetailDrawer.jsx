@@ -11,7 +11,7 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
   const isReactiva = parseSafe(record.factor_potencia) > 0;
 
   const factor = parseSafe(record.factor_multiplicador) || 1;
-  const tarifaNormal = parseSafe(record.tarifa_kwh) || 0;
+  const tarifaNormal = isPunta ? (parseSafe(record.tarifa_kwh_tr) || 0) : (parseSafe(record.tarifa_kwh) || 0);
   const tarifaPunta = parseSafe(record.tarifa_kwh_punta) || 0;
   const precioReactiva = parseSafe(record.precio_factor_potencia) || 0;
 
@@ -28,14 +28,20 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
   const consumoNormal = parseSafe(record.consumo_calculado) || calcConsumoNormal;
   const consumoPunta = parseSafe(record.consumo_calculado_punta) || calcConsumoPunta;
   const reactivaKvarh = parseSafe(record.factor_potencia);
-  const maxDemandaN = parseSafe(record.max_demanda_fuera_punta);
-  const maxDemandaP = parseSafe(record.max_demanda_punta);
+  const maxDemandaN = parseSafe(record.max_demanda_fuera_punta) || 0;
+  const maxDemandaP = parseSafe(record.max_demanda_punta) || 0;
 
-  const montoNormal = consumoNormal * tarifaNormal * factor;
-  const montoPunta = consumoPunta * tarifaPunta * factor;
-  const montoReactiva = reactivaKvarh > 0 ? (reactivaKvarh * precioReactiva) : 0; 
+  const montoNormal = Math.round((consumoNormal * tarifaNormal * factor) * 10) / 10;
+  const montoPunta = Math.round((consumoPunta * tarifaPunta * factor) * 10) / 10;
+  const montoReactiva = reactivaKvarh > 0 ? Math.round((reactivaKvarh * precioReactiva) * 10) / 10 : 0; 
+
+  const costoPotencia = parseSafe(record.costo_potencia) || 0;
+  const costoPotenciaFueraPunta = parseSafe(record.costo_potencia_fuera_punta) || 0;
   
-  const montoTotal = montoNormal + montoPunta + montoReactiva;
+  const montoDemandaP = isPunta ? Math.round((maxDemandaP * costoPotencia) * 10) / 10 : 0;
+  const montoDemandaN = isPunta ? Math.round((maxDemandaN * costoPotenciaFueraPunta) * 10) / 10 : 0;
+  
+  const montoTotal = Math.round((montoNormal + montoPunta + montoReactiva + montoDemandaP + montoDemandaN) * 10) / 10;
 
   const wasModified = Boolean(record.justificacion);
 
@@ -293,15 +299,17 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
                 </div>
                 <div className="p-4 grid grid-cols-2 md:grid-cols-2 gap-4">
                   {maxDemandaN > 0 && (
-                    <div>
-                      <p className="text-[10px] font-bold uppercase text-blue-600 mb-1">Fuera Punta</p>
+                    <div className="flex flex-col">
+                      <p className="text-[10px] font-bold uppercase text-blue-600 mb-1">Fuera Punta (S/ {fmtVal(costoPotenciaFueraPunta)}/kW)</p>
                       <p className="font-data-mono font-bold text-lg text-blue-600">{fmtVal(maxDemandaN)} <span className="text-[10px]">kW</span></p>
+                      <p className="text-xs font-bold text-blue-800 mt-1">Subtotal: S/ {fmtVal(montoDemandaN)}</p>
                     </div>
                   )}
                   {maxDemandaP > 0 && (
-                    <div>
-                      <p className="text-[10px] font-bold uppercase text-orange-600 mb-1">Punta</p>
+                    <div className="flex flex-col">
+                      <p className="text-[10px] font-bold uppercase text-orange-600 mb-1">Punta (S/ {fmtVal(costoPotencia)}/kW)</p>
                       <p className="font-data-mono font-bold text-lg text-orange-600">{fmtVal(maxDemandaP)} <span className="text-[10px]">kW</span></p>
+                      <p className="text-xs font-bold text-orange-800 mt-1">Subtotal: S/ {fmtVal(montoDemandaP)}</p>
                     </div>
                   )}
                 </div>
