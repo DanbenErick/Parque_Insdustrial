@@ -72,6 +72,7 @@ const ManualBilling = () => {
   } = billingForms;
 
   const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1); // Persisted table page state
 
   return (
     <main className="p-4 md:p-xl space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow relative flex flex-col h-full">
@@ -118,6 +119,8 @@ const ManualBilling = () => {
                 handleSelectMember={handleSelectMember}
                 lecturasPeriodoActivoMap={lecturasPeriodoActivoMap}
                 activePeriodo={activePeriodo}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
               />
             )}
           </div>
@@ -175,6 +178,7 @@ const ManualBilling = () => {
       <ReadingDetailDrawer 
         record={selectedDetailRecord} 
         medidorInfo={selectedDetailRecord ? medidorMap.get(selectedDetailRecord.num_serie) : null}
+        activePeriodo={activePeriodo}
         onClose={() => setSelectedDetailRecord(null)} 
         onEdit={(record) => {
           setSelectedDetailRecord(null); // Close the drawer first

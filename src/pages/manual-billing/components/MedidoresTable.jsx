@@ -8,9 +8,10 @@ export const MedidoresTable = ({
   handleSearchChange,
   handleSelectMember,
   lecturasPeriodoActivoMap,
-  activePeriodo
+  activePeriodo,
+  currentPage,
+  setCurrentPage
 }) => {
-  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
   
   const [modalDeudaOpen, setModalDeudaOpen] = useState(false);

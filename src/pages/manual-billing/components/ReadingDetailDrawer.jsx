@@ -2,7 +2,7 @@ import React from 'react';
 import { BadgeType } from './shared/BadgeType';
 import { formatDateLong, fmtVal, parseSafe } from '../utils';
 
-export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) => {
+export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClose, onEdit }) => {
   if (!record) return null;
 
   const isCambioMedidor = Boolean(record.es_cambio_medidor);
@@ -41,7 +41,9 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
   const montoDemandaP = isPunta ? Math.round((maxDemandaP * costoPotencia) * 10) / 10 : 0;
   const montoDemandaN = isPunta ? Math.round((maxDemandaN * costoPotenciaFueraPunta) * 10) / 10 : 0;
   
-  const montoTotal = Math.round((montoNormal + montoPunta + montoReactiva + montoDemandaP + montoDemandaN) * 10) / 10;
+  const montoFijo = 10.0; // Hardcoded cargo fijo
+
+  const montoTotal = Math.round((montoNormal + montoPunta + montoReactiva + montoDemandaP + montoDemandaN + montoFijo) * 10) / 10;
 
   const wasModified = Boolean(record.justificacion);
 
@@ -340,6 +342,23 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
                 </div>
               </div>
             )}
+
+            {/* Cargo Fijo Informativo */}
+            {montoFijo > 0 && (
+              <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+                <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <span className="material-symbols-outlined text-slate-600 text-[18px]">build</span>
+                    <span className="font-bold text-sm text-slate-800">Cargo por Mantenimiento</span>
+                  </div>
+                </div>
+                <div className="p-4 flex items-center justify-between">
+                  <p className="text-[10px] font-bold uppercase text-slate-600">Costo Fijo Mensual</p>
+                  <p className="font-data-mono font-black text-sm text-slate-800">S/ {fmtVal(montoFijo)}</p>
+                </div>
+              </div>
+            )}
+
           </div>
         </div>
       </div>
