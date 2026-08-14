@@ -17,7 +17,8 @@ export const RegistrationForm = ({
   lecturaInicialNuevo, setLecturaInicialNuevo,
   lecturaFinalAntiguoPunta, setLecturaFinalAntiguoPunta,
   lecturaInicialNuevoPunta, setLecturaInicialNuevoPunta,
-  isSaving, handleSave
+  isSaving, handleSave,
+  onClose
 }) => {
   const isTR = selectedMember?.tipo === 'Hora Punta' || selectedMember?.tipo === 'Tiempo Real';
   
@@ -97,44 +98,68 @@ export const RegistrationForm = ({
           </div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <div className="flex flex-col items-end">
+          <div className="flex flex-col items-end hidden md:flex">
             <span className="text-[9px] uppercase tracking-wider font-bold text-primary/70">Medidor</span>
             <span className="font-data-mono font-bold text-sm text-primary leading-tight">{selectedMember.num_serie}</span>
           </div>
           <BadgeType tipo={selectedMember.tipo} />
+          {onClose && (
+            <button
+              type="button"
+              onClick={onClose}
+              className="w-8 h-8 rounded-full hover:bg-primary/10 flex items-center justify-center text-primary/70 hover:text-primary transition-colors ml-2"
+              title="Cerrar y volver a la lista"
+            >
+              <span className="material-symbols-outlined text-[20px]">close</span>
+            </button>
+          )}
         </div>
       </div>
 
       <div className="p-4">
         {lecturaExistente ? (
-          <div className="bg-green-50/50 border border-green-200/60 rounded-lg px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
-            <div className="flex items-center gap-3 text-left">
-              <span className="material-symbols-outlined text-[24px] text-green-600 shrink-0">check_circle</span>
-              <div>
-                <h4 className="font-bold text-green-800 text-sm leading-none mb-1">Lectura Registrada</h4>
-                <p className="text-green-700/80 text-xs leading-tight">
-                  Mes de <strong>{formatPeriodo(activePeriodo?.mes_anio)}</strong> completado.
-                </p>
+          <>
+            <div className="bg-green-50/50 border border-green-200/60 rounded-lg px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
+              <div className="flex items-center gap-3 text-left">
+                <span className="material-symbols-outlined text-[24px] text-green-600 shrink-0">check_circle</span>
+                <div>
+                  <h4 className="font-bold text-green-800 text-sm leading-none mb-1">Lectura Registrada</h4>
+                  <p className="text-green-700/80 text-xs leading-tight">
+                    Mes de <strong>{formatPeriodo(activePeriodo?.mes_anio)}</strong> completado.
+                  </p>
+                </div>
               </div>
-            </div>
-            <div className="flex flex-col md:flex-row items-center gap-4 bg-white px-4 py-3 rounded-xl border border-green-200/60 shadow-sm shrink-0 w-full md:w-auto justify-between md:justify-end">
-              <div className="flex flex-col items-center md:items-end">
-                <span className="text-[10px] text-green-600/70 font-bold uppercase tracking-wider mb-0.5">L. Registrada</span>
-                <span className="font-data-mono text-xl font-black text-green-700 leading-none">
-                  {fmtVal(lecturaExistente.lectura_actual)} <span className="text-[11px] font-bold text-green-600/80">kWh</span>
-                </span>
-              </div>
-              {lecturaExistente.consumo_calculado !== undefined && (
-                <div className="flex flex-col items-center md:items-end border-t md:border-t-0 md:border-l border-green-200/60 pt-2 md:pt-0 md:pl-4 mt-2 md:mt-0 w-full md:w-auto">
-                  <span className="text-[10px] text-green-600/70 font-bold uppercase tracking-wider mb-0.5">Consumo (Dif.)</span>
-                  <span className="font-data-mono text-xl font-black text-green-600 leading-none flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[16px] text-green-500">add_circle</span>
-                    {fmtVal(lecturaExistente.consumo_calculado)} <span className="text-[11px] font-bold text-green-600/80">kWh</span>
+              <div className="flex flex-col md:flex-row items-center gap-4 bg-white px-4 py-3 rounded-xl border border-green-200/60 shadow-sm shrink-0 w-full md:w-auto justify-between md:justify-end">
+                <div className="flex flex-col items-center md:items-end">
+                  <span className="text-[10px] text-green-600/70 font-bold uppercase tracking-wider mb-0.5">L. Registrada</span>
+                  <span className="font-data-mono text-xl font-black text-green-700 leading-none">
+                    {fmtVal(lecturaExistente.lectura_actual)} <span className="text-[11px] font-bold text-green-600/80">kWh</span>
                   </span>
                 </div>
-              )}
+                {lecturaExistente.consumo_calculado !== undefined && (
+                  <div className="flex flex-col items-center md:items-end border-t md:border-t-0 md:border-l border-green-200/60 pt-2 md:pt-0 md:pl-4 mt-2 md:mt-0 w-full md:w-auto">
+                    <span className="text-[10px] text-green-600/70 font-bold uppercase tracking-wider mb-0.5">Consumo (Dif.)</span>
+                    <span className="font-data-mono text-xl font-black text-green-600 leading-none flex items-center gap-1">
+                      <span className="material-symbols-outlined text-[16px] text-green-500">add_circle</span>
+                      {fmtVal(lecturaExistente.consumo_calculado)} <span className="text-[11px] font-bold text-green-600/80">kWh</span>
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+            {onClose && (
+              <div className="mt-4 flex justify-end">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-4 py-2 bg-surface border border-outline-variant rounded-lg text-sm font-bold text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors inline-flex items-center gap-2 shadow-sm"
+                >
+                  <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+                  Volver a la lista
+                </button>
+              </div>
+            )}
+          </>
         ) : (
           <form onSubmit={handleSave} className="flex flex-col gap-3">
             

@@ -72,7 +72,6 @@ const ManualBilling = () => {
   } = billingForms;
 
   const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
-  const [currentPage, setCurrentPage] = useState(1); // Persisted table page state
 
   return (
     <main className="p-4 md:p-xl space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow relative flex flex-col h-full">
@@ -93,9 +92,10 @@ const ManualBilling = () => {
         <div className="flex flex-col gap-lg">
           {/* Top Section: Search & Form / Table */}
           <div className="w-full">
-            {selectedMember ? (
+            {selectedMember && (
                 <RegistrationForm 
                 selectedMember={selectedMember}
+                onClose={resetForm}
                 lecturaExistente={lecturaExistente}
                 activePeriodo={activePeriodo}
                 currentReading={currentReading} setCurrentReading={setCurrentReading}
@@ -111,7 +111,8 @@ const ManualBilling = () => {
                 lecturaInicialNuevoPunta={lecturaInicialNuevoPunta} setLecturaInicialNuevoPunta={setLecturaInicialNuevoPunta}
                 isSaving={isSaving} handleSave={handleSave}
               />
-            ) : (
+            )}
+            <div className={selectedMember ? 'hidden' : 'block'}>
               <MedidoresTable 
                 medidores={medidores}
                 searchTerm={searchTerm}
@@ -119,10 +120,9 @@ const ManualBilling = () => {
                 handleSelectMember={handleSelectMember}
                 lecturasPeriodoActivoMap={lecturasPeriodoActivoMap}
                 activePeriodo={activePeriodo}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
+                isVisible={!selectedMember}
               />
-            )}
+            </div>
           </div>
 
           {/* Bottom Section: History */}

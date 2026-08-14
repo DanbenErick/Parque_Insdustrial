@@ -86,8 +86,8 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
         try {
           const [medidoresRes, lecturasRes, usuariosRes] = await Promise.all([
             api.get('/medidores'),
-            api.get('/lecturas'),
-            api.get('/usuarios')
+            api.get('/lecturas?limit=10000'),
+            api.get('/usuarios?limit=10000')
           ]);
           // Helper for paginated APIs
           const getRawData = (res) => Array.isArray(res.data) ? res.data : (res.data?.data || []);

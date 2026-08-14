@@ -9,10 +9,27 @@ export const MedidoresTable = ({
   handleSelectMember,
   lecturasPeriodoActivoMap,
   activePeriodo,
-  currentPage,
-  setCurrentPage
+  isVisible = true
 }) => {
-  const itemsPerPage = 10;
+  const scrollRef = React.useRef(null);
+  const [savedScroll, setSavedScroll] = useState(0);
+
+  React.useEffect(() => {
+    if (isVisible && scrollRef.current) {
+      setTimeout(() => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = savedScroll;
+        }
+      }, 10);
+    }
+  }, [isVisible, savedScroll]);
+
+  const onSelectClick = (medidor) => {
+    if (scrollRef.current) {
+      setSavedScroll(scrollRef.current.scrollTop);
+    }
+    handleSelectMember(medidor);
+  };
   
   const [modalDeudaOpen, setModalDeudaOpen] = useState(false);
   const [selectedForDeuda, setSelectedForDeuda] = useState(null);
@@ -28,15 +45,8 @@ export const MedidoresTable = ({
     );
   }, [medidores, searchTerm]);
 
-  // Reset page when searching
-  React.useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
+  // Remove local reset page logic
 
-  const totalPages = Math.ceil(filteredMedidores.length / itemsPerPage);
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredMedidores.slice(indexOfFirstItem, indexOfLastItem);
 
   return (
     <div className="bg-white rounded-3xl border border-outline-variant shadow-sm overflow-hidden flex flex-col h-full animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -71,7 +81,7 @@ export const MedidoresTable = ({
         </div>
       </div>
 
-      <div className="overflow-x-auto flex-1">
+      <div ref={scrollRef} className="overflow-x-auto overflow-y-auto custom-scrollbar flex-1 max-h-[340px]">
         <table className="w-full text-left border-collapse min-w-[600px]">
           <thead>
             <tr className="border-b border-outline-variant bg-surface-container/30">
@@ -82,8 +92,8 @@ export const MedidoresTable = ({
             </tr>
           </thead>
           <tbody className="divide-y divide-outline-variant/60">
-            {currentItems.length > 0 ? (
-              currentItems.map((medidor) => {
+            {filteredMedidores.length > 0 ? (
+              filteredMedidores.map((medidor) => {
                 const isLecturado = lecturasPeriodoActivoMap?.has(medidor.num_serie);
                 return (
                   <tr key={medidor.id} className="hover:bg-surface-container-lowest transition-colors group">
@@ -134,7 +144,7 @@ export const MedidoresTable = ({
                         </button>
                         {!isLecturado && (
                           <button
-                            onClick={() => handleSelectMember(medidor)}
+                            onClick={() => onSelectClick(medidor)}
                             className="px-2.5 py-1 bg-surface text-on-surface border border-outline-variant rounded-md text-[10px] font-bold hover:bg-primary hover:text-white hover:border-primary transition-colors inline-flex items-center gap-1 shadow-sm"
                           >
                             Seleccionar
@@ -158,33 +168,7 @@ export const MedidoresTable = ({
         </table>
       </div>
 
-      {totalPages > 1 && (
-        <div className="px-5 py-2.5 border-t border-outline-variant bg-surface-container-lowest flex items-center justify-between mt-auto">
-          <span className="text-[10px] text-on-surface-variant font-medium">
-            Mostrando {indexOfFirstItem + 1} - {Math.min(indexOfLastItem, filteredMedidores.length)} de {filteredMedidores.length}
-          </span>
-          <div className="flex gap-1">
-            <button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="p-1 rounded border border-outline-variant text-on-surface-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <span className="material-symbols-outlined text-[16px]">chevron_left</span>
-            </button>
-            <div className="flex items-center gap-1 px-1.5">
-              <span className="text-[11px] font-bold">{currentPage}</span>
-              <span className="text-[10px] text-on-surface-variant">/ {totalPages}</span>
-            </div>
-            <button
-              onClick={() => setCurrentPage(p => Math.max(1, Math.min(totalPages, p + 1)))}
-              disabled={currentPage === totalPages}
-              className="p-1 rounded border border-outline-variant text-on-surface-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
-            </button>
-          </div>
-        </div>
-      )}
+
 
       <DeudaPersonalizadaModal 
         isOpen={modalDeudaOpen}
