@@ -81,6 +81,10 @@ export const RegistrationForm = ({
     ? Math.max(0, parseSafe(lecturaFinalAntiguoPunta) - parseSafe(selectedMember?.ultima_lectura_punta)) + Math.max(0, parseSafe(currentReadingPunta) - parseSafe(lecturaInicialNuevoPunta))
     : Math.max(0, parseSafe(currentReadingPunta) - parseSafe(selectedMember?.ultima_lectura_punta));
 
+  const tarifaFueraPunta = isTR 
+    ? (parseSafe(activePeriodo?.tarifa_kwh_tr) || parseSafe(activePeriodo?.tarifa_kwh) || 0)
+    : (parseSafe(activePeriodo?.tarifa_kwh) || 0);
+
   return (
     <div className="bg-surface border border-primary/20 rounded-xl shadow-sm overflow-hidden animate-in slide-in-from-top-4 fade-in duration-300">
       <div className="bg-primary/5 px-4 py-3 border-b border-primary/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
@@ -222,7 +226,7 @@ export const RegistrationForm = ({
                 />
                 <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col pointer-events-none">
                   <span className="text-[9px] font-bold text-primary uppercase tracking-wider leading-tight">L. Actual {isTR && '(F.P.)'}</span>
-                  {activePeriodo && <span className="text-[8px] text-primary/70 font-bold leading-tight mt-0.5">S/ {parseFloat(activePeriodo.tarifa_kwh).toFixed(4)}</span>}
+                  {activePeriodo && <span className="text-[8px] text-primary/70 font-bold leading-tight mt-0.5">S/ {tarifaFueraPunta.toFixed(4)}</span>}
                 </div>
                 <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-primary/50 pointer-events-none">kWh</span>
               </div>
@@ -242,14 +246,14 @@ export const RegistrationForm = ({
                       {isCambioMedidor 
                         ? `${(Math.max(0, parseSafe(lecturaFinalAntiguo) - parseSafe(selectedMember?.ultima_lectura))).toFixed(2)} + ${(Math.max(0, parseSafe(currentReading) - parseSafe(lecturaInicialNuevo))).toFixed(2)} = ${subTotalNormal.toFixed(2)} kWh`
                         : `${subTotalNormal.toFixed(2)} kWh`
-                      } <span className="text-primary/60 font-bold mx-0.5">×</span> S/ {parseFloat(activePeriodo.tarifa_kwh).toFixed(4)}
+                      } <span className="text-primary/60 font-bold mx-0.5">×</span> S/ {tarifaFueraPunta.toFixed(4)}
                     </span>
                   </div>
                 </div>
                 <div className="flex flex-col items-end z-10 w-full sm:w-auto bg-white px-4 py-2 rounded-lg border border-primary/10 shadow-sm">
                   <span className="text-[9px] text-on-surface-variant font-bold uppercase tracking-wider mb-0.5">Importe Calculado</span>
                   <span className="font-data-mono font-black text-primary text-xl leading-none">
-                    S/ {(subTotalNormal * parseFloat(activePeriodo.tarifa_kwh)).toFixed(2)}
+                    S/ {(subTotalNormal * tarifaFueraPunta).toFixed(2)}
                   </span>
                 </div>
               </div>
