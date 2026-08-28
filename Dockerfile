@@ -1,32 +1,13 @@
-# ---- Stage 1: Build ----
-FROM node:20-alpine AS build
-
-# Establecer el directorio de trabajo
-WORKDIR /app
-
-# Copiar archivos de configuración de paquetes
-COPY package*.json ./
-
-# Instalar dependencias
-RUN npm ci
-
-# Copiar el resto del código
-COPY . .
-
-# Compilar el frontend (React/Vite) para producción
-# Para Vite el resultado suele ir a la carpeta /dist
-RUN npm run build
-
-# ---- Stage 2: Serve ----
-FROM node:20-alpine AS production
+# ---- Single Stage: Production ----
+FROM node:20-alpine
 
 WORKDIR /app
 
 # Instalar 'serve' globalmente para servir archivos estáticos
 RUN npm install -g serve
 
-# Copiar la carpeta compilada desde la etapa anterior
-COPY --from=build /app/dist ./dist
+# Copiar la carpeta compilada que subiste con git
+COPY dist ./dist
 
 # Exponer el puerto para el frontend
 EXPOSE 3000
