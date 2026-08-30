@@ -14,12 +14,12 @@ jobs:
       - name: Deploy Frontend to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          password: ${{ secrets.PASSWORD }}
+          host: ${{ vars.HOST }}
+          username: ${{ vars.USERNAME }}
+          password: ${{ vars.PASSWORD }}
           # Ajusta la ruta a donde tengas tu proyecto en el servidor
           script: |
-            export TARGET_DIR="/root/parque_jicamarca"
+            export TARGET_DIR="/root"
             export FRONT_DIR="$TARGET_DIR/front"
             
             if [ ! -d "$FRONT_DIR" ]; then
