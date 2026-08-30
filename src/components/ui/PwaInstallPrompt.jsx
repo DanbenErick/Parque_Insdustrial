@@ -29,6 +29,10 @@ const PwaInstallPrompt = () => {
       }
     };
 
+    if (window.deferredPWAEvent) {
+      handleBeforeInstallPrompt(window.deferredPWAEvent);
+    }
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
     return () => {
