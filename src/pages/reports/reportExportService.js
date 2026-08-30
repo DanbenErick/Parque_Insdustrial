@@ -20,7 +20,7 @@ const downloadBlob = (blob, filename) => {
 export const handleExportPDF = async (selectedPeriod) => {
   try {
     toast.info('Generando PDF, por favor espere...');
-    const response = await api.get(`/recibos/reportes/facturacion/pdf?periodo=${selectedPeriod}`, { responseType: 'blob' });
+    const response = await api.get(`/recibos/reporte/pdf?periodo=${selectedPeriod}`, { responseType: 'blob' });
     downloadBlob(new Blob([response.data], { type: 'application/pdf' }), `Reporte_Consumo_Facturacion_${selectedPeriod}.pdf`);
     toast.success('Reporte PDF descargado exitosamente');
   } catch (error) {
@@ -32,7 +32,7 @@ export const handleExportPDF = async (selectedPeriod) => {
 export const handleExportExcel = async (selectedPeriod) => {
   try {
     toast.info('Generando Excel, por favor espere...');
-    const response = await api.get(`/recibos/reportes/facturacion/excel?periodo=${selectedPeriod}`, { responseType: 'blob' });
+    const response = await api.get(`/recibos/reporte/excel?periodo=${selectedPeriod}`, { responseType: 'blob' });
     downloadBlob(new Blob([response.data]), `Reporte_Facturacion_${selectedPeriod}.xlsx`);
     toast.success('Reporte Excel descargado exitosamente');
   } catch (error) {

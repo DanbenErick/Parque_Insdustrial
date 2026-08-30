@@ -324,6 +324,7 @@ const UserManagement = () => {
                       <td className="px-4 py-2">
                         <div className="flex flex-col">
                           <span className={`text-[11px] font-bold text-on-surface group-hover:text-primary transition-colors ${!user.es_activo && 'line-through'}`}>{user.nombre_razonsocial}</span>
+                          <span className="text-[10px] font-bold text-primary mt-0.5">Usuario: {user.username || '-'}</span>
                           <span className="text-[10px] text-on-surface-variant">{user.correo || 'Sin correo'}</span>
                         </div>
                       </td>

@@ -22,6 +22,9 @@ const TenantTableRow = ({ tenant, specificMedidor, onOpenDrawer, onOpenEdit, onT
           >
             {tenant.nombre_razonsocial}
           </button>
+          <span className="text-[10px] font-bold text-primary mt-0.5">
+            Usuario: {tenant.username || '-'}
+          </span>
           <span className="text-[10px] text-on-surface-variant font-data-mono">
             {tenant.documento_identidad?.length === 8 ? 'DNI' : 'RUC'}: {tenant.documento_identidad}
           </span>

@@ -104,9 +104,9 @@ export const AuthProvider = ({ children }) => {
       });
   }, [clearSession]);
 
-  const login = async (documento_identidad, clave_acceso) => {
+  const login = async (identificador, clave_acceso) => {
     const response = await api.post('/auth/login', {
-      documento_identidad,
+      identificador,
       clave_acceso,
     });
 

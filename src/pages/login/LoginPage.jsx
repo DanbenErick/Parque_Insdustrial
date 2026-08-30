@@ -77,7 +77,7 @@ const Login = () => {
           
           <div className="mb-6 text-center flex flex-col items-center">
             {/* Elegant Logo Container */}
-            <div className="w-14 h-14 mb-3 bg-white rounded-xl flex items-center justify-center border border-outline-variant shadow-sm overflow-hidden p-1.5">
+            <div className="w-14 h-14 mb-3 bg-white rounded-xl flex items-center justify-center border border-outline-variant shadow-sm overflow-hidden">
               <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
             </div>
             

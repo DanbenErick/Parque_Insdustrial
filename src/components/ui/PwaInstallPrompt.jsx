@@ -60,7 +60,7 @@ const PwaInstallPrompt = () => {
   return (
     <div className="fixed bottom-4 left-4 right-4 md:hidden z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
       <div className="bg-emerald-900 text-white rounded-2xl p-4 shadow-2xl flex items-center gap-4 border border-emerald-700/50">
-        <div className="w-12 h-12 bg-white rounded-xl p-2 shrink-0 flex items-center justify-center">
+        <div className="w-12 h-12 bg-white rounded-xl shrink-0 flex items-center justify-center overflow-hidden">
           <img src="/logo.png" alt="App Logo" className="w-full h-full object-contain" />
         </div>
         

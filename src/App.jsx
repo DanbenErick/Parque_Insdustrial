@@ -120,7 +120,7 @@ function App() {
                 <span className="material-symbols-outlined text-[28px]">menu</span>
               </button>
               <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center overflow-hidden border border-emerald-100">
-                <img src="/logo.png" alt="Logo" className="w-[85%] h-[85%] object-contain drop-shadow-sm" />
+                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-sm" />
               </div>
               <span className="font-bold text-[14px]">Portal Cliente</span>
             </div>
@@ -132,7 +132,7 @@ function App() {
           <header className="md:hidden shrink-0 flex items-center justify-between p-4 bg-surface text-on-surface shadow-sm border-b border-outline-variant/50 z-40 print:hidden">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
-                <img src="/logo.png" alt="Logo" className="w-[85%] h-[85%] object-contain" />
+                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-on-surface text-[14px] leading-tight tracking-tight">Parque Industrial</span>
