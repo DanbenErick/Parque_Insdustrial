@@ -38,7 +38,7 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
         <div className="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined text-[20px]">history</span>
+              <span className="material-symbols-outlined text-[20px]" translate="no">history</span>
             </div>
             <div>
               <h2 className="text-lg font-bold text-on-surface leading-tight">Historial de Refacturaciones</h2>
@@ -49,7 +49,7 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
             onClick={onClose}
             className="w-8 h-8 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface-variant transition-colors"
           >
-            <span className="material-symbols-outlined text-[20px]">close</span>
+            <span className="material-symbols-outlined text-[20px]" translate="no">close</span>
           </button>
         </div>
 
@@ -57,7 +57,7 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
         <div className="p-6 overflow-y-auto custom-scrollbar flex-1 bg-surface-container-lowest/30">
           {isLoading ? (
             <div className="flex flex-col items-center justify-center py-12 text-on-surface-variant">
-              <span className="material-symbols-outlined animate-spin text-[32px] mb-4 text-primary">sync</span>
+              <span className="material-symbols-outlined animate-spin text-[32px] mb-4 text-primary" translate="no">sync</span>
               <p className="font-bold">Cargando historial...</p>
             </div>
           ) : historial.length === 0 ? (
@@ -97,7 +97,7 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
                           </span>
                         </div>
                         <span className="text-[11px] font-medium text-on-surface-variant flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[14px]">calendar_today</span>
+                          <span className="material-symbols-outlined text-[14px]" translate="no">calendar_today</span>
                           {new Date(item.created_at).toLocaleString('es-PE')}
                         </span>
                       </div>
@@ -127,7 +127,7 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
 
                       {item.motivo_anulacion && (
                         <div className="mt-2 p-2.5 bg-error/5 rounded-lg border border-error/10 flex items-start gap-2">
-                          <span className="material-symbols-outlined text-error text-[16px] mt-0.5">info</span>
+                          <span className="material-symbols-outlined text-error text-[16px] mt-0.5" translate="no">info</span>
                           <div>
                             <p className="text-[10px] font-bold text-error uppercase mb-0.5">Motivo de Anulación</p>
                             <p className="text-[12px] text-on-surface-variant font-medium">{item.motivo_anulacion}</p>

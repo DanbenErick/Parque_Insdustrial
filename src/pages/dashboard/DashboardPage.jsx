@@ -159,7 +159,7 @@ const Dashboard = () => {
               <Bar data={consumoChart.data} options={CONSUMO_CHART_OPTIONS} />
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-on-surface-variant gap-2 opacity-70">
-                <span className="material-symbols-outlined text-[40px]">bar_chart_off</span>
+                <span className="material-symbols-outlined text-[40px]" translate="no">bar_chart_off</span>
                 <span className="font-bold text-body-lg">No hay datos de consumo para {activeYear}</span>
               </div>
             )}
@@ -192,7 +192,7 @@ const Dashboard = () => {
               <Bar data={recaudacionChart.data} options={RECAUDACION_CHART_OPTIONS} />
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-on-surface-variant gap-2 opacity-70">
-                <span className="material-symbols-outlined text-[40px]">query_stats</span>
+                <span className="material-symbols-outlined text-[40px]" translate="no">query_stats</span>
                 <span className="font-bold text-body-lg">No hay recaudaciones para {activeYear}</span>
               </div>
             )}

@@ -48,7 +48,7 @@ const SocioTopBar = () => {
         
         {/* Support/Contact Info (Optional Visual Element) */}
         <div className="hidden lg:flex items-center gap-2 mr-4 px-4 py-1.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100">
-          <span className="material-symbols-outlined text-[16px]">support_agent</span>
+          <span className="material-symbols-outlined text-[16px]" translate="no">support_agent</span>
           <span className="text-[11px] font-bold tracking-wide uppercase">Atención al Socio</span>
         </div>
 
@@ -57,7 +57,7 @@ const SocioTopBar = () => {
           className="relative p-2 hover:bg-surface-container rounded-full transition-colors text-on-surface-variant hover:text-emerald-600"
           title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
         >
-          <span className="material-symbols-outlined text-[20px]">
+          <span className="material-symbols-outlined text-[20px]" translate="no">
             {isFullscreen ? 'fullscreen_exit' : 'fullscreen'}
           </span>
         </button>

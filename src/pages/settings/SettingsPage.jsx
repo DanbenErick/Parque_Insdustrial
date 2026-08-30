@@ -48,7 +48,9 @@ const Settings = () => {
   const [tarifas, setTarifas] = useState({
     monto_multa_base: 0,
     monto_instalacion_base: 0,
-    cuenta_bancaria: ''
+    cuenta_bancaria: '',
+    cuenta_yape: '',
+    titular_cuenta: ''
   });
 
   // Cargar datos del usuario y configuración global
@@ -87,7 +89,9 @@ const Settings = () => {
       setTarifas({
         monto_multa_base: res.data.monto_multa_base || 0,
         monto_instalacion_base: res.data.monto_instalacion_base || 0,
-        cuenta_bancaria: res.data.cuenta_bancaria || ''
+        cuenta_bancaria: res.data.cuenta_bancaria || '',
+        cuenta_yape: res.data.cuenta_yape || '',
+        titular_cuenta: res.data.titular_cuenta || ''
       });
     }).catch(() => { /* Config load failed silently */ });
   }, [user]);
@@ -187,14 +191,14 @@ const Settings = () => {
         toast.custom((t) => (
           <div className="bg-surface border border-outline-variant rounded-xl shadow-lg p-3.5 flex items-center gap-3.5 w-full min-w-[300px]">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
-              <span className="material-symbols-outlined">task_alt</span>
+              <span className="material-symbols-outlined" translate="no">task_alt</span>
             </div>
             <div className="flex-1">
               <h4 className="text-sm font-bold text-on-surface leading-tight mb-0.5">Preferencias Guardadas</h4>
               <p className="text-[11px] text-on-surface-variant leading-tight">Tu configuración local ha sido actualizada correctamente.</p>
             </div>
             <button onClick={() => toast.dismiss(t)} className="w-6 h-6 rounded-md hover:bg-surface-variant flex items-center justify-center text-on-surface-variant transition-colors shrink-0">
-              <span className="material-symbols-outlined text-[14px]">close</span>
+              <span className="material-symbols-outlined text-[14px]" translate="no">close</span>
             </button>
           </div>
         ));
@@ -224,7 +228,7 @@ const Settings = () => {
             >
               {isSaving ? (
                 <>
-                  <span className="material-symbols-outlined animate-spin text-[16px]">sync</span>
+                  <span className="material-symbols-outlined animate-spin text-[16px]" translate="no">sync</span>
                   Guardando...
                 </>
               ) : (
@@ -240,28 +244,28 @@ const Settings = () => {
                 onClick={() => setActiveTab('profile')}
                 className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left text-xs ${activeTab === 'profile' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
               >
-                <span className="material-symbols-outlined text-[16px]">person</span>
+                <span className="material-symbols-outlined text-[16px]" translate="no">person</span>
                 Perfil de Usuario
               </button>
               <button 
                 onClick={() => setActiveTab('notifications')}
                 className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left text-xs ${activeTab === 'notifications' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
               >
-                <span className="material-symbols-outlined text-[16px]">notifications_active</span>
+                <span className="material-symbols-outlined text-[16px]" translate="no">notifications_active</span>
                 Notificaciones
               </button>
               <button 
                 onClick={() => setActiveTab('periodos')}
                 className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left text-xs ${activeTab === 'periodos' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
               >
-                <span className="material-symbols-outlined text-[16px]">calendar_month</span>
+                <span className="material-symbols-outlined text-[16px]" translate="no">calendar_month</span>
                 Periodos de Facturación
               </button>
               <button 
                 onClick={() => setActiveTab('tarifas')}
                 className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left text-xs ${activeTab === 'tarifas' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
               >
-                <span className="material-symbols-outlined text-[16px]">request_quote</span>
+                <span className="material-symbols-outlined text-[16px]" translate="no">request_quote</span>
                 Tarifas y Cobros
               </button>
 
@@ -271,7 +275,7 @@ const Settings = () => {
                 onClick={() => setActiveTab('herramientas')}
                 className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left text-xs ${activeTab === 'herramientas' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
               >
-                <span className="material-symbols-outlined text-[16px]">build</span>
+                <span className="material-symbols-outlined text-[16px]" translate="no">build</span>
                 Importar Datos
               </button>
             </div>
@@ -283,7 +287,7 @@ const Settings = () => {
                 <div className="animate-in fade-in space-y-6">
                   <div className="flex items-center gap-4 border-b border-outline-variant pb-4">
                     <div className="w-16 h-16 bg-primary rounded-full flex items-center justify-center text-on-primary shadow-sm">
-                      <span className="material-symbols-outlined text-[32px]">account_circle</span>
+                      <span className="material-symbols-outlined text-[32px]" translate="no">account_circle</span>
                     </div>
                     <div>
                       <h3 className="text-base font-bold text-on-surface">{user?.nombre_razonsocial || 'Administrador'}</h3>
@@ -344,66 +348,104 @@ const Settings = () => {
                   </div>
 
                   <div className="pt-4 border-t border-outline-variant/30 mt-6">
-                    <h4 className="text-sm text-on-surface font-bold mb-2">Datos para Recibos</h4>
-                    <div className="space-y-0.5 max-w-md">
-                      <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Cuenta Bancaria Principal (Se mostrará en los recibos)</label>
-                      <div className="flex gap-2">
-                        <input 
-                          type="text" 
-                          name="cuenta_bancaria"
-                          placeholder="Ej. BCP: 191-12345678-0-12 (Opcional)"
-                          value={tarifas.cuenta_bancaria}
-                          onChange={(e) => setTarifas(prev => ({ ...prev, cuenta_bancaria: e.target.value }))}
-                          disabled={!isEditingAccount}
-                          className={`flex-grow border rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm ${
-                            isEditingAccount 
-                              ? 'bg-surface-container-lowest border-outline-variant/50 hover:border-primary/50 focus:border-primary' 
-                              : 'bg-surface-container-highest border-transparent text-on-surface-variant cursor-not-allowed'
-                          }`} 
-                        />
-                        {!isEditingAccount ? (
+                    <h4 className="text-sm text-on-surface font-bold mb-2">Datos para Recibos y App Móvil</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
+                      <div className="space-y-0.5">
+                        <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Cuenta Bancaria Principal (BCP)</label>
+                        <div className="flex gap-2">
+                          <input 
+                            type="text" 
+                            name="cuenta_bancaria"
+                            placeholder="Ej. BCP: 191-12345678-0-12"
+                            value={tarifas.cuenta_bancaria}
+                            onChange={(e) => setTarifas(prev => ({ ...prev, cuenta_bancaria: e.target.value }))}
+                            disabled={!isEditingAccount}
+                            className={`flex-grow border rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm ${
+                              isEditingAccount 
+                                ? 'bg-surface-container-lowest border-outline-variant/50 hover:border-primary/50 focus:border-primary' 
+                                : 'bg-surface-container-highest border-transparent text-on-surface-variant cursor-not-allowed'
+                            }`} 
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-0.5">
+                        <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Número de Yape / Plin</label>
+                        <div className="flex gap-2">
+                          <input 
+                            type="text" 
+                            name="cuenta_yape"
+                            placeholder="Ej. 999 888 777"
+                            value={tarifas.cuenta_yape}
+                            onChange={(e) => setTarifas(prev => ({ ...prev, cuenta_yape: e.target.value }))}
+                            disabled={!isEditingAccount}
+                            className={`flex-grow border rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm ${
+                              isEditingAccount 
+                                ? 'bg-surface-container-lowest border-outline-variant/50 hover:border-primary/50 focus:border-primary' 
+                                : 'bg-surface-container-highest border-transparent text-on-surface-variant cursor-not-allowed'
+                            }`} 
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-0.5 mt-3 md:mt-0 md:col-span-2">
+                        <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Nombre del Titular de las Cuentas</label>
+                        <div className="flex gap-2">
+                          <input 
+                            type="text" 
+                            name="titular_cuenta"
+                            placeholder="Ej. Parque Industrial Jicamarca"
+                            value={tarifas.titular_cuenta}
+                            onChange={(e) => setTarifas(prev => ({ ...prev, titular_cuenta: e.target.value }))}
+                            disabled={!isEditingAccount}
+                            className={`flex-grow border rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm ${
+                              isEditingAccount 
+                                ? 'bg-surface-container-lowest border-outline-variant/50 hover:border-primary/50 focus:border-primary' 
+                                : 'bg-surface-container-highest border-transparent text-on-surface-variant cursor-not-allowed'
+                            }`} 
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-3 flex justify-start">
+                      {!isEditingAccount ? (
+                        <button 
+                          type="button" 
+                          onClick={() => setIsEditingAccount(true)}
+                          className="px-3 py-1.5 h-8 border border-outline-variant text-on-surface hover:text-primary hover:border-primary hover:bg-primary/5 rounded-md transition-colors text-xs font-bold active:scale-95 flex items-center gap-1"
+                        >
+                          <span className="material-symbols-outlined text-[16px]" translate="no">edit</span>
+                          Editar Cuentas
+                        </button>
+                      ) : (
+                        <div className="flex gap-1">
                           <button 
                             type="button" 
-                            onClick={() => setIsEditingAccount(true)}
-                            className="px-3 py-1.5 h-8 border border-outline-variant text-on-surface hover:text-primary hover:border-primary hover:bg-primary/5 rounded-md transition-colors text-xs font-bold active:scale-95 flex items-center gap-1"
+                            onClick={() => setIsEditingAccount(false)}
+                            className="px-2 h-8 border border-outline-variant text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest rounded-md transition-colors flex items-center justify-center active:scale-95"
+                            title="Cancelar"
                           >
-                            <span className="material-symbols-outlined text-[16px]">edit</span>
-                            Editar
+                            <span className="material-symbols-outlined text-[16px]" translate="no">close</span>
                           </button>
-                        ) : (
-                          <div className="flex gap-1">
-                            <button 
-                              type="button" 
-                              onClick={() => {
-                                setIsEditingAccount(false);
-                                // Opcional: restaurar valor original si se cancela, pero como el estado ya cambió, necesitaríamos el original.
-                                // Por simplicidad, solo cerramos el modo de edición.
-                              }}
-                              className="px-2 h-8 border border-outline-variant text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest rounded-md transition-colors flex items-center justify-center active:scale-95"
-                              title="Cancelar"
-                            >
-                              <span className="material-symbols-outlined text-[16px]">close</span>
-                            </button>
-                            <button 
-                              type="button" 
-                              onClick={handleSaveAccount}
-                              disabled={isSavingAccount}
-                              className={`px-3 py-1.5 h-8 bg-primary text-on-primary rounded-md shadow-sm transition-all text-xs font-bold flex items-center gap-1 ${
-                                isSavingAccount ? 'opacity-70 cursor-not-allowed' : 'hover:opacity-90 active:scale-95'
-                              }`}
-                            >
-                              {isSavingAccount ? (
-                                <span className="material-symbols-outlined animate-spin text-[16px]">sync</span>
-                              ) : (
-                                <span className="material-symbols-outlined text-[16px]">save</span>
-                              )}
-                              Guardar
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-[10px] text-on-surface-variant mt-1">Este número de cuenta aparecerá en la parte inferior de los recibos en PDF generados.</p>
+                          <button 
+                            type="button" 
+                            onClick={handleSaveAccount}
+                            disabled={isSavingAccount}
+                            className={`px-3 py-1.5 h-8 bg-primary text-on-primary rounded-md shadow-sm transition-all text-xs font-bold flex items-center gap-1 ${
+                              isSavingAccount ? 'opacity-70 cursor-not-allowed' : 'hover:opacity-90 active:scale-95'
+                            }`}
+                          >
+                            {isSavingAccount ? (
+                              <span className="material-symbols-outlined animate-spin text-[16px]" translate="no">sync</span>
+                            ) : (
+                              <span className="material-symbols-outlined text-[16px]" translate="no">save</span>
+                            )}
+                            Guardar Cuentas
+                          </button>
+                        </div>
+                      )}
                     </div>
+                    <p className="text-[10px] text-on-surface-variant mt-2">Estas cuentas aparecerán en los recibos en PDF y en la App Móvil de los usuarios.</p>
                   </div>
 
                   <div className="pt-4 border-t border-outline-variant/30 mt-6">
@@ -425,7 +467,7 @@ const Settings = () => {
                       <form onSubmit={handlePasswordSave} className="space-y-3 max-w-md bg-surface-container-low p-4 border border-outline-variant rounded-lg mt-2 animate-in slide-in-from-top-2 duration-200">
                         <div className="flex justify-between items-center pb-2 border-b border-outline-variant/30 mb-2">
                           <span className="text-xs font-bold text-on-surface flex items-center gap-1">
-                            <span className="material-symbols-outlined text-[16px] text-primary">key</span>
+                            <span className="material-symbols-outlined text-[16px] text-primary" translate="no">key</span>
                             Actualizar Contraseña
                           </span>
                           <button 
@@ -436,7 +478,7 @@ const Settings = () => {
                             }}
                             className="p-1 hover:bg-surface-container-highest rounded text-on-surface-variant"
                           >
-                            <span className="material-symbols-outlined text-[14px]">close</span>
+                            <span className="material-symbols-outlined text-[14px]" translate="no">close</span>
                           </button>
                         </div>
                         
@@ -577,7 +619,7 @@ const Settings = () => {
                       <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
                       <div className="flex flex-col gap-4 flex-grow ml-2">
                         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary shadow-inner shrink-0">
-                          <span className="material-symbols-outlined text-[24px]">group_add</span>
+                          <span className="material-symbols-outlined text-[24px]" translate="no">group_add</span>
                         </div>
                         <div>
                           <h4 className="font-bold text-on-surface text-sm mb-1">Importar Socios Masivamente</h4>
@@ -589,7 +631,7 @@ const Settings = () => {
                           onClick={() => setIsTenantImportOpen(true)}
                           className="w-full px-5 py-2.5 bg-surface-container-highest text-on-surface hover:text-primary font-bold text-xs rounded-xl shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-primary border border-outline-variant transition-all flex items-center justify-center gap-2"
                         >
-                          <span className="material-symbols-outlined text-[16px]">upload_file</span>
+                          <span className="material-symbols-outlined text-[16px]" translate="no">upload_file</span>
                           Abrir Importador de Socios
                         </button>
                       </div>
@@ -600,7 +642,7 @@ const Settings = () => {
                       <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
                       <div className="flex flex-col gap-4 flex-grow ml-2">
                         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center text-primary shadow-inner shrink-0">
-                          <span className="material-symbols-outlined text-[24px]">database_upload</span>
+                          <span className="material-symbols-outlined text-[24px]" translate="no">database_upload</span>
                         </div>
                         <div>
                           <h4 className="font-bold text-on-surface text-sm mb-1">Importar Facturación Masiva</h4>
@@ -612,7 +654,7 @@ const Settings = () => {
                           onClick={() => setIsBulkImportOpen(true)}
                           className="w-full px-5 py-2.5 bg-primary text-on-primary font-bold text-xs rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
                         >
-                          <span className="material-symbols-outlined text-[16px]">upload_file</span>
+                          <span className="material-symbols-outlined text-[16px]" translate="no">upload_file</span>
                           Abrir Importador de Facturación
                         </button>
                       </div>

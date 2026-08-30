@@ -35,7 +35,7 @@ const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onV
                     ? 'bg-primary/10 text-primary border border-primary/20' 
                     : 'bg-surface-container-high text-on-surface-variant border border-outline-variant'
                 } group-hover/btn:bg-primary/20 transition-colors`}>
-                  <span className="material-symbols-outlined text-[14px]">
+                  <span className="material-symbols-outlined text-[14px]" translate="no">
                     {recibo.medidor_num_serie ? 'speed' : 'money_off'}
                   </span>
                   {recibo.medidor_num_serie || 'Sin medidor'}
@@ -98,7 +98,7 @@ const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onV
               onClick={() => onViewPdf(recibo.id)}
               className="w-7 h-7 flex items-center justify-center text-error hover:bg-error/10 rounded-md transition-colors"
             >
-              <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+              <span className="material-symbols-outlined text-[16px]" translate="no">picture_as_pdf</span>
             </button>
             <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
               Ver PDF
@@ -124,7 +124,7 @@ const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onV
               onClick={() => onViewHistorial(recibo.id)}
               className="w-7 h-7 flex items-center justify-center text-primary hover:bg-primary/10 rounded-md transition-colors"
             >
-              <span className="material-symbols-outlined text-[16px]">history</span>
+              <span className="material-symbols-outlined text-[16px]" translate="no">history</span>
             </button>
             <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
               Historial de Cambios
@@ -138,7 +138,7 @@ const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onV
                   onClick={() => onDeuda(recibo)}
                   className="w-7 h-7 flex items-center justify-center text-teal-600 hover:bg-teal-100 rounded-md transition-colors"
                 >
-                  <span className="material-symbols-outlined text-[16px]">payments</span>
+                  <span className="material-symbols-outlined text-[16px]" translate="no">payments</span>
                 </button>
                 <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
                   Añadir Deuda
@@ -149,7 +149,7 @@ const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onV
                   onClick={() => onRefacturar(recibo.id)}
                   className="w-7 h-7 flex items-center justify-center text-orange-600 hover:bg-orange-100 rounded-md transition-colors"
                 >
-                  <span className="material-symbols-outlined text-[16px]">autorenew</span>
+                  <span className="material-symbols-outlined text-[16px]" translate="no">autorenew</span>
                 </button>
                 <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
                   Refacturar

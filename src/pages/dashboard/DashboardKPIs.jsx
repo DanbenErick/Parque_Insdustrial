@@ -11,7 +11,7 @@ const KPI_ITEMS = [
     textColor: 'text-primary',
     getBadge: () => (
       <span className="text-[10px] text-primary flex items-center gap-0.5 font-bold mb-px bg-primary/10 px-1 rounded-sm">
-        <span className="material-symbols-outlined text-[12px]">trending_up</span> 2.4%
+        <span className="material-symbols-outlined text-[12px]" translate="no">trending_up</span> 2.4%
       </span>
     ),
     getValue: (kpis) => typeof kpis.totalConsumo === 'number'
@@ -61,7 +61,7 @@ const DashboardKPIs = React.memo(({ kpis }) => (
         className={`bg-surface border border-outline-variant ${item.borderHover} rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm`}
       >
         <div className={`w-10 h-10 rounded-full ${item.bgIcon} flex items-center justify-center ${item.textColor} shrink-0 border`}>
-          <span className="material-symbols-outlined text-[20px]">{item.icon}</span>
+          <span className="material-symbols-outlined text-[20px]" translate="no">{item.icon}</span>
         </div>
         <div className="flex flex-col justify-center overflow-hidden flex-1">
           <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider leading-tight truncate">

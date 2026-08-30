@@ -70,7 +70,7 @@ const TopBar = ({ screens }) => {
             placeholder="Buscar pantallas..."
             className="bg-surface-container border border-outline-variant rounded-full pl-10 pr-4 py-2 text-sm w-64 focus:border-primary outline-none focus:w-80 transition-all"
           />
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]" translate="no">search</span>
 
           {/* Search Results Dropdown */}
           {globalSearchResults.length > 0 && (
@@ -83,7 +83,7 @@ const TopBar = ({ screens }) => {
                     className="px-4 py-3 hover:bg-surface-container cursor-pointer flex items-center gap-3 transition-colors group"
                   >
                     <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                      <span className="material-symbols-outlined text-[18px]">{screen.icon}</span>
+                      <span className="material-symbols-outlined text-[18px]" translate="no">{screen.icon}</span>
                     </div>
                     <div>
                       <p className="font-bold text-sm text-on-surface">{screen.name}</p>
@@ -103,7 +103,7 @@ const TopBar = ({ screens }) => {
           className="relative p-2 hover:bg-surface-container rounded-full transition-colors hidden sm:block"
           title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
         >
-          <span className="material-symbols-outlined text-on-surface-variant">
+          <span className="material-symbols-outlined text-on-surface-variant" translate="no">
             {isFullscreen ? 'fullscreen_exit' : 'fullscreen'}
           </span>
         </button>
@@ -114,7 +114,7 @@ const TopBar = ({ screens }) => {
           onClick={() => navigate('/settings')}
           className="w-10 h-10 flex items-center justify-center hover:bg-surface-container-low transition-colors rounded-full text-on-surface-variant"
         >
-          <span className="material-symbols-outlined">settings</span>
+          <span className="material-symbols-outlined" translate="no">settings</span>
         </button>
 
 

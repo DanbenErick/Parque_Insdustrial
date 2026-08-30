@@ -117,7 +117,7 @@ function App() {
           <header className="md:hidden shrink-0 flex items-center justify-between p-4 bg-white border-b border-outline-variant/30 text-emerald-900 shadow-sm z-40 print:hidden">
             <div className="flex items-center gap-3">
               <button onClick={() => setIsMobileMenuOpen(true)} className="p-1 hover:bg-emerald-50 rounded-lg transition-colors text-emerald-600">
-                <span className="material-symbols-outlined text-[28px]">menu</span>
+                <span className="material-symbols-outlined text-[28px]" translate="no">menu</span>
               </button>
               <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center overflow-hidden border border-emerald-100">
                 <img src="/logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-sm" />

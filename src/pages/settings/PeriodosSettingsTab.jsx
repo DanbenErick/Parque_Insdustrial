@@ -89,14 +89,14 @@ const PeriodosSettingsTab = () => {
             onClick={handleAddYear}
             className="flex items-center gap-1.5 bg-surface-container-high text-on-surface px-3 py-1.5 h-8 rounded-md text-xs font-bold shadow-sm hover:bg-surface-container-highest transition-colors border border-outline-variant"
           >
-            <span className="material-symbols-outlined text-[16px]">calendar_add_on</span>
+            <span className="material-symbols-outlined text-[16px]" translate="no">calendar_add_on</span>
             Nuevo Año
           </button>
           <button 
             onClick={handleCreate}
             className="flex items-center gap-1.5 bg-primary text-on-primary px-3 py-1.5 h-8 rounded-md text-xs font-bold shadow-sm hover:opacity-90 transition-opacity"
           >
-            <span className="material-symbols-outlined text-[16px]">add_circle</span>
+            <span className="material-symbols-outlined text-[16px]" translate="no">add_circle</span>
             Nuevo Periodo
           </button>
         </div>
@@ -105,12 +105,12 @@ const PeriodosSettingsTab = () => {
       <div className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden shadow-sm">
         {isLoading ? (
           <div className="p-8 flex justify-center items-center">
-            <span className="material-symbols-outlined animate-spin text-primary text-[32px]">sync</span>
+            <span className="material-symbols-outlined animate-spin text-primary text-[32px]" translate="no">sync</span>
           </div>
         ) : periodosFiltrados.length === 0 ? (
           <div className="p-10 flex flex-col items-center justify-center text-on-surface-variant text-center gap-4 bg-surface-container-lowest">
             <div className="w-16 h-16 bg-surface-container rounded-full flex items-center justify-center text-on-surface-variant">
-              <span className="material-symbols-outlined text-[32px]">calendar_month</span>
+              <span className="material-symbols-outlined text-[32px]" translate="no">calendar_month</span>
             </div>
             <div>
               <p className="font-bold text-lg text-on-surface">No hay periodos en {activeYear}</p>
@@ -175,7 +175,7 @@ const PeriodosSettingsTab = () => {
                         className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
                         title="Editar Periodo"
                       >
-                        <span className="material-symbols-outlined text-[16px]">edit</span>
+                        <span className="material-symbols-outlined text-[16px]" translate="no">edit</span>
                       </button>
                     </td>
                   </tr>

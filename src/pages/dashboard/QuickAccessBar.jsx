@@ -48,7 +48,7 @@ const QuickAccessBar = React.memo(() => {
             className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors border shadow-sm group ${item.color} ${item.hover} bg-white`}
           >
             <span
-              className="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform"
+              className="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform" translate="no"
               style={{ fontVariationSettings: "'FILL' 1" }}
             >
               {item.icon}

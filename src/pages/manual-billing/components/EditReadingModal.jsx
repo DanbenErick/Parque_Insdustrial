@@ -81,10 +81,10 @@ export const EditReadingModal = ({
       <div {...MODAL_CONTENT} className="bg-surface w-full max-w-xl rounded-2xl shadow-2xl flex flex-col">
         <div className="px-lg py-md border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest rounded-t-2xl">
           <h3 className="font-headline-sm text-primary font-bold flex items-center gap-2">
-            <span className="material-symbols-outlined">edit_note</span> Modificar Lectura
+            <span className="material-symbols-outlined" translate="no">edit_note</span> Modificar Lectura
           </h3>
           <button onClick={() => setEditModalData(null)} className="w-8 h-8 rounded-full hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors">
-            <span className="material-symbols-outlined">close</span>
+            <span className="material-symbols-outlined" translate="no">close</span>
           </button>
         </div>
 
@@ -174,7 +174,7 @@ export const EditReadingModal = ({
           {(editModalData.es_cambio_medidor === 1 || editModalData.es_cambio_medidor === true) && (
             <div className="bg-orange-50/50 p-4 rounded-xl border border-orange-200/50 space-y-4">
               <h4 className="text-[10px] font-bold text-orange-700 uppercase tracking-wider flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[14px]">swap_horiz</span> Editar Cambio de Medidor
+                <span className="material-symbols-outlined text-[14px]" translate="no">swap_horiz</span> Editar Cambio de Medidor
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -230,7 +230,7 @@ export const EditReadingModal = ({
 
           {validationErrors.length > 0 && (
             <div className="mt-2 mb-2 text-error text-[11px] font-bold flex items-start gap-1.5 bg-error/10 px-3 py-2 rounded-md border border-error/20">
-              <span className="material-symbols-outlined text-[14px] mt-0.5">error</span>
+              <span className="material-symbols-outlined text-[14px] mt-0.5" translate="no">error</span>
               <div className="flex flex-col">
                 <span className="block text-error/80 uppercase tracking-wider text-[9px] mb-0.5">Errores de validación:</span>
                 <ul className="list-disc pl-3">
@@ -247,7 +247,7 @@ export const EditReadingModal = ({
               Cancelar
             </button>
             <button type="submit" disabled={isSaving || validationErrors.length > 0} className={`flex-grow py-2 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm ${validationErrors.length === 0 ? 'bg-primary text-on-primary hover:opacity-90' : 'bg-surface-container-highest text-on-surface-variant cursor-not-allowed'}`}>
-              {isSaving ? <><span className="material-symbols-outlined animate-spin text-[18px]">sync</span> Actualizando...</> : <><span className="material-symbols-outlined text-[18px]">save</span> Guardar Cambios</>}
+              {isSaving ? <><span className="material-symbols-outlined animate-spin text-[18px]" translate="no">sync</span> Actualizando...</> : <><span className="material-symbols-outlined text-[18px]" translate="no">save</span> Guardar Cambios</>}
             </button>
           </div>
         </form>

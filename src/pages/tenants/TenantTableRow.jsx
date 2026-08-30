@@ -59,8 +59,8 @@ const TenantTableRow = ({ tenant, specificMedidor, onOpenDrawer, onOpenEdit, onT
       </td>
 
       <td className="px-4 py-2">
-        <Badge variant={tenant.es_activo ? 'success' : 'error'}>
-          {tenant.es_activo ? 'Activo' : 'Suspendido'}
+        <Badge variant={(specificMedidor ? specificMedidor.operativo : tenant.es_activo) ? 'success' : 'error'}>
+          {(specificMedidor ? specificMedidor.operativo : tenant.es_activo) ? 'Activo' : 'Suspendido'}
         </Badge>
       </td>
       <td className="px-4 py-2 text-right">
@@ -70,7 +70,7 @@ const TenantTableRow = ({ tenant, specificMedidor, onOpenDrawer, onOpenEdit, onT
               onClick={() => onWhatsApp()}
               className="w-7 h-7 flex items-center justify-center rounded-md transition-colors text-[#25D366] hover:bg-[#25D366]/10"
             >
-              <span className="material-symbols-outlined text-[15px]">chat</span>
+              <span className="material-symbols-outlined text-[15px]" translate="no">chat</span>
             </button>
             <div className="absolute bottom-full right-0 mb-2 hidden group-hover/btn:block w-max bg-gray-800 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg z-50">
               WhatsApp
@@ -83,7 +83,7 @@ const TenantTableRow = ({ tenant, specificMedidor, onOpenDrawer, onOpenEdit, onT
               onClick={() => onResetPassword()}
               className="w-7 h-7 flex items-center justify-center rounded-md transition-colors text-secondary hover:bg-secondary/10"
             >
-              <span className="material-symbols-outlined text-[15px]">key</span>
+              <span className="material-symbols-outlined text-[15px]" translate="no">key</span>
             </button>
             <div className="absolute bottom-full right-0 mb-2 hidden group-hover/btn:block w-max bg-gray-800 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg z-50">
               Restablecer Clave
@@ -96,7 +96,7 @@ const TenantTableRow = ({ tenant, specificMedidor, onOpenDrawer, onOpenEdit, onT
               onClick={() => onOpenEdit(tenant)}
               className="w-7 h-7 flex items-center justify-center rounded-md transition-colors text-blue-600 hover:bg-blue-50"
             >
-              <span className="material-symbols-outlined text-[15px]">edit</span>
+              <span className="material-symbols-outlined text-[15px]" translate="no">edit</span>
             </button>
             <div className="absolute bottom-full right-0 mb-2 hidden group-hover/btn:block w-max bg-gray-800 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg z-50">
               Editar Socio
@@ -107,12 +107,12 @@ const TenantTableRow = ({ tenant, specificMedidor, onOpenDrawer, onOpenEdit, onT
           <div className="relative group/btn flex items-center justify-center">
             <button
               onClick={() => onToggleStatus(tenant)}
-              className={`w-7 h-7 flex items-center justify-center rounded-md transition-colors ${tenant.es_activo ? 'text-error hover:bg-error/10' : 'text-primary hover:bg-primary/10'}`}
+              className={`w-7 h-7 flex items-center justify-center rounded-md transition-colors ${(specificMedidor ? specificMedidor.operativo : tenant.es_activo) ? 'text-error hover:bg-error/10' : 'text-primary hover:bg-primary/10'}`}
             >
-              <span className="material-symbols-outlined text-[15px]">{tenant.es_activo ? 'power_off' : 'bolt'}</span>
+              <span className="material-symbols-outlined text-[15px]" translate="no">{(specificMedidor ? specificMedidor.operativo : tenant.es_activo) ? 'power_off' : 'bolt'}</span>
             </button>
             <div className="absolute bottom-full right-0 mb-2 hidden group-hover/btn:block w-max bg-gray-800 text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg z-50">
-              {tenant.es_activo ? "Cortar Servicio" : "Reactivar Servicio"}
+              {(specificMedidor ? specificMedidor.operativo : tenant.es_activo) ? "Cortar Servicio" : "Reactivar Servicio"}
               <div className="absolute top-full right-2 -mt-px border-[4px] border-transparent border-t-gray-800"></div>
             </div>
           </div>

@@ -50,27 +50,27 @@ export const DeudaPersonalizadaModal = ({ isOpen, onClose, selectedMedidor, acti
       <div className="bg-surface rounded-3xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-300">
         <div className="px-6 py-4 border-b border-outline-variant bg-surface-container-lowest flex items-center justify-between">
           <div className="flex items-center gap-2 text-primary">
-            <span className="material-symbols-outlined">payments</span>
+            <span className="material-symbols-outlined" translate="no">payments</span>
             <h2 className="text-lg font-bold text-on-surface">Añadir Deuda Personalizada</h2>
           </div>
           <button 
             onClick={onClose}
             className="p-1.5 rounded-full hover:bg-surface-variant text-on-surface-variant transition-colors"
           >
-            <span className="material-symbols-outlined text-[20px]">close</span>
+            <span className="material-symbols-outlined text-[20px]" translate="no">close</span>
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="bg-primary/5 rounded-xl p-3 border border-primary/10 flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-              <span className="material-symbols-outlined">person</span>
+              <span className="material-symbols-outlined" translate="no">person</span>
             </div>
             <div>
               <p className="text-xs text-on-surface-variant font-medium">Socio / Propietario</p>
               <p className="text-sm font-bold text-on-surface line-clamp-1">{selectedMedidor?.propietario || 'Socio'}</p>
               <p className="text-[10px] text-on-surface-variant font-medium line-clamp-1 mt-0.5">
-                <span className="material-symbols-outlined text-[10px] align-middle mr-1">location_on</span>
+                <span className="material-symbols-outlined text-[10px] align-middle mr-1" translate="no">location_on</span>
                 {selectedMedidor?.socio_direccion || selectedMedidor?.direccion || 'Sin dirección'}
               </p>
             </div>
@@ -131,12 +131,12 @@ export const DeudaPersonalizadaModal = ({ isOpen, onClose, selectedMedidor, acti
             >
               {isSaving ? (
                 <>
-                  <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                  <span className="material-symbols-outlined animate-spin text-[18px]" translate="no">progress_activity</span>
                   Guardando...
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-[18px]">save</span>
+                  <span className="material-symbols-outlined text-[18px]" translate="no">save</span>
                   Guardar Cargo
                 </>
               )}

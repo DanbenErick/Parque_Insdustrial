@@ -92,7 +92,7 @@ const Login = () => {
             {/* Mensaje de Error de Login */}
             {loginError && (
               <div className="bg-error/10 border-l-[3px] border-error px-3 py-2 rounded-r flex items-start gap-2 mb-4 animate-in fade-in slide-in-from-top-2">
-                <span className="material-symbols-outlined text-error text-[16px] mt-0.5">error</span>
+                <span className="material-symbols-outlined text-error text-[16px] mt-0.5" translate="no">error</span>
                 <p className="text-[11px] text-error font-medium leading-tight">
                   {loginError}
                 </p>
@@ -108,7 +108,7 @@ const Login = () => {
                   Usuario, Correo o DNI/RUC
                 </label>
                 <div className="relative flex items-center">
-                  <span className={`material-symbols-outlined absolute left-3 text-[18px] transition-colors ${getIconClass('username')}`}>
+                  <span translate="no" className={`material-symbols-outlined absolute left-3 text-[18px] transition-colors ${getIconClass('username')}`}>
                     person
                   </span>
                   <input 
@@ -136,7 +136,7 @@ const Login = () => {
                   Contraseña o PIN
                 </label>
                 <div className="relative flex items-center">
-                  <span className={`material-symbols-outlined absolute left-3 text-[18px] transition-colors ${getIconClass('password')}`}>
+                  <span translate="no" className={`material-symbols-outlined absolute left-3 text-[18px] transition-colors ${getIconClass('password')}`}>
                     lock
                   </span>
                   <input 
@@ -160,7 +160,7 @@ const Login = () => {
                     className="absolute right-2.5 text-on-surface-variant hover:text-on-surface transition-colors focus:outline-none flex items-center justify-center p-1"
                     aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                   >
-                    <span className="material-symbols-outlined text-[18px]">
+                    <span className="material-symbols-outlined text-[18px]" translate="no">
                       {showPassword ? 'visibility_off' : 'visibility'}
                     </span>
                   </button>
@@ -176,7 +176,7 @@ const Login = () => {
               className={`w-full h-10 bg-primary hover:bg-primary-fixed-variant text-white font-bold rounded-lg transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 mt-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'active:scale-[0.98]'}`}
             >
               <span className="text-xs tracking-wide">{isLoading ? 'Autenticando...' : 'Iniciar Sesión'}</span>
-              {!isLoading && <span className="material-symbols-outlined text-[16px]">arrow_forward</span>}
+              {!isLoading && <span className="material-symbols-outlined text-[16px]" translate="no">arrow_forward</span>}
             </button>
             
           </form>

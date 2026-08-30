@@ -14,7 +14,7 @@ export const HistoryPanel = ({
     <div className="bg-white/80 backdrop-blur-xl border border-outline-variant/60 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden h-full flex flex-col transition-all hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
       <div className="px-5 py-4 border-b border-outline-variant/50 flex items-center gap-3 bg-gradient-to-r from-surface to-surface-container-lowest relative">
         <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner border border-primary/20">
-          <span className="material-symbols-outlined text-[20px]">history</span>
+          <span className="material-symbols-outlined text-[20px]" translate="no">history</span>
         </div>
         <div>
           <h4 className="font-extrabold text-sm text-on-surface tracking-tight">Lecturas Registradas</h4>
@@ -38,7 +38,7 @@ export const HistoryPanel = ({
             onClick={() => setIsModalOpen(true)}
             className="w-full py-2.5 bg-primary/10 text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all duration-300 flex items-center justify-center gap-2 text-sm shadow-sm hover:shadow-md group"
           >
-            <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">list_alt</span>
+            <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform" translate="no">list_alt</span>
             Ver todas las lecturas ({lecturasPeriodoActivo.length})
           </button>
         </div>

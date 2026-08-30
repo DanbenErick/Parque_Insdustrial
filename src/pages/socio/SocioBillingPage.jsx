@@ -46,7 +46,7 @@ const SocioBillingPage = () => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 text-emerald-600">
-        <span className="material-symbols-outlined animate-spin text-[40px]">sync</span>
+        <span className="material-symbols-outlined animate-spin text-[40px]" translate="no">sync</span>
         <p className="font-bold animate-pulse">Cargando sus recibos...</p>
       </div>
     );
@@ -55,7 +55,7 @@ const SocioBillingPage = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-red-500">
-        <span className="material-symbols-outlined text-[48px]">error</span>
+        <span className="material-symbols-outlined text-[48px]" translate="no">error</span>
         <p className="mt-2 font-bold">Error al cargar la información.</p>
         <button onClick={refetch} className="mt-4 px-4 py-2 bg-red-100 rounded-lg">Reintentar</button>
       </div>
@@ -74,7 +74,7 @@ const SocioBillingPage = () => {
       <div className="space-y-4">
         {recibos.length === 0 ? (
           <div className="bg-white rounded-2xl border border-outline-variant p-12 flex flex-col items-center justify-center text-on-surface-variant shadow-sm">
-            <span className="material-symbols-outlined text-[48px] mb-4 opacity-50">receipt_long</span>
+            <span className="material-symbols-outlined text-[48px] mb-4 opacity-50" translate="no">receipt_long</span>
             <p className="font-bold text-lg">No hay recibos registrados</p>
             <p className="text-sm mt-1">Aún no se ha generado ningún recibo a su nombre.</p>
           </div>
@@ -92,7 +92,7 @@ const SocioBillingPage = () => {
                       <span className="font-data-mono font-bold text-sm text-on-surface">{recibo.numero_comprobante}</span>
                     </div>
                     <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/60 border ${status.border}`}>
-                      <span className={`material-symbols-outlined text-[14px] ${status.text}`}>{status.icon}</span>
+                      <span translate="no" className={`material-symbols-outlined text-[14px] ${status.text}`}>{status.icon}</span>
                       <span className={`text-[11px] font-bold uppercase tracking-wider ${status.text}`}>{recibo.estado}</span>
                     </div>
                   </div>
@@ -144,7 +144,7 @@ const SocioBillingPage = () => {
                       onClick={() => handleDownloadPDF(recibo)}
                       className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 font-bold text-sm hover:bg-emerald-100 transition-colors"
                     >
-                      <span className="material-symbols-outlined text-[18px]">download</span>
+                      <span className="material-symbols-outlined text-[18px]" translate="no">download</span>
                       Descargar PDF
                     </button>
                   </div>

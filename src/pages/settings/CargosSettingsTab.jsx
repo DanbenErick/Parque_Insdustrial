@@ -136,7 +136,7 @@ const CargosSettingsTab = () => {
           onClick={() => handleOpenModal()}
           className="px-3 py-1.5 h-8 bg-primary text-on-primary text-xs font-bold rounded-md shadow-sm hover:opacity-90 active:scale-95 flex items-center gap-1 transition-all"
         >
-          <span className="material-symbols-outlined text-[16px]">add</span>
+          <span className="material-symbols-outlined text-[16px]" translate="no">add</span>
           Nuevo Cargo
         </button>
       </div>
@@ -172,7 +172,7 @@ const CargosSettingsTab = () => {
                     {cargo.descripcion}
                     <div className="text-[10px] text-on-surface-variant font-normal mt-0.5">
                       {(cargo.es_global === 1 || cargo.es_global === true) 
-                        ? <span className="text-primary font-bold flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">public</span> Global (Todos)</span>
+                        ? <span className="text-primary font-bold flex items-center gap-1"><span className="material-symbols-outlined text-[12px]" translate="no">public</span> Global (Todos)</span>
                         : `${cargo.periodos_ids?.length || 0} periodos asignados`}
                     </div>
                   </td>
@@ -185,10 +185,10 @@ const CargosSettingsTab = () => {
                   </td>
                   <td className="py-2.5 px-4 text-right space-x-1">
                     <button onClick={() => handleOpenModal(cargo)} className="p-1.5 text-primary hover:bg-primary/10 rounded-md transition-colors">
-                      <span className="material-symbols-outlined text-[16px]">edit</span>
+                      <span className="material-symbols-outlined text-[16px]" translate="no">edit</span>
                     </button>
                     <button onClick={() => handleDelete(cargo.id)} className="p-1.5 text-error hover:bg-error/10 rounded-md transition-colors">
-                      <span className="material-symbols-outlined text-[16px]">delete</span>
+                      <span className="material-symbols-outlined text-[16px]" translate="no">delete</span>
                     </button>
                   </td>
                 </tr>

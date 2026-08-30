@@ -56,11 +56,11 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
         {/* Header del Drawer */}
         <div className="px-6 py-4 border-b border-outline-variant bg-surface-container-low flex justify-between items-center shadow-sm">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary">calendar_month</span>
+            <span className="material-symbols-outlined text-primary" translate="no">calendar_month</span>
             <h3 className="font-headline-sm font-bold text-on-surface">Detalle del Periodo</h3>
           </div>
           <button onClick={() => setDrawerPeriodo(null)} className="p-2 hover:bg-surface-container rounded-full transition-colors text-on-surface-variant">
-            <span className="material-symbols-outlined">close</span>
+            <span className="material-symbols-outlined" translate="no">close</span>
           </button>
         </div>
 
@@ -70,7 +70,7 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
           <div className="flex flex-col items-center text-center space-y-3 bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm relative overflow-hidden">
             <div className="absolute top-0 left-0 w-full h-1 bg-primary" />
             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-2xl shadow-inner">
-              <span className="material-symbols-outlined text-3xl">event_available</span>
+              <span className="material-symbols-outlined text-3xl" translate="no">event_available</span>
             </div>
             <div>
               <h2 className="text-2xl font-bold text-on-surface capitalize">{formatPeriodo(drawerPeriodo.mes_anio)}</h2>
@@ -86,14 +86,14 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
           {/* Tarifas y Costos */}
           <div className="space-y-3">
             <h4 className="text-sm font-label-caps font-bold text-on-surface-variant uppercase flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">payments</span>
+              <span className="material-symbols-outlined text-[18px]" translate="no">payments</span>
               Tarifas y Costos
             </h4>
             <div className="bg-white rounded-xl border border-outline-variant divide-y divide-outline-variant shadow-sm">
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-surface border border-outline-variant rounded-xl p-3 shadow-sm hover:border-primary/30 transition-colors group">
                   <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px] text-primary">bolt</span> Costo Energía (Fuera Punta)
+                    <span className="material-symbols-outlined text-[14px] text-primary" translate="no">bolt</span> Costo Energía (Fuera Punta)
                   </p>
                   <p className="font-data-mono font-bold text-base text-on-surface group-hover:text-primary transition-colors">
                     S/ {Number(drawerPeriodo.tarifa_kwh).toFixed(4)}
@@ -101,7 +101,7 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
                 </div>
                 <div className="bg-surface border border-outline-variant rounded-xl p-3 shadow-sm hover:border-orange-500/30 transition-colors group">
                   <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px] text-orange-600">bolt</span> Costo Energía (H. Punta)
+                    <span className="material-symbols-outlined text-[14px] text-orange-600" translate="no">bolt</span> Costo Energía (H. Punta)
                   </p>
                   <p className="font-data-mono font-bold text-base text-on-surface group-hover:text-orange-600 transition-colors">
                     S/ {Number(drawerPeriodo.tarifa_kwh_tr || drawerPeriodo.tarifa_kwh).toFixed(4)}
@@ -109,7 +109,7 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
                 </div>
                 <div className="bg-surface border border-outline-variant rounded-xl p-3 shadow-sm hover:border-orange-500/30 transition-colors group">
                   <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px] text-orange-600">schedule</span> Costo Punta (kWh)
+                    <span className="material-symbols-outlined text-[14px] text-orange-600" translate="no">schedule</span> Costo Punta (kWh)
                   </p>
                   <p className="font-data-mono font-bold text-base text-on-surface group-hover:text-orange-600 transition-colors">
                     S/ {Number(drawerPeriodo.tarifa_kwh_punta || 0).toFixed(4)}
@@ -117,7 +117,7 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
                 </div>
                 <div className="bg-surface border border-outline-variant rounded-xl p-3 shadow-sm hover:border-purple-500/30 transition-colors group">
                   <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px] text-purple-600">electric_meter</span> Costo Potencia (Punta)
+                    <span className="material-symbols-outlined text-[14px] text-purple-600" translate="no">electric_meter</span> Costo Potencia (Punta)
                   </p>
                   <p className="font-data-mono font-bold text-base text-on-surface group-hover:text-purple-600 transition-colors">
                     S/ {Number(drawerPeriodo.costo_potencia || 0).toFixed(4)}
@@ -126,7 +126,7 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
                 
                 <div className="bg-surface border border-outline-variant rounded-xl p-3 shadow-sm hover:border-indigo-500/30 transition-colors group">
                   <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px] text-indigo-600">electric_meter</span> Costo Potencia (F. Punta)
+                    <span className="material-symbols-outlined text-[14px] text-indigo-600" translate="no">electric_meter</span> Costo Potencia (F. Punta)
                   </p>
                   <p className="font-data-mono font-bold text-base text-on-surface group-hover:text-indigo-600 transition-colors">
                     S/ {Number(drawerPeriodo.costo_potencia_fuera_punta || 0).toFixed(4)}
@@ -139,12 +139,12 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
           {/* Cronograma */}
           <div className="space-y-3">
             <h4 className="text-sm font-label-caps font-bold text-on-surface-variant uppercase flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">calendar_clock</span>
+              <span className="material-symbols-outlined text-[18px]" translate="no">calendar_clock</span>
               Cronograma
             </h4>
             <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden">
               <div className="p-3 bg-blue-50 border-b border-blue-100 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[16px] text-blue-600">calendar_month</span>
+                <span className="material-symbols-outlined text-[16px] text-blue-600" translate="no">calendar_month</span>
                 <span className="text-xs font-bold text-blue-800 uppercase">Periodo de Consumo</span>
               </div>
               <div className="p-4 grid grid-cols-2 gap-4">
@@ -161,7 +161,7 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
             
             <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden">
               <div className="p-3 bg-orange-50 border-b border-orange-100 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[16px] text-orange-600">receipt_long</span>
+                <span className="material-symbols-outlined text-[16px] text-orange-600" translate="no">receipt_long</span>
                 <span className="text-xs font-bold text-orange-800 uppercase">Fechas de Facturación</span>
               </div>
               <div className="p-4 space-y-3">
@@ -184,13 +184,13 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
           {/* Auditoría */}
           <div className="space-y-3">
             <h4 className="text-sm font-label-caps font-bold text-on-surface-variant uppercase flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">history</span>
+              <span className="material-symbols-outlined text-[18px]" translate="no">history</span>
               Auditoría y Trazabilidad
             </h4>
             <div className="bg-surface-container rounded-xl p-4 border border-outline-variant shadow-inner">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 rounded-full bg-surface-container-highest flex items-center justify-center text-on-surface-variant">
-                  <span className="material-symbols-outlined">person</span>
+                  <span className="material-symbols-outlined" translate="no">person</span>
                 </div>
                 <div>
                   <p className="text-xs text-on-surface-variant mb-0.5">Creado por</p>
@@ -215,7 +215,7 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
             }}
             className="w-full py-3 bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-lg font-bold flex justify-center items-center gap-2 border border-primary/20"
           >
-            <span className="material-symbols-outlined">edit</span>
+            <span className="material-symbols-outlined" translate="no">edit</span>
             Editar Periodo
           </button>
         </div>

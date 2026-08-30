@@ -217,7 +217,7 @@ const Billing = () => {
                   <option key={m} value={m}>{formatPeriod(m)}</option>
                 ))}
               </select>
-              <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[16px]">expand_more</span>
+              <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[16px]" translate="no">expand_more</span>
             </div>
           </div>
 
@@ -231,7 +231,7 @@ const Billing = () => {
                 : 'bg-primary text-on-primary hover:opacity-90 active:scale-95'
             }`}
           >
-            <span className="material-symbols-outlined mr-1 text-[16px]">receipt_long</span>
+            <span className="material-symbols-outlined mr-1 text-[16px]" translate="no">receipt_long</span>
             Generar Facturas
           </button>
         </div>
@@ -258,7 +258,7 @@ const Billing = () => {
           <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
             {/* Search */}
             <div className="relative flex-grow md:flex-grow-0">
-              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
+              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">search</span>
               <input
                 type="text"
                 placeholder="Buscar socio o doc..."
@@ -275,7 +275,7 @@ const Billing = () => {
                 showFilters ? 'bg-primary/10 text-primary border-primary/20' : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container'
               }`}
             >
-              <span className="material-symbols-outlined text-[16px]">filter_list</span>
+              <span className="material-symbols-outlined text-[16px]" translate="no">filter_list</span>
               Filtros {filterEstado !== 'Todos' && <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse ml-0.5"></span>}
             </button>
 
@@ -283,14 +283,14 @@ const Billing = () => {
               onClick={exports.handleExportExcel}
               className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-xs rounded-md transition-colors border border-[#107C41]/20"
             >
-              <span className="material-symbols-outlined text-[16px]">table_view</span>
+              <span className="material-symbols-outlined text-[16px]" translate="no">table_view</span>
               Excel
             </button>
             <button
               onClick={() => setShowDeudasModal(true)}
               className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-[#ea580c]/10 text-[#ea580c] hover:bg-[#ea580c]/20 font-bold text-xs rounded-md transition-colors border border-[#ea580c]/20"
             >
-              <span className="material-symbols-outlined text-[16px]">request_quote</span>
+              <span className="material-symbols-outlined text-[16px]" translate="no">request_quote</span>
               Reporte Deudas
             </button>
             <button
@@ -298,7 +298,7 @@ const Billing = () => {
               className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-error/10 text-error hover:bg-error/20 font-bold text-xs rounded-md transition-colors border border-error/20 tooltip-trigger"
               title="Reporte Tabla"
             >
-              <span className="material-symbols-outlined text-[16px]">list_alt</span>
+              <span className="material-symbols-outlined text-[16px]" translate="no">list_alt</span>
               Reporte
             </button>
             <button
@@ -306,7 +306,7 @@ const Billing = () => {
               className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-primary/10 text-primary hover:bg-primary/20 font-bold text-xs rounded-md transition-colors border border-primary/20 tooltip-trigger"
               title="Descargar todos los recibos para imprimir"
             >
-              <span className="material-symbols-outlined text-[16px]">print</span>
+              <span className="material-symbols-outlined text-[16px]" translate="no">print</span>
               Imprimir Recibos
             </button>
           </div>
@@ -350,7 +350,7 @@ const Billing = () => {
                 onClick={() => setFilterEstado('Todos')}
                 className="text-xs font-bold text-error hover:underline ml-auto flex items-center gap-1"
               >
-                <span className="material-symbols-outlined text-[14px]">close</span>
+                <span className="material-symbols-outlined text-[14px]" translate="no">close</span>
                 Limpiar Filtro
               </button>
             )}
@@ -373,13 +373,13 @@ const Billing = () => {
               {isLoading ? (
                 <tr>
                   <td colSpan="5" className="text-center p-8 text-on-surface-variant">
-                    <span className="material-symbols-outlined animate-spin text-[24px]">sync</span>
+                    <span className="material-symbols-outlined animate-spin text-[24px]" translate="no">sync</span>
                   </td>
                 </tr>
               ) : currentItems.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="text-center p-8 text-on-surface-variant">
-                    <span className="material-symbols-outlined text-[32px] opacity-20 mb-2 block">search_off</span>
+                    <span className="material-symbols-outlined text-[32px] opacity-20 mb-2 block" translate="no">search_off</span>
                     <p className="font-bold">No se encontraron recibos</p>
                   </td>
                 </tr>
@@ -416,7 +416,7 @@ const Billing = () => {
                 disabled={currentPage === 1}
                 className="px-3 py-1.5 rounded-md border border-outline-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-bold flex items-center gap-1 text-on-surface"
               >
-                <span className="material-symbols-outlined text-[16px]">chevron_left</span> Anterior
+                <span className="material-symbols-outlined text-[16px]" translate="no">chevron_left</span> Anterior
               </button>
 
               <div className="flex items-center gap-1">
@@ -444,7 +444,7 @@ const Billing = () => {
                 disabled={currentPage === totalPages}
                 className="px-3 py-1.5 rounded-md border border-outline-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-bold flex items-center gap-1 text-on-surface"
               >
-                Siguiente <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+                Siguiente <span className="material-symbols-outlined text-[16px]" translate="no">chevron_right</span>
               </button>
             </div>
           )}

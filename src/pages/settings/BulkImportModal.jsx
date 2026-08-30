@@ -220,7 +220,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
           <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none" />
           <div className="flex items-center gap-3 sm:gap-4 relative z-10">
             <div className="hidden sm:flex w-12 h-12 rounded-2xl bg-primary items-center justify-center text-on-primary shadow-lg shadow-primary/20 shrink-0">
-              <span className="material-symbols-outlined text-[24px]">database_upload</span>
+              <span className="material-symbols-outlined text-[24px]" translate="no">database_upload</span>
             </div>
             <div>
               <h3 className="text-lg sm:text-xl font-bold text-on-surface tracking-tight leading-tight mb-1">
@@ -236,7 +236,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
             onClick={() => { resetModal(); onClose(); }}
             className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-variant flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors shadow-sm relative z-10 border border-outline-variant/50 shrink-0"
           >
-            <span className="material-symbols-outlined text-[18px]">close</span>
+            <span className="material-symbols-outlined text-[18px]" translate="no">close</span>
           </button>
         </div>
 
@@ -249,7 +249,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
                 <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
                 <div className="ml-2">
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-primary mb-1 flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[14px]">download</span>
+                    <span className="material-symbols-outlined text-[14px]" translate="no">download</span>
                     Paso 1: Descargar Plantilla
                   </h4>
                   <p className="text-on-surface-variant text-xs mt-0.5 leading-tight">Incluye hoja de instrucciones y datos de ejemplo para todos los casos.</p>
@@ -258,7 +258,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
                   onClick={downloadTemplate}
                   className="w-full sm:w-auto justify-center px-4 py-2.5 bg-surface-container-highest text-on-surface font-bold text-xs rounded-xl hover:bg-surface-variant border border-outline-variant flex items-center gap-2 transition-all shadow-sm group-hover:shadow hover:-translate-y-0.5"
                 >
-                  <span className="material-symbols-outlined text-[16px] text-primary">download</span>
+                  <span className="material-symbols-outlined text-[16px] text-primary" translate="no">download</span>
                   Descargar Plantilla
                 </button>
               </div>
@@ -267,7 +267,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
               <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-2xl p-4 sm:p-5 shadow-inner relative overflow-hidden group">
                 <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500 pointer-events-none" />
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-1.5 relative z-10">
-                  <span className="material-symbols-outlined text-[16px]">upload</span>
+                  <span className="material-symbols-outlined text-[16px]" translate="no">upload</span>
                   Paso 2: Subir archivo completado
                 </h4>
 
@@ -286,13 +286,13 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
                   {file ? (
                     <div className="flex flex-col items-center animate-in zoom-in-95 duration-300">
                       <div className="w-14 h-14 rounded-2xl bg-green-500 text-white flex items-center justify-center mb-4 shadow-lg shadow-green-500/30">
-                        <span className="material-symbols-outlined text-[28px]">task</span>
+                        <span className="material-symbols-outlined text-[28px]" translate="no">task</span>
                       </div>
                       <p className="font-bold text-base text-on-surface">{file.name}</p>
                       <p className="text-xs text-on-surface-variant font-medium mt-1">{(file.size / 1024).toFixed(2)} KB</p>
                       {parsedRows && (
                         <p className="text-xs text-primary font-bold mt-2 flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[14px]">table_rows</span>
+                          <span className="material-symbols-outlined text-[14px]" translate="no">table_rows</span>
                           {parsedRows.length} filas detectadas
                         </p>
                       )}
@@ -306,7 +306,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
                   ) : (
                     <div className="flex flex-col items-center opacity-70 group-hover:opacity-100 transition-opacity">
                       <div className="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-4">
-                        <span className="material-symbols-outlined text-[32px]">note_add</span>
+                        <span className="material-symbols-outlined text-[32px]" translate="no">note_add</span>
                       </div>
                       <p className="font-bold text-sm text-on-surface">Haz clic para seleccionar el archivo</p>
                       <p className="text-xs text-on-surface-variant mt-1">Formatos admitidos: .xlsx, .xls o .csv</p>
@@ -319,7 +319,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
               {parsedRows && parsedRows.length > 0 && (
                 <div className="bg-surface border border-outline-variant rounded-2xl shadow-sm overflow-hidden">
                   <div className="px-5 py-3 border-b border-outline-variant bg-surface-container-lowest flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px] text-primary">preview</span>
+                    <span className="material-symbols-outlined text-[16px] text-primary" translate="no">preview</span>
                     <h4 className="text-[10px] font-bold uppercase tracking-widest text-primary">
                       Paso 3: Previsualización ({parsedRows.length} registros)
                     </h4>
@@ -378,7 +378,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
             <div className="flex flex-col gap-5">
               <div className="bg-surface-variant/30 rounded-2xl border border-outline-variant p-6 text-center">
                 <div className="w-16 h-16 rounded-full bg-primary/10 text-primary flex items-center justify-center mx-auto mb-4">
-                  <span className="material-symbols-outlined text-[32px]">{results.failed.length === 0 ? 'check_circle' : 'info'}</span>
+                  <span className="material-symbols-outlined text-[32px]" translate="no">{results.failed.length === 0 ? 'check_circle' : 'info'}</span>
                 </div>
                 <h4 className="font-bold text-on-surface text-lg mb-4">Importación Completada</h4>
                 <div className="grid grid-cols-3 gap-2 sm:gap-10 mt-4">
@@ -401,7 +401,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
               {results.successful.length > 0 && (
                 <div className="border border-green-500/20 bg-green-50/30 dark:bg-green-900/10 rounded-2xl overflow-hidden flex flex-col max-h-[150px]">
                   <div className="bg-green-500/10 px-4 py-2 border-b border-green-500/20 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[14px] text-green-600">check</span>
+                    <span className="material-symbols-outlined text-[14px] text-green-600" translate="no">check</span>
                     <p className="font-bold text-green-600 text-xs uppercase tracking-wider">Registros importados</p>
                   </div>
                   <div className="overflow-y-auto custom-scrollbar text-xs p-3 text-on-surface-variant">
@@ -420,7 +420,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
               {results.failed.length > 0 && (
                 <div className="border border-error/20 bg-error/5 rounded-2xl overflow-hidden flex flex-col max-h-[200px]">
                   <div className="bg-error/10 px-4 py-2 border-b border-error/20 flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[14px] text-error">error</span>
+                    <span className="material-symbols-outlined text-[14px] text-error" translate="no">error</span>
                     <p className="font-bold text-error text-xs uppercase tracking-wider">Detalles de errores</p>
                   </div>
                   <div className="overflow-y-auto custom-scrollbar p-0">
@@ -477,8 +477,8 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
                 className="w-full sm:w-auto justify-center group px-6 py-2.5 text-sm bg-primary text-on-primary font-bold rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2 disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"
               >
                 {isProcessing
-                  ? <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
-                  : <span className="material-symbols-outlined text-[18px] group-hover:-translate-y-0.5 transition-transform">cloud_upload</span>
+                  ? <span className="material-symbols-outlined animate-spin text-[18px]" translate="no">sync</span>
+                  : <span className="material-symbols-outlined text-[18px] group-hover:-translate-y-0.5 transition-transform" translate="no">cloud_upload</span>
                 }
                 {isProcessing ? 'Procesando...' : `Importar ${parsedRows?.length || 0} Registros`}
               </button>

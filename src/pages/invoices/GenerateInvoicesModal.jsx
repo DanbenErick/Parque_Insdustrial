@@ -198,7 +198,7 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
           
           <div className="flex items-center gap-3 relative z-10">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-              <span className="material-symbols-outlined text-primary">receipt_long</span>
+              <span className="material-symbols-outlined text-primary" translate="no">receipt_long</span>
             </div>
             <div>
               <h3 className="font-headline-sm text-on-surface font-bold">Generar Facturas</h3>
@@ -210,7 +210,7 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
             disabled={isProcessing}
             className="w-8 h-8 rounded-full hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors disabled:opacity-50 relative z-10"
           >
-            <span className="material-symbols-outlined text-[20px]">close</span>
+            <span className="material-symbols-outlined text-[20px]" translate="no">close</span>
           </button>
         </div>
 
@@ -228,7 +228,7 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
             <div>
               <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Tarifa Base</p>
               <div className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-primary text-[18px]">bolt</span>
+                <span className="material-symbols-outlined text-primary text-[18px]" translate="no">bolt</span>
                 <p className="font-data-mono font-bold text-base text-on-surface">S/ {Number(periodoSeleccionado.tarifa_kwh).toFixed(4)} <span className="text-xs font-normal text-on-surface-variant">/ kWh</span></p>
               </div>
             </div>
@@ -236,7 +236,7 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
 
           {isLoading ? (
             <div className="py-12 flex flex-col items-center justify-center gap-3">
-              <span className="material-symbols-outlined animate-spin text-primary text-[32px]">sync</span>
+              <span className="material-symbols-outlined animate-spin text-primary text-[32px]" translate="no">sync</span>
               <p className="text-sm text-on-surface-variant animate-pulse">Verificando lecturas disponibles...</p>
             </div>
           ) : (
@@ -251,14 +251,14 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
                   className={`flex-1 text-sm font-bold rounded-[10px] py-2 transition-colors flex items-center justify-center gap-2 relative z-10 ${modo === 'Masivo' ? 'text-on-primary' : 'text-on-surface-variant hover:text-on-surface'}`}
                   onClick={() => setModo('Masivo')}
                 >
-                  <span className={`material-symbols-outlined text-[18px] ${modo === 'Masivo' ? 'animate-in zoom-in' : ''}`}>groups</span>
+                  <span translate="no" className={`material-symbols-outlined text-[18px] ${modo === 'Masivo' ? 'animate-in zoom-in' : ''}`}>groups</span>
                   Masivo
                 </button>
                 <button 
                   className={`flex-1 text-sm font-bold rounded-[10px] py-2 transition-colors flex items-center justify-center gap-2 relative z-10 ${modo === 'Individual' ? 'text-on-primary' : 'text-on-surface-variant hover:text-on-surface'}`}
                   onClick={() => setModo('Individual')}
                 >
-                  <span className={`material-symbols-outlined text-[18px] ${modo === 'Individual' ? 'animate-in zoom-in' : ''}`}>person</span>
+                  <span translate="no" className={`material-symbols-outlined text-[18px] ${modo === 'Individual' ? 'animate-in zoom-in' : ''}`}>person</span>
                   Individual
                 </button>
               </div>
@@ -273,14 +273,14 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
                     </div>
                     <div className="bg-success/5 border border-success/20 rounded-xl p-3 text-center shadow-sm flex flex-col justify-center">
                       <p className="text-[10px] font-bold text-success uppercase tracking-wider mb-1 flex items-center justify-center gap-1">
-                        <span className="material-symbols-outlined text-[12px]">check_circle</span>
+                        <span className="material-symbols-outlined text-[12px]" translate="no">check_circle</span>
                         Leídos
                       </p>
                       <p className="font-data-mono font-bold text-2xl text-success leading-none">{cantidadLecturas}</p>
                     </div>
                     <div className={`border rounded-xl p-3 text-center shadow-sm flex flex-col justify-center transition-colors ${lecturasFaltantes > 0 ? 'bg-error/5 border-error/20' : 'bg-surface-container-lowest border-outline-variant/50'}`}>
                       <p className={`text-[10px] font-bold uppercase tracking-wider mb-1 flex items-center justify-center gap-1 ${lecturasFaltantes > 0 ? 'text-error' : 'text-on-surface-variant'}`}>
-                        {lecturasFaltantes > 0 && <span className="material-symbols-outlined text-[12px]">warning</span>}
+                        {lecturasFaltantes > 0 && <span className="material-symbols-outlined text-[12px]" translate="no">warning</span>}
                         Faltantes
                       </p>
                       <p className={`font-data-mono font-bold text-2xl leading-none ${lecturasFaltantes > 0 ? 'text-error' : 'text-on-surface'}`}>
@@ -294,7 +294,7 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
                     {totalMedidores === 0 ? (
                       <div className="bg-error/10 border border-error/20 px-4 py-3 rounded-xl flex items-start gap-3">
                         <div className="w-8 h-8 rounded-full bg-error/20 flex items-center justify-center shrink-0">
-                          <span className="material-symbols-outlined text-error text-[18px]">error</span>
+                          <span className="material-symbols-outlined text-error text-[18px]" translate="no">error</span>
                         </div>
                         <div>
                           <p className="text-sm text-error font-bold mb-0.5">Sin registros</p>
@@ -304,7 +304,7 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
                     ) : lecturasFaltantes > 0 ? (
                       <div className="bg-error/10 border border-error/20 px-4 py-3 rounded-xl flex items-start gap-3">
                         <div className="w-8 h-8 rounded-full bg-error/20 flex items-center justify-center shrink-0">
-                          <span className="material-symbols-outlined text-error text-[18px]">warning</span>
+                          <span className="material-symbols-outlined text-error text-[18px]" translate="no">warning</span>
                         </div>
                         <div>
                           <p className="text-sm text-error font-bold mb-0.5">Lecturas incompletas</p>
@@ -314,7 +314,7 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
                     ) : (
                       <div className="bg-success/10 border border-success/20 px-4 py-3 rounded-xl flex items-start gap-3">
                         <div className="w-8 h-8 rounded-full bg-success/20 flex items-center justify-center shrink-0">
-                          <span className="material-symbols-outlined text-success text-[18px]">check_circle</span>
+                          <span className="material-symbols-outlined text-success text-[18px]" translate="no">check_circle</span>
                         </div>
                         <div>
                           <p className="text-sm text-success font-bold mb-0.5">Listo para emitir</p>
@@ -327,13 +327,13 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
               ) : (
                 <div className="bg-surface-container-lowest border border-outline-variant/60 p-5 rounded-xl shadow-sm animate-in fade-in slide-in-from-bottom-2 duration-300">
                   <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-2 flex items-center gap-1.5">
-                    <span className="material-symbols-outlined text-[14px]">person_search</span>
+                    <span className="material-symbols-outlined text-[14px]" translate="no">person_search</span>
                     Buscar Socio o Medidor
                   </label>
                   
                   <div className="relative" ref={dropdownRef}>
                     <div className="relative">
-                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+                      <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]" translate="no">search</span>
                       <input 
                         type="text"
                         value={searchTerm}
@@ -352,7 +352,7 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
                             setIsAutocompleteOpen(true);
                           }}
                         >
-                          <span className="material-symbols-outlined text-[14px]">close</span>
+                          <span className="material-symbols-outlined text-[14px]" translate="no">close</span>
                         </button>
                       )}
                     </div>
@@ -374,7 +374,7 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
                                       {opt.nombre}
                                     </div>
                                     <div className={`flex items-start gap-1.5 ${selectedUsuarioId === opt.usuarioId && selectedMedidorId === opt.medidorId ? 'text-primary' : 'text-primary/90'}`}>
-                                      <span className="material-symbols-outlined text-[16px] mt-0.5">
+                                      <span className="material-symbols-outlined text-[16px] mt-0.5" translate="no">
                                         location_on
                                       </span>
                                       <span className="font-bold text-[13px] whitespace-normal leading-snug">
@@ -385,7 +385,7 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
                                   
                                   {/* Medidor en segundo plano */}
                                   <div className="flex items-start gap-1.5 text-on-surface-variant text-[11px] font-medium border-t border-outline-variant/20 pt-1.5">
-                                    <span className="material-symbols-outlined text-[14px] opacity-70">
+                                    <span className="material-symbols-outlined text-[14px] opacity-70" translate="no">
                                       {opt.medidorId ? 'electric_meter' : 'person_off'}
                                     </span>
                                     <span className="whitespace-normal leading-tight">
@@ -398,7 +398,7 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
                           </ul>
                         ) : (
                           <div className="p-4 text-center text-sm text-on-surface-variant flex flex-col items-center gap-1">
-                            <span className="material-symbols-outlined text-[24px] opacity-50">search_off</span>
+                            <span className="material-symbols-outlined text-[24px] opacity-50" translate="no">search_off</span>
                             No se encontraron resultados
                           </div>
                         )}
@@ -407,7 +407,7 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
                   </div>
 
                   <div className="mt-4 bg-secondary/5 px-3 py-2.5 rounded-lg border border-secondary/10 flex items-start gap-2">
-                    <span className="material-symbols-outlined text-secondary text-[16px] mt-0.5">verified</span>
+                    <span className="material-symbols-outlined text-secondary text-[16px] mt-0.5" translate="no">verified</span>
                     <p className="text-xs text-on-surface-variant leading-tight">
                       El sistema verificará automáticamente si el socio seleccionado cuenta con lecturas este mes.
                     </p>
@@ -417,7 +417,7 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
 
               <div className="grid grid-cols-2 gap-3 pt-2">
                 <div className="bg-surface-container-lowest border border-outline-variant/40 p-3 rounded-xl flex items-start gap-3">
-                  <span className="material-symbols-outlined text-secondary text-[20px] mt-0.5">info</span>
+                  <span className="material-symbols-outlined text-secondary text-[20px] mt-0.5" translate="no">info</span>
                   <p className="text-[11px] text-on-surface-variant leading-tight">
                     <strong className="text-on-surface block mb-0.5">Registro de Multas</strong>
                     Las multas y otros cargos adicionales se agregan editando la factura individualmente.
@@ -425,7 +425,7 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
                 </div>
 
                 <div className="bg-error/5 border border-error/10 p-3 rounded-xl flex items-start gap-3">
-                  <span className="material-symbols-outlined text-error text-[20px] mt-0.5">history</span>
+                  <span className="material-symbols-outlined text-error text-[20px] mt-0.5" translate="no">history</span>
                   <p className="text-[11px] text-error/80 leading-tight">
                     <strong className="text-error block mb-0.5">Cambio de Estado</strong>
                     Los recibos pendientes del mes pasado pasarán automáticamente a "Vencido".
@@ -452,12 +452,12 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
           >
             {isProcessing ? (
               <>
-                <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
+                <span className="material-symbols-outlined animate-spin text-[18px]" translate="no">sync</span>
                 Generando...
               </>
             ) : (
               <>
-                <span className="material-symbols-outlined text-[18px]">magic_button</span>
+                <span className="material-symbols-outlined text-[18px]" translate="no">magic_button</span>
                 Generar {modo === 'Masivo' ? 'Facturas Masivas' : 'Factura Individual'}
               </>
             )}

@@ -84,7 +84,7 @@ const CargoFormModal = ({ formData, setFormData, periodos, onClose, onSubmit, is
             onClick={onClose}
             className="text-on-surface-variant hover:bg-outline-variant/20 p-1 rounded-full transition-colors"
           >
-            <span className="material-symbols-outlined text-[18px]">close</span>
+            <span className="material-symbols-outlined text-[18px]" translate="no">close</span>
           </button>
         </div>
 

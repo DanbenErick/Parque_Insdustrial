@@ -335,7 +335,7 @@ const Reports = () => {
     return (
       <main className="flex-grow flex items-center justify-center bg-background min-h-screen">
         <div className="flex flex-col items-center gap-md">
-          <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+          <span className="material-symbols-outlined animate-spin text-primary text-4xl" translate="no">progress_activity</span>
           <p className="text-body-md text-on-surface-variant font-medium">Cargando reportes...</p>
         </div>
       </main>
@@ -352,7 +352,7 @@ const Reports = () => {
 
         <div className="flex items-center gap-2 w-full md:w-auto">
           <div className="flex items-center bg-white border border-outline-variant rounded-md px-3 h-8 cursor-pointer hover:border-primary/50 transition-colors relative flex-1 md:flex-none">
-            <span className="material-symbols-outlined text-[16px] text-on-surface-variant mr-2">calendar_today</span>
+            <span className="material-symbols-outlined text-[16px] text-on-surface-variant mr-2" translate="no">calendar_today</span>
             <select
               value={selectedPeriod}
               onChange={handlePeriodChange}
@@ -365,14 +365,14 @@ const Reports = () => {
                 <option value="" disabled>Sin periodos en {activeYear}</option>
               )}
             </select>
-            <span className="material-symbols-outlined text-[16px] absolute right-2 pointer-events-none text-on-surface-variant">expand_more</span>
+            <span className="material-symbols-outlined text-[16px] absolute right-2 pointer-events-none text-on-surface-variant" translate="no">expand_more</span>
           </div>
 
           <button
             className="flex items-center justify-center gap-1.5 bg-primary text-white px-3 h-8 rounded-md hover:bg-primary/90 transition-colors text-xs font-bold shadow-sm"
             onClick={handleUpdate}
           >
-            <span className={`material-symbols-outlined text-[16px] ${isUpdating ? 'animate-spin' : ''}`}>refresh</span>
+            <span translate="no" className={`material-symbols-outlined text-[16px] ${isUpdating ? 'animate-spin' : ''}`}>refresh</span>
             <span className="hidden sm:inline">Actualizar Datos</span>
           </button>
         </div>
@@ -417,14 +417,14 @@ const Reports = () => {
           onClick={handleTabGeneral}
           className={`flex items-center gap-xs pb-sm px-xs font-body-md text-body-md font-bold border-b-2 transition-all ${activeTab === 'general' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
         >
-          <span className="material-symbols-outlined text-[20px]">analytics</span>
+          <span className="material-symbols-outlined text-[20px]" translate="no">analytics</span>
           Reporte General
         </button>
         <button
           onClick={handleTabMember}
           className={`flex items-center gap-xs pb-sm px-xs font-body-md text-body-md font-bold border-b-2 transition-all ${activeTab === 'member' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
         >
-          <span className="material-symbols-outlined text-[20px]">pie_chart</span>
+          <span className="material-symbols-outlined text-[20px]" translate="no">pie_chart</span>
           Reporte por Empresa
         </button>
       </div>
@@ -475,7 +475,7 @@ const Reports = () => {
                       <div key={m.id} className="group/item">
                         <div className="flex justify-between items-center mb-1.5">
                           <span className="text-[11px] font-bold text-on-surface flex items-center gap-1.5 truncate max-w-[60%]">
-                            <span className="material-symbols-outlined text-[14px] text-primary/70">corporate_fare</span>
+                            <span className="material-symbols-outlined text-[14px] text-primary/70" translate="no">corporate_fare</span>
                             <span className="truncate" title={m.propietario}>{m.propietario}</span>
                           </span>
                           <div className="text-right flex items-center gap-1.5">
@@ -494,7 +494,7 @@ const Reports = () => {
                   })}
                   {topBilledMembers.length === 0 && (
                     <div className="text-center text-on-surface-variant text-[11px] py-4 flex flex-col items-center justify-center h-full">
-                      <span className="material-symbols-outlined text-3xl text-on-surface-variant/40 mb-2">payments</span>
+                      <span className="material-symbols-outlined text-3xl text-on-surface-variant/40 mb-2" translate="no">payments</span>
                       No hay datos de facturación para el periodo seleccionado.
                     </div>
                   )}
@@ -545,7 +545,7 @@ const Reports = () => {
               <h3 className="text-base text-on-surface font-bold">Detalle de Lecturas y Facturación</h3>
               <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
                 <div className="relative flex-grow md:flex-grow-0">
-                  <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
+                  <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">search</span>
                   <input
                     type="text"
                     placeholder="Buscar socio o dirección..."
@@ -558,14 +558,14 @@ const Reports = () => {
                   onClick={onExportExcel}
                   className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-xs rounded-md transition-colors border border-[#107C41]/20"
                 >
-                  <span className="material-symbols-outlined text-[16px]">table_view</span>
+                  <span className="material-symbols-outlined text-[16px]" translate="no">table_view</span>
                   Excel
                 </button>
                 <button
                   onClick={onExportPDF}
                   className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-error/10 text-error hover:bg-error/20 font-bold text-xs rounded-md transition-colors border border-error/20"
                 >
-                  <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+                  <span className="material-symbols-outlined text-[16px]" translate="no">picture_as_pdf</span>
                   PDF
                 </button>
               </div>
@@ -609,14 +609,14 @@ const Reports = () => {
                       className="px-2.5 py-1 rounded-md border border-outline-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-[11px] font-bold flex items-center gap-0.5 text-on-surface"
                       disabled={currentPage === 1}
                     >
-                      <span className="material-symbols-outlined text-[14px]">chevron_left</span> Anterior
+                      <span className="material-symbols-outlined text-[14px]" translate="no">chevron_left</span> Anterior
                     </button>
                     <button
                       onClick={handleNextPage}
                       className="px-2.5 py-1 rounded-md border border-outline-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-[11px] font-bold flex items-center gap-0.5 text-on-surface"
                       disabled={currentPage === totalPages}
                     >
-                      Siguiente <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+                      Siguiente <span className="material-symbols-outlined text-[14px]" translate="no">chevron_right</span>
                     </button>
                   </div>
                 </div>

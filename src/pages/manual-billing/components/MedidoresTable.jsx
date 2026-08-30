@@ -53,7 +53,7 @@ export const MedidoresTable = ({
       <div className="px-5 py-3 border-b border-outline-variant bg-surface-container-lowest flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div>
           <h3 className="font-bold text-on-surface text-base flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[18px] text-primary">view_list</span>
+            <span className="material-symbols-outlined text-[18px] text-primary" translate="no">view_list</span>
             Seleccione un Medidor
           </h3>
           <p className="text-[10px] text-on-surface-variant mt-0.5">Haga clic en 'Seleccionar' para iniciar el registro.</p>
@@ -61,7 +61,7 @@ export const MedidoresTable = ({
         
         <div className="relative w-full md:w-72">
           <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
-            <span className="material-symbols-outlined text-on-surface-variant text-[16px]">search</span>
+            <span className="material-symbols-outlined text-on-surface-variant text-[16px]" translate="no">search</span>
           </div>
           <input
             type="text"
@@ -75,7 +75,7 @@ export const MedidoresTable = ({
               onClick={() => handleSearchChange({ target: { value: '' } })}
               className="absolute inset-y-0 right-0 pr-3 flex items-center text-on-surface-variant hover:text-error transition-colors"
             >
-              <span className="material-symbols-outlined text-[18px]">close</span>
+              <span className="material-symbols-outlined text-[18px]" translate="no">close</span>
             </button>
           )}
         </div>
@@ -119,12 +119,12 @@ export const MedidoresTable = ({
                     <td className="px-4 py-2 text-center">
                       {isLecturado ? (
                         <span className="inline-flex items-center gap-1 bg-green-100 text-green-800 text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">
-                          <span className="material-symbols-outlined text-[12px]">check_circle</span>
+                          <span className="material-symbols-outlined text-[12px]" translate="no">check_circle</span>
                           Lecturado
                         </span>
                       ) : (
                         <span className="inline-flex items-center gap-1 bg-yellow-100 text-yellow-800 text-[9px] font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider">
-                          <span className="material-symbols-outlined text-[12px]">pending_actions</span>
+                          <span className="material-symbols-outlined text-[12px]" translate="no">pending_actions</span>
                           Pendiente
                         </span>
                       )}
@@ -139,7 +139,7 @@ export const MedidoresTable = ({
                           className="px-2.5 py-1 bg-surface-variant text-on-surface-variant border border-outline-variant rounded-md text-[10px] font-bold hover:bg-error hover:text-white hover:border-error transition-colors inline-flex items-center gap-1 shadow-sm"
                           title="Añadir deuda personalizada"
                         >
-                          <span className="material-symbols-outlined text-[14px]">payments</span>
+                          <span className="material-symbols-outlined text-[14px]" translate="no">payments</span>
                           Deuda
                         </button>
                         {!isLecturado && (
@@ -148,7 +148,7 @@ export const MedidoresTable = ({
                             className="px-2.5 py-1 bg-surface text-on-surface border border-outline-variant rounded-md text-[10px] font-bold hover:bg-primary hover:text-white hover:border-primary transition-colors inline-flex items-center gap-1 shadow-sm"
                           >
                             Seleccionar
-                            <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                            <span className="material-symbols-outlined text-[14px]" translate="no">arrow_forward</span>
                           </button>
                         )}
                       </div>
@@ -159,7 +159,7 @@ export const MedidoresTable = ({
             ) : (
               <tr>
                 <td colSpan="4" className="px-6 py-12 text-center text-on-surface-variant">
-                  <span className="material-symbols-outlined text-[40px] opacity-50 mb-2">search_off</span>
+                  <span className="material-symbols-outlined text-[40px] opacity-50 mb-2" translate="no">search_off</span>
                   <p>No se encontraron medidores con la búsqueda proporcionada.</p>
                 </td>
               </tr>

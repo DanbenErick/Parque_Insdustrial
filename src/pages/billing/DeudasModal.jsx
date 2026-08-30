@@ -23,14 +23,14 @@ const DeudasModal = memo(({ isOpen, filterMes, onExport, onClose }) => {
           >
             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <h3 className="font-bold text-slate-800 flex items-center gap-2">
-                <span className="material-symbols-outlined text-[#ea580c]">request_quote</span>
+                <span className="material-symbols-outlined text-[#ea580c]" translate="no">request_quote</span>
                 Generar Reporte de Deudas
               </h3>
               <button
                 onClick={onClose}
                 className="text-slate-400 hover:text-slate-600 transition-colors"
               >
-                <span className="material-symbols-outlined">close</span>
+                <span className="material-symbols-outlined" translate="no">close</span>
               </button>
             </div>
 
@@ -52,7 +52,7 @@ const DeudasModal = memo(({ isOpen, filterMes, onExport, onClose }) => {
                       {filterMes === 'Todos' || filterMes === 'TodosHistorico' ? 'Actualmente viendo todos los periodos' : `Periodo: ${filterMes}`}
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-slate-300 group-hover:text-[#ea580c]">chevron_right</span>
+                  <span className="material-symbols-outlined text-slate-300 group-hover:text-[#ea580c]" translate="no">chevron_right</span>
                 </button>
 
                 <button
@@ -67,7 +67,7 @@ const DeudasModal = memo(({ isOpen, filterMes, onExport, onClose }) => {
                       Descarga todas las deudas vigentes e históricas
                     </div>
                   </div>
-                  <span className="material-symbols-outlined text-slate-300 group-hover:text-[#107C41]">history</span>
+                  <span className="material-symbols-outlined text-slate-300 group-hover:text-[#107C41]" translate="no">history</span>
                 </button>
               </div>
             </div>

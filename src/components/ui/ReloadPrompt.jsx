@@ -27,7 +27,7 @@ export default function ReloadPrompt() {
       <div className="flex flex-col gap-2">
         <div className="flex items-start gap-3">
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-            <span className="material-symbols-outlined">system_update</span>
+            <span className="material-symbols-outlined" translate="no">system_update</span>
           </div>
           <div className="flex-1">
             <h3 className="text-sm font-bold text-on-surface">

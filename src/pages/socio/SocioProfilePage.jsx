@@ -42,7 +42,7 @@ const SocioProfilePage = () => {
       
       <div className="flex items-center gap-4 mb-6">
         <button onClick={() => navigate(-1)} className="p-2 bg-surface-container-low hover:bg-surface-container rounded-xl text-on-surface-variant transition-colors">
-          <span className="material-symbols-outlined text-[20px]">arrow_back</span>
+          <span className="material-symbols-outlined text-[20px]" translate="no">arrow_back</span>
         </button>
         <div>
           <h1 className="text-2xl font-bold text-on-surface">Mi Perfil</h1>
@@ -61,12 +61,12 @@ const SocioProfilePage = () => {
             <h2 className="text-xl font-bold text-emerald-950 mb-1">{user?.nombre_razonsocial}</h2>
             <div className="flex flex-col gap-1 text-sm text-emerald-800">
               <p className="flex items-center justify-center md:justify-start gap-2">
-                <span className="material-symbols-outlined text-[16px]">badge</span>
+                <span className="material-symbols-outlined text-[16px]" translate="no">badge</span>
                 <span className="font-bold">RUC/DNI:</span> {user?.documento_identidad}
               </p>
               {user?.correo && (
                 <p className="flex items-center justify-center md:justify-start gap-2">
-                  <span className="material-symbols-outlined text-[16px]">mail</span>
+                  <span className="material-symbols-outlined text-[16px]" translate="no">mail</span>
                   {user.correo}
                 </p>
               )}
@@ -77,7 +77,7 @@ const SocioProfilePage = () => {
         {/* Change Password Form */}
         <div className="p-6 md:p-8">
           <h3 className="text-lg font-bold text-on-surface mb-6 flex items-center gap-2">
-            <span className="material-symbols-outlined text-emerald-600">lock</span>
+            <span className="material-symbols-outlined text-emerald-600" translate="no">lock</span>
             Cambiar Contraseña
           </h3>
 
@@ -145,9 +145,9 @@ const SocioProfilePage = () => {
                 className="w-full md:w-auto px-8 py-3 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
               >
                 {isLoading ? (
-                  <span className="material-symbols-outlined animate-spin text-[20px]">sync</span>
+                  <span className="material-symbols-outlined animate-spin text-[20px]" translate="no">sync</span>
                 ) : (
-                  <span className="material-symbols-outlined text-[20px]">save</span>
+                  <span className="material-symbols-outlined text-[20px]" translate="no">save</span>
                 )}
                 Actualizar Contraseña
               </button>

@@ -80,7 +80,7 @@ const EstadoBadge = React.memo(({ estado }) => {
   const cfg = getEstadoConfig(estado);
   return (
     <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-tight leading-none ${cfg.badge}`}>
-      <span className="material-symbols-outlined text-[12px]" style={FILL_1}>{cfg.icon}</span>
+      <span className="material-symbols-outlined text-[12px]" translate="no" style={FILL_1}>{cfg.icon}</span>
       {estado}
     </span>
   );
@@ -89,7 +89,7 @@ const EstadoBadge = React.memo(({ estado }) => {
 const KpiCard = React.memo(({ icon, label, children, subtitle, iconClassName = 'bg-primary/5 text-primary border-primary/10' }) => (
   <div className="bg-surface border border-outline-variant hover:border-primary/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
     <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${iconClassName}`}>
-      <span className="material-symbols-outlined text-[20px]">{icon}</span>
+      <span className="material-symbols-outlined text-[20px]" translate="no">{icon}</span>
     </div>
     <div className="flex flex-col justify-center overflow-hidden flex-1">
       <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider leading-tight truncate">{label}</span>
@@ -119,13 +119,13 @@ const AllMembersTableRow = React.memo(({ row }) => (
   <tr className="hover:bg-surface-container-low transition-colors group">
     <td className="px-5 py-3">
       <div className="flex items-center gap-1.5 text-on-surface font-bold text-xs">
-        <span className="material-symbols-outlined text-[14px] text-on-surface-variant">person</span>
+        <span className="material-symbols-outlined text-[14px] text-on-surface-variant" translate="no">person</span>
         <span className="truncate max-w-[200px]" title={row.propietario}>{row.propietario}</span>
       </div>
     </td>
     <td className="px-5 py-3">
       <div className="flex items-center gap-1.5 text-[11px] font-bold text-primary">
-        <span className="material-symbols-outlined text-[14px]" style={FILL_1}>bolt</span>
+        <span className="material-symbols-outlined text-[14px]" translate="no" style={FILL_1}>bolt</span>
         {fmtKwh(row.consumo)} kWh
       </div>
     </td>
@@ -371,7 +371,7 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
           <label className="font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant font-bold">Seleccionar Socio / Propietario</label>
           <div className="relative">
             <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">corporate_fare</span>
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]" translate="no">corporate_fare</span>
               <input
                 type="text"
                 placeholder="Buscar socio..."
@@ -385,7 +385,7 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
                 onClick={toggleDropdown}
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface focus:outline-none"
               >
-                <span className="material-symbols-outlined">{isOpen ? 'expand_less' : 'expand_more'}</span>
+                <span className="material-symbols-outlined" translate="no">{isOpen ? 'expand_less' : 'expand_more'}</span>
               </button>
             </div>
 
@@ -398,7 +398,7 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
                       onClick={() => handleSelectMember('Todos')}
                       className={`px-md py-2.5 hover:bg-primary/5 cursor-pointer text-sm font-semibold transition-colors flex items-center gap-xs ${isAllView ? 'bg-primary/10 text-primary' : 'text-on-surface'}`}
                     >
-                      <span className="material-symbols-outlined text-[16px]">group</span>
+                      <span className="material-symbols-outlined text-[16px]" translate="no">group</span>
                       Ver Todos los Socios
                     </div>
                     {filteredMembersList.map(m => (
@@ -408,7 +408,7 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
                         className={`px-md py-2.5 hover:bg-primary/5 cursor-pointer text-sm font-semibold transition-colors flex items-center justify-between ${selectedMember === m ? 'bg-primary/10 text-primary' : 'text-on-surface'}`}
                       >
                         <span className="truncate">{m}</span>
-                        {selectedMember === m && <span className="material-symbols-outlined text-primary text-[16px]">check</span>}
+                        {selectedMember === m && <span className="material-symbols-outlined text-primary text-[16px]" translate="no">check</span>}
                       </div>
                     ))}
                     {filteredMembersList.length === 0 && (
@@ -584,13 +584,13 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
                         <td className="px-5 py-3">
                           <div className="flex flex-col">
                             <div className="flex items-center gap-1.5 text-[11px]">
-                              <span className="material-symbols-outlined text-[14px] text-on-surface-variant">electric_meter</span>
+                              <span className="material-symbols-outlined text-[14px] text-on-surface-variant" translate="no">electric_meter</span>
                               <span className="text-on-surface-variant">Ant: <span className="font-data-mono">{fmtKwh(l.lectura_anterior)}</span></span>
                               <span className="text-on-surface-variant px-1">•</span>
                               <span className="text-on-surface-variant">Act: <span className="font-data-mono">{fmtKwh(l.lectura_actual)}</span></span>
                             </div>
                             <div className="flex items-center gap-1.5 text-[11px] font-bold text-primary mt-1">
-                              <span className="material-symbols-outlined text-[14px]" style={FILL_1}>bolt</span>
+                              <span className="material-symbols-outlined text-[14px]" translate="no" style={FILL_1}>bolt</span>
                               Consumo: {fmtKwh(l.consumo_calculado)} kWh
                             </div>
                           </div>

@@ -78,7 +78,7 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
         <div className="px-6 py-4 border-b border-outline-variant bg-surface-container-low flex justify-between items-center shadow-sm z-10 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-              <span className="material-symbols-outlined text-[20px]">analytics</span>
+              <span className="material-symbols-outlined text-[20px]" translate="no">analytics</span>
             </div>
             <div>
               <h3 className="font-headline-sm text-lg font-bold text-on-surface leading-tight">Detalle de Medición</h3>
@@ -90,12 +90,12 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
           <div className="flex items-center gap-2">
             {onEdit && (
               <button onClick={() => onEdit(record)} className="px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-bold text-xs flex items-center gap-1.5 border border-primary/20">
-                <span className="material-symbols-outlined text-[16px]">edit</span>
+                <span className="material-symbols-outlined text-[16px]" translate="no">edit</span>
                 Editar
               </button>
             )}
             <button onClick={onClose} className="p-2 rounded-full hover:bg-surface-variant text-on-surface-variant transition-colors">
-              <span className="material-symbols-outlined">close</span>
+              <span className="material-symbols-outlined" translate="no">close</span>
             </button>
           </div>
         </div>
@@ -106,7 +106,7 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
           {wasModified && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 items-start shadow-sm relative overflow-hidden">
               <div className="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
-              <span className="material-symbols-outlined text-amber-600 shrink-0 mt-0.5 text-[22px]">edit_note</span>
+              <span className="material-symbols-outlined text-amber-600 shrink-0 mt-0.5 text-[22px]" translate="no">edit_note</span>
               <div>
                 <h4 className="text-amber-800 font-bold text-sm mb-1">Lectura Modificada Manualmente</h4>
                 <p className="text-amber-700/80 text-xs mb-2">Los valores actuales mostrados a continuación son el resultado de una corrección manual. El operario registró el siguiente motivo:</p>
@@ -158,7 +158,7 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
                 {(medidorInfo?.direccion || record.medidor_direccion) && (
                   <div className="mt-1 bg-indigo-50 border border-indigo-200 rounded-lg p-2.5 flex items-start gap-2.5 shadow-sm max-w-[280px]">
                     <div className="bg-indigo-100 text-indigo-700 p-1.5 rounded-md shrink-0 flex">
-                      <span className="material-symbols-outlined text-[18px]">location_on</span>
+                      <span className="material-symbols-outlined text-[18px]" translate="no">location_on</span>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[9px] font-bold uppercase tracking-wider text-indigo-600/80 leading-tight mb-0.5">Dirección del Medidor</span>
@@ -170,13 +170,13 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
             </div>
 
             <div className="flex items-center gap-2 text-xs text-on-surface-variant bg-surface px-3 py-2 rounded-lg border border-outline-variant/50">
-              <span className="material-symbols-outlined text-[16px]">account_circle</span>
+              <span className="material-symbols-outlined text-[16px]" translate="no">account_circle</span>
               <span>Registrado por: <strong>{record.operario || 'Desconocido'}</strong></span>
             </div>
 
             {isCambioMedidor && (
               <div className="mt-4 bg-orange-50 text-orange-700 text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-2 border border-orange-200">
-                <span className="material-symbols-outlined text-[16px]">swap_horiz</span>
+                <span className="material-symbols-outlined text-[16px]" translate="no">swap_horiz</span>
                 Hubo un cambio de medidor en este periodo
               </div>
             )}
@@ -185,14 +185,14 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
           {/* Consumo y Costos Resumen */}
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 relative overflow-hidden group">
-              <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-[80px] text-blue-500/10 group-hover:scale-110 transition-transform">electric_bolt</span>
+              <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-[80px] text-blue-500/10 group-hover:scale-110 transition-transform" translate="no">electric_bolt</span>
               <p className="text-[10px] font-bold uppercase tracking-wider text-blue-700 mb-1 relative z-10">Total Energía</p>
               <h2 className="font-data-mono font-black text-3xl text-blue-900 relative z-10">
                 {fmtVal(consumoNormal + consumoPunta)} <span className="text-sm font-bold opacity-70">kWh</span>
               </h2>
             </div>
             <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 relative overflow-hidden group">
-              <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-[80px] text-emerald-500/10 group-hover:scale-110 transition-transform">payments</span>
+              <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-[80px] text-emerald-500/10 group-hover:scale-110 transition-transform" translate="no">payments</span>
               <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 mb-1 relative z-10">Costo Estimado</p>
               <h2 className="font-data-mono font-black text-3xl text-emerald-900 relative z-10">
                 <span className="text-xl font-bold opacity-70">S/</span> {fmtVal(montoTotal)}
@@ -203,14 +203,14 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
           {/* Desglose de Lecturas */}
           <div className="space-y-4">
             <h4 className="text-sm font-bold text-on-surface flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px]">list_alt</span> Desglose de Lecturas
+              <span className="material-symbols-outlined text-[18px]" translate="no">list_alt</span> Desglose de Lecturas
             </h4>
 
             {/* Lectura Normal */}
             <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
               <div className="bg-surface-container-lowest px-4 py-3 border-b border-outline-variant flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[18px]">bolt</span>
+                  <span className="material-symbols-outlined text-primary text-[18px]" translate="no">bolt</span>
                   <span className="font-bold text-sm text-on-surface">Fuera Punta</span>
                 </div>
                 {tarifaNormal > 0 && (
@@ -252,7 +252,7 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
               <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
                 <div className="bg-orange-50 px-4 py-3 border-b border-orange-100 flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-orange-600 text-[18px]">schedule</span>
+                    <span className="material-symbols-outlined text-orange-600 text-[18px]" translate="no">schedule</span>
                     <span className="font-bold text-sm text-orange-800">Hora Punta</span>
                   </div>
                   {tarifaPunta > 0 && (
@@ -295,7 +295,7 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
               <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
                 <div className="bg-blue-50/50 px-4 py-3 border-b border-blue-100 flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-blue-600 text-[18px]">speed</span>
+                    <span className="material-symbols-outlined text-blue-600 text-[18px]" translate="no">speed</span>
                     <span className="font-bold text-sm text-blue-800">Máxima Demanda</span>
                   </div>
                 </div>
@@ -323,7 +323,7 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
               <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
                 <div className="bg-purple-50 px-4 py-3 border-b border-purple-100 flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-purple-600 text-[18px]">electric_meter</span>
+                    <span className="material-symbols-outlined text-purple-600 text-[18px]" translate="no">electric_meter</span>
                     <span className="font-bold text-sm text-purple-800">Energía Reactiva Capacitiva</span>
                   </div>
                   <span className="text-xs font-bold text-purple-700 bg-white px-2 py-1 rounded border border-purple-200">
@@ -348,7 +348,7 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
               <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
                 <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-slate-600 text-[18px]">build</span>
+                    <span className="material-symbols-outlined text-slate-600 text-[18px]" translate="no">build</span>
                     <span className="font-bold text-sm text-slate-800">Cargo por Mantenimiento</span>
                   </div>
                 </div>

@@ -32,7 +32,7 @@ const MobileMenuSheet = ({ isOpen, onClose, screens, currentPath, onNavClick }) 
             <p className="text-xs text-on-surface-variant capitalize truncate">{userRole}</p>
           </div>
           <button onClick={logout} className="p-2 text-error bg-error/10 hover:bg-error/20 rounded-full transition-colors flex items-center justify-center" title="Cerrar Sesión">
-            <span className="material-symbols-outlined text-[20px]">logout</span>
+            <span className="material-symbols-outlined text-[20px]" translate="no">logout</span>
           </button>
         </div>
 
@@ -52,7 +52,7 @@ const MobileMenuSheet = ({ isOpen, onClose, screens, currentPath, onNavClick }) 
                   <option key={year} value={year}>Gestión {year}</option>
                 ))}
               </select>
-              <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[20px]">
+              <span className="material-symbols-outlined absolute right-4 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[20px]" translate="no">
                 calendar_month
               </span>
             </div>
@@ -68,7 +68,7 @@ const MobileMenuSheet = ({ isOpen, onClose, screens, currentPath, onNavClick }) 
                   onClick={() => onNavClick(screen.view)}
                   className={`flex flex-col items-start gap-1 p-3 rounded-xl transition-all border ${currentPath === screen.view ? 'bg-primary/10 border-primary text-primary shadow-sm' : 'bg-surface-container-lowest border-outline-variant text-on-surface hover:bg-surface-container'}`}
                 >
-                  <span className={`material-symbols-outlined text-[22px] ${currentPath === screen.view ? 'text-primary' : 'text-on-surface-variant'}`} style={{ fontVariationSettings: currentPath === screen.view ? "'FILL' 1" : "'FILL' 0" }}>
+                  <span translate="no" className={`material-symbols-outlined text-[22px] ${currentPath === screen.view ? 'text-primary' : 'text-on-surface-variant'}`} style={{ fontVariationSettings: currentPath === screen.view ? "'FILL' 1" : "'FILL' 0" }}>
                     {screen.icon}
                   </span>
                   <span className="text-xs font-bold truncate w-full text-left">{screen.name}</span>

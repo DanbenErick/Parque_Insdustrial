@@ -41,7 +41,7 @@ const ReportKPICard = React.memo(({ icon, label, value, badge, subtitle, variant
   return (
     <div className={`bg-surface border border-outline-variant ${s.border} rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm`}>
       <div className={`w-10 h-10 rounded-full ${s.iconBg} flex items-center justify-center ${s.iconColor} shrink-0 border`}>
-        <span className="material-symbols-outlined text-[20px]">{icon}</span>
+        <span className="material-symbols-outlined text-[20px]" translate="no">{icon}</span>
       </div>
       <div className="flex flex-col justify-center overflow-hidden flex-1">
         <span className={`text-[9px] font-bold ${s.labelColor} uppercase tracking-wider leading-tight truncate`}>{label}</span>

@@ -36,7 +36,7 @@ const SocioSidebar = ({ isMobileMenuOpen, onCloseMobileMenu }) => {
           </div>
         </div>
         <button onClick={onCloseMobileMenu} className="md:hidden p-2 text-on-surface-variant hover:bg-surface-container rounded-lg">
-          <span className="material-symbols-outlined">close</span>
+          <span className="material-symbols-outlined" translate="no">close</span>
         </button>
       </div>
 
@@ -56,7 +56,7 @@ const SocioSidebar = ({ isMobileMenuOpen, onCloseMobileMenu }) => {
               }`}
             >
               {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-1/2 w-1 bg-emerald-500 rounded-r-full"></div>}
-              <span 
+              <span translate="no" 
                 className={`material-symbols-outlined text-[20px] transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} 
                 style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
               >
@@ -89,7 +89,7 @@ const SocioSidebar = ({ isMobileMenuOpen, onCloseMobileMenu }) => {
               className="p-1.5 text-on-surface-variant hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
               title="Cerrar Sesión"
             >
-              <span className="material-symbols-outlined text-[18px]">logout</span>
+              <span className="material-symbols-outlined text-[18px]" translate="no">logout</span>
             </button>
           </div>
         </div>

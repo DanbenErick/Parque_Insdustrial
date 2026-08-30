@@ -212,7 +212,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
               <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none" />
               <div className="flex items-center gap-4 relative z-10">
                 <div className="w-12 h-12 rounded-2xl bg-primary flex items-center justify-center text-on-primary shadow-lg shadow-primary/20">
-                  <span className="material-symbols-outlined text-[24px]">{isEditing ? 'edit_calendar' : 'calendar_add_on'}</span>
+                  <span className="material-symbols-outlined text-[24px]" translate="no">{isEditing ? 'edit_calendar' : 'calendar_add_on'}</span>
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-on-surface tracking-tight leading-none mb-1">
@@ -228,7 +228,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                 className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-variant flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors shadow-sm relative z-10 border border-outline-variant/50"
                 title="Cerrar modal"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span className="material-symbols-outlined text-[18px]" translate="no">close</span>
               </button>
             </div>
             
@@ -238,7 +238,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
               <div className="bg-surface border border-outline-variant rounded-2xl p-4 shadow-sm relative overflow-hidden group hover:border-primary/30 transition-colors">
                 <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
                 <h4 className="text-[10px] font-bold uppercase tracking-widest text-primary mb-3 flex items-center gap-1.5 ml-2">
-                  <span className="material-symbols-outlined text-[14px]">event</span>
+                  <span className="material-symbols-outlined text-[14px]" translate="no">event</span>
                   Identificación del Periodo
                 </h4>
                 <div className="grid grid-cols-1 gap-4">
@@ -246,7 +246,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                     <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider mb-1.5 flex items-center gap-2 ml-2">
                       Periodo a Aperturar
                       <span className="bg-surface-container-highest px-2 py-0.5 rounded-md text-[9px] flex items-center gap-1 opacity-70">
-                        <span className="material-symbols-outlined text-[10px]">lock</span> {activeYear}
+                        <span className="material-symbols-outlined text-[10px]" translate="no">lock</span> {activeYear}
                       </span>
                     </label>
                     <div className="relative ml-2">
@@ -266,7 +266,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                           );
                         })}
                       </select>
-                      <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[20px]">expand_more</span>
+                      <span className="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[20px]" translate="no">expand_more</span>
                     </div>
                   </div>
                 </div>
@@ -279,14 +279,14 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                 <div className="w-full bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-2xl p-5 shadow-inner relative overflow-hidden group">
                   <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500" />
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-primary mb-4 flex items-center gap-1.5 relative z-10">
-                    <span className="material-symbols-outlined text-[16px]">payments</span>
+                    <span className="material-symbols-outlined text-[16px]" translate="no">payments</span>
                     Medidor Fuera Punta
                   </h4>
                   
                   <div className="flex flex-col relative z-10">
                     <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px] text-primary">bolt</span> Costo Energía (kWh)
+                        <span className="material-symbols-outlined text-[14px] text-primary" translate="no">bolt</span> Costo Energía (kWh)
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
@@ -308,14 +308,14 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                 <div className="w-full bg-gradient-to-br from-orange-500/10 via-orange-500/5 to-transparent border border-orange-500/20 rounded-2xl p-5 shadow-inner relative overflow-hidden group">
                   <div className="absolute -right-4 -top-4 w-24 h-24 bg-orange-500/10 rounded-full blur-2xl group-hover:bg-orange-500/20 transition-all duration-500" />
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-orange-600 mb-4 flex items-center gap-1.5 relative z-10">
-                    <span className="material-symbols-outlined text-[16px]">electric_meter</span>
+                    <span className="material-symbols-outlined text-[16px]" translate="no">electric_meter</span>
                     Medidor Hora Punta
                   </h4>
                   
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
                     <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px] text-primary">bolt</span> Costo Energía (kWh)
+                        <span className="material-symbols-outlined text-[14px] text-primary" translate="no">bolt</span> Costo Energía (kWh)
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
@@ -333,7 +333,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                     
                     <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px] text-orange-600">schedule</span> Costo Punta (kWh)
+                        <span className="material-symbols-outlined text-[14px] text-orange-600" translate="no">schedule</span> Costo Punta (kWh)
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
@@ -350,7 +350,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
 
                     <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px] text-purple-600">electric_meter</span> Costo Potencia (Punta)
+                        <span className="material-symbols-outlined text-[14px] text-purple-600" translate="no">electric_meter</span> Costo Potencia (Punta)
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
@@ -367,7 +367,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
 
                     <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px] text-indigo-600">electric_meter</span> Costo Potencia (Fuera Punta)
+                        <span className="material-symbols-outlined text-[14px] text-indigo-600" translate="no">electric_meter</span> Costo Potencia (Fuera Punta)
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
@@ -384,7 +384,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                     
                     <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
-                        <span className="material-symbols-outlined text-[14px] text-pink-600">electric_meter</span> Costo Energía Reactiva
+                        <span className="material-symbols-outlined text-[14px] text-pink-600" translate="no">electric_meter</span> Costo Energía Reactiva
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
@@ -409,7 +409,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                 <div className="bg-surface border border-outline-variant rounded-2xl p-4 shadow-sm hover:border-blue-500/30 transition-colors relative overflow-hidden group">
                   <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-blue-600 mb-3 flex items-center gap-1.5 ml-2">
-                    <span className="material-symbols-outlined text-[14px]">calendar_month</span>
+                    <span className="material-symbols-outlined text-[14px]" translate="no">calendar_month</span>
                     Periodo de Consumo
                   </h4>
                   <div className="space-y-3 ml-2">
@@ -440,7 +440,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                 <div className="bg-surface border border-outline-variant rounded-2xl p-4 shadow-sm hover:border-orange-500/30 transition-colors relative overflow-hidden group">
                   <div className="absolute top-0 left-0 w-1 h-full bg-orange-500" />
                   <h4 className="text-[10px] font-bold uppercase tracking-widest text-orange-600 mb-3 flex items-center gap-1.5 ml-2">
-                    <span className="material-symbols-outlined text-[14px]">receipt_long</span>
+                    <span className="material-symbols-outlined text-[14px]" translate="no">receipt_long</span>
                     Fechas de Facturación
                   </h4>
                   <div className="space-y-3 ml-2">
@@ -466,7 +466,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                         />
                       </div>
                       <div className="flex flex-col">
-                        <label className="text-[10px] font-bold text-error uppercase tracking-wider mb-1 flex items-center gap-1"><span className="material-symbols-outlined text-[12px]">warning</span> Corte</label>
+                        <label className="text-[10px] font-bold text-error uppercase tracking-wider mb-1 flex items-center gap-1"><span className="material-symbols-outlined text-[12px]" translate="no">warning</span> Corte</label>
                         <input 
                           type="date" 
                           required
@@ -496,12 +496,12 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                 >
                   {isSaving ? (
                     <>
-                      <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
+                      <span className="material-symbols-outlined animate-spin text-[18px]" translate="no">sync</span>
                       Guardando
                     </>
                   ) : (
                     <>
-                      <span className="material-symbols-outlined text-[18px]">{isEditing ? 'save' : 'add_circle'}</span>
+                      <span className="material-symbols-outlined text-[18px]" translate="no">{isEditing ? 'save' : 'add_circle'}</span>
                       {isEditing ? 'Actualizar' : 'Aperturar'}
                     </>
                   )}

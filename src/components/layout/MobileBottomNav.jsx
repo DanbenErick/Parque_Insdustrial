@@ -33,7 +33,7 @@ const MobileBottomNav = ({ screens }) => {
                 className="flex flex-col items-center justify-center w-[20%] gap-1 transition-all h-full"
               >
                 <div className={`flex items-center justify-center w-14 h-8 rounded-full transition-colors ${isActive ? 'bg-primary text-on-primary shadow-sm shadow-primary/20' : 'text-on-surface-variant hover:bg-surface-variant'}`}>
-                  <span className={`material-symbols-outlined text-[24px] ${isActive ? 'scale-105' : ''}`} style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}>
+                  <span translate="no" className={`material-symbols-outlined text-[24px] ${isActive ? 'scale-105' : ''}`} style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}>
                     {screen.icon}
                   </span>
                 </div>
@@ -50,7 +50,7 @@ const MobileBottomNav = ({ screens }) => {
             className="flex flex-col items-center justify-center w-[20%] gap-1 transition-all h-full"
           >
             <div className={`flex items-center justify-center w-14 h-8 rounded-full transition-colors text-on-surface-variant hover:bg-surface-variant`}>
-              <span className="material-symbols-outlined text-[24px]">menu</span>
+              <span className="material-symbols-outlined text-[24px]" translate="no">menu</span>
             </div>
             <span className="text-[10px] w-full text-center tracking-tight font-medium text-on-surface-variant">
               Menú

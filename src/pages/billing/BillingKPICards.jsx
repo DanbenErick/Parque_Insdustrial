@@ -25,7 +25,7 @@ const BillingKPICards = memo(({ totalRecaudado, pendienteCobro, deudaVencida, us
         <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 shadow-sm relative overflow-hidden">
           
           <h3 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-4 flex items-center gap-1.5 relative z-10">
-            <span className="material-symbols-outlined text-[15px]">inventory_2</span>
+            <span className="material-symbols-outlined text-[15px]" translate="no">inventory_2</span>
             Inventario de Socios
           </h3>
 
@@ -33,7 +33,7 @@ const BillingKPICards = memo(({ totalRecaudado, pendienteCobro, deudaVencida, us
             {/* Medidores Reales */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 border border-primary/20">
-                <span className="material-symbols-outlined text-[20px]">speed</span>
+                <span className="material-symbols-outlined text-[20px]" translate="no">speed</span>
               </div>
               <div>
                 <p className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wide">Medidores Reales</p>
@@ -46,7 +46,7 @@ const BillingKPICards = memo(({ totalRecaudado, pendienteCobro, deudaVencida, us
             {/* Socios Sin Medidor */}
             <div className="flex items-center gap-3 pl-4">
               <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center text-warning shrink-0 border border-warning/20">
-                <span className="material-symbols-outlined text-[20px]">person_off</span>
+                <span className="material-symbols-outlined text-[20px]" translate="no">person_off</span>
               </div>
               <div>
                 <p className="text-[9px] font-bold text-warning uppercase tracking-wide">Sin Medidor</p>
@@ -62,7 +62,7 @@ const BillingKPICards = memo(({ totalRecaudado, pendienteCobro, deudaVencida, us
         <div className="bg-error/5 border border-error/10 rounded-2xl p-4 shadow-sm relative overflow-hidden">
 
           <h3 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-4 flex items-center gap-1.5 relative z-10">
-            <span className="material-symbols-outlined text-[15px]">data_usage</span>
+            <span className="material-symbols-outlined text-[15px]" translate="no">data_usage</span>
             Progreso del Periodo
           </h3>
 
@@ -70,7 +70,7 @@ const BillingKPICards = memo(({ totalRecaudado, pendienteCobro, deudaVencida, us
             {/* Faltan Lecturar */}
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center text-error shrink-0 relative border border-error/20">
-                <span className="material-symbols-outlined text-[20px]">assignment_late</span>
+                <span className="material-symbols-outlined text-[20px]" translate="no">assignment_late</span>
                 {faltanLecturar > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-error rounded-full animate-pulse border-2 border-surface"></span>
                 )}
@@ -86,7 +86,7 @@ const BillingKPICards = memo(({ totalRecaudado, pendienteCobro, deudaVencida, us
             {/* Pendientes de Facturar */}
             <div className="flex items-center gap-3 pl-4">
               <div className="w-10 h-10 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary shrink-0 border border-tertiary/20">
-                <span className="material-symbols-outlined text-[20px]">receipt_long</span>
+                <span className="material-symbols-outlined text-[20px]" translate="no">receipt_long</span>
               </div>
               <div>
                 <p className="text-[9px] font-bold text-tertiary uppercase tracking-wide">Sin Facturar</p>
@@ -104,7 +104,7 @@ const BillingKPICards = memo(({ totalRecaudado, pendienteCobro, deudaVencida, us
         {/* Card 1: Total Recaudado */}
         <div className="bg-surface border border-outline-variant hover:border-primary/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
           <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0 border border-primary/10">
-            <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+            <span className="material-symbols-outlined text-[20px]" translate="no">account_balance_wallet</span>
           </div>
           <div className="flex flex-col justify-center overflow-hidden flex-1">
             <div className="flex justify-between items-center w-full">
@@ -125,7 +125,7 @@ const BillingKPICards = memo(({ totalRecaudado, pendienteCobro, deudaVencida, us
         {/* Card 2: Pendiente de Cobro */}
         <div className="bg-surface border border-outline-variant hover:border-tertiary/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
           <div className="w-10 h-10 rounded-full bg-tertiary/5 flex items-center justify-center text-tertiary shrink-0 border border-tertiary/10">
-            <span className="material-symbols-outlined text-[20px]">pending_actions</span>
+            <span className="material-symbols-outlined text-[20px]" translate="no">pending_actions</span>
           </div>
           <div className="flex flex-col justify-center overflow-hidden flex-1">
             <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider leading-tight truncate">Pendiente de Cobro</span>
@@ -139,7 +139,7 @@ const BillingKPICards = memo(({ totalRecaudado, pendienteCobro, deudaVencida, us
         {/* Card 3: Deuda Vencida */}
         <div className="bg-surface border border-outline-variant hover:border-error/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
           <div className="w-10 h-10 rounded-full bg-error/5 flex items-center justify-center text-error shrink-0 border border-error/10">
-            <span className="material-symbols-outlined text-[20px]">warning</span>
+            <span className="material-symbols-outlined text-[20px]" translate="no">warning</span>
           </div>
           <div className="flex flex-col justify-center overflow-hidden flex-1">
             <span className="text-[9px] font-bold text-error uppercase tracking-wider leading-tight truncate">Deuda Vencida (&gt;30 días)</span>

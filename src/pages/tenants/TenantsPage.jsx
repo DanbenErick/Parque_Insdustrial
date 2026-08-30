@@ -36,7 +36,7 @@ const TenantsAndSectors = () => {
   // Modals / Drawers state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [confirmModal, setConfirmModal] = useState({ show: false, user: null, isActivating: false });
+  const [confirmModal, setConfirmModal] = useState({ show: false, user: null, specificMedidor: null, isActivating: false });
   const [resetPasswordModal, setResetPasswordModal] = useState({ show: false, tenant: null });
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [drawerTenant, setDrawerTenant] = useState(null);
@@ -196,32 +196,40 @@ const TenantsAndSectors = () => {
     setIsModalOpen(true);
   };
 
-  const toggleUserStatus = (tenant) => {
-    setConfirmModal({ show: true, user: tenant, isActivating: !tenant.es_activo });
+  const toggleUserStatus = (tenant, specificMedidor) => {
+    // Si la fila tiene un medidor específico, usamos el estado del medidor; si no, el del usuario
+    const isActivating = specificMedidor ? !specificMedidor.operativo : !tenant.es_activo;
+    setConfirmModal({ show: true, user: tenant, specificMedidor, isActivating });
   };
 
   const executeToggleUser = async () => {
-    const { user, isActivating } = confirmModal;
+    const { user, specificMedidor, isActivating } = confirmModal;
     setIsSavingToggle(true);
 
     try {
-      const toggleData = {
-        rol_id: user.rol_id,
-        documento_identidad: user.documento_identidad,
-        nombre_razonsocial: user.nombre_razonsocial,
-        cargo_representante: user.cargo_representante,
-        actividad_rubro: user.actividad_rubro,
-        telefono: user.telefono,
-        correo: user.correo,
-        direccion: user.direccion,
-        es_activo: isActivating
-      };
-
-      await api.put(`/usuarios/${user.id}`, toggleData);
+      if (specificMedidor) {
+        // Suspender/Reactivar solo el medidor
+        await api.put(`/medidores/${specificMedidor.id}`, { operativo: isActivating });
+      } else {
+        // Suspender/Reactivar todo el usuario
+        const toggleData = {
+          rol_id: user.rol_id,
+          documento_identidad: user.documento_identidad,
+          nombre_razonsocial: user.nombre_razonsocial,
+          cargo_representante: user.cargo_representante,
+          actividad_rubro: user.actividad_rubro,
+          telefono: user.telefono,
+          correo: user.correo,
+          direccion: user.direccion,
+          es_activo: isActivating
+        };
+        await api.put(`/usuarios/${user.id}`, toggleData);
+      }
+      
       toast.custom((t) => (
         <div className="bg-surface border-l-4 border-outline-variant shadow-lg rounded-r-lg p-4 flex items-start gap-3 w-[350px] animate-in slide-in-from-top-5" style={{ borderLeftColor: isActivating ? '#059669' : '#d97706' }}>
           <div className={`mt-0.5 w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isActivating ? 'bg-[#059669]/10 text-[#059669]' : 'bg-amber-100 text-amber-700'}`}>
-            <span className="material-symbols-outlined text-[18px]">
+            <span className="material-symbols-outlined text-[18px]" translate="no">
               {isActivating ? 'power' : 'power_off'}
             </span>
           </div>
@@ -230,11 +238,11 @@ const TenantsAndSectors = () => {
               {isActivating ? 'Conexión Reactivada' : 'Servicio Suspendido'}
             </h4>
             <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
-              El suministro de <strong className="text-on-surface">{user.nombre_razonsocial}</strong> ha sido actualizado con éxito.
+              El suministro de <strong className="text-on-surface">{specificMedidor ? (specificMedidor.num_serie || 'Sin Medidor') : user.nombre_razonsocial}</strong> ha sido actualizado con éxito.
             </p>
           </div>
           <button onClick={() => toast.dismiss(t)} className="text-on-surface-variant hover:text-on-surface transition-colors">
-            <span className="material-symbols-outlined text-[16px]">close</span>
+            <span className="material-symbols-outlined text-[16px]" translate="no">close</span>
           </button>
         </div>
       ), { duration: 5000, position: 'top-center' });
@@ -243,7 +251,7 @@ const TenantsAndSectors = () => {
       toast.error(error.message);
     } finally {
       setIsSavingToggle(false);
-      setConfirmModal({ show: false, user: null, isActivating: false });
+      setConfirmModal({ show: false, user: null, specificMedidor: null, isActivating: false });
     }
   };
 
@@ -289,7 +297,7 @@ const TenantsAndSectors = () => {
             onClick={handleOpenNew}
             className="group px-4 py-2 bg-primary text-on-primary font-bold rounded-xl shadow-sm hover:shadow-md hover:opacity-90 transition-all flex items-center justify-center gap-2 whitespace-nowrap"
           >
-            <span className="material-symbols-outlined text-[20px] group-hover:-translate-y-0.5 transition-transform">add_circle</span>
+            <span className="material-symbols-outlined text-[20px] group-hover:-translate-y-0.5 transition-transform" translate="no">add_circle</span>
             Nuevo Socio
           </button>
         </div>
@@ -305,7 +313,7 @@ const TenantsAndSectors = () => {
           </div>
           <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
             <div className="relative flex-grow md:flex-grow-0">
-              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
+              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">search</span>
               <input
                 type="text"
                 placeholder="Buscar socio..."
@@ -323,7 +331,7 @@ const TenantsAndSectors = () => {
               onClick={() => setShowFilters(!showFilters)}
               className={`flex items-center gap-1.5 px-3 py-1.5 h-8 font-bold text-xs rounded-md transition-colors border ${showFilters ? 'bg-primary/10 text-primary border-primary/20' : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container'}`}
             >
-              <span className="material-symbols-outlined text-[16px]">filter_list</span>
+              <span className="material-symbols-outlined text-[16px]" translate="no">filter_list</span>
               Filtros {(filterEstado !== 'Todos' || filterRubro !== 'Todos') && <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse ml-0.5"></span>}
             </button>
 
@@ -331,7 +339,7 @@ const TenantsAndSectors = () => {
               onClick={onExportExcel}
               className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-xs rounded-md transition-colors border border-[#107C41]/20"
             >
-              <span className="material-symbols-outlined text-[16px]">table_view</span>
+              <span className="material-symbols-outlined text-[16px]" translate="no">table_view</span>
               Excel
             </button>
             <button
@@ -339,7 +347,7 @@ const TenantsAndSectors = () => {
               disabled={isGeneratingPdf}
               className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-error/10 text-error hover:bg-error/20 font-bold text-xs rounded-md transition-colors border border-error/20 disabled:opacity-50"
             >
-              <span className={`material-symbols-outlined text-[16px] ${isGeneratingPdf ? 'animate-spin' : ''}`}>
+              <span translate="no" className={`material-symbols-outlined text-[16px] ${isGeneratingPdf ? 'animate-spin' : ''}`}>
                 {isGeneratingPdf ? 'sync' : 'picture_as_pdf'}
               </span>
               PDF
@@ -384,7 +392,7 @@ const TenantsAndSectors = () => {
                 onClick={() => { setFilterEstado('Todos'); setFilterRubro('Todos'); }}
                 className="text-xs font-bold text-error hover:underline ml-auto flex items-center gap-1"
               >
-                <span className="material-symbols-outlined text-[14px]">close</span>
+                <span className="material-symbols-outlined text-[14px]" translate="no">close</span>
                 Limpiar Filtros
               </button>
             )}
@@ -410,7 +418,7 @@ const TenantsAndSectors = () => {
                   specificMedidor={tenant.specificMedidor}
                   onOpenDrawer={setDrawerTenant}
                   onOpenEdit={(t) => handleOpenEdit(t, tenant.specificMedidor)}
-                  onToggleStatus={toggleUserStatus}
+                  onToggleStatus={(tenant) => toggleUserStatus(tenant, tenant.specificMedidor)}
                   onWhatsApp={() => handleWhatsApp(tenant)}
                   onResetPassword={() => handleResetPassword(tenant)}
                 />
@@ -436,7 +444,7 @@ const TenantsAndSectors = () => {
                 disabled={currentPage === 1}
                 className="px-2.5 py-1 rounded-md border border-outline-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-[11px] font-bold flex items-center gap-0.5 text-on-surface"
               >
-                <span className="material-symbols-outlined text-[14px]">chevron_left</span> Anterior
+                <span className="material-symbols-outlined text-[14px]" translate="no">chevron_left</span> Anterior
               </button>
               <div className="flex items-center gap-1">
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -460,7 +468,7 @@ const TenantsAndSectors = () => {
                 disabled={currentPage === totalPages}
                 className="px-2.5 py-1 rounded-md border border-outline-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-[11px] font-bold flex items-center gap-0.5 text-on-surface"
               >
-                Siguiente <span className="material-symbols-outlined text-[14px]">chevron_right</span>
+                Siguiente <span className="material-symbols-outlined text-[14px]" translate="no">chevron_right</span>
               </button>
             </div>
           )}

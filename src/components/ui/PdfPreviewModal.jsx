@@ -15,7 +15,7 @@ const PdfPreviewModal = ({ pdfBlobUrl, onClose, downloadFileName = 'documento.pd
         <div className="px-lg py-sm border-b border-outline-variant bg-surface-container-low flex justify-between items-center">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-error/10 flex items-center justify-center text-error">
-              <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+              <span className="material-symbols-outlined text-[18px]" translate="no">picture_as_pdf</span>
             </div>
             <h3 className="font-headline-sm font-bold text-on-surface">{title}</h3>
           </div>
@@ -25,14 +25,14 @@ const PdfPreviewModal = ({ pdfBlobUrl, onClose, downloadFileName = 'documento.pd
               download={downloadFileName}
               className="px-4 py-2 bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 flex items-center gap-2 transition-colors"
             >
-              <span className="material-symbols-outlined text-[18px]">download</span>
+              <span className="material-symbols-outlined text-[18px]" translate="no">download</span>
               Descargar
             </a>
             <button
               onClick={onClose}
               className="p-2 hover:bg-error/10 hover:text-error text-on-surface-variant rounded-lg transition-colors"
             >
-              <span className="material-symbols-outlined text-[18px]">close</span>
+              <span className="material-symbols-outlined text-[18px]" translate="no">close</span>
               Cerrar
             </button>
           </div>

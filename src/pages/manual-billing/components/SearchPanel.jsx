@@ -17,9 +17,9 @@ export const SearchPanel = ({
       <div className="relative flex items-center bg-white/70 backdrop-blur-xl border-2 border-outline-variant/60 hover:border-primary/50 focus-within:border-primary focus-within:ring-4 focus-within:ring-primary/20 rounded-2xl shadow-lg transition-all duration-300 h-[60px] group">
         <div className="pl-5 pr-3 text-primary flex items-center justify-center shrink-0 group-focus-within:scale-110 transition-transform">
           {isSearching ? (
-            <span className="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
+            <span className="material-symbols-outlined text-[20px] animate-spin" translate="no">progress_activity</span>
           ) : (
-            <span className="material-symbols-outlined text-[24px]">search</span>
+            <span className="material-symbols-outlined text-[24px]" translate="no">search</span>
           )}
         </div>
         <input
@@ -37,7 +37,7 @@ export const SearchPanel = ({
             className="px-3 text-on-surface-variant hover:text-error transition-colors flex items-center justify-center focus:outline-none"
             title="Limpiar búsqueda"
           >
-            <span className="material-symbols-outlined text-[20px]">close</span>
+            <span className="material-symbols-outlined text-[20px]" translate="no">close</span>
           </button>
         )}
         <div className="pr-5 hidden md:flex items-center shrink-0">
@@ -64,7 +64,7 @@ export const SearchPanel = ({
       {/* Empty State */}
       {searchTerm.length > 0 && currentSearchResults.length === 0 && !selectedMember && !isSearching && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-surface border border-outline-variant/50 rounded-xl shadow-lg p-4 text-center animate-in fade-in z-50 flex flex-col items-center">
-          <span className="material-symbols-outlined text-[24px] text-on-surface-variant/30 mb-1">search_off</span>
+          <span className="material-symbols-outlined text-[24px] text-on-surface-variant/30 mb-1" translate="no">search_off</span>
           <p className="text-sm text-on-surface-variant">No se encontraron medidores o socios que coincidan.</p>
         </div>
       )}

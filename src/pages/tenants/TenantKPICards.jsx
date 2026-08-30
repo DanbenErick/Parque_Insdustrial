@@ -11,7 +11,7 @@ const TenantKPICards = ({ globalStats }) => {
         {/* Card 1: Total Socios */}
         <div className="bg-surface border border-outline-variant hover:border-primary/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
           <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0 border border-primary/10">
-            <span className="material-symbols-outlined text-[20px]">group</span>
+            <span className="material-symbols-outlined text-[20px]" translate="no">group</span>
           </div>
           <div className="flex flex-col justify-center overflow-hidden flex-1">
             <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider leading-tight truncate">Total de Socios</span>
@@ -27,7 +27,7 @@ const TenantKPICards = ({ globalStats }) => {
         {/* Card 2: Total Medidores */}
         <div className="bg-surface border border-outline-variant hover:border-blue-500/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
           <div className="w-10 h-10 rounded-full bg-blue-500/5 flex items-center justify-center text-blue-500 shrink-0 border border-blue-500/10">
-            <span className="material-symbols-outlined text-[20px]">speed</span>
+            <span className="material-symbols-outlined text-[20px]" translate="no">speed</span>
           </div>
           <div className="flex flex-col justify-center overflow-hidden flex-1">
             <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider leading-tight truncate">Total Medidores</span>
@@ -43,7 +43,7 @@ const TenantKPICards = ({ globalStats }) => {
         {/* Card 2: Conexiones Activas */}
         <div className="bg-surface border border-outline-variant hover:border-green-600/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
           <div className="w-10 h-10 rounded-full bg-green-600/5 flex items-center justify-center text-green-600 shrink-0 border border-green-600/10">
-            <span className="material-symbols-outlined text-[20px]">bolt</span>
+            <span className="material-symbols-outlined text-[20px]" translate="no">bolt</span>
           </div>
           <div className="flex flex-col justify-center overflow-hidden flex-1">
             <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider leading-tight truncate">Conexiones Activas</span>
@@ -57,7 +57,7 @@ const TenantKPICards = ({ globalStats }) => {
         {/* Card 3: Suspendidas / Cortadas */}
         <div className="bg-surface border border-outline-variant hover:border-error/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
           <div className="w-10 h-10 rounded-full bg-error/5 flex items-center justify-center text-error shrink-0 border border-error/10">
-            <span className="material-symbols-outlined text-[20px]">power_off</span>
+            <span className="material-symbols-outlined text-[20px]" translate="no">power_off</span>
           </div>
           <div className="flex flex-col justify-center overflow-hidden flex-1">
             <span className="text-[9px] font-bold text-error uppercase tracking-wider leading-tight truncate">Suspendidas / Cortadas</span>

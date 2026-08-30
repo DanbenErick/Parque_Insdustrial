@@ -72,7 +72,7 @@ const LoginHistoryTab = () => {
           className="w-8 h-8 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-full transition-colors"
           title="Actualizar"
         >
-          <span className="material-symbols-outlined text-[18px]">refresh</span>
+          <span className="material-symbols-outlined text-[18px]" translate="no">refresh</span>
         </button>
       </div>
 
@@ -105,7 +105,7 @@ const LoginHistoryTab = () => {
                 </td>
                 <td className="px-4 py-2">
                   <div className="flex items-center gap-2 text-on-surface-variant" title={log.user_agent}>
-                    <span className="material-symbols-outlined text-[14px]">
+                    <span className="material-symbols-outlined text-[14px]" translate="no">
                       {getDeviceIcon(log.user_agent)}
                     </span>
                     <span className="text-[10px] max-w-[200px] truncate">
@@ -119,7 +119,7 @@ const LoginHistoryTab = () => {
               <tr>
                 <td colSpan="4" className="text-center py-12 text-on-surface-variant">
                   <div className="flex flex-col items-center justify-center">
-                    <span className="material-symbols-outlined text-4xl mb-2 opacity-50">history_off</span>
+                    <span className="material-symbols-outlined text-4xl mb-2 opacity-50" translate="no">history_off</span>
                     <p>No hay registros de sesiones disponibles.</p>
                   </div>
                 </td>
@@ -137,7 +137,7 @@ const LoginHistoryTab = () => {
             className="text-xs font-bold text-primary hover:text-primary-fixed-variant transition-colors disabled:opacity-50 flex items-center gap-1"
           >
             {isLoading ? 'Cargando...' : 'Cargar más registros'}
-            {!isLoading && <span className="material-symbols-outlined text-[16px]">expand_more</span>}
+            {!isLoading && <span className="material-symbols-outlined text-[16px]" translate="no">expand_more</span>}
           </button>
         </div>
       )}

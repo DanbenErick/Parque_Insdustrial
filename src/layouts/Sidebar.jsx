@@ -30,7 +30,7 @@ const Sidebar = ({ isMobileMenuOpen, onCloseMobileMenu, screens }) => {
           </div>
         </div>
         <button onClick={onCloseMobileMenu} className="md:hidden p-2 text-slate-400 hover:bg-slate-800 rounded-lg">
-          <span className="material-symbols-outlined">close</span>
+          <span className="material-symbols-outlined" translate="no">close</span>
         </button>
       </div>
 
@@ -46,7 +46,7 @@ const Sidebar = ({ isMobileMenuOpen, onCloseMobileMenu, screens }) => {
               <option key={year} value={year} className="bg-surface text-on-surface">Año {year}</option>
             ))}
           </select>
-          <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none text-[18px]">
+          <span className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-white/50 pointer-events-none text-[18px]" translate="no">
             calendar_month
           </span>
         </div>
@@ -61,7 +61,7 @@ const Sidebar = ({ isMobileMenuOpen, onCloseMobileMenu, screens }) => {
             className={`flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-200 w-full text-left group relative overflow-hidden ${currentPath === screen.view ? 'bg-primary text-on-primary font-bold shadow-md' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
           >
             {currentPath === screen.view && <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full"></div>}
-            <span className={`material-symbols-outlined text-[18px] transition-transform duration-200 ${currentPath === screen.view ? 'scale-110' : 'group-hover:scale-110'}`} style={{ fontVariationSettings: currentPath === screen.view ? "'FILL' 1" : "'FILL' 0" }}>{screen.icon}</span>
+            <span translate="no" className={`material-symbols-outlined text-[18px] transition-transform duration-200 ${currentPath === screen.view ? 'scale-110' : 'group-hover:scale-110'}`} style={{ fontVariationSettings: currentPath === screen.view ? "'FILL' 1" : "'FILL' 0" }}>{screen.icon}</span>
             <span className="text-xs tracking-wide">{screen.name}</span>
           </button>
         ))}
@@ -76,7 +76,7 @@ const Sidebar = ({ isMobileMenuOpen, onCloseMobileMenu, screens }) => {
                 className={`flex items-center gap-2.5 px-3 py-2 rounded-lg transition-all duration-200 w-full text-left group relative overflow-hidden ${currentPath === screen.view ? 'bg-primary text-on-primary font-bold shadow-md' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}
               >
                 {currentPath === screen.view && <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full"></div>}
-                <span className={`material-symbols-outlined text-[18px] transition-transform duration-200 ${currentPath === screen.view ? 'scale-110' : 'group-hover:scale-110'}`} style={{ fontVariationSettings: currentPath === screen.view ? "'FILL' 1" : "'FILL' 0" }}>{screen.icon}</span>
+                <span translate="no" className={`material-symbols-outlined text-[18px] transition-transform duration-200 ${currentPath === screen.view ? 'scale-110' : 'group-hover:scale-110'}`} style={{ fontVariationSettings: currentPath === screen.view ? "'FILL' 1" : "'FILL' 0" }}>{screen.icon}</span>
                 <span className="text-xs tracking-wide">{screen.name}</span>
               </button>
             ))}
@@ -94,7 +94,7 @@ const Sidebar = ({ isMobileMenuOpen, onCloseMobileMenu, screens }) => {
             <p className="text-[10px] text-white/60 capitalize truncate">{userRole}</p>
           </div>
           <button onClick={logout} className="p-1.5 text-white/60 hover:text-error hover:bg-error/20 rounded-lg transition-colors ml-auto" title="Cerrar Sesión">
-            <span className="material-symbols-outlined text-[20px]">logout</span>
+            <span className="material-symbols-outlined text-[20px]" translate="no">logout</span>
           </button>
         </div>
       </div>

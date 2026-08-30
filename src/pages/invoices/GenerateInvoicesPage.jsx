@@ -174,7 +174,7 @@ const GenerateInvoices = () => {
               </div>
               <div className="mt-xl p-md bg-primary-container/10 border-l-4 border-primary rounded-r">
                 <div className="flex items-start gap-md">
-                  <span className="material-symbols-outlined text-primary">info</span>
+                  <span className="material-symbols-outlined text-primary" translate="no">info</span>
                   <div>
                     <p className="font-body-md text-body-md text-on-primary-container">
                       Se generarán <span className="font-bold">{lecturasDelPeriodo.length} facturas</span> para el periodo <span className="font-bold">{periodoSeleccionado?.mes_anio || '...'}</span>.
@@ -193,7 +193,7 @@ const GenerateInvoices = () => {
                     S/ {montoEstimado.toLocaleString('en-US', {minimumFractionDigits: 2})}
                   </p>
                 </div>
-                <span className="material-symbols-outlined text-primary-container text-[48px] opacity-80">account_balance_wallet</span>
+                <span className="material-symbols-outlined text-primary-container text-[48px] opacity-80" translate="no">account_balance_wallet</span>
               </div>
               <div className="bg-surface border border-outline-variant rounded-lg p-lg flex items-center justify-between shadow-sm">
                 <div>
@@ -202,7 +202,7 @@ const GenerateInvoices = () => {
                     {consumoTotal.toLocaleString('en-US')}
                   </p>
                 </div>
-                <span className="material-symbols-outlined text-tertiary text-[48px] opacity-80">bolt</span>
+                <span className="material-symbols-outlined text-tertiary text-[48px] opacity-80" translate="no">bolt</span>
               </div>
             </div>
           </div>
@@ -222,7 +222,7 @@ const GenerateInvoices = () => {
               <div className="p-md flex items-center justify-between hover:bg-surface-container-lowest transition-colors px-lg">
                 <div className="flex items-center gap-md">
                   <div className="bg-primary/10 text-primary p-2 rounded">
-                    <span className="material-symbols-outlined">electric_bolt</span>
+                    <span className="material-symbols-outlined" translate="no">electric_bolt</span>
                   </div>
                   <div>
                     <p className="font-body-md font-bold text-on-surface">Lecturas de Energía Eléctrica Registradas</p>
@@ -232,9 +232,9 @@ const GenerateInvoices = () => {
                   </div>
                 </div>
                 {lecturasDelPeriodo.length > 0 ? (
-                   <span className="material-symbols-outlined text-[#059669]">check_circle</span>
+                   <span className="material-symbols-outlined text-[#059669]" translate="no">check_circle</span>
                 ) : (
-                   <span className="material-symbols-outlined text-warning">pending</span>
+                   <span className="material-symbols-outlined text-warning" translate="no">pending</span>
                 )}
               </div>
             </div>
@@ -242,7 +242,7 @@ const GenerateInvoices = () => {
 
           {!isProcessing && !showSuccess && (
             <div className="bg-error/10 border-l-[3px] border-error px-4 py-3 rounded-r flex items-start gap-3 mt-4 animate-in fade-in">
-              <span className="material-symbols-outlined text-error text-[20px] mt-0.5">warning</span>
+              <span className="material-symbols-outlined text-error text-[20px] mt-0.5" translate="no">warning</span>
               <p className="text-sm text-error font-medium leading-tight">
                 <strong className="font-bold">Importante:</strong> Al confirmar y generar facturas para este periodo, cualquier recibo pendiente del mes anterior pasará automáticamente a estado "Vencido".
               </p>
@@ -280,7 +280,7 @@ const GenerateInvoices = () => {
                 onClick={handleGenerate}
                 disabled={lecturasDelPeriodo.length === 0}
               >
-                <span className="material-symbols-outlined">print</span>
+                <span className="material-symbols-outlined" translate="no">print</span>
                 Confirmar y Generar Recibos
               </button>
             </div>

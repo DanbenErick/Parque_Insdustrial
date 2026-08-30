@@ -15,7 +15,7 @@ const SocioPaymentsPage = () => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 text-teal-600">
-        <span className="material-symbols-outlined animate-spin text-[40px]">sync</span>
+        <span className="material-symbols-outlined animate-spin text-[40px]" translate="no">sync</span>
         <p className="font-bold animate-pulse">Cargando historial de pagos...</p>
       </div>
     );
@@ -24,7 +24,7 @@ const SocioPaymentsPage = () => {
   if (isError) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-red-500">
-        <span className="material-symbols-outlined text-[48px]">error</span>
+        <span className="material-symbols-outlined text-[48px]" translate="no">error</span>
         <p className="mt-2 font-bold">Error al cargar la información.</p>
         <button onClick={refetch} className="mt-4 px-4 py-2 bg-red-100 rounded-lg">Reintentar</button>
       </div>
@@ -52,7 +52,7 @@ const SocioPaymentsPage = () => {
       <div className="bg-white rounded-2xl border border-outline-variant shadow-sm overflow-hidden p-2">
         {pagos.length === 0 ? (
           <div className="p-12 flex flex-col items-center justify-center text-on-surface-variant">
-            <span className="material-symbols-outlined text-[48px] mb-4 opacity-50">payments</span>
+            <span className="material-symbols-outlined text-[48px] mb-4 opacity-50" translate="no">payments</span>
             <p className="font-bold text-lg">No hay pagos registrados</p>
             <p className="text-sm mt-1">Aún no se ha registrado ningún pago a su nombre.</p>
           </div>
@@ -65,19 +65,19 @@ const SocioPaymentsPage = () => {
                   
                   <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${bg}`}>
-                      <span className="material-symbols-outlined">{icon}</span>
+                      <span className="material-symbols-outlined" translate="no">{icon}</span>
                     </div>
                     <div>
                       <h3 className="font-bold text-on-surface flex items-center gap-2">
                         {pago.metodo_pago}
                         {pago.estado_validacion === 'Confirmado' ? (
-                          <span className="material-symbols-outlined text-[14px] text-green-500" title="Pago Confirmado">verified</span>
+                          <span className="material-symbols-outlined text-[14px] text-green-500" translate="no" title="Pago Confirmado">verified</span>
                         ) : (
-                          <span className="material-symbols-outlined text-[14px] text-orange-500" title="Pendiente de Validación">pending</span>
+                          <span className="material-symbols-outlined text-[14px] text-orange-500" translate="no" title="Pendiente de Validación">pending</span>
                         )}
                       </h3>
                       <p className="text-[11px] text-on-surface-variant flex items-center gap-1.5 mt-0.5">
-                        <span className="material-symbols-outlined text-[14px]">calendar_today</span>
+                        <span className="material-symbols-outlined text-[14px]" translate="no">calendar_today</span>
                         {new Date(pago.fecha_pago).toLocaleString()}
                       </p>
                       {pago.numero_operacion && (

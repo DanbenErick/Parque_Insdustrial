@@ -60,7 +60,7 @@ const UserManagement = () => {
   const fetchUsers = useCallback(async () => {
     try {
       setIsLoading(true);
-      const response = await api.get('/usuarios');
+      const response = await api.get('/usuarios?limit=1000');
       const rawData = Array.isArray(response.data) ? response.data : (response.data?.data || []);
       const personalData = rawData.filter(
         u => u.rol_id === 1 || u.rol_id === 2 || u.nombre_rol === 'Admin' || u.nombre_rol === 'Operario'
@@ -232,7 +232,7 @@ const UserManagement = () => {
             onClick={openAddModal}
             className="flex items-center gap-1.5 bg-primary text-on-primary px-4 py-1.5 h-8 rounded-md font-bold shadow-sm hover:opacity-90 active:scale-95 transition-all"
           >
-            <span className="material-symbols-outlined text-[16px]">person_add</span>
+            <span className="material-symbols-outlined text-[16px]" translate="no">person_add</span>
             <span className="text-xs">Añadir Usuario</span>
           </button>
         )}
@@ -275,7 +275,7 @@ const UserManagement = () => {
 
             <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
               <div className="relative flex-grow md:flex-grow-0">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">search</span>
+                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]" translate="no">search</span>
                 <input
                   type="text" placeholder="Buscar usuario..."
                   value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
@@ -288,14 +288,14 @@ const UserManagement = () => {
                   onClick={() => handleExport('excel')}
                   className="group flex items-center gap-1.5 px-3 py-2 bg-[#107C41]/10 border border-transparent hover:border-[#107C41]/30 hover:bg-[#107C41]/20 text-[#107C41] font-bold text-xs rounded-xl transition-all shadow-sm"
                 >
-                  <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">table_view</span>
+                  <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform" translate="no">table_view</span>
                   <span className="hidden sm:inline">Excel</span>
                 </button>
                 <button
                   onClick={() => handleExport('pdf')}
                   className="group flex items-center gap-1.5 px-3 py-2 bg-error/10 border border-transparent hover:border-error/30 hover:bg-error/20 text-error font-bold text-xs rounded-xl transition-all shadow-sm"
                 >
-                  <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform">picture_as_pdf</span>
+                  <span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform" translate="no">picture_as_pdf</span>
                   <span className="hidden sm:inline">PDF</span>
                 </button>
               </div>
@@ -361,7 +361,7 @@ const UserManagement = () => {
                           onClick={() => openEditModal(user)}
                           className="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-full transition-colors inline-flex"
                         >
-                          <span className="material-symbols-outlined text-[16px]">edit</span>
+                          <span className="material-symbols-outlined text-[16px]" translate="no">edit</span>
                         </button>
                       </td>
                     </tr>
@@ -370,7 +370,7 @@ const UserManagement = () => {
                     <tr>
                       <td colSpan="6" className="text-center py-12 text-on-surface-variant">
                         <div className="flex flex-col items-center justify-center">
-                          <span className="material-symbols-outlined text-4xl mb-2 opacity-50">search_off</span>
+                          <span className="material-symbols-outlined text-4xl mb-2 opacity-50" translate="no">search_off</span>
                           <p>No se encontraron usuarios que coincidan con la búsqueda.</p>
                         </div>
                       </td>

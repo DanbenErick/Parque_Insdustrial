@@ -14,7 +14,7 @@ const LecturasDetailsModal = ({ isOpen, onClose, lecturas }) => {
           <h4 className="font-headline-sm text-headline-sm text-on-surface font-bold">Detalle de Lecturas del Periodo</h4>
           <div className="flex flex-wrap items-center gap-sm">
             <button onClick={onClose} className="text-on-surface-variant hover:text-on-surface p-1 rounded-full bg-surface-container-high">
-              <span className="material-symbols-outlined text-md">close</span>
+              <span className="material-symbols-outlined text-md" translate="no">close</span>
             </button>
           </div>
         </div>

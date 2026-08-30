@@ -15,6 +15,7 @@ import { HistoryPanel } from './components/HistoryPanel';
 import { AllReadingsModal } from './components/AllReadingsModal';
 import { EditReadingModal } from './components/EditReadingModal';
 import { ReadingDetailDrawer } from './components/ReadingDetailDrawer';
+import { exportLecturasToExcel } from './utils/exportLecturasService';
 
 const ManualBilling = () => {
   const { activeYear } = useYear();
@@ -87,6 +88,7 @@ const ManualBilling = () => {
           totalMedidores={totalMedidores}
           porcentajeAvance={porcentajeAvance}
           dashOffset={dashOffset}
+          onExportExcel={() => exportLecturasToExcel(medidores, lecturasPeriodoActivoMap, activePeriodo)}
         />
 
         <div className="flex flex-col gap-lg">

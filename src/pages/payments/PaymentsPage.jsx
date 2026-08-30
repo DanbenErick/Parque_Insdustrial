@@ -57,7 +57,7 @@ const buildFilterParams = (filterMes, activeYear) => {
 const KpiCard = React.memo(({ icon, label, value, subtitle, colorClass = 'primary', subtitleIcon }) => (
   <div className="bg-surface border border-outline-variant hover:border-primary/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
     <div className={`w-10 h-10 rounded-full bg-${colorClass}/5 flex items-center justify-center text-${colorClass} shrink-0 border border-${colorClass}/10`}>
-      <span className="material-symbols-outlined text-[20px]">{icon}</span>
+      <span className="material-symbols-outlined text-[20px]" translate="no">{icon}</span>
     </div>
     <div className="flex flex-col justify-center overflow-hidden">
       <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider leading-tight truncate">{label}</span>
@@ -66,7 +66,7 @@ const KpiCard = React.memo(({ icon, label, value, subtitle, colorClass = 'primar
       </span>
       {subtitleIcon ? (
         <div className={`flex items-center gap-1 mt-1 text-${colorClass}/80`}>
-          <span className="material-symbols-outlined text-[10px]">{subtitleIcon}</span>
+          <span className="material-symbols-outlined text-[10px]" translate="no">{subtitleIcon}</span>
           <span className="text-[9px] truncate">{subtitle}</span>
         </div>
       ) : (
@@ -79,7 +79,7 @@ const KpiCard = React.memo(({ icon, label, value, subtitle, colorClass = 'primar
 const DetailRow = React.memo(({ icon, label, value, valueClassName = 'text-xs font-bold text-on-surface' }) => (
   <div className="flex justify-between items-center p-3">
     <span className="text-[11px] text-on-surface-variant flex items-center gap-1.5">
-      <span className="material-symbols-outlined text-[14px]">{icon}</span> {label}
+      <span className="material-symbols-outlined text-[14px]" translate="no">{icon}</span> {label}
     </span>
     <span className={valueClassName}>{value}</span>
   </div>
@@ -100,7 +100,7 @@ const PaymentRow = React.memo(({ pago, saldoPendiente, onSelect, onPrintTicket, 
         </button>
         {pago.medidor_num_serie ? (
           <span className="text-[10px] text-on-surface-variant flex items-center gap-1 mt-0.5">
-            <span className="material-symbols-outlined text-[12px]">speed</span>
+            <span className="material-symbols-outlined text-[12px]" translate="no">speed</span>
             {pago.medidor_num_serie}
           </span>
         ) : (
@@ -151,7 +151,7 @@ const PaymentRow = React.memo(({ pago, saldoPendiente, onSelect, onPrintTicket, 
                 onClick={(e) => { e.stopPropagation(); onPrintTicket(pago.id); }}
               className="p-1.5 rounded-md text-primary hover:bg-primary/10 transition-colors"
             >
-              <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+              <span className="material-symbols-outlined text-[18px]" translate="no">receipt_long</span>
             </button>
             <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
               Imprimir Ticket
@@ -162,7 +162,7 @@ const PaymentRow = React.memo(({ pago, saldoPendiente, onSelect, onPrintTicket, 
               onClick={(e) => { e.stopPropagation(); onWhatsApp(pago); }}
               className="p-1.5 rounded-md text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
             >
-              <span className="material-symbols-outlined text-[18px]">chat</span>
+              <span className="material-symbols-outlined text-[18px]" translate="no">chat</span>
             </button>
             <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
               Enviar por WhatsApp
@@ -173,7 +173,7 @@ const PaymentRow = React.memo(({ pago, saldoPendiente, onSelect, onPrintTicket, 
               onClick={(e) => { e.stopPropagation(); onViewRecibo(pago.recibo_id); }}
               className="p-1.5 rounded-md text-secondary hover:bg-secondary/10 transition-colors"
             >
-              <span className="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+              <span className="material-symbols-outlined text-[18px]" translate="no">picture_as_pdf</span>
             </button>
             <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
               Ver Recibo
@@ -184,7 +184,7 @@ const PaymentRow = React.memo(({ pago, saldoPendiente, onSelect, onPrintTicket, 
               onClick={(e) => { e.stopPropagation(); onAnular(pago.id); }}
               className="p-1.5 rounded-md text-error hover:bg-error/10 transition-colors"
             >
-              <span className="material-symbols-outlined text-[18px]">delete</span>
+              <span className="material-symbols-outlined text-[18px]" translate="no">delete</span>
             </button>
             <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
               Anular Pago
@@ -602,7 +602,7 @@ const Payments = () => {
                   <option key={m} value={m}>{formatPeriod(m)}</option>
                 ))}
               </select>
-              <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[16px]">expand_more</span>
+              <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[16px]" translate="no">expand_more</span>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -622,7 +622,7 @@ const Payments = () => {
                 : 'bg-primary text-on-primary hover:opacity-90 active:scale-95'
               }`}
           >
-            <span className="material-symbols-outlined mr-1 text-[16px]">add_card</span>
+            <span className="material-symbols-outlined mr-1 text-[16px]" translate="no">add_card</span>
             Registrar Pago
           </button>
           </div>
@@ -643,7 +643,7 @@ const Payments = () => {
         <div className="bg-surface border border-outline-variant rounded-xl p-4 shadow-sm flex flex-col gap-2">
           <div className="flex justify-between items-end">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] text-primary">monitoring</span>
+              <span className="material-symbols-outlined text-[18px] text-primary" translate="no">monitoring</span>
               <span className="text-xs font-bold text-on-surface uppercase tracking-wider">Avance de Recaudación</span>
             </div>
             <span className="font-data-mono font-bold text-primary text-sm">{porcentajeRecaudado.toFixed(1)}%</span>
@@ -672,7 +672,7 @@ const Payments = () => {
         <div className="bg-surface border border-outline-variant rounded-xl p-4 shadow-sm flex flex-col gap-2">
           <div className="flex justify-between items-end">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] text-indigo-600">pie_chart</span>
+              <span className="material-symbols-outlined text-[18px] text-indigo-600" translate="no">pie_chart</span>
               <span className="text-xs font-bold text-on-surface uppercase tracking-wider">Ingresos por Método</span>
             </div>
           </div>
@@ -715,7 +715,7 @@ const Payments = () => {
           <h4 className="text-base font-bold text-on-surface">Historial de Pagos</h4>
           <div className="flex flex-wrap items-center gap-2">
             <div className="relative">
-              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
+              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">search</span>
               <input
                 type="text"
                 placeholder="Buscar por socio o recibo..."
@@ -728,21 +728,21 @@ const Payments = () => {
               onClick={handleExportExcel}
               className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-xs rounded-md transition-colors border border-[#107C41]/20"
             >
-              <span className="material-symbols-outlined text-[16px]">table_view</span>
+              <span className="material-symbols-outlined text-[16px]" translate="no">table_view</span>
               Excel
             </button>
             <button
               onClick={handleExportPDF}
               className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-error/10 text-error hover:bg-error/20 font-bold text-xs rounded-md transition-colors border border-error/20"
             >
-              <span className="material-symbols-outlined text-[16px]">picture_as_pdf</span>
+              <span className="material-symbols-outlined text-[16px]" translate="no">picture_as_pdf</span>
               Reporte PDF
             </button>
             <button
               onClick={handleExportAllPdf}
               className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-primary/10 text-primary hover:bg-primary/20 font-bold text-xs rounded-md transition-colors border border-primary/20"
             >
-              <span className="material-symbols-outlined text-[16px]">print</span>
+              <span className="material-symbols-outlined text-[16px]" translate="no">print</span>
               Tickets A5
             </button>
           </div>
@@ -763,13 +763,13 @@ const Payments = () => {
               {isLoading ? (
                 <tr>
                   <td colSpan="4" className="text-center p-8 text-on-surface-variant">
-                    <span className="material-symbols-outlined animate-spin text-[24px]">sync</span>
+                    <span className="material-symbols-outlined animate-spin text-[24px]" translate="no">sync</span>
                   </td>
                 </tr>
               ) : filteredPagos.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="text-center p-8 text-on-surface-variant">
-                    <span className="material-symbols-outlined text-[32px] opacity-20 mb-2 block">search_off</span>
+                    <span className="material-symbols-outlined text-[32px] opacity-20 mb-2 block" translate="no">search_off</span>
                     <p className="font-bold">No se encontraron pagos</p>
                   </td>
                 </tr>
@@ -804,7 +804,7 @@ const Payments = () => {
             {/* Header */}
             <div className="px-4 py-3 border-b border-outline-variant bg-surface-container-lowest flex justify-between items-center">
               <h3 className="text-base text-primary font-bold flex items-center gap-2">
-                <span className="material-symbols-outlined text-[20px]">payments</span>
+                <span className="material-symbols-outlined text-[20px]" translate="no">payments</span>
                 Registrar Nuevo Pago
                 {filterMes && filterMes !== 'Todos' && filterMes !== 'TodosHistorico' && filterMes !== 'ULTIMO' && (
                   <span className="ml-2 text-xs font-medium bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20">
@@ -817,7 +817,7 @@ const Payments = () => {
                 disabled={isSubmitting}
                 className="w-7 h-7 rounded-full hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors disabled:opacity-50"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span className="material-symbols-outlined text-[18px]" translate="no">close</span>
               </button>
             </div>
 
@@ -831,7 +831,7 @@ const Payments = () => {
                     Socio, Recibo o Medidor <span className="text-error">*</span>
                   </label>
                   <div className="relative">
-                    <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">search</span>
+                    <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">search</span>
                     <input
                       type="text"
                       className="w-full border border-outline-variant rounded-md text-xs bg-white focus:border-primary focus:ring-1 focus:ring-primary pl-8 pr-3 py-1.5 h-8 outline-none transition-colors hover:border-primary/50"
@@ -857,12 +857,12 @@ const Payments = () => {
                               <span className="font-bold text-xs text-on-surface">{r.socio}</span>
                               <div className="flex justify-between items-center mt-0.5">
                                 <span className="text-[10px] text-on-surface-variant flex items-center gap-1">
-                                  <span className="material-symbols-outlined text-[12px]">receipt_long</span>
+                                  <span className="material-symbols-outlined text-[12px]" translate="no">receipt_long</span>
                                   {r.numero_comprobante}
                                   {r.medidor_num_serie && (
                                     <>
                                       <span className="mx-1">•</span>
-                                      <span className="material-symbols-outlined text-[12px]">speed</span>
+                                      <span className="material-symbols-outlined text-[12px]" translate="no">speed</span>
                                       {r.medidor_num_serie}
                                     </>
                                   )}
@@ -886,7 +886,7 @@ const Payments = () => {
                       Monto Pagado (S/) <span className="text-error">*</span>
                     </label>
                     <div className="relative">
-                      <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px] pointer-events-none">attach_money</span>
+                      <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px] pointer-events-none" translate="no">attach_money</span>
                       <input
                         type="number"
                         step="0.01"
@@ -904,14 +904,14 @@ const Payments = () => {
                     <div className="min-h-[16px] pl-1 flex items-center">
                       {isPagoExcedido ? (
                         <span className="text-[10px] text-[#059669] font-medium flex items-center gap-1">
-                          <span className="material-symbols-outlined text-[12px]">account_balance_wallet</span>
+                          <span className="material-symbols-outlined text-[12px]" translate="no">account_balance_wallet</span>
                           Saldo a favor: S/ {(parseFloat(monto) - saldoPendiente).toFixed(2)}
                         </span>
                       ) : isPagoParcial ? (
                         <span className="text-[10px] text-primary">Quedará saldo de S/ {(saldoPendiente - parseFloat(monto)).toFixed(2)}</span>
                       ) : selectedRecibo && monto ? (
                         <span className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 text-[#047857]">
-                          <span className="material-symbols-outlined text-[12px]">check_circle</span>
+                          <span className="material-symbols-outlined text-[12px]" translate="no">check_circle</span>
                           Pago Completo
                         </span>
                       ) : null}
@@ -922,7 +922,7 @@ const Payments = () => {
                   <div className="flex flex-col gap-0.5">
                     <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-1">Método de Pago <span className="text-error">*</span></label>
                     <div className="relative">
-                      <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">account_balance</span>
+                      <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">account_balance</span>
                       <select
                         className="appearance-none w-full border border-outline-variant rounded-md pl-8 pr-8 py-1.5 h-8 bg-white text-xs font-medium focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors cursor-pointer"
                         value={metodoPago}
@@ -934,7 +934,7 @@ const Payments = () => {
                         <option value="Cheque">Cheque</option>
                         <option value="Depósito">Depósito en Cuenta</option>
                       </select>
-                      <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[16px]">expand_more</span>
+                      <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[16px]" translate="no">expand_more</span>
                     </div>
                   </div>
                 </div>
@@ -944,7 +944,7 @@ const Payments = () => {
                   <div className="flex flex-col gap-0.5">
                     <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-1">Nº Operación / Referencia</label>
                     <div className="relative">
-                      <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]">tag</span>
+                      <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">tag</span>
                       <input
                         type="text"
                         className="w-full border border-outline-variant rounded-md pl-8 pr-3 py-1.5 h-8 bg-white font-data-mono text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
@@ -989,9 +989,9 @@ const Payments = () => {
                 className="flex-1 py-1.5 h-8 rounded-md text-xs font-bold bg-primary text-on-primary hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-1.5 shadow-sm"
               >
                 {isSubmitting ? (
-                  <><span className="material-symbols-outlined animate-spin text-[16px]">sync</span> Procesando...</>
+                  <><span className="material-symbols-outlined animate-spin text-[16px]" translate="no">sync</span> Procesando...</>
                 ) : (
-                  <><span className="material-symbols-outlined text-[16px]">save</span> Confirmar Pago</>
+                  <><span className="material-symbols-outlined text-[16px]" translate="no">save</span> Confirmar Pago</>
                 )}
               </button>
             </div>
@@ -1053,14 +1053,14 @@ const Payments = () => {
           >
             <div className="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
               <h3 className="text-base text-on-surface font-bold flex items-center gap-2">
-                <span className="material-symbols-outlined text-[20px] text-primary">receipt_long</span>
+                <span className="material-symbols-outlined text-[20px] text-primary" translate="no">receipt_long</span>
                 Detalle del Pago
               </h3>
               <button
                 onClick={closeDetailsDrawer}
                 className="w-7 h-7 rounded-full hover:bg-surface-variant flex items-center justify-center text-on-surface-variant transition-colors"
               >
-                <span className="material-symbols-outlined text-[18px]">close</span>
+                <span className="material-symbols-outlined text-[18px]" translate="no">close</span>
               </button>
             </div>
 
@@ -1085,7 +1085,7 @@ const Payments = () => {
                 <div className="bg-white border border-outline-variant rounded-lg p-3">
                   <div className="font-bold text-xs text-on-surface">{selectedPaymentForDetails.socio}</div>
                   <div className="text-[11px] text-on-surface-variant mt-0.5 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">folder</span>
+                    <span className="material-symbols-outlined text-[14px]" translate="no">folder</span>
                     Recibo Asociado: <span className="font-data-mono font-bold text-xs">{selectedPaymentForDetails.numero_comprobante}</span>
                   </div>
                 </div>
@@ -1145,7 +1145,7 @@ const Payments = () => {
                   onClick={handleViewRecibo}
                   className="w-full py-1.5 h-8 bg-surface-container-low hover:bg-surface-variant border border-outline-variant text-on-surface text-xs font-bold rounded-md flex items-center justify-center gap-1.5 transition-colors"
                 >
-                  <span className="material-symbols-outlined text-[16px]">receipt_long</span>
+                  <span className="material-symbols-outlined text-[16px]" translate="no">receipt_long</span>
                   Ver Recibo Completo
                 </button>
               </div>

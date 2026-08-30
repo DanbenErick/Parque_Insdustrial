@@ -27,7 +27,7 @@ const RefacturarModal = memo(({ isOpen, motivo, isProcessing, onMotivoChange, on
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-3 text-white">
                   <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner border border-white/30">
-                    <span className="material-symbols-outlined text-[24px]">autorenew</span>
+                    <span className="material-symbols-outlined text-[24px]" translate="no">autorenew</span>
                   </div>
                   <div>
                     <h3 className="text-[20px] font-display font-bold leading-tight drop-shadow-sm">Refacturar Recibo</h3>
@@ -38,7 +38,7 @@ const RefacturarModal = memo(({ isOpen, motivo, isProcessing, onMotivoChange, on
                   onClick={onClose}
                   className="text-white hover:bg-white/20 p-2 rounded-full transition-all duration-200 flex items-center justify-center"
                 >
-                  <span className="material-symbols-outlined text-[20px]">close</span>
+                  <span className="material-symbols-outlined text-[20px]" translate="no">close</span>
                 </button>
               </div>
             </div>
@@ -47,7 +47,7 @@ const RefacturarModal = memo(({ isOpen, motivo, isProcessing, onMotivoChange, on
               {/* Elegant Warning Banner */}
               <div className="flex items-start gap-3 p-3 rounded-xl bg-orange-50 border border-orange-100 shadow-sm">
                 <div className="mt-0.5">
-                  <span className="material-symbols-outlined text-orange-500 text-[20px]">info</span>
+                  <span className="material-symbols-outlined text-orange-500 text-[20px]" translate="no">info</span>
                 </div>
                 <div className="text-xs text-on-surface-variant leading-relaxed">
                   El recibo actual pasará a estado <span className="font-bold text-orange-700 bg-orange-100 px-1.5 py-0.5 rounded mx-0.5">ANULADO</span>. Se emitirá uno nuevo con las tarifas y lecturas más recientes.
@@ -89,12 +89,12 @@ const RefacturarModal = memo(({ isOpen, motivo, isProcessing, onMotivoChange, on
                 >
                   {isProcessing ? (
                     <>
-                      <span className="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+                      <span className="material-symbols-outlined animate-spin text-[16px]" translate="no">progress_activity</span>
                       Procesando...
                     </>
                   ) : (
                     <>
-                      <span className="material-symbols-outlined text-[16px]">autorenew</span>
+                      <span className="material-symbols-outlined text-[16px]" translate="no">autorenew</span>
                       Confirmar
                     </>
                   )}

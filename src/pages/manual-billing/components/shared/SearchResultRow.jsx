@@ -13,7 +13,7 @@ export const SearchResultRow = React.memo(({ member, onSelect, isLecturado }) =>
           ? 'bg-green-100 text-green-700 border-green-200 group-hover:bg-green-200' 
           : 'bg-primary/10 text-primary border-primary/20 group-hover:bg-primary/20'
       }`}>
-        <span className="material-symbols-outlined text-[16px]">
+        <span className="material-symbols-outlined text-[16px]" translate="no">
           {isLecturado ? 'check_circle' : 'speed'}
         </span>
       </div>
@@ -23,13 +23,13 @@ export const SearchResultRow = React.memo(({ member, onSelect, isLecturado }) =>
           <BadgeType tipo={member.tipo} />
           {isLecturado && (
             <span className="flex items-center gap-0.5 bg-green-100 text-green-700 px-1.5 py-0.5 rounded text-[9px] font-bold tracking-wider uppercase border border-green-200">
-              <span className="material-symbols-outlined text-[10px]">done_all</span>
+              <span className="material-symbols-outlined text-[10px]" translate="no">done_all</span>
               Lecturado
             </span>
           )}
         </div>
         <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
-          <span className="material-symbols-outlined text-[12px] text-on-surface-variant">person</span>
+          <span className="material-symbols-outlined text-[12px] text-on-surface-variant" translate="no">person</span>
           <span className="text-[10px] text-on-surface-variant truncate font-medium max-w-[150px] sm:max-w-[200px]">{member.propietario}</span>
           <span className="text-[10px] text-on-surface-variant/50 hidden sm:inline">•</span>
           <span className="text-[10px] text-on-surface-variant truncate max-w-[120px] sm:max-w-[150px]">{member.direccion || 'Sin dirección'}</span>
@@ -39,12 +39,12 @@ export const SearchResultRow = React.memo(({ member, onSelect, isLecturado }) =>
     <div className="flex sm:text-right items-center justify-between sm:justify-end gap-3 shrink-0 w-full sm:w-auto pl-11 sm:pl-0 mt-1 sm:mt-0">
       <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-start gap-3 sm:gap-1 w-full sm:w-auto">
         <span className="text-[10px] text-primary/70 font-bold flex items-center gap-0.5 bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">
-          <span className="material-symbols-outlined text-[12px]">history</span>
+          <span className="material-symbols-outlined text-[12px]" translate="no">history</span>
           Última: {fmtVal(member.ultima_lectura)} W
         </span>
         <span className="text-[9px] text-on-surface-variant/70 font-data-mono hidden sm:block">ID: {member.documento_identidad}</span>
       </div>
-      <span className="hidden sm:block material-symbols-outlined text-primary/30 group-hover:text-primary group-hover:translate-x-1 transition-all text-[18px]">
+      <span className="hidden sm:block material-symbols-outlined text-primary/30 group-hover:text-primary group-hover:translate-x-1 transition-all text-[18px]" translate="no">
         arrow_forward
       </span>
     </div>

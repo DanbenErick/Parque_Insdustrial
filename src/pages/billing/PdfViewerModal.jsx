@@ -23,7 +23,7 @@ const PdfViewerModal = memo(({ isOpen, pdfUrl, pdfId, onDownload, onClose }) => 
           >
             <div className="flex items-center justify-between p-4 border-b border-outline-variant bg-surface-dim">
               <h3 className="font-headline-sm font-bold text-on-surface flex items-center gap-2">
-                <span className="material-symbols-outlined text-error">picture_as_pdf</span>
+                <span className="material-symbols-outlined text-error" translate="no">picture_as_pdf</span>
                 Visor de Boleta
               </h3>
               <div className="flex items-center gap-2">
@@ -31,14 +31,14 @@ const PdfViewerModal = memo(({ isOpen, pdfUrl, pdfId, onDownload, onClose }) => 
                   onClick={onDownload}
                   className="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg hover:opacity-90 transition-opacity font-bold text-sm shadow-md"
                 >
-                  <span className="material-symbols-outlined text-[18px]">download</span>
+                  <span className="material-symbols-outlined text-[18px]" translate="no">download</span>
                   Descargar PDF
                 </button>
                 <button
                   onClick={onClose}
                   className="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors"
                 >
-                  <span className="material-symbols-outlined">close</span>
+                  <span className="material-symbols-outlined" translate="no">close</span>
                 </button>
               </div>
             </div>
@@ -51,7 +51,7 @@ const PdfViewerModal = memo(({ isOpen, pdfUrl, pdfId, onDownload, onClose }) => 
                 />
               ) : (
                 <div className="flex h-full items-center justify-center">
-                  <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+                  <span className="material-symbols-outlined animate-spin text-primary text-4xl" translate="no">progress_activity</span>
                 </div>
               )}
             </div>

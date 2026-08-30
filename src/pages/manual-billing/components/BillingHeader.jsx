@@ -11,7 +11,8 @@ export const BillingHeader = ({
   totalRegistrados,
   totalMedidores,
   porcentajeAvance,
-  dashOffset
+  dashOffset,
+  onExportExcel
 }) => {
   return (
     <div className="mb-md flex flex-col md:flex-row justify-between md:items-end gap-md">
@@ -35,34 +36,43 @@ export const BillingHeader = ({
                   <option key={p.id} value={p.id}>{formatPeriodo(p.mes_anio)}</option>
                 ))}
               </select>
-              <span className="material-symbols-outlined absolute right-2 text-primary pointer-events-none text-[18px]">calendar_month</span>
+              <span className="material-symbols-outlined absolute right-2 text-primary pointer-events-none text-[18px]" translate="no">calendar_month</span>
             </div>
             <button
               onClick={() => setIsPeriodModalOpen(true)}
               className="p-1.5 ml-1 text-primary hover:bg-primary/10 rounded-lg transition-colors flex items-center justify-center"
               title="Aperturar nuevo periodo"
             >
-              <span className="material-symbols-outlined text-[24px]">add_circle</span>
+              <span className="material-symbols-outlined text-[24px]" translate="no">add_circle</span>
             </button>
           </div>
         ) : (
           <div className="mt-4 flex flex-col items-start gap-3">
             <div className="inline-flex items-center gap-2 bg-orange-50 border border-orange-200 text-orange-700 px-3 py-1.5 rounded-lg text-sm">
-              <span className="material-symbols-outlined text-[18px]">warning</span>
+              <span className="material-symbols-outlined text-[18px]" translate="no">warning</span>
               No hay periodos creados para el año {activeYear}
             </div>
             <button
               onClick={() => setIsPeriodModalOpen(true)}
               className="flex items-center gap-2 bg-primary text-on-primary px-4 py-2 rounded-xl font-bold shadow hover:opacity-90 transition-opacity"
             >
-              <span className="material-symbols-outlined text-[18px]">add_circle</span>
+              <span className="material-symbols-outlined text-[18px]" translate="no">add_circle</span>
               Aperturar Primer Periodo
             </button>
           </div>
         )}
       </div>
-      {/* KPI Card */}
-      <div className="flex">
+      {/* Actions and KPI Card */}
+      <div className="flex flex-col md:flex-row gap-4 items-end md:items-center">
+        {activePeriodo && (
+          <button
+            onClick={onExportExcel}
+            className="flex items-center gap-2 bg-teal-600 text-white px-4 py-2 rounded-xl font-bold shadow-md shadow-teal-600/20 hover:shadow-lg hover:shadow-teal-600/30 hover:-translate-y-0.5 transition-all duration-200 text-sm"
+          >
+            <span className="material-symbols-outlined text-[20px]" translate="no">table_chart</span>
+            Exportar Excel
+          </button>
+        )}
         <div className="relative overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-2xl px-5 py-3 flex items-center gap-5 shadow-lg backdrop-blur-xl transition-transform hover:scale-[1.02] duration-300">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-[0.03] mix-blend-overlay"></div>
           <div className="relative z-10">

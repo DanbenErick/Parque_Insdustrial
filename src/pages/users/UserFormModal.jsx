@@ -29,14 +29,14 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
         <div className="px-5 py-4 border-b border-outline-variant flex justify-between items-center bg-surface">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-              <span className="material-symbols-outlined text-[20px]">{isEdit ? 'edit' : 'person_add'}</span>
+              <span className="material-symbols-outlined text-[20px]" translate="no">{isEdit ? 'edit' : 'person_add'}</span>
             </div>
             <h3 className="text-lg font-bold text-on-surface tracking-tight leading-none">
               {isEdit ? 'Editar Usuario' : 'Registrar Nuevo Usuario'}
             </h3>
           </div>
           <button type="button" onClick={onClose} className="h-8 w-8 bg-surface border border-transparent hover:border-outline-variant hover:bg-surface-variant rounded-lg transition-all text-on-surface-variant hover:text-on-surface flex items-center justify-center">
-            <span className="material-symbols-outlined text-[18px]">close</span>
+            <span className="material-symbols-outlined text-[18px]" translate="no">close</span>
           </button>
         </div>
 
@@ -230,8 +230,8 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
             className="w-full px-4 py-2.5 text-sm bg-primary text-on-primary font-bold rounded-xl shadow-sm hover:shadow-md hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {isSaving
-              ? <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
-              : <span className="material-symbols-outlined text-[18px] transition-transform">{isEdit ? 'save' : 'add_circle'}</span>
+              ? <span className="material-symbols-outlined animate-spin text-[18px]" translate="no">sync</span>
+              : <span className="material-symbols-outlined text-[18px] transition-transform" translate="no">{isEdit ? 'save' : 'add_circle'}</span>
             }
             {isSaving ? 'Guardando' : isEdit ? 'Guardar Cambios' : 'Crear Usuario'}
           </button>

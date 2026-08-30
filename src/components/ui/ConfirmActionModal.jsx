@@ -25,7 +25,7 @@ const ConfirmActionModal = ({
       >
         <div className={`px-lg py-md flex justify-between items-center border-b-0 ${isDestructive ? 'bg-error' : 'bg-primary'}`}>
           <h3 className="font-headline-sm font-bold text-white flex items-center gap-2">
-            <span className="material-symbols-outlined text-white">
+            <span className="material-symbols-outlined text-white" translate="no">
               {icon}
             </span>
             {title}
@@ -57,9 +57,9 @@ const ConfirmActionModal = ({
             className={`px-lg py-2 font-bold rounded-lg shadow-sm hover:opacity-90 disabled:opacity-50 transition-all flex items-center gap-2 ${isDestructive ? 'bg-error text-white' : 'bg-primary text-on-primary'}`}
           >
             {isLoading ? (
-              <span className="material-symbols-outlined animate-spin text-[18px]">sync</span>
+              <span className="material-symbols-outlined animate-spin text-[18px]" translate="no">sync</span>
             ) : (
-              <span className="material-symbols-outlined text-[18px]">
+              <span className="material-symbols-outlined text-[18px]" translate="no">
                 {isDestructive ? 'delete' : 'check_circle'}
               </span>
             )}

@@ -33,13 +33,13 @@ export const AllReadingsModal = ({
         <div className="px-xl py-md border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-surface-container-lowest rounded-t-2xl">
           <div>
             <h3 className="font-headline-sm text-primary font-bold flex items-center gap-2">
-              <span className="material-symbols-outlined">list_alt</span> Todas las Lecturas
+              <span className="material-symbols-outlined" translate="no">list_alt</span> Todas las Lecturas
             </h3>
             <p className="text-sm text-on-surface-variant mt-1">Periodo: {formatPeriodo(activePeriodo?.mes_anio)} • Mostrando: {filteredModalLecturas.length}</p>
           </div>
 
           <div className="flex-grow w-full md:max-w-sm md:mx-4 relative">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]" translate="no">search</span>
             <input
               type="text" value={modalSearchTerm} onChange={(e) => setModalSearchTerm(e.target.value)}
               placeholder="Buscar nombre, medidor o doc..."
@@ -48,7 +48,7 @@ export const AllReadingsModal = ({
           </div>
 
           <button onClick={() => setIsModalOpen(false)} className="w-10 h-10 rounded-full hover:bg-surface-container-high flex items-center justify-center text-on-surface-variant transition-colors shrink-0 absolute top-4 right-4 md:static">
-            <span className="material-symbols-outlined">close</span>
+            <span className="material-symbols-outlined" translate="no">close</span>
           </button>
         </div>
 
@@ -56,7 +56,7 @@ export const AllReadingsModal = ({
           <ul className="space-y-2">
             {filteredModalLecturas.length === 0 ? (
               <div className="text-center py-12 text-on-surface-variant">
-                <span className="material-symbols-outlined text-[48px] opacity-20 mb-3">search_off</span>
+                <span className="material-symbols-outlined text-[48px] opacity-20 mb-3" translate="no">search_off</span>
                 <p>No se encontraron resultados para "{modalSearchTerm}"</p>
               </div>
             ) : (

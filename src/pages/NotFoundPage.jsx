@@ -11,7 +11,7 @@ const NotFoundPage = () => {
       >
         {/* Icon */}
         <div className="w-24 h-24 rounded-full bg-surface-container-low border border-outline-variant flex items-center justify-center mb-6 shadow-inner">
-          <span className="material-symbols-outlined text-[48px] text-on-surface-variant opacity-50">
+          <span className="material-symbols-outlined text-[48px] text-on-surface-variant opacity-50" translate="no">
             travel_explore
           </span>
         </div>
@@ -31,7 +31,7 @@ const NotFoundPage = () => {
           onClick={() => navigate('/dashboard')}
           className="flex items-center gap-2 px-6 py-2.5 bg-primary text-on-primary font-bold rounded-xl hover:opacity-90 active:scale-95 transition-all shadow-md text-sm"
         >
-          <span className="material-symbols-outlined text-[18px]">home</span>
+          <span className="material-symbols-outlined text-[18px]" translate="no">home</span>
           Volver al Inicio
         </button>
       </div>

@@ -90,7 +90,7 @@ export const RegistrationForm = ({
       <div className="bg-primary/5 px-4 py-3 border-b border-primary/10 flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
         <div className="flex items-center gap-3 overflow-hidden">
           <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center text-primary shadow-sm border border-primary/10 shrink-0">
-            <span className="material-symbols-outlined text-[20px]">person</span>
+            <span className="material-symbols-outlined text-[20px]" translate="no">person</span>
           </div>
           <div className="truncate">
             <h3 className="font-bold text-on-surface text-sm leading-tight truncate" title={selectedMember.propietario}>{selectedMember.propietario}</h3>
@@ -114,7 +114,7 @@ export const RegistrationForm = ({
               className="w-8 h-8 rounded-full hover:bg-primary/10 flex items-center justify-center text-primary/70 hover:text-primary transition-colors ml-2"
               title="Cerrar y volver a la lista"
             >
-              <span className="material-symbols-outlined text-[20px]">close</span>
+              <span className="material-symbols-outlined text-[20px]" translate="no">close</span>
             </button>
           )}
         </div>
@@ -125,7 +125,7 @@ export const RegistrationForm = ({
           <>
             <div className="bg-green-50/50 border border-green-200/60 rounded-lg px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm">
               <div className="flex items-center gap-3 text-left">
-                <span className="material-symbols-outlined text-[24px] text-green-600 shrink-0">check_circle</span>
+                <span className="material-symbols-outlined text-[24px] text-green-600 shrink-0" translate="no">check_circle</span>
                 <div>
                   <h4 className="font-bold text-green-800 text-sm leading-none mb-1">Lectura Registrada</h4>
                   <p className="text-green-700/80 text-xs leading-tight">
@@ -144,7 +144,7 @@ export const RegistrationForm = ({
                   <div className="flex flex-col items-center md:items-end border-t md:border-t-0 md:border-l border-green-200/60 pt-2 md:pt-0 md:pl-4 mt-2 md:mt-0 w-full md:w-auto">
                     <span className="text-[10px] text-green-600/70 font-bold uppercase tracking-wider mb-0.5">Consumo (Dif.)</span>
                     <span className="font-data-mono text-xl font-black text-green-600 leading-none flex items-center gap-1">
-                      <span className="material-symbols-outlined text-[16px] text-green-500">add_circle</span>
+                      <span className="material-symbols-outlined text-[16px] text-green-500" translate="no">add_circle</span>
                       {fmtVal(lecturaExistente.consumo_calculado)} <span className="text-[11px] font-bold text-green-600/80">kWh</span>
                     </span>
                   </div>
@@ -158,7 +158,7 @@ export const RegistrationForm = ({
                   onClick={onClose}
                   className="px-4 py-2 bg-surface border border-outline-variant rounded-lg text-sm font-bold text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors inline-flex items-center gap-2 shadow-sm"
                 >
-                  <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+                  <span className="material-symbols-outlined text-[18px]" translate="no">arrow_back</span>
                   Volver a la lista
                 </button>
               </div>
@@ -169,7 +169,7 @@ export const RegistrationForm = ({
             
             <div className="flex items-center justify-between bg-surface-container-lowest px-3 py-2 rounded-lg border border-outline-variant/50">
               <span className="text-xs font-bold text-on-surface-variant flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-[16px]">swap_horiz</span>
+                <span className="material-symbols-outlined text-[16px]" translate="no">swap_horiz</span>
                 ¿Hubo cambio de medidor este mes?
               </span>
               <label className="relative inline-flex items-center cursor-pointer">
@@ -192,7 +192,7 @@ export const RegistrationForm = ({
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-error/50 pointer-events-none">kWh</span>
                 </div>
                 
-                <span className="material-symbols-outlined text-error/30 hidden md:block text-[18px]">arrow_forward</span>
+                <span className="material-symbols-outlined text-error/30 hidden md:block text-[18px]" translate="no">arrow_forward</span>
 
                 <div className="flex-1 w-full relative h-[48px]">
                   <input
@@ -216,7 +216,7 @@ export const RegistrationForm = ({
                 </span>
               </div>
 
-              <span className="material-symbols-outlined text-primary/30 hidden md:block text-[18px]">arrow_forward</span>
+              <span className="material-symbols-outlined text-primary/30 hidden md:block text-[18px]" translate="no">arrow_forward</span>
 
               <div className="flex-1 w-full relative h-[52px]">
                 <input
@@ -237,7 +237,7 @@ export const RegistrationForm = ({
                 <div className="absolute right-0 top-0 w-32 h-32 bg-primary/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
                 <div className="flex items-center gap-3 z-10 w-full sm:w-auto mb-3 sm:mb-0">
                   <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-primary shadow-sm border border-primary/10 shrink-0">
-                    <span className="material-symbols-outlined text-[18px]">payments</span>
+                    <span className="material-symbols-outlined text-[18px]" translate="no">payments</span>
                   </div>
                   <div className="flex flex-col">
                     <span className="text-[11px] font-extrabold text-primary uppercase tracking-widest leading-none mb-1">Subtotal Fuera Punta</span>
@@ -275,7 +275,7 @@ export const RegistrationForm = ({
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-error/50 pointer-events-none">kWh</span>
                     </div>
                     
-                    <span className="material-symbols-outlined text-error/30 hidden md:block text-[18px]">arrow_forward</span>
+                    <span className="material-symbols-outlined text-error/30 hidden md:block text-[18px]" translate="no">arrow_forward</span>
 
                     <div className="flex-1 w-full relative h-[48px]">
                       <input
@@ -299,7 +299,7 @@ export const RegistrationForm = ({
                     </span>
                   </div>
 
-                  <span className="material-symbols-outlined text-primary/30 hidden md:block text-[18px]">arrow_forward</span>
+                  <span className="material-symbols-outlined text-primary/30 hidden md:block text-[18px]" translate="no">arrow_forward</span>
 
                   <div className="flex-1 w-full relative h-[52px]">
                     <input
@@ -320,7 +320,7 @@ export const RegistrationForm = ({
                     <div className="absolute right-0 top-0 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
                     <div className="flex items-center gap-3 z-10 w-full sm:w-auto mb-3 sm:mb-0">
                       <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-orange-600 shadow-sm border border-orange-500/10 shrink-0">
-                        <span className="material-symbols-outlined text-[18px]">bolt</span>
+                        <span className="material-symbols-outlined text-[18px]" translate="no">bolt</span>
                       </div>
                       <div className="flex flex-col">
                         <span className="text-[11px] font-extrabold text-orange-700 uppercase tracking-widest leading-none mb-1">Subtotal Punta</span>
@@ -350,7 +350,7 @@ export const RegistrationForm = ({
                       className="w-full h-full bg-blue-50/50 border border-blue-200 hover:border-blue-300 focus:border-blue-400 rounded-lg pl-3 pr-16 text-lg font-data-mono font-bold text-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-right shadow-inner transition-all"
                     />
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col pointer-events-none">
-                      <span className="text-[9px] font-bold text-blue-700 uppercase tracking-wider leading-tight flex items-center gap-0.5"><span className="material-symbols-outlined text-[12px]">electric_meter</span> Máx. Dem. Fuera Punta</span>
+                      <span className="text-[9px] font-bold text-blue-700 uppercase tracking-wider leading-tight flex items-center gap-0.5"><span className="material-symbols-outlined text-[12px]" translate="no">electric_meter</span> Máx. Dem. Fuera Punta</span>
                     </div>
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-blue-600/70 pointer-events-none">kW</span>
                   </div>
@@ -361,7 +361,7 @@ export const RegistrationForm = ({
                     <div className="absolute right-0 top-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
                     <div className="flex items-center gap-3 z-10 w-full sm:w-auto mb-3 sm:mb-0">
                       <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-blue-600 shadow-sm border border-blue-500/10 shrink-0">
-                        <span className="material-symbols-outlined text-[18px]">electric_meter</span>
+                        <span className="material-symbols-outlined text-[18px]" translate="no">electric_meter</span>
                       </div>
                       <div className="flex flex-col">
                         <span className="text-[11px] font-extrabold text-blue-700 uppercase tracking-widest leading-none mb-1">Subtotal Dem. Fuera Punta</span>
@@ -388,7 +388,7 @@ export const RegistrationForm = ({
                       className="w-full h-full bg-orange-50/50 border border-orange-200 hover:border-orange-300 focus:border-orange-400 rounded-lg pl-3 pr-16 text-lg font-data-mono font-bold text-orange-800 focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-right shadow-inner transition-all"
                     />
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col pointer-events-none">
-                      <span className="text-[9px] font-bold text-orange-700 uppercase tracking-wider leading-tight flex items-center gap-0.5"><span className="material-symbols-outlined text-[12px]">electric_meter</span> Máx. Dem. Punta</span>
+                      <span className="text-[9px] font-bold text-orange-700 uppercase tracking-wider leading-tight flex items-center gap-0.5"><span className="material-symbols-outlined text-[12px]" translate="no">electric_meter</span> Máx. Dem. Punta</span>
                     </div>
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-orange-600/70 pointer-events-none">kW</span>
                   </div>
@@ -399,7 +399,7 @@ export const RegistrationForm = ({
                     <div className="absolute right-0 top-0 w-32 h-32 bg-orange-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
                     <div className="flex items-center gap-3 z-10 w-full sm:w-auto mb-3 sm:mb-0">
                       <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-orange-600 shadow-sm border border-orange-500/10 shrink-0">
-                        <span className="material-symbols-outlined text-[18px]">electric_meter</span>
+                        <span className="material-symbols-outlined text-[18px]" translate="no">electric_meter</span>
                       </div>
                       <div className="flex flex-col">
                         <span className="text-[11px] font-extrabold text-orange-700 uppercase tracking-widest leading-none mb-1">Subtotal Dem. Punta</span>
@@ -426,7 +426,7 @@ export const RegistrationForm = ({
                       className="w-full h-full bg-purple-50/50 border border-purple-200 hover:border-purple-300 focus:border-purple-400 rounded-lg pl-3 pr-16 text-lg font-data-mono font-bold text-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-500/20 text-right shadow-inner transition-all"
                     />
                     <div className="absolute left-3 top-1/2 -translate-y-1/2 flex flex-col pointer-events-none">
-                      <span className="text-[9px] font-bold text-purple-700 uppercase tracking-wider leading-tight flex items-center gap-0.5"><span className="material-symbols-outlined text-[12px]">electric_meter</span> Energía Reactiva Cap.</span>
+                      <span className="text-[9px] font-bold text-purple-700 uppercase tracking-wider leading-tight flex items-center gap-0.5"><span className="material-symbols-outlined text-[12px]" translate="no">electric_meter</span> Energía Reactiva Cap.</span>
                     </div>
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-purple-600/70 pointer-events-none">kVARh</span>
                   </div>
@@ -437,7 +437,7 @@ export const RegistrationForm = ({
                     <div className="absolute right-0 top-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
                     <div className="flex items-center gap-3 z-10 w-full sm:w-auto mb-3 sm:mb-0">
                       <div className="w-9 h-9 rounded-full bg-white flex items-center justify-center text-purple-600 shadow-sm border border-purple-500/10 shrink-0">
-                        <span className="material-symbols-outlined text-[18px]">electric_meter</span>
+                        <span className="material-symbols-outlined text-[18px]" translate="no">electric_meter</span>
                       </div>
                       <div className="flex flex-col">
                         <span className="text-[11px] font-extrabold text-purple-700 uppercase tracking-widest leading-none mb-1">Subtotal Reactiva</span>
@@ -461,7 +461,7 @@ export const RegistrationForm = ({
             <div className="mt-2">
               {validationErrors.length > 0 && (
                 <div className="mb-2 text-error text-[11px] font-bold flex items-start gap-1.5 bg-error/10 px-3 py-2 rounded-md border border-error/20 animate-in fade-in slide-in-from-top-1">
-                  <span className="material-symbols-outlined text-[14px] mt-0.5">error</span>
+                  <span className="material-symbols-outlined text-[14px] mt-0.5" translate="no">error</span>
                   <div className="flex flex-col">
                     <span className="block text-error/80 uppercase tracking-wider text-[9px] mb-0.5">Errores de validación:</span>
                     <ul className="list-disc pl-3">
@@ -478,9 +478,9 @@ export const RegistrationForm = ({
                 className={`w-full py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-sm ${validationErrors.length === 0 ? 'bg-primary text-on-primary hover:opacity-90 hover:shadow-md' : 'bg-surface-container-highest text-on-surface-variant cursor-not-allowed opacity-80'}`}
               >
                 {isSaving ? (
-                  <><span className="material-symbols-outlined animate-spin text-[18px]">sync</span>Guardando...</>
+                  <><span className="material-symbols-outlined animate-spin text-[18px]" translate="no">sync</span>Guardando...</>
                 ) : (
-                  <><span className="material-symbols-outlined text-[18px]">save</span>Guardar Lectura</>
+                  <><span className="material-symbols-outlined text-[18px]" translate="no">save</span>Guardar Lectura</>
                 )}
               </button>
             </div>

@@ -11,7 +11,7 @@ const SuccessModal = ({ isOpen, onClose, lecturasCount, periodoName }) => {
         className="bg-surface p-xl rounded-xl shadow-2xl max-w-md w-full text-center space-y-md border border-outline-variant"
       >
         <div className="w-20 h-20 bg-[#059669]/10 rounded-full flex items-center justify-center mx-auto mb-lg">
-          <span className="material-symbols-outlined text-[#059669] text-[48px]">verified</span>
+          <span className="material-symbols-outlined text-[#059669] text-[48px]" translate="no">verified</span>
         </div>
         <h3 className="font-headline-md text-headline-md text-on-surface font-bold">¡Proceso Exitoso!</h3>
         <p className="text-on-surface-variant">Se han generado {lecturasCount} recibos correctamente para el periodo {periodoName}.</p>

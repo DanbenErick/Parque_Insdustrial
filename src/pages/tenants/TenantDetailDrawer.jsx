@@ -7,7 +7,7 @@ const getInitials = (name) => {
 
 const DataItem = ({ icon, label, value }) => (
   <div className="flex items-start gap-2.5">
-    <span className="material-symbols-outlined text-on-surface-variant/60 text-[18px] mt-0.5">{icon}</span>
+    <span className="material-symbols-outlined text-on-surface-variant/60 text-[18px] mt-0.5" translate="no">{icon}</span>
     <div>
       <p className="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant/70">{label}</p>
       <p className="text-sm font-medium text-on-surface leading-tight mt-0.5">{value}</p>
@@ -31,7 +31,7 @@ const TenantDetailDrawer = ({ drawerTenant, setDrawerTenant, handleOpenEdit }) =
         <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/30 bg-white">
           <h3 className="font-bold text-lg text-on-surface">Expediente del Socio</h3>
           <button onClick={() => setDrawerTenant(null)} className="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-error/10 text-slate-700 hover:text-error rounded-full transition-colors shadow-sm border border-slate-200 hover:border-error/20">
-            <span className="material-symbols-outlined text-[18px] font-bold">close</span>
+            <span className="material-symbols-outlined text-[18px] font-bold" translate="no">close</span>
           </button>
         </div>
 
@@ -131,7 +131,7 @@ const TenantDetailDrawer = ({ drawerTenant, setDrawerTenant, handleOpenEdit }) =
             }}
             className="w-full py-2.5 bg-surface-container border border-outline-variant/50 hover:bg-surface-container-highest transition-colors rounded-lg font-bold text-on-surface flex justify-center items-center gap-2 text-sm"
           >
-            <span className="material-symbols-outlined text-[18px]">edit</span>
+            <span className="material-symbols-outlined text-[18px]" translate="no">edit</span>
             Editar Información
           </button>
         </div>

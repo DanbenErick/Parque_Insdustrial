@@ -67,7 +67,7 @@ const Support = () => {
                     key="success"
                     className="p-lg bg-[#059669]/10 border border-[#059669]/20 rounded-lg text-center"
                   >
-                    <span className="material-symbols-outlined text-[#059669] text-[48px] mb-2">check_circle</span>
+                    <span className="material-symbols-outlined text-[#059669] text-[48px] mb-2" translate="no">check_circle</span>
                     <h4 className="font-bold text-[#059669]">¡Mensaje Enviado!</h4>
                     <p className="text-sm text-[#059669]/80 mt-1">Tu ticket ha sido registrado exitosamente. Te contactaremos pronto.</p>
                   </div>
@@ -98,9 +98,9 @@ const Support = () => {
                     <div className="flex justify-end pt-md">
                       <button type="submit" disabled={isSubmitting} className="px-xl py-3 bg-primary text-on-primary font-bold rounded-lg shadow-sm hover:opacity-90 active:scale-95 transition-all flex items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
                         {isSubmitting ? (
-                          <span className="material-symbols-outlined animate-spin text-[20px]">sync</span>
+                          <span className="material-symbols-outlined animate-spin text-[20px]" translate="no">sync</span>
                         ) : (
-                          <span className="material-symbols-outlined text-[20px]">send</span>
+                          <span className="material-symbols-outlined text-[20px]" translate="no">send</span>
                         )}
                         {isSubmitting ? 'Enviando...' : 'Enviar Mensaje'}
                       </button>
@@ -116,12 +116,12 @@ const Support = () => {
               {/* Quick Contact Cards */}
               <div className="grid grid-cols-2 gap-md">
                 <div className="bg-primary/5 border border-primary/20 rounded-lg p-md text-center">
-                  <span className="material-symbols-outlined text-primary text-[32px] mb-2">call</span>
+                  <span className="material-symbols-outlined text-primary text-[32px] mb-2" translate="no">call</span>
                   <p className="font-bold text-on-surface text-sm">Línea Directa</p>
                   <p className="text-xs text-on-surface-variant mt-1">+51 987 654 321</p>
                 </div>
                 <div className="bg-tertiary/5 border border-tertiary/20 rounded-lg p-md text-center">
-                  <span className="material-symbols-outlined text-tertiary text-[32px] mb-2">mail</span>
+                  <span className="material-symbols-outlined text-tertiary text-[32px] mb-2" translate="no">mail</span>
                   <p className="font-bold text-on-surface text-sm">Email Soporte</p>
                   <p className="text-xs text-on-surface-variant mt-1">ayuda@jicamarca.com</p>
                 </div>
@@ -139,7 +139,7 @@ const Support = () => {
                       >
                         <span className="font-bold text-sm text-on-surface pr-4">{faq.question}</span>
                         <span
-                          className="material-symbols-outlined text-on-surface-variant"
+                          className="material-symbols-outlined text-on-surface-variant" translate="no"
                         >
                           expand_more
                         </span>

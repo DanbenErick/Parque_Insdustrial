@@ -99,7 +99,7 @@ const SocioDashboardPage = () => {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4 text-emerald-600">
-        <span className="material-symbols-outlined animate-spin text-[40px]">sync</span>
+        <span className="material-symbols-outlined animate-spin text-[40px]" translate="no">sync</span>
         <p className="font-bold animate-pulse">Cargando su portal...</p>
       </div>
     );
@@ -121,7 +121,7 @@ const SocioDashboardPage = () => {
             </p>
           </div>
           <div className="bg-white/20 backdrop-blur-md border border-white/30 px-4 py-2 rounded-xl flex items-center gap-2 shadow-inner w-full sm:w-auto">
-            <span className="material-symbols-outlined text-white">badge</span>
+            <span className="material-symbols-outlined text-white" translate="no">badge</span>
             <div>
               <p className="text-[9px] text-emerald-100 uppercase tracking-wider font-bold leading-tight">Documento</p>
               <p className="font-data-mono font-bold leading-tight text-sm">{user?.documento_identidad}</p>
@@ -133,7 +133,7 @@ const SocioDashboardPage = () => {
       {/* SECCIÓN PRINCIPAL: Mis Medidores (Mobile First Grid) */}
       <div>
         <h2 className="text-lg font-bold text-on-surface mb-3 flex items-center gap-2">
-          <span className="material-symbols-outlined text-emerald-600">electric_meter</span>
+          <span className="material-symbols-outlined text-emerald-600" translate="no">electric_meter</span>
           Mis Medidores
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -143,7 +143,7 @@ const SocioDashboardPage = () => {
               
               <div className="flex justify-between items-start mb-4">
                 <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center border border-emerald-100">
-                  <span className="material-symbols-outlined text-[24px]">power</span>
+                  <span className="material-symbols-outlined text-[24px]" translate="no">power</span>
                 </div>
                 <div className="text-right">
                   <span className="inline-block px-2.5 py-1 bg-surface-container-lowest text-on-surface-variant text-[10px] uppercase font-bold tracking-wider rounded-lg border border-outline-variant/50">
@@ -190,7 +190,7 @@ const SocioDashboardPage = () => {
         <div className="flex flex-col gap-4">
           <div className="bg-white rounded-2xl p-5 border border-outline-variant shadow-sm flex items-center gap-4">
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${kpis.deudaTotal > 0 ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
-              <span className="material-symbols-outlined text-[24px]">account_balance_wallet</span>
+              <span className="material-symbols-outlined text-[24px]" translate="no">account_balance_wallet</span>
             </div>
             <div>
               <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Total a Pagar</p>
@@ -202,7 +202,7 @@ const SocioDashboardPage = () => {
 
           <div className="bg-white rounded-2xl p-5 border border-outline-variant shadow-sm flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
-              <span className="material-symbols-outlined text-[24px]">receipt_long</span>
+              <span className="material-symbols-outlined text-[24px]" translate="no">receipt_long</span>
             </div>
             <div>
               <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-0.5">Último Recibo</p>
@@ -242,7 +242,7 @@ const SocioDashboardPage = () => {
               <Bar data={chartData} options={chartOptions} />
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center text-on-surface-variant/50">
-                <span className="material-symbols-outlined text-[36px] mb-2">bar_chart</span>
+                <span className="material-symbols-outlined text-[36px] mb-2" translate="no">bar_chart</span>
                 <p className="text-xs">Sin datos de consumo.</p>
               </div>
             )}

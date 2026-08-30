@@ -68,7 +68,7 @@ const TenantFormModal = ({
         <div className="flex justify-between items-start px-md py-3 border-b border-outline-variant bg-surface-container-lowest">
           <div className="flex gap-3">
             <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mt-0.5 flex-shrink-0">
-              <span className="material-symbols-outlined text-[18px]">{editId ? 'edit_document' : 'add_business'}</span>
+              <span className="material-symbols-outlined text-[18px]" translate="no">{editId ? 'edit_document' : 'add_business'}</span>
             </div>
             <div>
               <h3 className="text-base text-on-surface font-bold leading-tight">{editId ? 'Editar Socio' : 'Registrar Nuevo Socio'}</h3>
@@ -76,7 +76,7 @@ const TenantFormModal = ({
             </div>
           </div>
           <button onClick={onClose} className="p-1 hover:bg-surface-container rounded-full transition-colors text-on-surface-variant flex-shrink-0">
-            <span className="material-symbols-outlined text-[20px]">close</span>
+            <span className="material-symbols-outlined text-[20px]" translate="no">close</span>
           </button>
         </div>
 
@@ -86,7 +86,7 @@ const TenantFormModal = ({
             <div className="bg-surface rounded-2xl border border-outline-variant/60 shadow-sm overflow-hidden">
               <div className="px-5 py-3 bg-surface-container-lowest border-b border-outline-variant/60 flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                  <span className="material-symbols-outlined text-[18px]">person</span>
+                  <span className="material-symbols-outlined text-[18px]" translate="no">person</span>
                 </div>
                 <h4 className="font-bold text-on-surface text-sm tracking-wide">DATOS DEL SOCIO</h4>
               </div>
@@ -112,7 +112,7 @@ const TenantFormModal = ({
                         className="text-[10px] font-bold text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-2 py-0.5 rounded transition-colors flex items-center gap-1"
                         title="Genera un DNI temporal de 8 dígitos. Podrás cambiarlo después."
                       >
-                        <span className="material-symbols-outlined text-[12px]">casino</span>
+                        <span className="material-symbols-outlined text-[12px]" translate="no">casino</span>
                         Generar temporal
                       </button>
                     )}
@@ -173,12 +173,12 @@ const TenantFormModal = ({
               <div className="px-5 py-3 bg-surface-container-lowest border-b border-outline-variant/60 flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="w-8 h-8 rounded-lg bg-tertiary/10 flex items-center justify-center text-tertiary shadow-inner">
-                    <span className="material-symbols-outlined text-[18px]">speed</span>
+                    <span className="material-symbols-outlined text-[18px]" translate="no">speed</span>
                   </div>
                   <h4 className="font-bold text-on-surface text-sm tracking-wide">MEDIDORES ASIGNADOS</h4>
                 </div>
                 <button type="button" onClick={() => append({ num_serie: '', tipo: 'Normal', direccion: '', lectura_inicial: 0, lectura_inicial_punta: 0, demanda_maxima_fuera_punta: 0, demanda_maxima_punta: 0 })} className="flex items-center gap-1.5 px-3 py-1.5 bg-tertiary/10 text-tertiary rounded-lg hover:bg-tertiary/20 transition-colors font-bold text-xs shadow-sm">
-                  <span className="material-symbols-outlined text-[16px]">add_circle</span> Añadir Medidor
+                  <span className="material-symbols-outlined text-[16px]" translate="no">add_circle</span> Añadir Medidor
                 </button>
               </div>
 
@@ -197,12 +197,12 @@ const TenantFormModal = ({
                           <div className={`w-6 h-6 rounded-full bg-white flex items-center justify-center border ${theme.border} shadow-sm`}>
                             <span className="text-[11px] font-black">{editId ? '✓' : index + 1}</span>
                           </div>
-                          <span className="material-symbols-outlined text-[18px]">{theme.icon}</span>
+                          <span className="material-symbols-outlined text-[18px]" translate="no">{theme.icon}</span>
                           <span className="text-xs tracking-wider uppercase">Datos del Medidor</span>
                         </div>
                         {fields.length > 1 && (
                           <button type="button" onClick={() => remove(index)} className="text-error bg-white/80 hover:bg-error hover:text-white transition-colors p-1 rounded-md border border-error/20 flex items-center justify-center shadow-sm">
-                            <span className="material-symbols-outlined text-[16px]">delete</span>
+                            <span className="material-symbols-outlined text-[16px]" translate="no">delete</span>
                           </button>
                         )}
                       </div>
@@ -234,7 +234,7 @@ const TenantFormModal = ({
                             <option value="Hora Punta">Hora Punta</option>
                             <option value="Sin Medidor">Sin Medidor (Solo Cuotas)</option>
                           </select>
-                          <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[18px]">expand_more</span>
+                          <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[18px]" translate="no">expand_more</span>
                         </div>
                       </div>
                       
@@ -320,7 +320,7 @@ const TenantFormModal = ({
             Cancelar
           </button>
           <button type="submit" form="tenant-form" disabled={isSubmitting} className="w-full px-4 py-2.5 text-sm bg-primary text-on-primary font-bold rounded-xl shadow-sm hover:opacity-90 disabled:opacity-50 active:scale-95 transition-all duration-150 flex justify-center items-center gap-2">
-            <span className="material-symbols-outlined text-[18px]">save</span>
+            <span className="material-symbols-outlined text-[18px]" translate="no">save</span>
             {isSubmitting ? 'Guardando...' : (editId ? 'Actualizar Registro' : 'Registrar Conexión')}
           </button>
         </div>

@@ -65,7 +65,7 @@ const InfoRow = React.memo(({ label, value, valueClassName = 'text-on-surface fo
 const SectionHeader = React.memo(({ icon, title, children }) => (
   <div className="flex items-center justify-between mb-3 border-b border-outline-variant/50 pb-2">
     <div className="flex items-center gap-2">
-      <span className="material-symbols-outlined text-primary/70 text-[18px]">{icon}</span>
+      <span className="material-symbols-outlined text-primary/70 text-[18px]" translate="no">{icon}</span>
       <h4 className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">{title}</h4>
     </div>
     {children}
@@ -268,7 +268,7 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
   const renderLoading = () => (
     <div className="flex-grow flex items-center justify-center bg-background min-h-[50vh]">
       <div className="flex flex-col items-center gap-md">
-        <span className="material-symbols-outlined animate-spin text-primary text-4xl">progress_activity</span>
+        <span className="material-symbols-outlined animate-spin text-primary text-4xl" translate="no">progress_activity</span>
         <p className="text-body-md text-on-surface-variant font-medium">Cargando detalle del recibo...</p>
       </div>
     </div>
@@ -276,7 +276,7 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
 
   const renderError = () => (
     <div className="flex-grow flex flex-col items-center justify-center bg-background min-h-[50vh] gap-md p-lg">
-      <span className="material-symbols-outlined text-error text-[48px]">warning</span>
+      <span className="material-symbols-outlined text-error text-[48px]" translate="no">warning</span>
       <h3 className="font-headline-sm text-headline-sm text-on-surface font-bold">Recibo no encontrado</h3>
       <p className="text-body-sm text-on-surface-variant max-w-sm text-center">
         No se ha especificado un ID de recibo válido o el recibo solicitado no existe en el sistema.
@@ -285,7 +285,7 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
         onClick={handleBack}
         className="mt-md px-lg py-sm bg-primary text-on-primary font-bold rounded-lg hover:opacity-90 transition-all flex items-center gap-xs shadow-sm"
       >
-        <span className="material-symbols-outlined">arrow_back</span>
+        <span className="material-symbols-outlined" translate="no">arrow_back</span>
         Regresar
       </button>
     </div>
@@ -331,14 +331,14 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
         <div className="bg-surface rounded-xl shadow-2xl w-full max-w-lg border border-outline-variant/50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
           <div className="px-lg py-md border-b border-outline-variant/50 bg-surface-container-low flex justify-between items-center">
             <h3 className="font-headline-sm font-bold flex items-center gap-2 text-on-surface">
-              <span className="material-symbols-outlined text-primary">edit_note</span>
+              <span className="material-symbols-outlined text-primary" translate="no">edit_note</span>
               Editar Multas y Cargos
             </h3>
             <button
               onClick={closeEditModal}
               className="p-1 hover:bg-surface-container-highest rounded-full text-on-surface-variant transition-colors"
             >
-              <span className="material-symbols-outlined text-[20px]">close</span>
+              <span className="material-symbols-outlined text-[20px]" translate="no">close</span>
             </button>
           </div>
 
@@ -391,7 +391,7 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
               {/* Descuento section */}
               <div className="bg-emerald-500/5 p-4 rounded-lg border border-emerald-500/20 space-y-4">
                 <div className="flex items-center gap-2 border-b border-emerald-500/10 pb-2">
-                  <span className="material-symbols-outlined text-emerald-600 text-[18px]">loyalty</span>
+                  <span className="material-symbols-outlined text-emerald-600 text-[18px]" translate="no">loyalty</span>
                   <h4 className="font-bold text-emerald-700 text-xs uppercase tracking-wide">Descuento a Favor</h4>
                 </div>
 
@@ -462,7 +462,7 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
                   onClick={handleBack}
                   className="flex items-center text-on-surface-variant hover:text-on-surface transition-colors mb-1 text-[10px] font-bold uppercase tracking-wider"
                 >
-                  <span className="material-symbols-outlined mr-1 text-[14px]">arrow_back</span>
+                  <span className="material-symbols-outlined mr-1 text-[14px]" translate="no">arrow_back</span>
                   VOLVER AL LISTADO
                 </button>
                 <h2 className="text-xl font-headline-sm tracking-tight text-on-surface font-bold">Detalle de Recibo</h2>
@@ -474,14 +474,14 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
                     onClick={openEditModal}
                     className="flex items-center px-3 py-1.5 h-8 bg-surface-container-highest border border-outline-variant/50 text-on-surface rounded-md hover:bg-surface-variant transition-colors font-bold text-xs shadow-sm"
                   >
-                    <span className="material-symbols-outlined mr-1 text-[16px]">edit</span> Editar
+                    <span className="material-symbols-outlined mr-1 text-[16px]" translate="no">edit</span> Editar
                   </button>
                 )}
                 <button
                   onClick={handleDownloadPdf}
                   className="flex items-center px-3 py-1.5 h-8 bg-primary text-on-primary rounded-md hover:opacity-90 transition-colors font-bold text-xs shadow-sm"
                 >
-                  <span className="material-symbols-outlined mr-1 text-[16px]">picture_as_pdf</span> Descargar PDF
+                  <span className="material-symbols-outlined mr-1 text-[16px]" translate="no">picture_as_pdf</span> Descargar PDF
                 </button>
               </div>
             </div>
@@ -496,17 +496,17 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
                 <div className="bg-surface rounded-xl border border-outline-variant/50 shadow-sm p-4 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
                   <div className="flex gap-3 items-center">
                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${estadoConfig.bg}`}>
-                      <span className="material-symbols-outlined text-[20px]">{estadoConfig.icon}</span>
+                      <span className="material-symbols-outlined text-[20px]" translate="no">{estadoConfig.icon}</span>
                     </div>
                     <div>
                       <h3 className="text-base font-bold text-on-surface leading-tight">{recibo.nombre_razonsocial}</h3>
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
                         <span className="flex items-center gap-0.5">
-                          <span className="material-symbols-outlined text-[12px]">badge</span> {recibo.documento_identidad}
+                          <span className="material-symbols-outlined text-[12px]" translate="no">badge</span> {recibo.documento_identidad}
                         </span>
                         <span className="text-outline-variant">•</span>
                         <span className="flex items-center gap-0.5">
-                          <span className="material-symbols-outlined text-[12px]">location_on</span> {recibo.direccion || 'Sin dirección'}
+                          <span className="material-symbols-outlined text-[12px]" translate="no">location_on</span> {recibo.direccion || 'Sin dirección'}
                         </span>
                       </div>
                     </div>
@@ -562,7 +562,7 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
 
                       {pctChangeText && (
                         <div className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold ${pctChangeText.includes('Incremento') ? 'bg-error/10 text-error border border-error/20' : 'bg-emerald-500/10 text-emerald-700 border border-emerald-500/20'}`}>
-                          <span className="material-symbols-outlined text-[12px]">
+                          <span className="material-symbols-outlined text-[12px]" translate="no">
                             {pctChangeText.includes('Incremento') ? 'trending_up' : 'trending_down'}
                           </span>
                           {pctChangeText}
@@ -596,7 +596,7 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
                 <div className="bg-surface rounded-xl border border-outline-variant/50 shadow-sm flex flex-col h-full overflow-hidden">
                   <div className="p-3 border-b border-outline-variant/50 bg-surface-container-low">
                     <h4 className="text-[10px] font-bold uppercase tracking-wider text-on-surface flex items-center gap-1.5">
-                      <span className="material-symbols-outlined text-primary/70 text-[16px]">receipt_long</span> Desglose de Cargos
+                      <span className="material-symbols-outlined text-primary/70 text-[16px]" translate="no">receipt_long</span> Desglose de Cargos
                     </h4>
                   </div>
 
