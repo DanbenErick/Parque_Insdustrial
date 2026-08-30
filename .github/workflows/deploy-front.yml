@@ -1,0 +1,45 @@
+name: Deploy Front to DigitalOcean
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy Frontend to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          # Ajusta la ruta a donde tengas tu proyecto en el servidor
+          script: |
+            export TARGET_DIR="/root/parque_jicamarca"
+            export FRONT_DIR="$TARGET_DIR/front"
+            
+            if [ ! -d "$FRONT_DIR" ]; then
+              echo "Error: El directorio $FRONT_DIR no existe en el servidor."
+              exit 1
+            fi
+            
+            # Entramos a la carpeta del Frontend y descargamos cambios
+            cd $FRONT_DIR
+            echo "Realizando git pull en el Frontend..."
+            git pull origin main || git pull origin master
+            
+            # Volvemos a la raíz donde está docker-compose.yml
+            cd $TARGET_DIR
+            
+            # Reconstruir y levantar SOLO el contenedor del frontend
+            echo "Reconstruyendo contenedor del Frontend..."
+            docker-compose up -d --build front
+            
+            # Limpiar imágenes "colgantes" (dangling) que ya no se usan
+            docker image prune -f
+            
+            echo "Despliegue del Frontend completado exitosamente."
