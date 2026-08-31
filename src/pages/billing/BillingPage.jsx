@@ -41,8 +41,7 @@ const Billing = () => {
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [filterEstado, setFilterEstado] = useState('Todos');
   const [filterMes, setFilterMes] = useState('ULTIMO');
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15;
+
 
   // --- Receipt Detail Drawer ---
   const [drawerReceiptId, setDrawerReceiptId] = useState(null);
@@ -87,14 +86,7 @@ const Billing = () => {
   const faltanLecturar = useMemo(() => parseInt(globalStats?.faltanLecturar || 0, 10), [globalStats]);
   const pendientesFacturar = useMemo(() => parseInt(globalStats?.pendientesFacturar || 0, 10), [globalStats]);
 
-  // --- Pagination ---
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = useMemo(
-    () => recibos.slice(indexOfFirstItem, indexOfLastItem),
-    [recibos, indexOfFirstItem, indexOfLastItem],
-  );
-  const totalPages = Math.ceil(recibos.length / itemsPerPage);
+
 
   // =========================================================================
   // Effects
@@ -113,10 +105,7 @@ const Billing = () => {
     }
   }, [uniqueMonths, filterMes]);
 
-  // Reset page when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, filterEstado, filterMes]);
+
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -358,9 +347,9 @@ const Billing = () => {
         )}
 
         {/* Table */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto overflow-y-auto custom-scrollbar max-h-[500px]">
           <table className="w-full text-left border-collapse table-auto whitespace-nowrap">
-            <thead className="bg-surface-container-lowest border-b border-outline-variant text-on-surface-variant text-[11px] uppercase tracking-wider">
+            <thead className="bg-surface-container-lowest border-b border-outline-variant text-on-surface-variant text-[11px] uppercase tracking-wider sticky top-0 z-10 shadow-sm">
               <tr>
                 <th className="px-4 py-2 font-semibold">Empresa / Socio</th>
                 <th className="px-4 py-2 font-semibold">Periodo</th>
@@ -376,7 +365,7 @@ const Billing = () => {
                     <span className="material-symbols-outlined animate-spin text-[24px]" translate="no">sync</span>
                   </td>
                 </tr>
-              ) : currentItems.length === 0 ? (
+              ) : recibos.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="text-center p-8 text-on-surface-variant">
                     <span className="material-symbols-outlined text-[32px] opacity-20 mb-2 block" translate="no">search_off</span>
@@ -384,7 +373,7 @@ const Billing = () => {
                   </td>
                 </tr>
               ) : (
-                currentItems.map((recibo) => (
+                recibos.map((recibo) => (
                   <BillingTableRow
                     key={recibo.id}
                     recibo={recibo}
@@ -404,50 +393,11 @@ const Billing = () => {
           </table>
         </div>
 
-        {/* Pagination Controls */}
-        <div className="px-lg py-md border-t border-outline-variant bg-surface-container-lowest flex flex-col sm:flex-row justify-between items-center gap-4">
+        {/* Foot of table (Total items count) */}
+        <div className="px-lg py-sm border-t border-outline-variant bg-surface-container-lowest flex justify-end items-center gap-4">
           <span className="text-xs text-on-surface-variant font-medium">
-            Mostrando {recibos.length > 0 ? indexOfFirstItem + 1 : 0} a {Math.min(indexOfLastItem, recibos.length)} de {recibos.length} recibos
+            Total: {recibos.length} recibos
           </span>
-          {totalPages > 1 && (
-            <div className="flex gap-2">
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-1.5 rounded-md border border-outline-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-bold flex items-center gap-1 text-on-surface"
-              >
-                <span className="material-symbols-outlined text-[16px]" translate="no">chevron_left</span> Anterior
-              </button>
-
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter((page) => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1)
-                  .map((page, i, arr) => (
-                    <React.Fragment key={page}>
-                      {i > 0 && arr[i - 1] !== page - 1 && (
-                        <span className="px-1 py-1 text-on-surface-variant text-xs">...</span>
-                      )}
-                      <button
-                        onClick={() => setCurrentPage(page)}
-                        className={`w-8 h-8 rounded-md text-xs font-bold transition-colors ${
-                          currentPage === page ? 'bg-primary text-white' : 'hover:bg-surface-container text-on-surface-variant'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    </React.Fragment>
-                  ))}
-              </div>
-
-              <button
-                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="px-3 py-1.5 rounded-md border border-outline-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-xs font-bold flex items-center gap-1 text-on-surface"
-              >
-                Siguiente <span className="material-symbols-outlined text-[16px]" translate="no">chevron_right</span>
-              </button>
-            </div>
-          )}
         </div>
       </div>
 
@@ -494,6 +444,7 @@ const Billing = () => {
         onClose={() => {
           setDeudaModalOpen(false);
           setDeudaReciboData(null);
+          refetchAll();
         }}
         selectedMedidor={{
           usuario_id: deudaReciboData?.usuario_id,
