@@ -49,14 +49,12 @@ const TenantsAndSectors = () => {
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [errors, setErrors] = useState({});
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 15;
+
 
   // En TenantsPage ya no necesitamos handleInputChange ni validateField manual, 
   // porque de eso se encarga react-hook-form en TenantFormModal.
 
   const handleSearchClick = () => {
-    setCurrentPage(1);
     // React Query automáticamente re-fetchea cuando searchQuery, filterEstado o filterRubro cambian,
     // así que no necesitamos llamar a fetchTenants() manualmente aquí.
   };
@@ -271,10 +269,6 @@ const TenantsAndSectors = () => {
   }, [tenants]);
 
   const filteredTenants = flattenedTenants;
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = filteredTenants.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(filteredTenants.length / itemsPerPage);
 
   const onExportExcel = () => exportToExcel(filteredTenants);
   const onExportPDF = async () => {
@@ -411,7 +405,7 @@ const TenantsAndSectors = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/50 bg-surface text-body-sm">
-              {currentItems.map((tenant) => (
+              {filteredTenants.map((tenant) => (
                 <TenantTableRow
                   key={`${tenant.id}-${tenant.specificMedidor ? tenant.specificMedidor.id : 'none'}`}
                   tenant={tenant}
@@ -432,46 +426,11 @@ const TenantsAndSectors = () => {
           </table>
         </div>
 
-        {/* Paginación */}
-        <div className="px-4 py-2 border-t border-outline-variant bg-surface-container-lowest flex flex-col sm:flex-row justify-between items-center gap-4">
-          <span className="text-[11px] text-on-surface-variant font-medium">
-            Mostrando {filteredTenants.length > 0 ? indexOfFirstItem + 1 : 0} a {Math.min(indexOfLastItem, filteredTenants.length)} de {filteredTenants.length} registros
+        {/* Foot of table (Total items count) */}
+        <div className="px-lg py-sm border-t border-outline-variant bg-surface-container-lowest flex justify-end items-center gap-4">
+          <span className="text-xs text-on-surface-variant font-medium">
+            Total: {filteredTenants.length} registros
           </span>
-          {totalPages > 1 && (
-            <div className="flex gap-1.5">
-              <button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="px-2.5 py-1 rounded-md border border-outline-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-[11px] font-bold flex items-center gap-0.5 text-on-surface"
-              >
-                <span className="material-symbols-outlined text-[14px]" translate="no">chevron_left</span> Anterior
-              </button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: totalPages }, (_, i) => i + 1)
-                  .filter(page => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1)
-                  .map((page, i, arr) => (
-                    <React.Fragment key={page}>
-                      {i > 0 && arr[i - 1] !== page - 1 && (
-                        <span className="px-1 text-on-surface-variant text-[11px]">...</span>
-                      )}
-                      <button
-                        onClick={() => setCurrentPage(page)}
-                        className={`w-6 h-6 rounded-md text-[11px] font-bold transition-colors ${currentPage === page ? 'bg-primary text-white' : 'hover:bg-surface-container text-on-surface-variant'}`}
-                      >
-                        {page}
-                      </button>
-                    </React.Fragment>
-                  ))}
-              </div>
-              <button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-                disabled={currentPage === totalPages}
-                className="px-2.5 py-1 rounded-md border border-outline-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-[11px] font-bold flex items-center gap-0.5 text-on-surface"
-              >
-                Siguiente <span className="material-symbols-outlined text-[14px]" translate="no">chevron_right</span>
-              </button>
-            </div>
-          )}
         </div>
       </section>
 
