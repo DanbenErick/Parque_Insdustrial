@@ -82,7 +82,6 @@ const Reports = () => {
   const [chartData, setChartData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
 
   // ── Data Fetching ──────────────────────────────────────────────────────────
@@ -138,14 +137,11 @@ const Reports = () => {
 
   const handleTabGeneral = useCallback(() => {
     setActiveTab('general');
-    setCurrentPage(1);
   }, []);
 
   const handleTabMember = useCallback(() => setActiveTab('member'), []);
   const handleSearchChange = useCallback((e) => setSearchTerm(e.target.value), []);
   const handlePeriodChange = useCallback((e) => setSelectedPeriod(e.target.value), []);
-  const handlePrevPage = useCallback(() => setCurrentPage(prev => Math.max(prev - 1, 1)), []);
-  const handleNextPage = useCallback(() => setCurrentPage(prev => prev + 1), []);
 
   // ── Filtered Data (Memoized) ───────────────────────────────────────────────
 
@@ -323,11 +319,7 @@ const Reports = () => {
     );
   }, [memberData, searchTerm]);
 
-  useEffect(() => { setCurrentPage(1); }, [selectedPeriod, searchTerm]);
 
-  const totalPages = Math.max(Math.ceil(filteredMemberData.length / ITEMS_PER_PAGE), 1);
-  const indexOfFirstItem = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentItems = filteredMemberData.slice(indexOfFirstItem, indexOfFirstItem + ITEMS_PER_PAGE);
 
   // ── Loading State ─────────────────────────────────────────────────────────
 
@@ -582,7 +574,7 @@ const Reports = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/50 bg-surface text-body-sm">
-                  {currentItems.map((m) => (
+                  {filteredMemberData.map((m) => (
                     <ReportTableRow key={m.id} member={m} />
                   ))}
                   {filteredMemberData.length === 0 && (
@@ -596,32 +588,11 @@ const Reports = () => {
               </table>
             </div>
 
-            {filteredMemberData.length > 0 && (
-              <div className="px-4 py-2 border-t border-outline-variant bg-surface-container-lowest flex justify-between items-center">
-                <span className="text-[11px] font-medium text-on-surface-variant">
-                  Mostrando {indexOfFirstItem + 1} - {Math.min(indexOfFirstItem + ITEMS_PER_PAGE, filteredMemberData.length)} de {filteredMemberData.length} registros
-                </span>
-                <div className="flex items-center gap-3">
-                  <span className="text-[11px] font-medium text-on-surface-variant">Página {currentPage} de {totalPages}</span>
-                  <div className="flex gap-1.5">
-                    <button
-                      onClick={handlePrevPage}
-                      className="px-2.5 py-1 rounded-md border border-outline-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-[11px] font-bold flex items-center gap-0.5 text-on-surface"
-                      disabled={currentPage === 1}
-                    >
-                      <span className="material-symbols-outlined text-[14px]" translate="no">chevron_left</span> Anterior
-                    </button>
-                    <button
-                      onClick={handleNextPage}
-                      className="px-2.5 py-1 rounded-md border border-outline-variant hover:bg-surface-container disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-[11px] font-bold flex items-center gap-0.5 text-on-surface"
-                      disabled={currentPage === totalPages}
-                    >
-                      Siguiente <span className="material-symbols-outlined text-[14px]" translate="no">chevron_right</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
+            <div className="px-lg py-sm border-t border-outline-variant bg-surface-container-lowest flex justify-end items-center gap-4">
+              <span className="text-xs text-on-surface-variant font-medium">
+                Total: {filteredMemberData.length} registros
+              </span>
+            </div>
           </div>
         </>
       ) : (

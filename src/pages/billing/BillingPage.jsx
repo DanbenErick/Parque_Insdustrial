@@ -447,6 +447,7 @@ const Billing = () => {
           refetchAll();
         }}
         selectedMedidor={{
+          recibo_id: deudaReciboData?.id,
           usuario_id: deudaReciboData?.usuario_id,
           propietario: deudaReciboData?.socio
         }}

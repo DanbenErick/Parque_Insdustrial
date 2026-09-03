@@ -33,6 +33,7 @@ export const DeudaPersonalizadaModal = ({ isOpen, onClose, selectedMedidor, acti
       await api.post('/cargos-personalizados', {
         usuario_id: selectedMedidor.usuario_id || selectedMedidor.socio_id || selectedMedidor.id, // we'll pass the correct user ID
         periodo_id: activePeriodo.id,
+        recibo_id: selectedMedidor.recibo_id,
         descripcion,
         monto: parseFloat(monto)
       });

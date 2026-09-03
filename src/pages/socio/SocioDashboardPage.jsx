@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -18,6 +18,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend)
 
 const SocioDashboardPage = () => {
   const { user } = useAuth();
+  const [selectedChartMedidor, setSelectedChartMedidor] = useState('Todos');
 
   const { data: recibos = [], isLoading: isLoadingRecibos } = useQuery({
     queryKey: ['socio-recibos', user?.id],
@@ -63,25 +64,40 @@ const SocioDashboardPage = () => {
   }, [medidores, recibos]);
 
   const chartData = useMemo(() => {
-    const ultimos = [...recibos].slice(0, 6).reverse();
+    let recibosFiltrados = recibos;
+    if (selectedChartMedidor !== 'Todos') {
+      recibosFiltrados = recibos.filter(r => r.medidor_num_serie === selectedChartMedidor);
+    }
+    
+    const agrupado = {};
+    recibosFiltrados.forEach(r => {
+      const per = r.periodo;
+      if (!agrupado[per]) agrupado[per] = { p: per, normal: 0, punta: 0 };
+      agrupado[per].normal += Number(r.consumo_calculado || 0);
+      agrupado[per].punta += Number(r.consumo_calculado_punta || 0);
+    });
+    
+    // Sort descending by period, take top 6, then reverse for chronological order on chart
+    const list = Object.values(agrupado).sort((a,b) => b.p.localeCompare(a.p)).slice(0, 6).reverse();
+
     return {
-      labels: ultimos.map(r => r.periodo),
+      labels: list.map(r => r.p),
       datasets: [
         {
           label: 'Consumo Fuera Punta (kWh)',
-          data: ultimos.map(r => Number(r.consumo_calculado || 0)),
+          data: list.map(r => r.normal),
           backgroundColor: 'rgba(16, 185, 129, 0.8)', 
           borderRadius: 4,
         },
         {
           label: 'Consumo Punta (kWh)',
-          data: ultimos.map(r => Number(r.consumo_calculado_punta || 0)),
+          data: list.map(r => r.punta),
           backgroundColor: 'rgba(245, 158, 11, 0.8)', 
           borderRadius: 4,
         }
       ]
     };
-  }, [recibos]);
+  }, [recibos, selectedChartMedidor]);
 
   const chartOptions = {
     responsive: true,
@@ -155,6 +171,15 @@ const SocioDashboardPage = () => {
               <div className="mb-4">
                 <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-0.5">Serie del Medidor</p>
                 <h3 className="font-data-mono font-bold text-lg text-on-surface">{medidor.num_serie}</h3>
+                
+                {medidor.direccion && (
+                  <>
+                    <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mt-3 mb-0.5">Dirección</p>
+                    <p className="text-xs font-bold text-on-surface truncate" title={medidor.direccion}>
+                      {medidor.direccion}
+                    </p>
+                  </>
+                )}
               </div>
               
               <div className="mt-auto pt-4 border-t border-outline-variant/30 flex justify-between items-end">
@@ -235,7 +260,19 @@ const SocioDashboardPage = () => {
 
         {/* Gráfico */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-outline-variant shadow-sm p-4 md:p-6 flex flex-col h-[300px] md:h-auto">
-          <h2 className="text-sm font-bold text-on-surface mb-1">Historial de Consumo</h2>
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-1">
+            <h2 className="text-sm font-bold text-on-surface">Historial de Consumo</h2>
+            <select
+              value={selectedChartMedidor}
+              onChange={(e) => setSelectedChartMedidor(e.target.value)}
+              className="text-[11px] bg-surface-container border border-outline-variant rounded-md px-2 py-1 outline-none cursor-pointer text-on-surface-variant font-medium min-w-[120px]"
+            >
+              <option value="Todos">Todos los Medidores</option>
+              {medidores.map(m => (
+                <option key={m.id} value={m.num_serie}>{m.num_serie} {m.direccion ? `(${m.direccion})` : ''}</option>
+              ))}
+            </select>
+          </div>
           <p className="text-[11px] text-on-surface-variant mb-4">Consumo de sus últimos 6 periodos facturados.</p>
           <div className="flex-grow relative min-h-[200px]">
             {recibos.length > 0 ? (
