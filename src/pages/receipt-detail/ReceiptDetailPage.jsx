@@ -465,7 +465,14 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
                   <span className="material-symbols-outlined mr-1 text-[14px]" translate="no">arrow_back</span>
                   VOLVER AL LISTADO
                 </button>
-                <h2 className="text-xl font-headline-sm tracking-tight text-on-surface font-bold">Detalle de Recibo</h2>
+                <h2 className="text-xl font-headline-sm tracking-tight text-on-surface font-bold flex items-center gap-2">
+                  Detalle de Recibo
+                  {recibo.numero_comprobante && (
+                    <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-md text-sm font-data-mono border border-primary/20">
+                      {recibo.numero_comprobante}
+                    </span>
+                  )}
+                </h2>
               </div>
 
               <div className="flex gap-2">
@@ -602,7 +609,7 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
 
                   <div className="p-4 flex-grow space-y-2">
                     <CargoLine label="Energía Activa" amount={recibo.cargo_energia} className="text-on-surface-variant font-medium" />
-                    <CargoLine label="Cargo Fijo" amount={recibo.cargo_fijo} className="text-on-surface-variant font-medium" />
+                    <CargoLineConditional value={recibo.cargo_fijo} label="Cargo Fijo" className="text-on-surface-variant font-medium" />
                     <CargoLineConditional value={recibo.cargo_mantenimiento} label="Mantenimiento" className="text-on-surface-variant font-medium" />
                     <CargoLineConditional value={recibo.multa_manipulacion} label="Multa Manipulación" />
                     <CargoLineConditional value={recibo.multa_reconexion} label="Multa Reconexión" />

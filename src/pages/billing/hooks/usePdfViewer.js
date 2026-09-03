@@ -10,8 +10,10 @@ export const usePdfViewer = () => {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [pdfUrl, setPdfUrl] = useState(null);
   const [pdfId, setPdfId] = useState(null);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const openPdf = useCallback(async (id, version = 'v3') => {
+    setIsGenerating(true);
     try {
       // El backend ahora utiliza /pdf para generar el recibo actual
       const endpoint = 'pdf';
@@ -28,12 +30,14 @@ export const usePdfViewer = () => {
       setIsPdfModalOpen(true);
     } catch {
       toast.error(`Error al cargar el PDF${version !== 'v1' ? ` ${version.toUpperCase()}` : ''}`);
+    } finally {
+      setIsGenerating(false);
     }
   }, []);
 
   const openReportePdf = useCallback(async (filterParams) => {
+    setIsGenerating(true);
     try {
-      toast.info('Generando PDF, por favor espere...');
       const response = await api.get('/recibos/reporte/pdf', { params: filterParams, responseType: 'blob' });
       const blob = new Blob([response.data], { type: MIME_TYPES.PDF });
       const url = window.URL.createObjectURL(blob);
@@ -47,6 +51,8 @@ export const usePdfViewer = () => {
       toast.success('Reporte PDF generado exitosamente');
     } catch {
       toast.error('Error al generar el PDF desde el servidor');
+    } finally {
+      setIsGenerating(false);
     }
   }, []);
 
@@ -79,5 +85,6 @@ export const usePdfViewer = () => {
     openReportePdf,
     downloadFromModal,
     closePdfModal,
+    isGenerating,
   };
 };

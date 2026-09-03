@@ -183,6 +183,17 @@ const Billing = () => {
         </div>
       )}
 
+      {/* PDF Generation Overlay */}
+      {pdf.isGenerating && (
+        <div className="absolute inset-0 z-[100] flex items-center justify-center bg-surface/60 backdrop-blur-sm rounded-xl fixed">
+          <div className="bg-surface border border-outline-variant shadow-2xl rounded-2xl p-8 flex flex-col items-center animate-in fade-in zoom-in duration-200">
+            <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin mb-4"></div>
+            <h3 className="text-lg font-bold text-on-surface">Generando PDF...</h3>
+            <p className="text-sm text-on-surface-variant mt-1">Por favor espere, procesando el documento.</p>
+          </div>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
         <div>
