@@ -513,7 +513,7 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
                         </span>
                         <span className="text-outline-variant">•</span>
                         <span className="flex items-center gap-0.5">
-                          <span className="material-symbols-outlined text-[12px]" translate="no">location_on</span> {recibo.direccion || 'Sin dirección'}
+                          <span className="material-symbols-outlined text-[12px]" translate="no">location_on</span> {recibo.medidor_direccion || recibo.direccion || 'Sin dirección'}
                         </span>
                       </div>
                     </div>

@@ -68,7 +68,13 @@ const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onV
               </div>
             </div>
           </button>
-          <span className="font-data-mono text-[10px] text-on-surface-variant/70">DNI/RUC: {recibo.documento_identidad}</span>
+          <div className="flex flex-col mt-0.5">
+            <span className="font-data-mono text-[10px] text-on-surface-variant/70">DNI/RUC: {recibo.documento_identidad}</span>
+            <span className="font-data-mono text-[10px] text-on-surface-variant/70 flex items-center gap-0.5 mt-0.5">
+              <span className="material-symbols-outlined text-[10px]" translate="no">location_on</span>
+              {recibo.medidor_direccion || recibo.direccion || 'Sin dirección'}
+            </span>
+          </div>
         </div>
       </td>
       <td className="px-4 py-2">
