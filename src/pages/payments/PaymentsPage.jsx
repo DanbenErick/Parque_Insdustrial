@@ -89,7 +89,7 @@ const PaymentRow = React.memo(({ pago, saldoPendiente, onSelect, onPrintTicket, 
   const isPartial = isPartialPayment(pago.monto_pagado, pago.recibo_total);
 
   return (
-    <tr className={`hover:bg-surface-container-lowest transition-colors group ${pago.estado_validacion === 'Anulado' ? 'opacity-50 grayscale' : ''}`}>
+    <tr className={`hover:bg-surface-container-lowest transition-colors group ${pago.estado_validacion === 'Anulado' ? 'bg-red-500/5 hover:bg-red-500/10' : ''}`}>
       <td className="px-4 py-2">
         <button
           onClick={() => onSelect(pago)}
@@ -125,26 +125,45 @@ const PaymentRow = React.memo(({ pago, saldoPendiente, onSelect, onPrintTicket, 
       </td>
       <td className="px-4 py-2 text-center">
         <div className="flex flex-col items-center">
-          <span className="text-[9px] text-on-surface-variant uppercase tracking-wider mb-0.5">
-            {pago.estado_validacion || 'Confirmado'}
+          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${
+            pago.estado_validacion === 'Anulado'
+              ? 'bg-error/15 text-error border border-error/30'
+              : isPartial
+              ? 'bg-amber-100 text-amber-800'
+              : 'bg-indigo-100 text-indigo-800'
+          }`}>
+            {pago.estado_validacion === 'Anulado' ? 'Anulado' : isPartial ? 'Parcial' : 'Completo'}
           </span>
-          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${isPartial ? 'bg-amber-100 text-amber-800' : 'bg-indigo-100 text-indigo-800'}`}>
-            {isPartial ? 'Parcial' : 'Completo'}
-          </span>
+          {pago.motivo_anulacion && (
+            <span className="text-[9px] text-error font-medium italic mt-0.5 truncate max-w-[150px]" title={`Motivo: ${pago.motivo_anulacion}`}>
+              {pago.motivo_anulacion}
+            </span>
+          )}
         </div>
       </td>
       <td className="px-4 py-2 text-right">
-        <div className="font-data-mono font-bold text-on-surface text-[12px]">
+        <div className={`font-data-mono font-bold text-[12px] ${pago.estado_validacion === 'Anulado' ? 'line-through text-on-surface-variant/60' : 'text-on-surface'}`}>
           S/ {fmtCurrency(pago.monto_pagado)}
         </div>
-        {isPartial && (
+        {isPartial && pago.estado_validacion !== 'Anulado' && (
           <div className="text-[9px] text-amber-700 font-bold">
             Restante: S/ {fmtCurrency(saldoPendiente)}
           </div>
         )}
       </td>
       <td className="px-4 py-2 text-right">
-        {pago.estado_validacion !== 'Anulado' && (
+        {pago.estado_validacion === 'Anulado' ? (
+          <div className="flex items-center justify-end">
+            <button
+              onClick={(e) => { e.stopPropagation(); onSelect(pago); }}
+              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-error/10 hover:bg-error/20 text-error text-[11px] font-bold transition-colors cursor-pointer"
+              title="Ver detalle del pago anulado y motivo"
+            >
+              <span className="material-symbols-outlined text-[15px]" translate="no">info</span>
+              <span>Ver Detalle</span>
+            </button>
+          </div>
+        ) : (
           <div className="flex items-center justify-end gap-2">
             <div className="relative group/tooltip flex items-center justify-center">
               <button
@@ -211,13 +230,13 @@ const Payments = () => {
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [selectedPaymentForDetails, setSelectedPaymentForDetails] = useState(null);
   const [filterMes, setFilterMes] = useState('ULTIMO');
-  const [showAnulados, setShowAnulados] = useState(false);
+  const [showAnulados, setShowAnulados] = useState(true);
 
   // ── React Query — data fetching ────────────────────────────────────
 
   const filterParams = useMemo(() => {
     const params = buildFilterParams(filterMes, activeYear);
-    if (showAnulados) params.includeAnulados = true;
+    params.includeAnulados = showAnulados;
     return params;
   }, [filterMes, activeYear, showAnulados]);
 
@@ -253,17 +272,26 @@ const Payments = () => {
   const [metodoPago, setMetodoPago] = useState('Transferencia');
   const [numeroOperacion, setNumeroOperacion] = useState('');
   const [searchSocio, setSearchSocio] = useState('');
+  const [permitirPagoExtra, setPermitirPagoExtra] = useState(false);
   const [fechaPago, setFechaPago] = useState(() => {
     const tzOffset = new Date().getTimezoneOffset() * 60000;
     return new Date(Date.now() - tzOffset).toISOString().slice(0, 10);
   });
   const [isAutocompleteOpen, setIsAutocompleteOpen] = useState(false);
 
+  // Modal Anular Pago state
+  const [isAnularModalOpen, setIsAnularModalOpen] = useState(false);
+  const [pagoToAnular, setPagoToAnular] = useState(null);
+  const [motivoAnulacion, setMotivoAnulacion] = useState('');
+  const [isSubmittingAnular, setIsSubmittingAnular] = useState(false);
+
   // ── Memoised derived data ──────────────────────────────────────────
-  const recibosPendientes = useMemo(
-    () => allRecibos.filter(r => r.estado === 'Pendiente' || r.estado === 'Pago Parcial' || r.estado === 'Vencido'),
-    [allRecibos],
-  );
+  const recibosDisponibles = useMemo(() => {
+    if (permitirPagoExtra) {
+      return allRecibos.filter(r => r.estado !== 'Anulado');
+    }
+    return allRecibos.filter(r => r.estado === 'Pendiente' || r.estado === 'Pago Parcial' || r.estado === 'Vencido');
+  }, [allRecibos, permitirPagoExtra]);
 
   const uniqueMonths = useMemo(() =>
     periodos
@@ -285,6 +313,7 @@ const Payments = () => {
     let efectivo = 0;
     let transferencia = 0;
     pagos.forEach(p => {
+      if (p.estado_validacion === 'Anulado') return;
       const monto = parseFloat(p.monto_pagado || 0);
       total += monto;
       if (p.metodo_pago === 'Efectivo') efectivo += monto;
@@ -305,6 +334,7 @@ const Payments = () => {
     const hoyFin = new Date();
     hoyFin.setHours(23, 59, 59, 999);
     return pagos.filter(p => {
+      if (p.estado_validacion === 'Anulado') return false;
       const f = new Date(p.fecha_pago);
       return f >= hoyInicio && f <= hoyFin;
     }).length;
@@ -325,23 +355,23 @@ const Payments = () => {
   }, [pagos, searchTerm]);
 
   const selectedReciboObj = useMemo(
-    () => recibosPendientes.find(r => r.id === parseInt(selectedRecibo)),
-    [recibosPendientes, selectedRecibo],
+    () => allRecibos.find(r => r.id === parseInt(selectedRecibo)),
+    [allRecibos, selectedRecibo],
   );
 
   const saldoPendiente = useMemo(
-    () => selectedReciboObj ? parseFloat(selectedReciboObj.saldo_pendiente || selectedReciboObj.total) : 0,
+    () => selectedReciboObj ? Math.max(0, parseFloat(selectedReciboObj.saldo_pendiente ?? selectedReciboObj.total ?? 0)) : 0,
     [selectedReciboObj],
   );
 
-  const isPagoParcial = monto && parseFloat(monto) < saldoPendiente - PARTIAL_THRESHOLD;
+  const isPagoParcial = monto && parseFloat(monto) < saldoPendiente - PARTIAL_THRESHOLD && saldoPendiente > 0;
   const isPagoExcedido = monto && parseFloat(monto) > saldoPendiente + PARTIAL_THRESHOLD;
 
   const filteredSocios = useMemo(() => {
-    let list = recibosPendientes;
+    let list = recibosDisponibles;
     if (searchSocio !== '*') {
       const term = searchSocio.toLowerCase();
-      list = recibosPendientes.filter(r =>
+      list = recibosDisponibles.filter(r =>
         (r.socio || '').toLowerCase().includes(term) ||
         (r.numero_comprobante || '').toLowerCase().includes(term) ||
         (r.medidor_num_serie && r.medidor_num_serie.toLowerCase().includes(term)) ||
@@ -350,7 +380,7 @@ const Payments = () => {
       );
     }
     return [...list].sort((a, b) => (a.socio || '').localeCompare(b.socio || '', 'es', { sensitivity: 'base' }));
-  }, [recibosPendientes, searchSocio]);
+  }, [recibosDisponibles, searchSocio]);
 
   // Map recibo_id -> saldo_pendiente for fast lookups in table rows
   const reciboSaldoMap = useMemo(() => {
@@ -366,6 +396,7 @@ const Payments = () => {
     setMonto('');
     setMetodoPago('Transferencia');
     setNumeroOperacion('');
+    setPermitirPagoExtra(false);
     const tzOffset = new Date().getTimezoneOffset() * 60000;
     setFechaPago(new Date(Date.now() - tzOffset).toISOString().slice(0, 10));
   }, []);
@@ -390,7 +421,8 @@ const Payments = () => {
       ? `${recibo.socio} (Medidor: ${recibo.medidor_num_serie})`
       : recibo.socio;
     setSearchSocio(displayText);
-    setMonto(parseFloat(recibo.saldo_pendiente || recibo.total).toFixed(2));
+    const saldo = parseFloat(recibo.saldo_pendiente ?? recibo.total ?? 0);
+    setMonto(saldo > 0 ? saldo.toFixed(2) : '');
     setIsAutocompleteOpen(false);
   }, []);
 
@@ -409,14 +441,16 @@ const Payments = () => {
 
     setIsSubmitting(true);
     try {
+      const isPagoExtra = permitirPagoExtra || selectedReciboObj?.estado === 'Pagado';
       await api.post('/pagos', {
         recibo_id: selectedRecibo,
         monto_pagado: parseFloat(monto),
         metodo_pago: metodoPago,
         numero_operacion: numeroOperacion,
         fecha_pago: fechaPago,
+        permitir_pago_adicional: isPagoExtra,
       });
-      toast.success('Pago registrado exitosamente');
+      toast.success(isPagoExtra ? 'Pago adicional registrado exitosamente (saldo a favor acumulado)' : 'Pago registrado exitosamente');
       setIsModalOpen(false);
       resetForm();
       refetchAll();
@@ -425,7 +459,29 @@ const Payments = () => {
     } finally {
       setIsSubmitting(false);
     }
-  }, [selectedRecibo, monto, metodoPago, numeroOperacion, fechaPago, resetForm, refetchAll]);
+  }, [selectedRecibo, monto, metodoPago, numeroOperacion, fechaPago, resetForm, refetchAll, permitirPagoExtra, selectedReciboObj]);
+
+  const handleConfirmAnularPago = useCallback(async (e) => {
+    e.preventDefault();
+    if (!pagoToAnular) return;
+    if (!motivoAnulacion.trim()) {
+      return toast.error('Debe ingresar un motivo para anular el pago');
+    }
+
+    setIsSubmittingAnular(true);
+    try {
+      await api.post(`/pagos/${pagoToAnular.id}/anular`, { motivo: motivoAnulacion.trim() });
+      toast.success('Pago anulado exitosamente');
+      setIsAnularModalOpen(false);
+      setPagoToAnular(null);
+      setMotivoAnulacion('');
+      refetchAll();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Error al anular el pago');
+    } finally {
+      setIsSubmittingAnular(false);
+    }
+  }, [pagoToAnular, motivoAnulacion, refetchAll]);
 
   const handleExportExcel = useCallback(async () => {
     try {
@@ -728,6 +784,20 @@ const Payments = () => {
               />
             </div>
             <button
+              onClick={() => setShowAnulados(!showAnulados)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 h-8 font-bold text-xs rounded-md transition-colors border ${
+                showAnulados
+                  ? 'bg-amber-500/15 text-amber-800 border-amber-500/30'
+                  : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container'
+              }`}
+              title={showAnulados ? 'Ocultar pagos anulados' : 'Ver pagos anulados'}
+            >
+              <span className="material-symbols-outlined text-[16px]" translate="no">
+                {showAnulados ? 'visibility_off' : 'visibility'}
+              </span>
+              {showAnulados ? 'Ocultar Anulados' : 'Ver Anulados'}
+            </button>
+            <button
               onClick={handleExportExcel}
               className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-xs rounded-md transition-colors border border-[#107C41]/20"
             >
@@ -786,7 +856,8 @@ const Payments = () => {
                     onPrintTicket={handlePrintTicket}
                     onViewRecibo={handleViewPdfRecibo}
                     onAnular={() => {
-                      setSelectedPaymentForDetails(pago);
+                      setPagoToAnular(pago);
+                      setMotivoAnulacion('');
                       setIsAnularModalOpen(true);
                     }}
                     onWhatsApp={handleWhatsApp}
@@ -830,9 +901,27 @@ const Payments = () => {
 
                 {/* Recibo Pendiente (Autocomplete) */}
                 <div className="bg-surface-container-lowest border border-outline-variant p-3 rounded-lg">
-                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block mb-1.5">
-                    Socio, Recibo o Medidor <span className="text-error">*</span>
-                  </label>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-1.5">
+                    <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block">
+                      Socio, Recibo o Medidor <span className="text-error">*</span>
+                    </label>
+                    <label className="flex items-center gap-1.5 cursor-pointer select-none text-[10px] text-on-surface-variant hover:text-primary transition-colors">
+                      <input
+                        type="checkbox"
+                        checked={permitirPagoExtra}
+                        onChange={(e) => {
+                          setPermitirPagoExtra(e.target.checked);
+                          if (!e.target.checked && selectedReciboObj?.estado === 'Pagado') {
+                            setSelectedRecibo('');
+                            setSearchSocio('');
+                            setMonto('');
+                          }
+                        }}
+                        className="rounded border-outline-variant text-primary focus:ring-primary w-3.5 h-3.5 cursor-pointer"
+                      />
+                      <span className="font-semibold">Incluir recibos ya pagados (Pago extra / Saldo a favor)</span>
+                    </label>
+                  </div>
                   <div className="relative">
                     <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">search</span>
                     <input
@@ -848,12 +937,13 @@ const Payments = () => {
                     {isAutocompleteOpen && !selectedRecibo && (
                       <div className="absolute z-10 w-full mt-1 bg-surface border border-outline-variant rounded-md shadow-xl max-h-60 overflow-y-auto custom-scrollbar">
                         {filteredSocios.length === 0 ? (
-                          <div className="p-2 text-xs text-on-surface-variant text-center">No se encontraron recibos pendientes</div>
+                          <div className="p-2 text-xs text-on-surface-variant text-center">No se encontraron recibos disponibles</div>
                         ) : (
                           filteredSocios.map(r => {
                             const saldo = parseFloat(r.saldo_pendiente ?? r.total ?? 0);
                             const total = parseFloat(r.total ?? 0);
-                            const isParcial = r.estado === 'Pago Parcial' || (saldo > 0 && total > 0 && saldo < total - 0.05);
+                            const isPagado = r.estado === 'Pagado' || saldo <= 0.02;
+                            const isParcial = !isPagado && (r.estado === 'Pago Parcial' || (saldo > 0 && total > 0 && saldo < total - 0.05));
 
                             return (
                               <button
@@ -863,17 +953,27 @@ const Payments = () => {
                                 className={`w-full text-left px-3 py-2 border-b border-outline-variant/50 last:border-0 transition-colors flex flex-col ${
                                   isParcial
                                     ? 'bg-amber-500/10 hover:bg-amber-500/20 border-l-4 border-l-amber-500'
+                                    : isPagado
+                                    ? 'bg-emerald-500/10 hover:bg-emerald-500/20 border-l-4 border-l-emerald-500'
                                     : 'hover:bg-surface-container-low'
                                 }`}
                               >
                                 <div className="flex justify-between items-center gap-2">
-                                  <span className={`font-bold text-xs ${isParcial ? 'text-amber-950 font-extrabold' : 'text-on-surface'}`}>
+                                  <span className={`font-bold text-xs ${
+                                    isParcial ? 'text-amber-950 font-extrabold' : isPagado ? 'text-emerald-950 font-extrabold' : 'text-on-surface'
+                                  }`}>
                                     {r.socio}
                                   </span>
                                   {isParcial && (
                                     <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-800 border border-amber-500/30 shrink-0">
                                       <span className="material-symbols-outlined text-[11px]" translate="no">timelapse</span>
                                       Pago Parcial
+                                    </span>
+                                  )}
+                                  {isPagado && (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-emerald-500/20 text-emerald-800 border border-emerald-500/30 shrink-0">
+                                      <span className="material-symbols-outlined text-[11px]" translate="no">check_circle</span>
+                                      Pagado
                                     </span>
                                   )}
                                 </div>
@@ -889,8 +989,10 @@ const Payments = () => {
                                       </>
                                     )}
                                   </span>
-                                  <span className={`text-[10px] font-bold font-data-mono ${isParcial ? 'text-amber-700' : 'text-error'}`}>
-                                    {isParcial ? 'Saldo: ' : 'Deuda: '}S/ {saldo.toFixed(2)}
+                                  <span className={`text-[10px] font-bold font-data-mono ${
+                                    isPagado ? 'text-emerald-700' : isParcial ? 'text-amber-700' : 'text-error'
+                                  }`}>
+                                    {isPagado ? 'Al día (S/ 0.00)' : isParcial ? 'Saldo: ' : 'Deuda: '}S/ {saldo.toFixed(2)}
                                   </span>
                                 </div>
                               </button>
@@ -900,6 +1002,17 @@ const Payments = () => {
                       </div>
                     )}
                   </div>
+
+                  {/* Alerta informativa si se seleccionó un recibo ya pagado */}
+                  {selectedReciboObj?.estado === 'Pagado' && (
+                    <div className="mt-2 p-2.5 bg-emerald-50 border border-emerald-200 rounded-md text-[11px] text-emerald-900 flex items-start gap-2 animate-in fade-in duration-200">
+                      <span className="material-symbols-outlined text-[16px] text-emerald-600 mt-0.5 shrink-0" translate="no">savings</span>
+                      <div>
+                        <span className="font-bold block">Recibo cancelado en su totalidad (S/ 0.00 pendiente)</span>
+                        <span>El monto ingresado aquí se registrará como abono adicional y se acreditará automáticamente al <strong>Saldo a Favor</strong> del socio.</span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -914,8 +1027,13 @@ const Payments = () => {
                         type="number"
                         step="0.01"
                         min="0.01"
-                        className={`w-full border rounded-md pl-8 pr-3 py-1.5 h-8 bg-white font-data-mono text-xs font-medium outline-none transition-colors ${(isPagoExcedido || isPagoParcial) ? 'border-error focus:ring-1 focus:ring-error' : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary'
-                          }`}
+                        className={`w-full border rounded-md pl-8 pr-3 py-1.5 h-8 bg-white font-data-mono text-xs font-medium outline-none transition-colors ${
+                          selectedReciboObj?.estado === 'Pagado'
+                            ? 'border-[#059669] focus:border-[#059669] focus:ring-1 focus:ring-[#059669]'
+                            : (isPagoExcedido || isPagoParcial)
+                            ? 'border-amber-500 focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
+                            : 'border-outline-variant focus:border-primary focus:ring-1 focus:ring-primary'
+                        }`}
                         value={monto}
                         onChange={(e) => setMonto(e.target.value)}
                         placeholder="0.00"
@@ -925,13 +1043,18 @@ const Payments = () => {
                     </div>
                     {/* Validation messages */}
                     <div className="min-h-[16px] pl-1 flex items-center">
-                      {isPagoExcedido ? (
+                      {selectedReciboObj?.estado === 'Pagado' ? (
+                        <span className="text-[10px] text-[#059669] font-medium flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[12px]" translate="no">savings</span>
+                          Abono adicional a saldo a favor: S/ {parseFloat(monto || 0).toFixed(2)}
+                        </span>
+                      ) : isPagoExcedido ? (
                         <span className="text-[10px] text-[#059669] font-medium flex items-center gap-1">
                           <span className="material-symbols-outlined text-[12px]" translate="no">account_balance_wallet</span>
                           Saldo a favor: S/ {(parseFloat(monto) - saldoPendiente).toFixed(2)}
                         </span>
                       ) : isPagoParcial ? (
-                        <span className="text-[10px] text-primary">Quedará saldo de S/ {(saldoPendiente - parseFloat(monto)).toFixed(2)}</span>
+                        <span className="text-[10px] text-amber-700 font-medium">Quedará saldo de S/ {(saldoPendiente - parseFloat(monto)).toFixed(2)}</span>
                       ) : selectedRecibo && monto ? (
                         <span className="text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 text-[#047857]">
                           <span className="material-symbols-outlined text-[12px]" translate="no">check_circle</span>
@@ -1062,6 +1185,114 @@ const Payments = () => {
         document.body,
       )}
 
+      {/* Modal Anular Pago */}
+      {isAnularModalOpen && pagoToAnular && (
+        <div {...MODAL_BACKDROP} className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div {...MODAL_CONTENT} className="bg-surface rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden border border-outline-variant animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="px-5 py-4 border-b border-outline-variant bg-error/5 flex justify-between items-center">
+              <h3 className="text-base text-error font-bold flex items-center gap-2">
+                <span className="material-symbols-outlined text-[22px]" translate="no">cancel</span>
+                Anular Pago
+              </h3>
+              <button
+                onClick={() => {
+                  if (!isSubmittingAnular) {
+                    setIsAnularModalOpen(false);
+                    setPagoToAnular(null);
+                    setMotivoAnulacion('');
+                  }
+                }}
+                disabled={isSubmittingAnular}
+                className="w-7 h-7 rounded-full hover:bg-surface-variant flex items-center justify-center text-on-surface-variant transition-colors disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-[18px]" translate="no">close</span>
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleConfirmAnularPago} className="p-5 space-y-4">
+              {/* Resumen del pago */}
+              <div className="bg-surface-container-low border border-outline-variant/60 rounded-xl p-3.5 space-y-2 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-medium">Socio:</span>
+                  <span className="font-bold text-on-surface text-right">{pagoToAnular.socio}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-medium">Recibo / Comprobante:</span>
+                  <span className="font-data-mono font-bold text-on-surface">{pagoToAnular.numero_comprobante}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-medium">Monto Pagado:</span>
+                  <span className="font-data-mono font-bold text-error text-sm">S/ {fmtCurrency(pagoToAnular.monto_pagado)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-medium">Fecha de Pago:</span>
+                  <span className="text-on-surface">{new Date(pagoToAnular.fecha_pago).toLocaleDateString('es-PE')}</span>
+                </div>
+              </div>
+
+              {/* Advertencia */}
+              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-xs text-amber-900 flex items-start gap-2">
+                <span className="material-symbols-outlined text-[18px] text-amber-700 shrink-0 mt-0.5" translate="no">warning</span>
+                <span>
+                  Al anular este pago, el estado y saldo de la deuda del recibo se recalcularán automáticamente. Si este pago generó saldo a favor, será deducido.
+                </span>
+              </div>
+
+              {/* Motivo Input */}
+              <div>
+                <label className="text-[11px] font-bold text-on-surface block mb-1.5">
+                  Motivo de Anulación <span className="text-error">*</span>
+                </label>
+                <textarea
+                  required
+                  rows={3}
+                  value={motivoAnulacion}
+                  onChange={(e) => setMotivoAnulacion(e.target.value)}
+                  placeholder="Especifique el motivo de anulación (ej. comprobante duplicado, error en monto, transferencia no acreditada)..."
+                  className="w-full border border-outline-variant rounded-lg p-2.5 text-xs bg-white focus:border-error focus:ring-1 focus:ring-error outline-none transition-all resize-none shadow-inner"
+                  autoFocus
+                />
+              </div>
+
+              {/* Acciones */}
+              <div className="flex justify-end items-center gap-2 pt-2 border-t border-outline-variant">
+                <button
+                  type="button"
+                  disabled={isSubmittingAnular}
+                  onClick={() => {
+                    setIsAnularModalOpen(false);
+                    setPagoToAnular(null);
+                    setMotivoAnulacion('');
+                  }}
+                  className="px-4 py-2 text-xs font-semibold text-on-surface-variant hover:bg-surface-variant rounded-md transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingAnular || !motivoAnulacion.trim()}
+                  className="px-4 py-2 text-xs font-bold text-white bg-error hover:bg-error/90 rounded-md transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {isSubmittingAnular ? (
+                    <>
+                      <span className="material-symbols-outlined animate-spin text-[16px]" translate="no">sync</span>
+                      Anulando...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[16px]" translate="no">delete_forever</span>
+                      Confirmar Anulación
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
 
       {/* Drawer de Detalles del Pago (Portal) */}
 
@@ -1095,10 +1326,19 @@ const Payments = () => {
                 <span className="font-data-mono text-3xl font-bold text-primary">
                   S/ {fmtCurrency(selectedPaymentForDetails.monto_pagado)}
                 </span>
-                <div className="mt-3">
-                  <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#059669]/10 text-[#059669] border border-[#059669]/20 uppercase tracking-wider">
+                <div className="mt-3 flex flex-col items-center gap-1">
+                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
+                    selectedPaymentForDetails.estado_validacion === 'Anulado'
+                      ? 'bg-error/10 text-error border border-error/20'
+                      : 'bg-[#059669]/10 text-[#059669] border border-[#059669]/20'
+                  }`}>
                     {selectedPaymentForDetails.estado_validacion || 'Confirmado'}
                   </span>
+                  {selectedPaymentForDetails.motivo_anulacion && (
+                    <span className="text-[10px] text-error/90 italic bg-error/5 border border-error/10 rounded px-2.5 py-1 text-center mt-1 max-w-xs">
+                      Motivo: {selectedPaymentForDetails.motivo_anulacion}
+                    </span>
+                  )}
                 </div>
               </div>
 

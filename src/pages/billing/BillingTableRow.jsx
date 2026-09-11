@@ -47,6 +47,20 @@ const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onV
                     {recibo.medidor_tipo === 'Tiempo Real' ? 'Hora Punta' : recibo.medidor_tipo}
                   </span>
                 )}
+                {Number(recibo.cantidad_anulados || 0) > 0 && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onViewHistorial(recibo.id);
+                    }}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wide bg-amber-500/15 text-amber-800 border border-amber-500/30 hover:bg-amber-500/25 transition-all shadow-xs cursor-pointer"
+                    title={`Este periodo tiene ${recibo.cantidad_anulados} comprobante(s) anulado(s). Haz clic para ver detalles del historial.`}
+                  >
+                    <span className="material-symbols-outlined text-[12px] text-amber-600" translate="no">history</span>
+                    <span>{recibo.cantidad_anulados} {Number(recibo.cantidad_anulados) === 1 ? 'Anulada' : 'Anuladas'}</span>
+                  </button>
+                )}
               </div>
               
               {/* Socio name as secondary text */}
@@ -93,9 +107,25 @@ const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onV
         </div>
       </td>
       <td className="px-4 py-2 text-center">
-        <span className={`inline-flex px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wide ${estado.bg} ${estado.text}`}>
-          {recibo.estado}
-        </span>
+        <div className="flex flex-col items-center gap-1">
+          <span className={`inline-flex px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wide ${estado.bg} ${estado.text}`}>
+            {recibo.estado}
+          </span>
+          {Number(recibo.cantidad_anulados || 0) > 0 && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewHistorial(recibo.id);
+              }}
+              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-tight bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100 transition-colors shadow-2xs"
+              title={`Clic para ver los detalles de las facturas anuladas`}
+            >
+              <span className="material-symbols-outlined text-[10px] text-amber-600" translate="no">warning</span>
+              {recibo.cantidad_anulados} {Number(recibo.cantidad_anulados) === 1 ? 'anulada' : 'anuladas'}
+            </button>
+          )}
+        </div>
       </td>
       <td className="px-4 py-2 text-right">
         <div className="flex items-center justify-end gap-2">
@@ -128,12 +158,23 @@ const BillingTableRow = memo(({ recibo, onViewPdf, onWhatsApp, onRefacturar, onV
           <div className="relative group/tooltip flex items-center justify-center">
             <button
               onClick={() => onViewHistorial(recibo.id)}
-              className="w-7 h-7 flex items-center justify-center text-primary hover:bg-primary/10 rounded-md transition-colors"
+              className={`w-7 h-7 flex items-center justify-center rounded-md transition-colors relative ${
+                Number(recibo.cantidad_anulados || 0) > 0
+                  ? 'text-amber-800 bg-amber-100 hover:bg-amber-200 border border-amber-300 ring-2 ring-amber-400/20'
+                  : 'text-primary hover:bg-primary/10'
+              }`}
             >
               <span className="material-symbols-outlined text-[16px]" translate="no">history</span>
+              {Number(recibo.cantidad_anulados || 0) > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-0.5 bg-amber-600 text-white text-[8.5px] font-black rounded-full flex items-center justify-center leading-none shadow-xs">
+                  {recibo.cantidad_anulados}
+                </span>
+              )}
             </button>
             <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
-              Historial de Cambios
+              {Number(recibo.cantidad_anulados || 0) > 0
+                ? `Ver Detalles de ${recibo.cantidad_anulados} Factura(s) Anulada(s)`
+                : 'Historial de Cambios'}
             </span>
           </div>
 

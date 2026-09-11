@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import { toast } from 'sonner';
+import HistorialModal from '../billing/HistorialModal';
 
 // ── Constants ────────────────────────────────────────────────────────
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -85,6 +86,7 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
   const [pagosHistorial, setPagosHistorial] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isHistorialModalOpen, setIsHistorialModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [cargos, setCargos] = useState(INITIAL_CARGOS);
@@ -499,6 +501,33 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
               {/* Left Column (Info & Metrics) */}
               <div className="lg:col-span-2 flex flex-col gap-3">
 
+                {/* Banner si tiene comprobantes anulados (refacturados) */}
+                {Number(recibo.cantidad_anulados || 0) > 0 && (
+                  <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-amber-900 shadow-sm">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/20 flex items-center justify-center text-amber-700 shrink-0">
+                        <span className="material-symbols-outlined text-[20px]" translate="no">history</span>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold leading-tight">
+                          Este periodo tiene {recibo.cantidad_anulados} {Number(recibo.cantidad_anulados) === 1 ? 'factura anulada previa' : 'facturas anuladas previas'} (Refacturación)
+                        </p>
+                        <p className="text-[11px] text-amber-800/80 mt-0.5">
+                          Puedes consultar los detalles, montos anteriores y motivos de anulación.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsHistorialModalOpen(true)}
+                      className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shrink-0 shadow-xs cursor-pointer"
+                    >
+                      <span className="material-symbols-outlined text-[15px]" translate="no">visibility</span>
+                      Ver Detalles Anulados
+                    </button>
+                  </div>
+                )}
+
                 {/* Hero Card */}
                 <div className="bg-surface rounded-xl border border-outline-variant/50 shadow-sm p-4 flex flex-col md:flex-row gap-4 justify-between items-start md:items-center">
                   <div className="flex gap-3 items-center">
@@ -667,6 +696,15 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
 
         {/* Modal Edit Cargos */}
         {renderEditModal()}
+
+        {/* Modal Historial de Refacturación */}
+        {recibo && (
+          <HistorialModal
+            isOpen={isHistorialModalOpen}
+            reciboId={recibo.id}
+            onClose={() => setIsHistorialModalOpen(false)}
+          />
+        )}
       </div>
     );
   };

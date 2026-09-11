@@ -5,6 +5,7 @@ import api from '../../api/axiosConfig';
 const HistorialModal = ({ isOpen, reciboId, onClose }) => {
   const [historial, setHistorial] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [downloadingId, setDownloadingId] = useState(null);
 
   useEffect(() => {
     if (isOpen && reciboId) {
@@ -28,6 +29,27 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
     }
   };
 
+  const handleDownloadPdf = async (item) => {
+    setDownloadingId(item.id);
+    try {
+      const response = await api.get(`/recibos/${item.id}/pdf`, { responseType: 'blob' });
+      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `Recibo_${item.numero_comprobante || item.id}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error(err);
+      toast.error('Error al descargar PDF');
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -42,7 +64,7 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
             </div>
             <div>
               <h2 className="text-lg font-bold text-on-surface leading-tight">Historial de Refacturaciones</h2>
-              <p className="text-sm text-on-surface-variant font-medium">Auditoría de cambios para este recibo</p>
+              <p className="text-sm text-on-surface-variant font-medium">Auditoría de comprobantes para este socio y periodo</p>
             </div>
           </div>
           <button
@@ -78,7 +100,7 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
                     }`}></div>
                     
                     <div className={`bg-surface border rounded-xl p-4 shadow-sm transition-all ${
-                      isLatest ? 'border-primary/30 ring-1 ring-primary/10' : 'border-outline-variant opacity-80'
+                      isLatest ? 'border-primary/30 ring-1 ring-primary/10' : 'border-outline-variant opacity-85'
                     }`}>
                       <div className="flex flex-wrap justify-between items-start gap-2 mb-3">
                         <div className="flex items-center gap-2">
@@ -125,15 +147,28 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
                         </div>
                       </div>
 
-                      {item.motivo_anulacion && (
-                        <div className="mt-2 p-2.5 bg-error/5 rounded-lg border border-error/10 flex items-start gap-2">
-                          <span className="material-symbols-outlined text-error text-[16px] mt-0.5" translate="no">info</span>
-                          <div>
-                            <p className="text-[10px] font-bold text-error uppercase mb-0.5">Motivo de Anulación</p>
-                            <p className="text-[12px] text-on-surface-variant font-medium">{item.motivo_anulacion}</p>
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mt-3 pt-2.5 border-t border-outline-variant/40">
+                        {item.motivo_anulacion ? (
+                          <div className="p-2 bg-error/5 rounded-lg border border-error/10 flex items-start gap-2 flex-1">
+                            <span className="material-symbols-outlined text-error text-[16px] mt-0.5 shrink-0" translate="no">info</span>
+                            <div>
+                              <p className="text-[10px] font-bold text-error uppercase mb-0.5">Motivo de Anulación</p>
+                              <p className="text-[12px] text-on-surface-variant font-medium">{item.motivo_anulacion}</p>
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        ) : <div />}
+
+                        <button
+                          type="button"
+                          onClick={() => handleDownloadPdf(item)}
+                          disabled={downloadingId === item.id}
+                          className="flex items-center gap-1 text-[11px] font-bold text-primary hover:text-primary/80 bg-primary/5 hover:bg-primary/10 border border-primary/20 px-2.5 py-1.5 rounded-lg transition-colors shrink-0"
+                          title="Descargar PDF de este comprobante"
+                        >
+                          <span className="material-symbols-outlined text-[15px]" translate="no">picture_as_pdf</span>
+                          {downloadingId === item.id ? 'Descargando...' : 'Ver PDF'}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );
