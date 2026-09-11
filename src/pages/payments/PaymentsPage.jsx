@@ -338,15 +338,18 @@ const Payments = () => {
   const isPagoExcedido = monto && parseFloat(monto) > saldoPendiente + PARTIAL_THRESHOLD;
 
   const filteredSocios = useMemo(() => {
-    if (searchSocio === '*') return recibosPendientes;
-    const term = searchSocio.toLowerCase();
-    return recibosPendientes.filter(r =>
-      (r.socio || '').toLowerCase().includes(term) ||
-      (r.numero_comprobante || '').toLowerCase().includes(term) ||
-      (r.medidor_num_serie && r.medidor_num_serie.toLowerCase().includes(term)) ||
-      (r.num_medidor && r.num_medidor.toLowerCase().includes(term)) ||
-      (r.num_serie && r.num_serie.toLowerCase().includes(term))
-    );
+    let list = recibosPendientes;
+    if (searchSocio !== '*') {
+      const term = searchSocio.toLowerCase();
+      list = recibosPendientes.filter(r =>
+        (r.socio || '').toLowerCase().includes(term) ||
+        (r.numero_comprobante || '').toLowerCase().includes(term) ||
+        (r.medidor_num_serie && r.medidor_num_serie.toLowerCase().includes(term)) ||
+        (r.num_medidor && r.num_medidor.toLowerCase().includes(term)) ||
+        (r.num_serie && r.num_serie.toLowerCase().includes(term))
+      );
+    }
+    return [...list].sort((a, b) => (a.socio || '').localeCompare(b.socio || '', 'es', { sensitivity: 'base' }));
   }, [recibosPendientes, searchSocio]);
 
   // Map recibo_id -> saldo_pendiente for fast lookups in table rows
@@ -847,32 +850,52 @@ const Payments = () => {
                         {filteredSocios.length === 0 ? (
                           <div className="p-2 text-xs text-on-surface-variant text-center">No se encontraron recibos pendientes</div>
                         ) : (
-                          filteredSocios.map(r => (
-                            <button
-                              key={r.id}
-                              type="button"
-                              onClick={() => handleSelectSocio(r)}
-                              className="w-full text-left px-3 py-2 hover:bg-surface-container-low border-b border-outline-variant/50 last:border-0 transition-colors flex flex-col"
-                            >
-                              <span className="font-bold text-xs text-on-surface">{r.socio}</span>
-                              <div className="flex justify-between items-center mt-0.5">
-                                <span className="text-[10px] text-on-surface-variant flex items-center gap-1">
-                                  <span className="material-symbols-outlined text-[12px]" translate="no">receipt_long</span>
-                                  {r.numero_comprobante}
-                                  {r.medidor_num_serie && (
-                                    <>
-                                      <span className="mx-1">•</span>
-                                      <span className="material-symbols-outlined text-[12px]" translate="no">speed</span>
-                                      {r.medidor_num_serie}
-                                    </>
+                          filteredSocios.map(r => {
+                            const saldo = parseFloat(r.saldo_pendiente ?? r.total ?? 0);
+                            const total = parseFloat(r.total ?? 0);
+                            const isParcial = r.estado === 'Pago Parcial' || (saldo > 0 && total > 0 && saldo < total - 0.05);
+
+                            return (
+                              <button
+                                key={r.id}
+                                type="button"
+                                onClick={() => handleSelectSocio(r)}
+                                className={`w-full text-left px-3 py-2 border-b border-outline-variant/50 last:border-0 transition-colors flex flex-col ${
+                                  isParcial
+                                    ? 'bg-amber-500/10 hover:bg-amber-500/20 border-l-4 border-l-amber-500'
+                                    : 'hover:bg-surface-container-low'
+                                }`}
+                              >
+                                <div className="flex justify-between items-center gap-2">
+                                  <span className={`font-bold text-xs ${isParcial ? 'text-amber-950 font-extrabold' : 'text-on-surface'}`}>
+                                    {r.socio}
+                                  </span>
+                                  {isParcial && (
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-amber-500/20 text-amber-800 border border-amber-500/30 shrink-0">
+                                      <span className="material-symbols-outlined text-[11px]" translate="no">timelapse</span>
+                                      Pago Parcial
+                                    </span>
                                   )}
-                                </span>
-                                <span className="text-[10px] font-bold font-data-mono text-error">
-                                  Deuda: S/ {parseFloat(r.saldo_pendiente || r.total).toFixed(2)}
-                                </span>
-                              </div>
-                            </button>
-                          ))
+                                </div>
+                                <div className="flex justify-between items-center mt-0.5">
+                                  <span className="text-[10px] text-on-surface-variant flex items-center gap-1">
+                                    <span className="material-symbols-outlined text-[12px]" translate="no">receipt_long</span>
+                                    {r.numero_comprobante}
+                                    {r.medidor_num_serie && (
+                                      <>
+                                        <span className="mx-1">•</span>
+                                        <span className="material-symbols-outlined text-[12px]" translate="no">speed</span>
+                                        {r.medidor_num_serie}
+                                      </>
+                                    )}
+                                  </span>
+                                  <span className={`text-[10px] font-bold font-data-mono ${isParcial ? 'text-amber-700' : 'text-error'}`}>
+                                    {isParcial ? 'Saldo: ' : 'Deuda: '}S/ {saldo.toFixed(2)}
+                                  </span>
+                                </div>
+                              </button>
+                            );
+                          })
                         )}
                       </div>
                     )}
