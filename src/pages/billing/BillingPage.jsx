@@ -60,6 +60,23 @@ const Billing = () => {
     activeYear,
   });
 
+  // --- Ordenamiento alfabético por Empresa / Socio ---
+  const [sortAsc, setSortAsc] = useState(true);
+
+  const sortedRecibos = useMemo(() => {
+    return [...recibos].sort((a, b) => {
+      const nameA = (a.socio || a.nombre_razonsocial || '').trim();
+      const nameB = (b.socio || b.nombre_razonsocial || '').trim();
+      const cmp = nameA.localeCompare(nameB, 'es', { sensitivity: 'base' });
+      if (cmp !== 0) return sortAsc ? cmp : -cmp;
+      const serieA = a.medidor_num_serie || '';
+      const serieB = b.medidor_num_serie || '';
+      return sortAsc
+        ? serieA.localeCompare(serieB, 'es', { numeric: true })
+        : serieB.localeCompare(serieA, 'es', { numeric: true });
+    });
+  }, [recibos, sortAsc]);
+
   // --- Derived values ---
   const uniqueMonths = useMemo(
     () =>
@@ -362,7 +379,21 @@ const Billing = () => {
           <table className="w-full text-left border-collapse table-auto whitespace-nowrap">
             <thead className="bg-surface-container-lowest border-b border-outline-variant text-on-surface-variant text-[11px] uppercase tracking-wider sticky top-0 z-10 shadow-sm">
               <tr>
-                <th className="px-4 py-2 font-semibold">Empresa / Socio</th>
+                <th
+                  onClick={() => setSortAsc((prev) => !prev)}
+                  className="px-4 py-2 font-semibold cursor-pointer select-none hover:bg-surface-container-high transition-colors group/sort"
+                  title="Clic para alternar orden alfabético"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Empresa / Socio</span>
+                    <span className="material-symbols-outlined text-[15px] text-primary transition-transform" translate="no">
+                      {sortAsc ? 'arrow_upward' : 'arrow_downward'}
+                    </span>
+                    <span className="text-[10px] text-primary/80 font-bold lowercase">
+                      ({sortAsc ? 'a-z' : 'z-a'})
+                    </span>
+                  </div>
+                </th>
                 <th className="px-4 py-2 font-semibold">Periodo</th>
                 <th className="px-4 py-2 font-semibold">Monto / Venc.</th>
                 <th className="px-4 py-2 font-semibold text-center">Estado</th>
@@ -376,7 +407,7 @@ const Billing = () => {
                     <span className="material-symbols-outlined animate-spin text-[24px]" translate="no">sync</span>
                   </td>
                 </tr>
-              ) : recibos.length === 0 ? (
+              ) : sortedRecibos.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="text-center p-8 text-on-surface-variant">
                     <span className="material-symbols-outlined text-[32px] opacity-20 mb-2 block" translate="no">search_off</span>
@@ -384,7 +415,7 @@ const Billing = () => {
                   </td>
                 </tr>
               ) : (
-                recibos.map((recibo) => (
+                sortedRecibos.map((recibo) => (
                   <BillingTableRow
                     key={recibo.id}
                     recibo={recibo}
@@ -407,7 +438,7 @@ const Billing = () => {
         {/* Foot of table (Total items count) */}
         <div className="px-lg py-sm border-t border-outline-variant bg-surface-container-lowest flex justify-end items-center gap-4">
           <span className="text-xs text-on-surface-variant font-medium">
-            Total: {recibos.length} recibos
+            Total: {sortedRecibos.length} recibos
           </span>
         </div>
       </div>
