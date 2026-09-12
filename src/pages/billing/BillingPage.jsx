@@ -53,7 +53,7 @@ const Billing = () => {
   // Data & Derived State (via custom hooks)
   // =========================================================================
 
-  const { recibos, periodos, globalStats, isLoading, filterParams, refetchAll } = useBillingData({
+  const { recibos, totalRecibos, totalPages, page, setPage, periodos, globalStats, isLoading, filterParams, refetchAll } = useBillingData({
     filterMes,
     filterEstado,
     debouncedSearchTerm,
@@ -435,11 +435,38 @@ const Billing = () => {
           </table>
         </div>
 
-        {/* Foot of table (Total items count) */}
-        <div className="px-lg py-sm border-t border-outline-variant bg-surface-container-lowest flex justify-end items-center gap-4">
+        {/* Foot of table: count + pagination */}
+        <div className="px-lg py-sm border-t border-outline-variant bg-surface-container-lowest flex flex-wrap justify-between items-center gap-2">
           <span className="text-xs text-on-surface-variant font-medium">
-            Total: {sortedRecibos.length} recibos
+            {totalRecibos} recibos en total · Página {page} de {totalPages || 1}
           </span>
+          {totalPages > 1 && (
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage(1)}
+                disabled={page === 1}
+                className="px-2 py-1 text-xs rounded border border-outline-variant disabled:opacity-40 hover:bg-surface-container transition-colors"
+                title="Primera página"
+              >«</button>
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                className="px-2 py-1 text-xs rounded border border-outline-variant disabled:opacity-40 hover:bg-surface-container transition-colors"
+              >‹ Anterior</button>
+              <span className="px-3 py-1 text-xs font-bold bg-primary text-white rounded">{page}</span>
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page >= totalPages}
+                className="px-2 py-1 text-xs rounded border border-outline-variant disabled:opacity-40 hover:bg-surface-container transition-colors"
+              >Siguiente ›</button>
+              <button
+                onClick={() => setPage(totalPages)}
+                disabled={page >= totalPages}
+                className="px-2 py-1 text-xs rounded border border-outline-variant disabled:opacity-40 hover:bg-surface-container transition-colors"
+                title="Última página"
+              >»</button>
+            </div>
+          )}
         </div>
       </div>
 

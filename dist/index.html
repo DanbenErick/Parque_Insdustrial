@@ -11,8 +11,15 @@
   
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+  <!-- Lexend: solo pesos usados (400, 600, 700) con carga no bloqueante -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet"></noscript>
+  <!-- Material Symbols: carga diferida para no bloquear el render -->
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"></noscript>
+
   <script>
     window.deferredPWAEvent = null;
     window.addEventListener('beforeinstallprompt', (e) => {
@@ -20,8 +27,13 @@
       window.deferredPWAEvent = e;
     });
   </script>
-  <script type="module" crossorigin src="/assets/index-CjR85nrW.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-CPv4bYni.css">
+  <script type="module" crossorigin src="/assets/index-Bw-0tc7P.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-aKtaBQYM.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-charts-BaE5bLnp.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-react-BBzjq_Oh.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-ui-PLxJgHCZ.js">
+  <link rel="modulepreload" crossorigin href="/assets/axiosConfig-BNNq8jLl.js">
+  <link rel="stylesheet" crossorigin href="/assets/index-e9Df5Efm.css">
 <link rel="manifest" href="/manifest.webmanifest"></head>
 
 <body>

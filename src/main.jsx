@@ -39,8 +39,10 @@ createRoot(document.getElementById('root')).render(
           </AuthProvider>
         </ThemeProvider>
       </BrowserRouter>
-      {/* Devtools de React Query (solo visible en desarrollo) */}
-      <ReactQueryDevtools initialIsOpen={false} position="bottom-left" />
+      {/* Devtools de React Query (solo en desarrollo) */}
+      {import.meta.env.DEV && (
+        <ReactQueryDevtools initialIsOpen={false} position="bottom-left" />
+      )}
     </QueryClientProvider>
   </StrictMode>,
 )

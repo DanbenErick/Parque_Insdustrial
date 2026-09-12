@@ -20,7 +20,6 @@ import {
   buildRecaudacionChartData,
   CONSUMO_CHART_OPTIONS,
   RECAUDACION_CHART_OPTIONS,
-  buildRecaudacionData,
   deriveKpiValues,
 } from './';
 
@@ -54,11 +53,11 @@ const Dashboard = () => {
         staleTime: 5 * 60 * 1000,
       },
       {
-        queryKey: ['recibos-dashboard', consumoYear, isGlobal],
+        // ✅ Endpoint dedicado: devuelve solo los totales agrupados por periodo (máx ~12 filas)
+        // Antes: /recibos?year=X retornaba TODOS los recibos (cientos de filas)
+        queryKey: ['dashboard-recaudacion', consumoYear],
         queryFn: () =>
-          api
-            .get(`/recibos?year=${consumoYear}${isGlobal ? '&periodo=TodosHistorico' : ''}`)
-            .then((r) => r.data),
+          api.get(`/dashboard/recaudacion?year=${consumoYear}`).then((r) => r.data),
         staleTime: 5 * 60 * 1000,
       },
       {
@@ -69,13 +68,14 @@ const Dashboard = () => {
     ],
   });
 
-  const [kpisQuery, chartQuery, readingsQuery, recibosQuery, alertsQuery] = results;
+  const [kpisQuery, chartQuery, readingsQuery, recaudacionQuery, alertsQuery] = results;
 
   const isLoading = results.some((r) => r.isLoading);
 
   const kpis = kpisQuery.data ?? { totalConsumo: 0, maxConsumo: 0, maxPeriodo: 'N/A', minConsumo: 0, minPeriodo: 'N/A' };
   const chartData = chartQuery.data ?? [];
-  const recibos = recibosQuery.data ?? [];
+  // recaudacionRaw ya viene agregado del server: [{ label, recaudado }]
+  const recaudacionRaw = recaudacionQuery.data ?? [];
 
   // --- All derived data is memoized ---
   const kpiValues = useMemo(() => deriveKpiValues(kpis, chartData), [kpis, chartData]);
@@ -85,14 +85,14 @@ const Dashboard = () => {
     [chartData],
   );
 
-  const { recaudacionData, totalRecaudado } = useMemo(
-    () => buildRecaudacionData(recibos, chartViewMode),
-    [recibos, chartViewMode],
+  const totalRecaudado = useMemo(
+    () => recaudacionRaw.reduce((sum, r) => sum + (r.recaudado || 0), 0),
+    [recaudacionRaw],
   );
 
   const recaudacionChart = useMemo(
-    () => (recaudacionData.length ? buildRecaudacionChartData(recaudacionData) : null),
-    [recaudacionData],
+    () => (recaudacionRaw.length ? buildRecaudacionChartData(recaudacionRaw) : null),
+    [recaudacionRaw],
   );
 
   // --- Stable view mode handlers ---

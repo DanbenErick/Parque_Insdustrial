@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import api from '../../../api/axiosConfig';
@@ -6,29 +6,39 @@ import { buildFilterParams } from '../billingUtils';
 
 /**
  * useBillingData — Fetches recibos, periodos and global stats using React Query.
- * Replaces the manual useEffect + useState pattern in BillingPage.
+ * Uses server-side pagination (page + limit) — no more downloading 100k rows.
  */
 export const useBillingData = ({ filterMes, filterEstado, debouncedSearchTerm, activeYear }) => {
   const queryClient = useQueryClient();
+  const [page, setPage] = useState(1);
+  const LIMIT = 100; // filas por página
 
   const filterParams = useMemo(
     () => buildFilterParams({ filterMes, filterEstado, debouncedSearchTerm, activeYear }),
     [filterMes, filterEstado, debouncedSearchTerm, activeYear],
   );
 
+  // Reset page when filters change
+  useMemo(() => { setPage(1); }, [filterParams]);
+
   // ── Recibos ──────────────────────────────────────────────────────────────
   const {
-    data: recibos = [],
+    data: recibosResponse,
     isLoading: isLoadingRecibos,
   } = useQuery({
-    queryKey: ['recibos', filterParams],
+    queryKey: ['recibos', filterParams, page],
     queryFn: async () => {
-      const res = await api.get('/recibos', { params: filterParams });
-      return res.data;
+      const res = await api.get('/recibos', { params: { ...filterParams, page, limit: LIMIT } });
+      return res.data; // { data: [], total: N, page, limit }
     },
     staleTime: 2 * 60 * 1000, // 2 min
     onError: () => toast.error('Error al cargar los recibos'),
+    keepPreviousData: true, // suave transición entre páginas
   });
+
+  const recibos = recibosResponse?.data ?? [];
+  const totalRecibos = recibosResponse?.total ?? 0;
+  const totalPages = Math.ceil(totalRecibos / LIMIT);
 
   // ── Periodos ─────────────────────────────────────────────────────────────
   const { data: periodos = [] } = useQuery({
@@ -59,6 +69,10 @@ export const useBillingData = ({ filterMes, filterEstado, debouncedSearchTerm, a
 
   return {
     recibos,
+    totalRecibos,
+    totalPages,
+    page,
+    setPage,
     periodos,
     globalStats,
     isLoading: isLoadingRecibos,

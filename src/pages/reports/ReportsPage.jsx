@@ -98,9 +98,9 @@ const Reports = () => {
 
       const newPeriodos = periodosRes.data || [];
       setPeriodos(newPeriodos);
-      setRecibos(recibosRes.data || []);
-      setLecturas(lecturasRes.data || []);
-      setChartData(chartRes.data || []);
+      setRecibos(Array.isArray(recibosRes.data) ? recibosRes.data : (recibosRes.data?.data || []));
+      setLecturas(Array.isArray(lecturasRes.data) ? lecturasRes.data : (lecturasRes.data?.data || []));
+      setChartData(Array.isArray(chartRes.data) ? chartRes.data : (chartRes.data?.data || []));
 
       if (newPeriodos.length > 0) {
         const yearPeriods = newPeriodos.filter(p => p.mes_anio?.includes(activeYear.toString()));

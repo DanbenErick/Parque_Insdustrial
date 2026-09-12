@@ -85,7 +85,7 @@ const DetailRow = React.memo(({ icon, label, value, valueClassName = 'text-xs fo
   </div>
 ));
 
-const PaymentRow = React.memo(({ pago, saldoPendiente, onSelect, onPrintTicket, onViewRecibo, onAnular, onWhatsApp }) => {
+const PaymentRow = React.memo(({ pago, saldoPendiente, onSelect, onOpenMenu, isMenuOpen }) => {
   const isPartial = isPartialPayment(pago.monto_pagado, pago.recibo_total);
 
   return (
@@ -152,65 +152,20 @@ const PaymentRow = React.memo(({ pago, saldoPendiente, onSelect, onPrintTicket, 
         )}
       </td>
       <td className="px-4 py-2 text-right">
-        {pago.estado_validacion === 'Anulado' ? (
-          <div className="flex items-center justify-end">
-            <button
-              onClick={(e) => { e.stopPropagation(); onSelect(pago); }}
-              className="inline-flex items-center gap-1 px-2 py-1 rounded bg-error/10 hover:bg-error/20 text-error text-[11px] font-bold transition-colors cursor-pointer"
-              title="Ver detalle del pago anulado y motivo"
-            >
-              <span className="material-symbols-outlined text-[15px]" translate="no">info</span>
-              <span>Ver Detalle</span>
-            </button>
-          </div>
-        ) : (
-          <div className="flex items-center justify-end gap-2">
-            <div className="relative group/tooltip flex items-center justify-center">
-              <button
-                onClick={(e) => { e.stopPropagation(); onPrintTicket(pago.id); }}
-              className="p-1.5 rounded-md text-primary hover:bg-primary/10 transition-colors"
-            >
-              <span className="material-symbols-outlined text-[18px]" translate="no">receipt_long</span>
-            </button>
-            <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
-              Imprimir Ticket
-            </span>
-          </div>
-          <div className="relative group/tooltip flex items-center justify-center">
-            <button
-              onClick={(e) => { e.stopPropagation(); onWhatsApp(pago); }}
-              className="p-1.5 rounded-md text-[#25D366] hover:bg-[#25D366]/10 transition-colors"
-            >
-              <span className="material-symbols-outlined text-[18px]" translate="no">chat</span>
-            </button>
-            <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
-              Enviar por WhatsApp
-            </span>
-          </div>
-          <div className="relative group/tooltip flex items-center justify-center">
-            <button
-              onClick={(e) => { e.stopPropagation(); onViewRecibo(pago.recibo_id); }}
-              className="p-1.5 rounded-md text-secondary hover:bg-secondary/10 transition-colors"
-            >
-              <span className="material-symbols-outlined text-[18px]" translate="no">picture_as_pdf</span>
-            </button>
-            <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
-              Ver Recibo
-            </span>
-          </div>
-          <div className="relative group/tooltip flex items-center justify-center">
-            <button
-              onClick={(e) => { e.stopPropagation(); onAnular(pago.id); }}
-              className="p-1.5 rounded-md text-error hover:bg-error/10 transition-colors"
-            >
-              <span className="material-symbols-outlined text-[18px]" translate="no">delete</span>
-            </button>
-            <span className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 px-2 py-1 bg-gray-800 text-white text-[10px] rounded opacity-0 group-hover/tooltip:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-10">
-              Anular Pago
-            </span>
-          </div>
+        <div className="flex items-center justify-end">
+          <button
+            type="button"
+            onClick={(e) => onOpenMenu(pago, e)}
+            className={`w-7 h-7 rounded-md flex items-center justify-center transition-colors cursor-pointer ${
+              isMenuOpen
+                ? 'bg-primary/15 text-primary ring-1 ring-primary/30'
+                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+            }`}
+            title="Opciones de pago"
+          >
+            <span className="material-symbols-outlined text-[20px]" translate="no">more_vert</span>
+          </button>
         </div>
-      )}
       </td>
     </tr>
   );
@@ -231,6 +186,7 @@ const Payments = () => {
   const [selectedPaymentForDetails, setSelectedPaymentForDetails] = useState(null);
   const [filterMes, setFilterMes] = useState('ULTIMO');
   const [showAnulados, setShowAnulados] = useState(true);
+  const [actionMenu, setActionMenu] = useState(null);
 
   // ── React Query — data fetching ────────────────────────────────────
 
@@ -258,9 +214,9 @@ const Payments = () => {
     onError: () => toast.error('Error al cargar datos de pagos'),
   });
 
-  const pagos = fetchedData?.pagos ?? [];
-  const allRecibos = fetchedData?.recibos ?? [];
-  const periodos = fetchedData?.periodos ?? [];
+  const pagos = Array.isArray(fetchedData?.pagos) ? fetchedData.pagos : (fetchedData?.pagos?.data ?? []);
+  const allRecibos = Array.isArray(fetchedData?.recibos) ? fetchedData.recibos : (fetchedData?.recibos?.data ?? []);
+  const periodos = Array.isArray(fetchedData?.periodos) ? fetchedData.periodos : (fetchedData?.periodos?.data ?? []);
 
   const refetchAll = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['pagos-data'] });
@@ -284,6 +240,14 @@ const Payments = () => {
   const [pagoToAnular, setPagoToAnular] = useState(null);
   const [motivoAnulacion, setMotivoAnulacion] = useState('');
   const [isSubmittingAnular, setIsSubmittingAnular] = useState(false);
+
+  // Modal Modificar Pago state
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [pagoToEdit, setPagoToEdit] = useState(null);
+  const [editMetodoPago, setEditMetodoPago] = useState('Transferencia');
+  const [editNumeroOperacion, setEditNumeroOperacion] = useState('');
+  const [editFechaPago, setEditFechaPago] = useState('');
+  const [isSubmittingEdit, setIsSubmittingEdit] = useState(false);
 
   // ── Memoised derived data ──────────────────────────────────────────
   const recibosDisponibles = useMemo(() => {
@@ -484,8 +448,12 @@ const Payments = () => {
   }, [pagoToAnular, motivoAnulacion, refetchAll]);
 
   const handleExportExcel = useCallback(async () => {
+    const pagosActivos = filteredPagos.filter(p => p.estado_validacion !== 'Anulado');
+    if (!pagosActivos.length) {
+      return toast.error('No hay pagos activos para exportar');
+    }
     try {
-      const params = { ...buildFilterParams(filterMes, activeYear) };
+      const params = { ...buildFilterParams(filterMes, activeYear), includeAnulados: false };
       if (searchTerm) params.search = searchTerm;
 
       const response = await api.get('/pagos/reporte/excel', { params, responseType: 'blob' });
@@ -502,15 +470,16 @@ const Payments = () => {
     } catch {
       toast.error('Error al descargar el Excel');
     }
-  }, [filterMes, activeYear, searchTerm]);
+  }, [filteredPagos, filterMes, activeYear, searchTerm]);
 
   const handleExportPDF = useCallback(async () => {
-    if (!filteredPagos.length) {
-      return toast.error('No hay pagos para exportar');
+    const pagosActivos = filteredPagos.filter(p => p.estado_validacion !== 'Anulado');
+    if (!pagosActivos.length) {
+      return toast.error('No hay pagos activos para exportar');
     }
     try {
       toast.info('Generando PDF, por favor espere...');
-      const params = { ...buildFilterParams(filterMes, activeYear) };
+      const params = { ...buildFilterParams(filterMes, activeYear), includeAnulados: false };
       if (searchTerm) params.search = searchTerm;
 
       const response = await api.get('/pagos/reporte/pdf', { params, responseType: 'blob' });
@@ -525,15 +494,16 @@ const Payments = () => {
     } catch {
       toast.error('Error al exportar a PDF');
     }
-  }, [filteredPagos.length, filterMes, activeYear, searchTerm]);
+  }, [filteredPagos, filterMes, activeYear, searchTerm]);
 
   const handleExportAllPdf = useCallback(async () => {
-    if (!filteredPagos.length) {
-      return toast.error('No hay pagos para exportar');
+    const pagosActivos = filteredPagos.filter(p => p.estado_validacion !== 'Anulado');
+    if (!pagosActivos.length) {
+      return toast.error('No hay pagos activos para exportar');
     }
     try {
       toast.loading('Generando PDF masivo...', { id: 'pdfMasivo' });
-      const params = { ...buildFilterParams(filterMes, activeYear) };
+      const params = { ...buildFilterParams(filterMes, activeYear), includeAnulados: false };
       if (searchTerm) params.search = searchTerm;
 
       const response = await api.get('/pagos/export/all', { params, responseType: 'blob' });
@@ -550,7 +520,7 @@ const Payments = () => {
     } catch (error) {
       toast.error(error.response?.data?.error || 'Error al generar PDF masivo', { id: 'pdfMasivo' });
     }
-  }, [filteredPagos.length, filterMes, activeYear, searchTerm]);
+  }, [filteredPagos, filterMes, activeYear, searchTerm]);
 
   const handleWhatsApp = useCallback(async (pago) => {
     if (!pago.telefono) {
@@ -635,6 +605,119 @@ const Payments = () => {
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [isPdfModalOpen, closePdfModal]);
+
+  const handleOpenMenu = useCallback((pago, e) => {
+    e.stopPropagation();
+    if (actionMenu?.pago?.id === pago.id) {
+      setActionMenu(null);
+      return;
+    }
+    const rect = e.currentTarget.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const menuHeight = 240;
+    const openUp = spaceBelow < menuHeight && rect.top > menuHeight;
+
+    setActionMenu({
+      pago,
+      top: openUp ? undefined : rect.bottom + 4,
+      bottom: openUp ? window.innerHeight - rect.top + 4 : undefined,
+      right: Math.max(12, window.innerWidth - rect.right),
+    });
+  }, [actionMenu]);
+
+  // Close action dropdown on Escape, scroll or resize
+  useEffect(() => {
+    if (!actionMenu) return;
+    const handleKeyDown = (e) => { if (e.key === 'Escape') setActionMenu(null); };
+    const handleScrollOrResize = () => setActionMenu(null);
+    document.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('scroll', handleScrollOrResize, true);
+    window.addEventListener('resize', handleScrollOrResize);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
+    };
+  }, [actionMenu]);
+
+  const handleOpenEditModal = useCallback((pago) => {
+    setPagoToEdit(pago);
+    setEditMetodoPago(pago.metodo_pago || 'Transferencia');
+    setEditNumeroOperacion(pago.numero_operacion || '');
+
+    if (pago.fecha_pago) {
+      const d = new Date(pago.fecha_pago);
+      if (!isNaN(d.getTime())) {
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        setEditFechaPago(`${year}-${month}-${day}`);
+      } else {
+        setEditFechaPago('');
+      }
+    } else {
+      setEditFechaPago('');
+    }
+    setIsEditModalOpen(true);
+  }, []);
+
+  const handleCloseEditModal = useCallback(() => {
+    if (isSubmittingEdit) return;
+    setIsEditModalOpen(false);
+    setPagoToEdit(null);
+  }, [isSubmittingEdit]);
+
+  const handleConfirmEditPago = useCallback(async (e) => {
+    e.preventDefault();
+    if (!pagoToEdit) return;
+
+    if (!editFechaPago) {
+      return toast.error('Debe seleccionar una fecha de pago');
+    }
+    if (!editMetodoPago) {
+      return toast.error('Debe seleccionar un método de pago');
+    }
+
+    setIsSubmittingEdit(true);
+    try {
+      const fechaFull = `${editFechaPago} 12:00:00`;
+
+      await api.put(`/pagos/${pagoToEdit.id}`, {
+        fecha_pago: fechaFull,
+        metodo_pago: editMetodoPago,
+        numero_operacion: editNumeroOperacion.trim() || null,
+      });
+
+      toast.success('Pago modificado exitosamente');
+      setIsEditModalOpen(false);
+      setPagoToEdit(null);
+      refetchAll();
+
+      setSelectedPaymentForDetails(prev => {
+        if (prev && prev.id === pagoToEdit.id) {
+          return {
+            ...prev,
+            fecha_pago: fechaFull,
+            metodo_pago: editMetodoPago,
+            numero_operacion: editNumeroOperacion.trim() || null,
+          };
+        }
+        return prev;
+      });
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Error al modificar el pago');
+    } finally {
+      setIsSubmittingEdit(false);
+    }
+  }, [pagoToEdit, editFechaPago, editMetodoPago, editNumeroOperacion, refetchAll]);
+
+  // Close edit modal with Escape key
+  useEffect(() => {
+    if (!isEditModalOpen) return;
+    const handler = (e) => { if (e.key === 'Escape' && !isSubmittingEdit) handleCloseEditModal(); };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [isEditModalOpen, isSubmittingEdit, handleCloseEditModal]);
 
   // ── Render ─────────────────────────────────────────────────────────
   return (
@@ -829,13 +912,13 @@ const Payments = () => {
                 <th className="px-4 py-2 font-semibold">Detalle / Fecha</th>
                 <th className="px-4 py-2 font-semibold text-center">Estado</th>
                 <th className="px-4 py-2 font-semibold text-right">Monto</th>
-                <th className="px-4 py-2 font-semibold text-right">Acciones</th>
+                <th className="px-4 py-2 font-semibold text-right w-16">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/50 bg-surface">
               {isLoading ? (
                 <tr>
-                  <td colSpan="4" className="text-center p-8 text-on-surface-variant">
+                  <td colSpan="5" className="text-center p-8 text-on-surface-variant">
                     <span className="material-symbols-outlined animate-spin text-[24px]" translate="no">sync</span>
                   </td>
                 </tr>
@@ -853,14 +936,8 @@ const Payments = () => {
                     pago={pago}
                     saldoPendiente={reciboSaldoMap.get(pago.recibo_id) || 0}
                     onSelect={setSelectedPaymentForDetails}
-                    onPrintTicket={handlePrintTicket}
-                    onViewRecibo={handleViewPdfRecibo}
-                    onAnular={() => {
-                      setPagoToAnular(pago);
-                      setMotivoAnulacion('');
-                      setIsAnularModalOpen(true);
-                    }}
-                    onWhatsApp={handleWhatsApp}
+                    onOpenMenu={handleOpenMenu}
+                    isMenuOpen={actionMenu?.pago?.id === pago.id}
                   />
                 ))
               )}
@@ -1185,6 +1262,146 @@ const Payments = () => {
         document.body,
       )}
 
+      {/* Dropdown flotante de Acciones */}
+      {actionMenu && createPortal(
+        <div className="dropdown-portal">
+          <div
+            className="fixed inset-0 z-[80]"
+            onClick={() => setActionMenu(null)}
+            onContextMenu={(e) => { e.preventDefault(); setActionMenu(null); }}
+          />
+          <div
+            style={{
+              top: actionMenu.top !== undefined ? `${actionMenu.top}px` : 'auto',
+              bottom: actionMenu.bottom !== undefined ? `${actionMenu.bottom}px` : 'auto',
+              right: `${actionMenu.right}px`,
+            }}
+            className="fixed z-[85] w-56 bg-white rounded-xl shadow-2xl border border-outline-variant/80 py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-100"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header del dropdown */}
+            <div className="px-3.5 py-2 mb-1 border-b border-outline-variant/50 flex items-center justify-between bg-surface-container-lowest">
+              <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Acciones</span>
+              <span className="font-data-mono text-[10px] font-bold text-primary">{actionMenu.pago.numero_comprobante || 'S/N'}</span>
+            </div>
+
+            {actionMenu.pago.estado_validacion === 'Anulado' ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const p = actionMenu.pago;
+                    setActionMenu(null);
+                    setSelectedPaymentForDetails(p);
+                  }}
+                  className="w-full px-3.5 py-2 text-left text-xs font-semibold text-error hover:bg-error/10 flex items-center gap-2.5 transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px]" translate="no">info</span>
+                  <span>Ver Detalle y Motivo</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const p = actionMenu.pago;
+                    setActionMenu(null);
+                    handleViewPdfRecibo(p.recibo_id);
+                  }}
+                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-secondary" translate="no">picture_as_pdf</span>
+                  <span>Ver Recibo Original</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const p = actionMenu.pago;
+                    setActionMenu(null);
+                    handlePrintTicket(p.id);
+                  }}
+                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-primary" translate="no">receipt_long</span>
+                  <span>Imprimir Ticket</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const p = actionMenu.pago;
+                    setActionMenu(null);
+                    handleWhatsApp(p);
+                  }}
+                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-[#25D366]" translate="no">chat</span>
+                  <span>Enviar por WhatsApp</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const p = actionMenu.pago;
+                    setActionMenu(null);
+                    handleViewPdfRecibo(p.recibo_id);
+                  }}
+                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-secondary" translate="no">picture_as_pdf</span>
+                  <span>Ver Recibo</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const p = actionMenu.pago;
+                    setActionMenu(null);
+                    handleOpenEditModal(p);
+                  }}
+                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-amber-600" translate="no">edit</span>
+                  <span>Modificar Pago</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const p = actionMenu.pago;
+                    setActionMenu(null);
+                    setSelectedPaymentForDetails(p);
+                  }}
+                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px] text-on-surface-variant" translate="no">visibility</span>
+                  <span>Ver Detalle</span>
+                </button>
+
+                <div className="my-1 border-t border-outline-variant/60" />
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const p = actionMenu.pago;
+                    setActionMenu(null);
+                    setPagoToAnular(p);
+                    setMotivoAnulacion('');
+                    setIsAnularModalOpen(true);
+                  }}
+                  className="w-full px-3.5 py-2 text-left text-xs font-semibold text-error hover:bg-error/10 flex items-center gap-2.5 transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-[18px]" translate="no">delete</span>
+                  <span>Anular Pago</span>
+                </button>
+              </>
+            )}
+          </div>
+        </div>,
+        document.body
+      )}
+
       {/* Modal Anular Pago */}
       {isAnularModalOpen && pagoToAnular && (
         <div {...MODAL_BACKDROP} className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
@@ -1293,6 +1510,133 @@ const Payments = () => {
         </div>
       )}
 
+      {/* Modal Modificar Pago */}
+      {isEditModalOpen && pagoToEdit && (
+        <div {...MODAL_BACKDROP} className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div {...MODAL_CONTENT} className="bg-surface rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden border border-outline-variant animate-in fade-in zoom-in-95 duration-150">
+            {/* Header */}
+            <div className="px-5 py-4 border-b border-outline-variant bg-amber-500/10 flex justify-between items-center">
+              <h3 className="text-base text-amber-900 font-bold flex items-center gap-2">
+                <span className="material-symbols-outlined text-[22px] text-amber-700" translate="no">edit_square</span>
+                Modificar Información del Pago
+              </h3>
+              <button
+                onClick={handleCloseEditModal}
+                disabled={isSubmittingEdit}
+                className="w-7 h-7 rounded-full hover:bg-surface-variant flex items-center justify-center text-on-surface-variant transition-colors disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-[18px]" translate="no">close</span>
+              </button>
+            </div>
+
+            {/* Form */}
+            <form onSubmit={handleConfirmEditPago} className="p-5 space-y-4">
+              {/* Resumen del pago */}
+              <div className="bg-surface-container-low border border-outline-variant/60 rounded-xl p-3.5 space-y-2 text-xs">
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-medium">Socio:</span>
+                  <span className="font-bold text-on-surface text-right">{pagoToEdit.socio}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-medium">Recibo / Comprobante:</span>
+                  <span className="font-data-mono font-bold text-on-surface">{pagoToEdit.numero_comprobante}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-on-surface-variant font-medium">Monto Pagado:</span>
+                  <span className="font-data-mono font-bold text-primary text-sm">S/ {fmtCurrency(pagoToEdit.monto_pagado)}</span>
+                </div>
+              </div>
+
+              {/* Campos modificables */}
+              <div className="space-y-3">
+                {/* Método de Pago */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-0.5">
+                    Método de Pago <span className="text-error">*</span>
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">account_balance</span>
+                    <select
+                      className="appearance-none w-full border border-outline-variant rounded-md pl-8 pr-8 py-1.5 h-8 bg-white text-xs font-medium focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors cursor-pointer"
+                      value={editMetodoPago}
+                      onChange={(e) => setEditMetodoPago(e.target.value)}
+                      required
+                    >
+                      <option value="Transferencia">Transferencia</option>
+                      <option value="Efectivo">Efectivo</option>
+                      <option value="Cheque">Cheque</option>
+                      <option value="Depósito">Depósito en Cuenta</option>
+                    </select>
+                    <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[16px]" translate="no">expand_more</span>
+                  </div>
+                </div>
+
+                {/* Nº Operación */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-0.5">
+                    Nº Operación / Referencia
+                  </label>
+                  <div className="relative">
+                    <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">tag</span>
+                    <input
+                      type="text"
+                      className="w-full border border-outline-variant rounded-md pl-8 pr-3 py-1.5 h-8 bg-white font-data-mono text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                      value={editNumeroOperacion}
+                      onChange={(e) => setEditNumeroOperacion(e.target.value)}
+                      placeholder="Ej. 04829102"
+                    />
+                  </div>
+                </div>
+
+                {/* Fecha de Pago */}
+                <div className="flex flex-col gap-1">
+                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-0.5">
+                    Fecha de Pago <span className="text-error">*</span>
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="date"
+                      className="w-full border border-outline-variant rounded-md px-3 py-1.5 h-8 bg-white font-data-mono text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
+                      value={editFechaPago}
+                      onChange={(e) => setEditFechaPago(e.target.value)}
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Botones de acción */}
+              <div className="flex justify-end items-center gap-2 pt-3 border-t border-outline-variant">
+                <button
+                  type="button"
+                  disabled={isSubmittingEdit}
+                  onClick={handleCloseEditModal}
+                  className="px-4 py-2 text-xs font-semibold text-on-surface-variant hover:bg-surface-variant rounded-md transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingEdit || !editFechaPago || !editMetodoPago}
+                  className="px-4 py-2 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-md transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
+                >
+                  {isSubmittingEdit ? (
+                    <>
+                      <span className="material-symbols-outlined animate-spin text-[16px]" translate="no">sync</span>
+                      Guardando...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-[16px]" translate="no">save</span>
+                      Guardar Cambios
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Drawer de Detalles del Pago (Portal) */}
 
@@ -1403,7 +1747,18 @@ const Payments = () => {
               })()}
 
               {/* Actions */}
-              <div className="pt-6 mt-auto">
+              <div className="pt-6 mt-auto space-y-2">
+                {selectedPaymentForDetails.estado_validacion !== 'Anulado' && (
+                  <button
+                    onClick={() => {
+                      handleOpenEditModal(selectedPaymentForDetails);
+                    }}
+                    className="w-full py-1.5 h-8 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-900 text-xs font-bold rounded-md flex items-center justify-center gap-1.5 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-[16px]" translate="no">edit</span>
+                    Modificar Datos del Pago
+                  </button>
+                )}
                 <button
                   onClick={handleViewRecibo}
                   className="w-full py-1.5 h-8 bg-surface-container-low hover:bg-surface-variant border border-outline-variant text-on-surface text-xs font-bold rounded-md flex items-center justify-center gap-1.5 transition-colors"
