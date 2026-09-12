@@ -1,8 +1,18 @@
-import React, { useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
+
+const STATUS_CONFIG = {
+  Pendiente: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', icon: 'schedule' },
+  Pagado: { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', icon: 'check_circle' },
+  Vencido: { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', icon: 'error' },
+  'Pago Parcial': { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', icon: 'incomplete_circle' },
+};
+
+const getStatusConfig = (estado) =>
+  STATUS_CONFIG[estado] || { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-700', icon: 'info' };
 
 const SocioBillingPage = () => {
   const { user } = useAuth();
@@ -13,7 +23,7 @@ const SocioBillingPage = () => {
     enabled: !!user?.id
   });
 
-  const handleDownloadPDF = async (recibo) => {
+  const handleDownloadPDF = useCallback(async (recibo) => {
     try {
       toast.loading('Generando PDF...', { id: 'pdf-gen' });
       const response = await api.get(`/recibos/${recibo.id}/pdf`, { responseType: 'blob' });
@@ -31,17 +41,7 @@ const SocioBillingPage = () => {
       console.error('Error al descargar PDF:', error);
       toast.error('Error al generar el PDF', { id: 'pdf-gen' });
     }
-  };
-
-  const getStatusConfig = (estado) => {
-    switch (estado) {
-      case 'Pendiente': return { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', icon: 'schedule' };
-      case 'Pagado': return { bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-700', icon: 'check_circle' };
-      case 'Vencido': return { bg: 'bg-red-50', border: 'border-red-200', text: 'text-red-700', icon: 'error' };
-      case 'Pago Parcial': return { bg: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700', icon: 'incomplete_circle' };
-      default: return { bg: 'bg-gray-50', border: 'border-gray-200', text: 'text-gray-700', icon: 'info' };
-    }
-  };
+  }, [user?.nombre_razonsocial]);
 
   if (isLoading) {
     return (

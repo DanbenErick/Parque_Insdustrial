@@ -60,64 +60,37 @@ const TopBar = ({ screens }) => {
   );
 
   return (
-    <header className="sticky top-0 z-40 bg-surface/80 backdrop-blur-md hidden md:flex justify-between items-center w-full px-lg h-16 border-b border-outline-variant print:hidden">
-      <div className="flex items-center gap-lg">
-        <div className="relative hidden lg:block">
-          <input
-            type="text"
-            value={globalSearchTerm}
-            onChange={handleGlobalSearch}
-            placeholder="Buscar pantallas..."
-            className="bg-surface-container border border-outline-variant rounded-full pl-10 pr-4 py-2 text-sm w-64 focus:border-primary outline-none focus:w-80 transition-all"
-          />
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]" translate="no">search</span>
-
-          {/* Search Results Dropdown */}
-          {globalSearchResults.length > 0 && (
-            <div className="absolute top-full left-0 mt-2 w-full bg-surface border border-outline-variant rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2">
-              <ul className="divide-y divide-outline-variant">
-                {globalSearchResults.map((screen) => (
-                  <li
-                    key={screen.view}
-                    onClick={() => handleNavClick(screen.view)}
-                    className="px-4 py-3 hover:bg-surface-container cursor-pointer flex items-center gap-3 transition-colors group"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                      <span className="material-symbols-outlined text-[18px]" translate="no">{screen.icon}</span>
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm text-on-surface">{screen.name}</p>
-                      <p className="text-[10px] text-on-surface-variant uppercase tracking-wider">Pantalla del Sistema</p>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+    <header className="sticky top-0 z-40 bg-surface/90 backdrop-blur-md flex md:hidden justify-between items-center w-full px-4 h-12 border-b border-outline-variant print:hidden">
+      {/* Logo & Marca en móvil */}
+      <div className="flex items-center gap-2">
+        <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-outline-variant/30">
+          <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+        </div>
+        <div className="flex flex-col">
+          <span className="font-bold text-xs text-on-surface leading-none">Parque Industrial</span>
+          <span className="text-[8px] text-on-surface-variant font-bold tracking-widest uppercase">Jicamarca</span>
         </div>
       </div>
 
-      <div className="flex items-center gap-md relative">
+      {/* Acciones en móvil */}
+      <div className="flex items-center gap-1">
         <button
           onClick={toggleFullscreen}
-          className="relative p-2 hover:bg-surface-container rounded-full transition-colors hidden sm:block"
+          className="p-1.5 hover:bg-surface-container rounded-full text-on-surface-variant transition-colors"
           title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
         >
-          <span className="material-symbols-outlined text-on-surface-variant" translate="no">
+          <span className="material-symbols-outlined text-[18px]" translate="no">
             {isFullscreen ? 'fullscreen_exit' : 'fullscreen'}
           </span>
         </button>
 
-
-
         <button
           onClick={() => navigate('/settings')}
-          className="w-10 h-10 flex items-center justify-center hover:bg-surface-container-low transition-colors rounded-full text-on-surface-variant"
+          className="p-1.5 hover:bg-surface-container rounded-full text-on-surface-variant transition-colors"
+          title="Configuración"
         >
-          <span className="material-symbols-outlined" translate="no">settings</span>
+          <span className="material-symbols-outlined text-[18px]" translate="no">settings</span>
         </button>
-
-
       </div>
     </header>
   );

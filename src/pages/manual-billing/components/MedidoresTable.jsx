@@ -81,7 +81,7 @@ export const MedidoresTable = ({
         </div>
       </div>
 
-      <div ref={scrollRef} className="overflow-x-auto overflow-y-auto custom-scrollbar flex-1 max-h-[340px]">
+      <div ref={scrollRef} className="overflow-x-auto overflow-y-auto custom-scrollbar flex-1 max-h-[600px]">
         <table className="w-full text-left border-collapse min-w-[600px]">
           <thead>
             <tr className="border-b border-outline-variant bg-surface-container/30">

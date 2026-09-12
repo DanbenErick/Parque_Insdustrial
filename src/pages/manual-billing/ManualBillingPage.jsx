@@ -12,6 +12,7 @@ import { BillingHeader } from './components/BillingHeader';
 import { MedidoresTable } from './components/MedidoresTable';
 import { RegistrationForm } from './components/RegistrationForm';
 import { HistoryPanel } from './components/HistoryPanel';
+import { RegisteredReadingsTab } from './components/RegisteredReadingsTab';
 import { AllReadingsModal } from './components/AllReadingsModal';
 import { EditReadingModal } from './components/EditReadingModal';
 import { ReadingDetailDrawer } from './components/ReadingDetailDrawer';
@@ -73,10 +74,11 @@ const ManualBilling = () => {
   } = billingForms;
 
   const [selectedDetailRecord, setSelectedDetailRecord] = useState(null);
+  const [activeTab, setActiveTab] = useState('registro'); // 'registro' | 'registradas'
 
   return (
     <main className="p-4 md:p-xl space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow relative flex flex-col h-full">
-      <div className="space-y-lg w-full">
+      <div className="space-y-4 w-full">
         <BillingHeader 
           activePeriodo={activePeriodo}
           setActivePeriodo={setActivePeriodo}
@@ -91,11 +93,74 @@ const ManualBilling = () => {
           onExportExcel={() => exportLecturasToExcel(medidores, lecturasPeriodoActivoMap, activePeriodo)}
         />
 
-        <div className="flex flex-col gap-lg">
-          {/* Top Section: Search & Form / Table */}
-          <div className="w-full">
+        {/* Barra de Pestañas / Tabs */}
+        <div className="border-b border-outline-variant/60 flex items-center justify-between overflow-x-auto custom-scrollbar">
+          <nav className="flex items-center gap-1.5 sm:gap-2 -mb-px min-w-max" aria-label="Pestañas de lecturas">
+            {/* Tab 1: Registro de Lecturas */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('registro')}
+              className={`group relative flex items-center gap-2.5 px-4 sm:px-6 py-3 text-xs sm:text-sm font-bold transition-all cursor-pointer select-none rounded-t-xl border-t-2 border-x ${
+                activeTab === 'registro'
+                  ? 'bg-surface text-primary border-t-primary border-x-outline-variant/60 shadow-[0_-2px_6px_rgba(0,0,0,0.03)] z-10'
+                  : 'bg-surface-container-low/70 text-on-surface-variant hover:text-on-surface hover:bg-surface-container border-transparent'
+              }`}
+            >
+              <span className={`material-symbols-outlined text-[20px] transition-colors ${
+                activeTab === 'registro' ? 'text-primary' : 'text-on-surface-variant/70 group-hover:text-on-surface'
+              }`} translate="no">
+                electric_meter
+              </span>
+              <span>Registro de Lecturas</span>
+              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold font-data-mono transition-colors ${
+                activeTab === 'registro'
+                  ? 'bg-primary text-white shadow-xs'
+                  : 'bg-surface-container-high text-on-surface-variant group-hover:bg-surface-container-highest'
+              }`}>
+                {totalMedidores}
+              </span>
+              {/* Oculta la línea inferior para fusionar con el fondo */}
+              {activeTab === 'registro' && (
+                <span className="absolute -bottom-[1px] left-0 right-0 h-[2px] bg-surface" />
+              )}
+            </button>
+
+            {/* Tab 2: Lecturas Registradas */}
+            <button
+              type="button"
+              onClick={() => setActiveTab('registradas')}
+              className={`group relative flex items-center gap-2.5 px-4 sm:px-6 py-3 text-xs sm:text-sm font-bold transition-all cursor-pointer select-none rounded-t-xl border-t-2 border-x ${
+                activeTab === 'registradas'
+                  ? 'bg-surface text-primary border-t-primary border-x-outline-variant/60 shadow-[0_-2px_6px_rgba(0,0,0,0.03)] z-10'
+                  : 'bg-surface-container-low/70 text-on-surface-variant hover:text-on-surface hover:bg-surface-container border-transparent'
+              }`}
+            >
+              <span className={`material-symbols-outlined text-[20px] transition-colors ${
+                activeTab === 'registradas' ? 'text-primary' : 'text-on-surface-variant/70 group-hover:text-on-surface'
+              }`} translate="no">
+                fact_check
+              </span>
+              <span>Lecturas Registradas</span>
+              <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-extrabold font-data-mono transition-colors ${
+                activeTab === 'registradas'
+                  ? 'bg-[#059669] text-white shadow-xs'
+                  : 'bg-surface-container-high text-on-surface-variant group-hover:bg-surface-container-highest'
+              }`}>
+                {totalRegistrados}
+              </span>
+              {/* Oculta la línea inferior para fusionar con el fondo */}
+              {activeTab === 'registradas' && (
+                <span className="absolute -bottom-[1px] left-0 right-0 h-[2px] bg-surface" />
+              )}
+            </button>
+          </nav>
+        </div>
+
+        {/* Tab 1: Padrón y Registro de Lecturas */}
+        {activeTab === 'registro' && (
+          <div className="w-full animate-in fade-in duration-200">
             {selectedMember && (
-                <RegistrationForm 
+              <RegistrationForm 
                 selectedMember={selectedMember}
                 onClose={resetForm}
                 lecturaExistente={lecturaExistente}
@@ -126,18 +191,20 @@ const ManualBilling = () => {
               />
             </div>
           </div>
+        )}
 
-          {/* Bottom Section: History */}
-          <div className="w-full">
-            <HistoryPanel 
+        {/* Tab 2: Lecturas Registradas del Periodo */}
+        {activeTab === 'registradas' && (
+          <div className="w-full animate-in fade-in duration-200">
+            <RegisteredReadingsTab 
               activePeriodo={activePeriodo}
               lecturasPeriodoActivo={lecturasPeriodoActivo}
               medidorMap={medidorMap}
-              setIsModalOpen={setIsModalOpen}
               onRowClick={(record) => setSelectedDetailRecord(record)}
+              onEdit={handleEditFromTable}
             />
           </div>
-        </div>
+        )}
       </div>
 
       

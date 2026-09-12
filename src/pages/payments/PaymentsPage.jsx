@@ -54,27 +54,53 @@ const buildFilterParams = (filterMes, activeYear) => {
 };
 
 // ── Sub-components ───────────────────────────────────────────────────
-const KpiCard = React.memo(({ icon, label, value, subtitle, colorClass = 'primary', subtitleIcon }) => (
-  <div className="bg-surface border border-outline-variant hover:border-primary/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
-    <div className={`w-10 h-10 rounded-full bg-${colorClass}/5 flex items-center justify-center text-${colorClass} shrink-0 border border-${colorClass}/10`}>
-      <span className="material-symbols-outlined text-[20px]" translate="no">{icon}</span>
+const KPI_COLORS = {
+  primary: {
+    bg: 'bg-primary/10 text-primary border-primary/20',
+    val: 'text-on-surface',
+  },
+  emerald: {
+    bg: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
+    val: 'text-emerald-600',
+  },
+  tertiary: {
+    bg: 'bg-tertiary/10 text-tertiary border-tertiary/20',
+    val: 'text-tertiary',
+  },
+  amber: {
+    bg: 'bg-amber-500/10 text-amber-700 border-amber-500/20',
+    val: 'text-amber-700',
+  },
+  secondary: {
+    bg: 'bg-secondary/10 text-secondary border-secondary/20',
+    val: 'text-secondary',
+  },
+};
+
+const KpiCard = React.memo(({ icon, label, value, subtitle, colorScheme = 'primary', subtitleIcon }) => {
+  const c = KPI_COLORS[colorScheme] || KPI_COLORS.primary;
+  return (
+    <div className="bg-surface border border-outline-variant hover:border-primary/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
+      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${c.bg}`}>
+        <span className="material-symbols-outlined text-[20px]" translate="no">{icon}</span>
+      </div>
+      <div className="flex flex-col justify-center overflow-hidden">
+        <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider leading-tight truncate">{label}</span>
+        <span className={`font-data-mono text-lg font-bold leading-none mt-0.5 truncate ${c.val}`}>
+          {value}
+        </span>
+        {subtitleIcon ? (
+          <div className="flex items-center gap-1 mt-1 opacity-80">
+            <span className="material-symbols-outlined text-[10px]" translate="no">{subtitleIcon}</span>
+            <span className="text-[9px] truncate">{subtitle}</span>
+          </div>
+        ) : (
+          <span className="text-[9px] text-on-surface-variant/70 mt-1 truncate">{subtitle}</span>
+        )}
+      </div>
     </div>
-    <div className="flex flex-col justify-center overflow-hidden">
-      <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider leading-tight truncate">{label}</span>
-      <span className={`font-data-mono text-lg text-${colorClass === 'primary' ? 'on-surface' : colorClass} font-bold leading-none mt-0.5 truncate`}>
-        {value}
-      </span>
-      {subtitleIcon ? (
-        <div className={`flex items-center gap-1 mt-1 text-${colorClass}/80`}>
-          <span className="material-symbols-outlined text-[10px]" translate="no">{subtitleIcon}</span>
-          <span className="text-[9px] truncate">{subtitle}</span>
-        </div>
-      ) : (
-        <span className="text-[9px] text-on-surface-variant/70 mt-1 truncate">{subtitle}</span>
-      )}
-    </div>
-  </div>
-));
+  );
+});
 
 const DetailRow = React.memo(({ icon, label, value, valueClassName = 'text-xs font-bold text-on-surface' }) => (
   <div className="flex justify-between items-center p-3">
@@ -199,15 +225,17 @@ const Payments = () => {
   const { data: fetchedData, isLoading } = useQuery({
     queryKey: ['pagos-data', filterParams],
     queryFn: async () => {
-      const [pagosRes, recibosRes, periodosRes] = await Promise.all([
+      const [pagosRes, recibosRes, periodosRes, statsRes] = await Promise.all([
         api.get('/pagos', { params: filterParams }),
         api.get('/recibos', { params: filterParams }),
         api.get('/periodos'),
+        api.get('/pagos/stats', { params: filterParams }),
       ]);
       return {
         pagos: pagosRes.data,
         recibos: recibosRes.data,
         periodos: periodosRes.data,
+        stats: statsRes.data,
       };
     },
     staleTime: 2 * 60 * 1000,
@@ -272,42 +300,17 @@ const Payments = () => {
     }
   }, [uniqueMonths, filterMes]);
 
-  const { totalRecaudado, recaudadoEfectivo, recaudadoTransferencia } = useMemo(() => {
-    let total = 0;
-    let efectivo = 0;
-    let transferencia = 0;
-    pagos.forEach(p => {
-      if (p.estado_validacion === 'Anulado') return;
-      const monto = parseFloat(p.monto_pagado || 0);
-      total += monto;
-      if (p.metodo_pago === 'Efectivo') efectivo += monto;
-      else if (p.metodo_pago === 'Transferencia') transferencia += monto;
-    });
-    return { totalRecaudado: total, recaudadoEfectivo: efectivo, recaudadoTransferencia: transferencia };
-  }, [pagos]);
-
-  const { totalFacturado, facturasPagadas, totalFacturas } = useMemo(() => ({
-    totalFacturado: allRecibos.reduce((sum, r) => sum + parseFloat(r.total || 0), 0),
-    facturasPagadas: allRecibos.filter(r => r.estado === 'Pagado').length,
-    totalFacturas: allRecibos.length,
-  }), [allRecibos]);
-
-  const transaccionesHoy = useMemo(() => {
-    const hoyInicio = new Date();
-    hoyInicio.setHours(0, 0, 0, 0);
-    const hoyFin = new Date();
-    hoyFin.setHours(23, 59, 59, 999);
-    return pagos.filter(p => {
-      if (p.estado_validacion === 'Anulado') return false;
-      const f = new Date(p.fecha_pago);
-      return f >= hoyInicio && f <= hoyFin;
-    }).length;
-  }, [pagos]);
-
-  const porcentajeRecaudado = useMemo(
-    () => totalFacturado > 0 ? (totalRecaudado / totalFacturado) * 100 : 0,
-    [totalRecaudado, totalFacturado],
-  );
+  // KPIs procesados directamente desde la API
+  const stats = fetchedData?.stats || {};
+  const totalFacturado = stats.totalFacturado ?? 0;
+  const totalRecaudado = stats.totalRecaudado ?? 0;
+  const pendienteRecaudar = stats.pendienteRecaudar ?? Math.max(0, totalFacturado - totalRecaudado);
+  const porcentajeRecaudado = stats.porcentajeRecaudado ?? (totalFacturado > 0 ? (totalRecaudado / totalFacturado) * 100 : 0);
+  const facturasPagadas = stats.facturasPagadas ?? 0;
+  const totalFacturas = stats.totalFacturas ?? 0;
+  const transaccionesHoy = stats.transaccionesHoy ?? 0;
+  const recaudadoEfectivo = stats.recaudadoEfectivo ?? 0;
+  const recaudadoTransferencia = stats.recaudadoTransferencia ?? 0;
 
   const filteredPagos = useMemo(() => {
     const term = searchTerm.toLowerCase();
@@ -773,10 +776,10 @@ const Payments = () => {
 
       {/* KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
-        <KpiCard icon="request_quote" label="Total Facturado" value={`S/ ${fmtCurrency(totalFacturado)}`} subtitle="En el periodo seleccionado" />
-        <KpiCard icon="account_balance_wallet" label="Total Recaudado" value={`S/ ${fmtCurrency(totalRecaudado)}`} subtitle="Ingresos reales" colorClass="[#059669]" subtitleIcon="trending_up" />
-        <KpiCard icon="checklist" label="Avance de Cobro" value={<>{facturasPagadas}<span className="font-data-mono text-[10px] text-on-surface-variant font-bold">/ {totalFacturas}</span></>} subtitle="Facturas pagadas" colorClass="tertiary" />
-        <KpiCard icon="bolt" label="Transacciones Hoy" value={transaccionesHoy} subtitle="En las últimas 24 hrs" colorClass="secondary" />
+        <KpiCard icon="request_quote" label="Total Facturado" value={`S/ ${fmtCurrency(totalFacturado)}`} subtitle="En el periodo seleccionado" colorScheme="primary" />
+        <KpiCard icon="account_balance_wallet" label="Total Recaudado" value={`S/ ${fmtCurrency(totalRecaudado)}`} subtitle="Ingresos reales" colorScheme="emerald" subtitleIcon="trending_up" />
+        <KpiCard icon="checklist" label="Avance de Cobro" value={<>{facturasPagadas}<span className="font-data-mono text-[10px] text-on-surface-variant font-bold">/ {totalFacturas}</span></>} subtitle="Facturas pagadas" colorScheme="tertiary" />
+        <KpiCard icon="pending_actions" label="Pendiente de Cobro" value={`S/ ${fmtCurrency(pendienteRecaudar)}`} subtitle="Resto que falta cobrar" colorScheme="amber" />
       </div>
 
       {/* Progress Bars & Dashboards */}
@@ -804,7 +807,7 @@ const Payments = () => {
               <span>Recaudado (S/ {fmtCurrency(totalRecaudado)})</span>
             </div>
             <div className="flex items-center gap-1">
-              <span>Pendiente (S/ {fmtCurrency(totalFacturado - totalRecaudado)})</span>
+              <span>Pendiente (S/ {fmtCurrency(pendienteRecaudar)})</span>
               <div className="w-2 h-2 rounded-full bg-surface-container-highest" />
             </div>
           </div>

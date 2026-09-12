@@ -18,81 +18,92 @@ const BillingKPICards = memo(({ totalRecaudado, pendienteCobro, deudaVencida, us
 
   return (
     <>
-      {/* Resumen de Operaciones - Dos Bloques */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+      {/* Resumen de Operaciones - Dos Bloques con el mismo estilo de las cards de abajo */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
         
         {/* Bloque 1: Inventario / Padrón */}
-        <div className="bg-primary/5 border border-primary/10 rounded-2xl p-4 shadow-sm relative overflow-hidden">
-          
-          <h3 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-4 flex items-center gap-1.5 relative z-10">
-            <span className="material-symbols-outlined text-[15px]" translate="no">inventory_2</span>
-            Inventario de Socios
-          </h3>
+        <div className="bg-surface border border-outline-variant hover:border-primary/30 rounded-xl p-3 shadow-sm transition-colors flex flex-col justify-between">
+          <div className="flex items-center justify-between pb-2 mb-2 border-b border-outline-variant/40">
+            <h3 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[15px] text-primary" translate="no">inventory_2</span>
+              Inventario de Socios
+            </h3>
+            <span className="text-[9px] font-bold font-data-mono text-on-surface-variant/70 bg-surface-container-high px-1.5 py-0.5 rounded">
+              {totalMedidores + sociosSinMedidor} socios
+            </span>
+          </div>
 
-          <div className="grid grid-cols-2 gap-4 divide-x divide-outline-variant/50 relative z-10">
+          <div className="grid grid-cols-2 gap-3 divide-x divide-outline-variant/50">
             {/* Medidores Reales */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0 border border-primary/20">
+              <div className="w-10 h-10 rounded-full bg-primary/5 flex items-center justify-center text-primary shrink-0 border border-primary/10">
                 <span className="material-symbols-outlined text-[20px]" translate="no">speed</span>
               </div>
-              <div>
-                <p className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wide">Medidores Reales</p>
-                <div className="flex items-end gap-1 mt-0.5">
-                  <span className="font-data-mono text-xl font-bold text-on-surface leading-none">{totalMedidores}</span>
-                </div>
+              <div className="flex flex-col justify-center overflow-hidden">
+                <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider leading-tight truncate">Medidores Reales</span>
+                <span className="font-data-mono text-lg text-on-surface font-bold leading-none mt-0.5 truncate">{totalMedidores}</span>
+                <span className="text-[9px] text-on-surface-variant/70 mt-1 truncate">Con medidor físico</span>
               </div>
             </div>
 
             {/* Socios Sin Medidor */}
-            <div className="flex items-center gap-3 pl-4">
-              <div className="w-10 h-10 rounded-full bg-warning/10 flex items-center justify-center text-warning shrink-0 border border-warning/20">
+            <div className="flex items-center gap-3 pl-3">
+              <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-700 shrink-0 border border-amber-500/20">
                 <span className="material-symbols-outlined text-[20px]" translate="no">person_off</span>
               </div>
-              <div>
-                <p className="text-[9px] font-bold text-warning uppercase tracking-wide">Sin Medidor</p>
-                <div className="flex items-end gap-1 mt-0.5">
-                  <span className="font-data-mono text-xl font-bold text-warning leading-none">{sociosSinMedidor}</span>
-                </div>
+              <div className="flex flex-col justify-center overflow-hidden">
+                <span className="text-[9px] font-bold text-amber-700 uppercase tracking-wider leading-tight truncate">Sin Medidor</span>
+                <span className="font-data-mono text-lg text-amber-700 font-bold leading-none mt-0.5 truncate">{sociosSinMedidor}</span>
+                <span className="text-[9px] text-amber-700/70 mt-1 truncate">Tarifa directa</span>
               </div>
             </div>
           </div>
         </div>
 
         {/* Bloque 2: Progreso / Pendientes */}
-        <div className="bg-error/5 border border-error/10 rounded-2xl p-4 shadow-sm relative overflow-hidden">
+        <div className="bg-surface border border-outline-variant hover:border-error/30 rounded-xl p-3 shadow-sm transition-colors flex flex-col justify-between">
+          <div className="flex items-center justify-between pb-2 mb-2 border-b border-outline-variant/40">
+            <h3 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-[15px] text-error" translate="no">data_usage</span>
+              Progreso del Periodo
+            </h3>
+            {faltanLecturar === 0 && pendientesFacturar === 0 ? (
+              <span className="text-[9px] font-bold text-emerald-600 bg-emerald-500/10 px-1.5 py-0.5 rounded flex items-center gap-1">
+                <span className="material-symbols-outlined text-[12px]" translate="no">check_circle</span>
+                Completado
+              </span>
+            ) : (
+              <span className="text-[9px] font-bold text-amber-700 bg-amber-500/10 px-1.5 py-0.5 rounded">
+                Pendientes
+              </span>
+            )}
+          </div>
 
-          <h3 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-4 flex items-center gap-1.5 relative z-10">
-            <span className="material-symbols-outlined text-[15px]" translate="no">data_usage</span>
-            Progreso del Periodo
-          </h3>
-
-          <div className="grid grid-cols-2 gap-4 divide-x divide-outline-variant/50 relative z-10">
+          <div className="grid grid-cols-2 gap-3 divide-x divide-outline-variant/50">
             {/* Faltan Lecturar */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-error/10 flex items-center justify-center text-error shrink-0 relative border border-error/20">
+              <div className="w-10 h-10 rounded-full bg-error/5 flex items-center justify-center text-error shrink-0 border border-error/10 relative">
                 <span className="material-symbols-outlined text-[20px]" translate="no">assignment_late</span>
                 {faltanLecturar > 0 && (
                   <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-error rounded-full animate-pulse border-2 border-surface"></span>
                 )}
               </div>
-              <div>
-                <p className="text-[9px] font-bold text-error uppercase tracking-wide">Por Lecturar</p>
-                <div className="flex items-end gap-1 mt-0.5">
-                  <span className="font-data-mono text-xl font-bold text-error leading-none">{faltanLecturar}</span>
-                </div>
+              <div className="flex flex-col justify-center overflow-hidden">
+                <span className="text-[9px] font-bold text-error uppercase tracking-wider leading-tight truncate">Por Lecturar</span>
+                <span className="font-data-mono text-lg text-error font-bold leading-none mt-0.5 truncate">{faltanLecturar}</span>
+                <span className="text-[9px] text-error/70 mt-1 truncate">Pendiente de registro</span>
               </div>
             </div>
 
             {/* Pendientes de Facturar */}
-            <div className="flex items-center gap-3 pl-4">
-              <div className="w-10 h-10 rounded-full bg-tertiary/10 flex items-center justify-center text-tertiary shrink-0 border border-tertiary/20">
+            <div className="flex items-center gap-3 pl-3">
+              <div className="w-10 h-10 rounded-full bg-tertiary/5 flex items-center justify-center text-tertiary shrink-0 border border-tertiary/10">
                 <span className="material-symbols-outlined text-[20px]" translate="no">receipt_long</span>
               </div>
-              <div>
-                <p className="text-[9px] font-bold text-tertiary uppercase tracking-wide">Sin Facturar</p>
-                <div className="flex items-end gap-1 mt-0.5">
-                  <span className="font-data-mono text-xl font-bold text-tertiary leading-none">{pendientesFacturar}</span>
-                </div>
+              <div className="flex flex-col justify-center overflow-hidden">
+                <span className="text-[9px] font-bold text-tertiary uppercase tracking-wider leading-tight truncate">Sin Facturar</span>
+                <span className="font-data-mono text-lg text-tertiary font-bold leading-none mt-0.5 truncate">{pendientesFacturar}</span>
+                <span className="text-[9px] text-tertiary/70 mt-1 truncate">Pendiente de emisión</span>
               </div>
             </div>
           </div>

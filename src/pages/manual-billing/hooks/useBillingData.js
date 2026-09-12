@@ -75,9 +75,14 @@ export const useBillingData = (activeYear) => {
     activePeriodo ? lecturas.filter(l => l.periodo === activePeriodo.mes_anio) : [],
   [lecturas, activePeriodo]);
 
-  const totalRegistrados = stats.total_registrados || lecturasPeriodoActivo.length;
-  const totalMedidores = stats.total_medidores || 0;
-  const porcentajeAvance = totalMedidores > 0 ? Math.min(100, Math.round((totalRegistrados / totalMedidores) * 100)) : 0;
+  const totalRegistrados = stats.total_registrados !== undefined ? Number(stats.total_registrados) : 0;
+  const totalMedidores = stats.total_medidores !== undefined ? Number(stats.total_medidores) : 0;
+  const porcentajeAvance = stats.porcentaje_avance !== undefined 
+    ? Number(stats.porcentaje_avance) 
+    : (totalMedidores > 0 ? Math.min(100, Math.round((totalRegistrados / totalMedidores) * 100)) : 0);
+  const pendientes = stats.pendientes !== undefined 
+    ? Number(stats.pendientes) 
+    : Math.max(0, totalMedidores - totalRegistrados);
   const dashOffset = 100.5 - (100.5 * porcentajeAvance) / 100;
 
   const lecturasPeriodoActivoMap = useMemo(() => {
@@ -107,6 +112,7 @@ export const useBillingData = (activeYear) => {
     medidorMap,
     totalRegistrados,
     totalMedidores,
+    pendientes,
     porcentajeAvance,
     dashOffset,
     fetchData: fetchPeriodos,

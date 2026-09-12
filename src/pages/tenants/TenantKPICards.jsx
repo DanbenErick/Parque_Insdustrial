@@ -16,7 +16,7 @@ const TenantKPICards = ({ globalStats }) => {
           <div className="flex flex-col justify-center overflow-hidden flex-1">
             <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider leading-tight truncate">Total de Socios</span>
             <span className="font-data-mono text-lg text-on-surface font-bold leading-none mt-0.5 truncate">
-              {globalStats.total}
+              {globalStats.total || 0}
             </span>
             <span className="text-[10px] text-on-surface-variant mt-1 truncate font-medium">
               <span className="font-bold text-on-surface">{globalStats.socios_sin_medidor || 0}</span> de ellos NO tienen medidor
@@ -32,15 +32,15 @@ const TenantKPICards = ({ globalStats }) => {
           <div className="flex flex-col justify-center overflow-hidden flex-1">
             <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider leading-tight truncate">Total Medidores</span>
             <span className="font-data-mono text-lg text-on-surface font-bold leading-none mt-0.5 truncate">
-              {(globalStats.medidores_normal || 0) + (globalStats.medidores_tiempo_real || 0)}
+              {globalStats.total_medidores ?? ((globalStats.medidores_normal || 0) + (globalStats.medidores_tiempo_real || 0) + (globalStats.sin_medidor || 0))}
             </span>
             <span className="text-[9px] text-on-surface-variant mt-1 truncate font-medium">
-              F. Punta: <span className="font-bold text-on-surface">{globalStats.medidores_normal || 0}</span> | Punta: <span className="font-bold text-on-surface">{globalStats.medidores_tiempo_real || 0}</span> | Sin Med: <span className="font-bold text-error">{globalStats.socios_sin_medidor || 0}</span>
+              F. Punta: <span className="font-bold text-on-surface">{globalStats.medidores_normal || 0}</span> | Punta: <span className="font-bold text-on-surface">{globalStats.medidores_tiempo_real || 0}</span> | Sin Med: <span className="font-bold text-amber-700">{globalStats.sin_medidor || globalStats.socios_sin_medidor || 0}</span>
             </span>
           </div>
         </div>
 
-        {/* Card 2: Conexiones Activas */}
+        {/* Card 3: Conexiones Activas */}
         <div className="bg-surface border border-outline-variant hover:border-green-600/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
           <div className="w-10 h-10 rounded-full bg-green-600/5 flex items-center justify-center text-green-600 shrink-0 border border-green-600/10">
             <span className="material-symbols-outlined text-[20px]" translate="no">bolt</span>
@@ -48,13 +48,13 @@ const TenantKPICards = ({ globalStats }) => {
           <div className="flex flex-col justify-center overflow-hidden flex-1">
             <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider leading-tight truncate">Conexiones Activas</span>
             <span className="font-data-mono text-lg text-green-600 font-bold leading-none mt-0.5 truncate">
-              {globalStats.activos}
+              {globalStats.activos || 0}
             </span>
             <span className="text-[9px] text-on-surface-variant/70 mt-1 truncate">Con suministro activo</span>
           </div>
         </div>
 
-        {/* Card 3: Suspendidas / Cortadas */}
+        {/* Card 4: Suspendidas / Cortadas */}
         <div className="bg-surface border border-outline-variant hover:border-error/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
           <div className="w-10 h-10 rounded-full bg-error/5 flex items-center justify-center text-error shrink-0 border border-error/10">
             <span className="material-symbols-outlined text-[20px]" translate="no">power_off</span>
@@ -62,7 +62,7 @@ const TenantKPICards = ({ globalStats }) => {
           <div className="flex flex-col justify-center overflow-hidden flex-1">
             <span className="text-[9px] font-bold text-error uppercase tracking-wider leading-tight truncate">Suspendidas / Cortadas</span>
             <span className="font-data-mono text-lg text-error font-bold leading-none mt-0.5 truncate">
-              {globalStats.inactivos}
+              {globalStats.inactivos || 0}
             </span>
             <span className="text-[9px] text-error/70 mt-1 truncate">Cortes o suspensiones de luz</span>
           </div>

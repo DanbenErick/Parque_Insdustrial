@@ -3,6 +3,15 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
 
+const METODO_CONFIG = {
+  Transferencia: { icon: 'account_balance', bg: 'bg-blue-100 text-blue-700' },
+  Efectivo: { icon: 'payments', bg: 'bg-green-100 text-green-700' },
+  'Yape/Plin': { icon: 'send_to_mobile', bg: 'bg-purple-100 text-purple-700' },
+};
+
+const getMetodoConfig = (metodo) =>
+  METODO_CONFIG[metodo] || { icon: 'receipt', bg: 'bg-gray-100 text-gray-700' };
+
 const SocioPaymentsPage = () => {
   const { user } = useAuth();
 
@@ -31,15 +40,6 @@ const SocioPaymentsPage = () => {
     );
   }
 
-  const formatMetodo = (metodo) => {
-    switch(metodo) {
-      case 'Transferencia': return { icon: 'account_balance', bg: 'bg-blue-100 text-blue-700' };
-      case 'Efectivo': return { icon: 'payments', bg: 'bg-green-100 text-green-700' };
-      case 'Yape/Plin': return { icon: 'send_to_mobile', bg: 'bg-purple-100 text-purple-700' };
-      default: return { icon: 'receipt', bg: 'bg-gray-100 text-gray-700' };
-    }
-  };
-
   return (
     <main className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[1000px] mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -59,7 +59,7 @@ const SocioPaymentsPage = () => {
         ) : (
           <div className="space-y-3">
             {pagos.map((pago) => {
-              const { icon, bg } = formatMetodo(pago.metodo_pago);
+              const { icon, bg } = getMetodoConfig(pago.metodo_pago);
               return (
                 <div key={pago.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 rounded-xl hover:bg-surface-container-lowest transition-colors border border-transparent hover:border-outline-variant/50 group">
                   
