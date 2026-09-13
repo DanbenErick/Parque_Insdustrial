@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { formatPeriodo, MODAL_BACKDROP, MODAL_CONTENT } from '../utils';
-import { ReadingRow } from './shared/ReadingRow';
+import { ReadingTableRow } from './shared/ReadingTableRow';
 
 export const AllReadingsModal = ({
   activePeriodo,
@@ -52,19 +52,37 @@ export const AllReadingsModal = ({
           </button>
         </div>
 
-        <div className="p-xl overflow-y-auto flex-grow bg-surface-container-lowest/30">
-          <ul className="space-y-2">
-            {filteredModalLecturas.length === 0 ? (
-              <div className="text-center py-12 text-on-surface-variant">
-                <span className="material-symbols-outlined text-[48px] opacity-20 mb-3" translate="no">search_off</span>
-                <p>No se encontraron resultados para "{modalSearchTerm}"</p>
-              </div>
-            ) : (
-              filteredModalLecturas.map(record => (
-                <ReadingRow key={record.id} record={record} medidorInfo={medidorMap.get(record.num_serie)} onEdit={handleEditFromTable} onClick={() => onRowClick?.(record)} showDateFull />
-              ))
-            )}
-          </ul>
+        <div className="overflow-x-auto overflow-y-auto flex-grow bg-surface-container-lowest/30 max-h-[65vh]">
+          {filteredModalLecturas.length === 0 ? (
+            <div className="text-center py-12 text-on-surface-variant">
+              <span className="material-symbols-outlined text-[48px] opacity-20 mb-3" translate="no">search_off</span>
+              <p>No se encontraron resultados para "{modalSearchTerm}"</p>
+            </div>
+          ) : (
+            <table className="w-full min-w-[850px] text-left border-collapse whitespace-nowrap">
+              <thead className="sticky top-0 z-10 shadow-sm bg-slate-50/90 backdrop-blur-xs text-on-surface-variant text-[11px] uppercase tracking-wider font-bold border-b border-outline-variant">
+                <tr>
+                  <th className="px-4 py-3 bg-slate-50/90 text-on-surface-variant">Socio / Dirección</th>
+                  <th className="px-4 py-3 bg-slate-50/90 text-on-surface-variant">Medidor / Tipo</th>
+                  <th className="px-4 py-3 bg-slate-50/90 text-on-surface-variant">Lectura Registrada</th>
+                  <th className="px-4 py-3 bg-slate-50/90 text-on-surface-variant">Consumo</th>
+                  <th className="px-4 py-3 text-right bg-slate-50/90 text-on-surface-variant">Acciones</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-outline-variant/40 bg-surface text-body-sm">
+                {filteredModalLecturas.map(record => (
+                  <ReadingTableRow
+                    key={record.id}
+                    record={record}
+                    medidorInfo={medidorMap.get(record.num_serie)}
+                    onEdit={handleEditFromTable}
+                    onClick={() => onRowClick?.(record)}
+                    showDateFull
+                  />
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>

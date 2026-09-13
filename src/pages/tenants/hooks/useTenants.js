@@ -1,23 +1,19 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../../../api/axiosConfig';
 
-export const useTenants = (searchQuery, filterEstado, filterRubro) => {
+export const useTenants = () => {
   const queryClient = useQueryClient();
 
-  // Fetchear los usuarios (socios)
+  // Fetchear todos los socios para búsqueda y filtrado local instantáneo en el frontend
   const { 
     data: tenants = [], 
     isLoading: isLoadingTenants, 
     isError: isErrorTenants, 
     refetch: refetchTenants 
   } = useQuery({
-    queryKey: ['tenants', searchQuery, filterEstado, filterRubro],
+    queryKey: ['tenants'],
     queryFn: async () => {
-      let url = `/usuarios?rol_id=3&limit=100000`;
-      if (searchQuery.trim()) url += `&search=${encodeURIComponent(searchQuery.trim())}`;
-      if (filterEstado !== 'Todos') url += `&estado=${filterEstado === 'Activos' ? 'activos' : 'suspendidos'}`;
-      if (filterRubro !== 'Todos') url += `&rubro=${encodeURIComponent(filterRubro)}`;
-
+      const url = `/usuarios?rol_id=3&limit=100000`;
       const response = await api.get(url);
       const rawData = Array.isArray(response.data) ? response.data : (response.data?.data || []);
 

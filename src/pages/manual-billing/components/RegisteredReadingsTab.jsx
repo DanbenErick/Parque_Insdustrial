@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { formatPeriodo } from '../utils';
-import { ReadingRow } from './shared/ReadingRow';
+import { ReadingTableRow } from './shared/ReadingTableRow';
 import { EmptyStateIcon } from './shared/EmptyStateIcon';
 
 export const RegisteredReadingsTab = ({
@@ -19,10 +19,12 @@ export const RegisteredReadingsTab = ({
     return lecturasPeriodoActivo.filter(record => {
       const medidor = medidorMap?.get(record.num_serie);
       const docId = medidor?.documento_identidad?.toLowerCase() || '';
+      const direccion = (record.medidor_direccion || medidor?.direccion || record.direccion || '').toLowerCase();
       return (
         (record.propietario?.toLowerCase().includes(term)) ||
         (record.num_serie?.toLowerCase().includes(term)) ||
-        docId.includes(term)
+        docId.includes(term) ||
+        direccion.includes(term)
       );
     });
   }, [searchTerm, lecturasPeriodoActivo, medidorMap]);
@@ -71,8 +73,8 @@ export const RegisteredReadingsTab = ({
         </div>
       </div>
 
-      {/* Lista de lecturas con scroll */}
-      <div className="overflow-y-auto custom-scrollbar p-3 flex-1 max-h-[600px]">
+      {/* Tabla de lecturas registradas */}
+      <div className="overflow-x-auto overflow-y-auto custom-scrollbar flex-1 max-h-[600px] relative">
         {filteredLecturas.length === 0 ? (
           <div className="py-12">
             <EmptyStateIcon
@@ -81,19 +83,35 @@ export const RegisteredReadingsTab = ({
             />
           </div>
         ) : (
-          <ul className="space-y-1.5">
-            {filteredLecturas.map(record => (
-              <ReadingRow
-                key={record.id}
-                record={record}
-                medidorInfo={medidorMap?.get(record.num_serie)}
-                onEdit={onEdit}
-                onClick={() => onRowClick?.(record)}
-                showDateFull={true}
-              />
-            ))}
-          </ul>
+          <table className="w-full min-w-[850px] text-left border-collapse whitespace-nowrap">
+            <thead className="sticky top-0 z-10 shadow-sm bg-slate-50/90 backdrop-blur-xs text-on-surface-variant text-[11px] uppercase tracking-wider font-bold border-b border-outline-variant">
+              <tr>
+                <th className="px-4 py-3 bg-slate-50/90 text-on-surface-variant">Socio / Dirección</th>
+                <th className="px-4 py-3 bg-slate-50/90 text-on-surface-variant">Medidor / Tipo</th>
+                <th className="px-4 py-3 bg-slate-50/90 text-on-surface-variant">Lectura Registrada</th>
+                <th className="px-4 py-3 bg-slate-50/90 text-on-surface-variant">Consumo</th>
+                <th className="px-4 py-3 text-right bg-slate-50/90 text-on-surface-variant">Acciones</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-outline-variant/40 bg-surface text-body-sm">
+              {filteredLecturas.map(record => (
+                <ReadingTableRow
+                  key={record.id}
+                  record={record}
+                  medidorInfo={medidorMap?.get(record.num_serie)}
+                  onEdit={onEdit}
+                  onClick={() => onRowClick?.(record)}
+                  showDateFull={true}
+                />
+              ))}
+            </tbody>
+          </table>
         )}
+      </div>
+
+      {/* Footer de la tabla */}
+      <div className="px-5 py-2.5 border-t border-outline-variant bg-surface-container-lowest flex justify-between items-center text-xs text-on-surface-variant">
+        <span>Mostrando {filteredLecturas.length} de {lecturasPeriodoActivo.length} lecturas</span>
       </div>
     </div>
   );

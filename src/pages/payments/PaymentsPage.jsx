@@ -40,8 +40,100 @@ const formatPeriod = (periodoStr) => {
 
 const getMetodoPagoIcon = (metodo) => METODO_PAGO_ICONS[metodo] || METODO_PAGO_ICONS.default;
 
-const isPartialPayment = (montoPagado, reciboTotal) =>
-  reciboTotal && parseFloat(montoPagado) < parseFloat(reciboTotal) - PARTIAL_THRESHOLD;
+const getPagoTipoInfo = (pago, fallbackPrevio = 0) => {
+  if (!pago) {
+    return {
+      tipo: 'Completo',
+      badgeLabel: 'Completo',
+      drawerLabel: 'Pago Completo',
+      badgeClass: 'bg-indigo-100 text-indigo-800',
+      boxClass: 'bg-indigo-50/50 border-indigo-200',
+      subtextType: 'none',
+      subtextMonto: 0,
+      restante: 0,
+      aFavor: 0,
+      previo: 0,
+      acumulado: 0,
+    };
+  }
+
+  if (pago.estado_validacion === 'Anulado') {
+    return {
+      tipo: 'Anulado',
+      badgeLabel: 'Anulado',
+      drawerLabel: 'Pago Anulado',
+      badgeClass: 'bg-error/15 text-error border border-error/30',
+      boxClass: 'bg-red-50/50 border-red-200',
+      subtextType: 'none',
+      subtextMonto: 0,
+      restante: 0,
+      aFavor: 0,
+      previo: 0,
+      acumulado: 0,
+    };
+  }
+
+  const monto = parseFloat(pago.monto_pagado || 0);
+  const totalRecibo = parseFloat(pago.recibo_total || 0);
+  const previo = (pago.previo_pagado !== undefined && pago.previo_pagado !== null)
+    ? parseFloat(pago.previo_pagado)
+    : parseFloat(fallbackPrevio || 0);
+
+  const acumulado = previo + monto;
+  const EPSILON = 0.05;
+
+  // 1. Si antes de este pago el recibo ya estaba totalmente cubierto (previo >= totalRecibo):
+  // Este pago es completamente un pago extra / adicional que genera saldo a favor.
+  if (totalRecibo > 0 && previo >= totalRecibo - EPSILON) {
+    return {
+      tipo: 'Adicional',
+      badgeLabel: 'Adicional',
+      drawerLabel: 'Pago Adicional / Excedente',
+      badgeClass: 'bg-emerald-100 text-emerald-800 border border-emerald-300/40',
+      boxClass: 'bg-emerald-50/50 border-emerald-200',
+      subtextType: 'a_favor',
+      subtextMonto: monto,
+      restante: 0,
+      aFavor: monto,
+      previo,
+      acumulado,
+    };
+  }
+
+  // 2. Si el acumulado aún no llega a cubrir el total del recibo:
+  if (totalRecibo > 0 && acumulado < totalRecibo - EPSILON) {
+    const restante = Math.max(0, totalRecibo - acumulado);
+    return {
+      tipo: 'Parcial',
+      badgeLabel: 'Parcial',
+      drawerLabel: 'Abono Parcial',
+      badgeClass: 'bg-amber-100 text-amber-800',
+      boxClass: 'bg-amber-50/50 border-amber-200',
+      subtextType: 'restante',
+      subtextMonto: restante,
+      restante,
+      aFavor: 0,
+      previo,
+      acumulado,
+    };
+  }
+
+  // 3. Este pago completa el recibo (o lo completa y tiene un saldo excedente a favor)
+  const excedente = (totalRecibo > 0 && acumulado > totalRecibo + EPSILON) ? (acumulado - totalRecibo) : 0;
+  return {
+    tipo: 'Completo',
+    badgeLabel: 'Completo',
+    drawerLabel: excedente > 0 ? 'Pago Completo con Excedente' : 'Pago Completo',
+    badgeClass: 'bg-indigo-100 text-indigo-800',
+    boxClass: 'bg-indigo-50/50 border-indigo-200',
+    subtextType: excedente > 0 ? 'a_favor' : 'none',
+    subtextMonto: excedente,
+    restante: 0,
+    aFavor: excedente,
+    previo,
+    acumulado,
+  };
+};
 
 const buildFilterParams = (filterMes, activeYear) => {
   const params = {};
@@ -111,8 +203,8 @@ const DetailRow = React.memo(({ icon, label, value, valueClassName = 'text-xs fo
   </div>
 ));
 
-const PaymentRow = React.memo(({ pago, saldoPendiente, onSelect, onOpenMenu, isMenuOpen }) => {
-  const isPartial = isPartialPayment(pago.monto_pagado, pago.recibo_total);
+const PaymentRow = React.memo(({ pago, fallbackPrevio, onSelect, onOpenMenu, isMenuOpen }) => {
+  const tipoInfo = useMemo(() => getPagoTipoInfo(pago, fallbackPrevio), [pago, fallbackPrevio]);
 
   return (
     <tr className={`hover:bg-surface-container-lowest transition-colors group ${pago.estado_validacion === 'Anulado' ? 'bg-red-500/5 hover:bg-red-500/10' : ''}`}>
@@ -151,14 +243,8 @@ const PaymentRow = React.memo(({ pago, saldoPendiente, onSelect, onOpenMenu, isM
       </td>
       <td className="px-4 py-2 text-center">
         <div className="flex flex-col items-center">
-          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${
-            pago.estado_validacion === 'Anulado'
-              ? 'bg-error/15 text-error border border-error/30'
-              : isPartial
-              ? 'bg-amber-100 text-amber-800'
-              : 'bg-indigo-100 text-indigo-800'
-          }`}>
-            {pago.estado_validacion === 'Anulado' ? 'Anulado' : isPartial ? 'Parcial' : 'Completo'}
+          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${tipoInfo.badgeClass}`}>
+            {tipoInfo.badgeLabel}
           </span>
           {pago.motivo_anulacion && (
             <span className="text-[9px] text-error font-medium italic mt-0.5 truncate max-w-[150px]" title={`Motivo: ${pago.motivo_anulacion}`}>
@@ -171,9 +257,14 @@ const PaymentRow = React.memo(({ pago, saldoPendiente, onSelect, onOpenMenu, isM
         <div className={`font-data-mono font-bold text-[12px] ${pago.estado_validacion === 'Anulado' ? 'line-through text-on-surface-variant/60' : 'text-on-surface'}`}>
           S/ {fmtCurrency(pago.monto_pagado)}
         </div>
-        {isPartial && pago.estado_validacion !== 'Anulado' && (
+        {pago.estado_validacion !== 'Anulado' && tipoInfo.subtextType === 'restante' && (
           <div className="text-[9px] text-amber-700 font-bold">
-            Restante: S/ {fmtCurrency(saldoPendiente)}
+            Restante: S/ {fmtCurrency(tipoInfo.subtextMonto)}
+          </div>
+        )}
+        {pago.estado_validacion !== 'Anulado' && tipoInfo.subtextType === 'a_favor' && (
+          <div className="text-[9px] text-emerald-700 font-bold">
+            A favor: S/ {fmtCurrency(tipoInfo.subtextMonto)}
           </div>
         )}
       </td>
@@ -355,6 +446,22 @@ const Payments = () => {
     allRecibos.forEach(r => map.set(r.id, r.saldo_pendiente || 0));
     return map;
   }, [allRecibos]);
+
+  // Map pago_id -> previous accumulated payment for its receipt (fallback if not provided by backend)
+  const fallbackPrevioMap = useMemo(() => {
+    const map = new Map();
+    const sorted = [...pagos]
+      .filter(p => p.estado_validacion !== 'Anulado')
+      .sort((a, b) => new Date(a.fecha_pago).getTime() - new Date(b.fecha_pago).getTime() || a.id - b.id);
+
+    const reciboAcumulado = new Map();
+    sorted.forEach(p => {
+      const prev = reciboAcumulado.get(p.recibo_id) || 0;
+      map.set(p.id, prev);
+      reciboAcumulado.set(p.recibo_id, prev + parseFloat(p.monto_pagado || 0));
+    });
+    return map;
+  }, [pagos]);
 
   // ── Callbacks ──────────────────────────────────────────────────────
   const resetForm = useCallback(() => {
@@ -937,7 +1044,7 @@ const Payments = () => {
                   <PaymentRow
                     key={pago.id}
                     pago={pago}
-                    saldoPendiente={reciboSaldoMap.get(pago.recibo_id) || 0}
+                    fallbackPrevio={fallbackPrevioMap.get(pago.id) || 0}
                     onSelect={setSelectedPaymentForDetails}
                     onOpenMenu={handleOpenMenu}
                     isMenuOpen={actionMenu?.pago?.id === pago.id}
@@ -1715,17 +1822,17 @@ const Payments = () => {
 
               {/* Status Info */}
               {(() => {
-                const isPartial = isPartialPayment(selectedPaymentForDetails.monto_pagado, selectedPaymentForDetails.recibo_total);
-                const saldo = reciboSaldoMap.get(selectedPaymentForDetails.recibo_id) || 0;
+                const fallbackPrev = fallbackPrevioMap.get(selectedPaymentForDetails.id) || 0;
+                const tipoInfo = getPagoTipoInfo(selectedPaymentForDetails, fallbackPrev);
 
                 return (
                   <div>
-                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Estado del Recibo</h4>
-                    <div className={`border rounded-lg p-3 ${isPartial ? 'bg-amber-50/50 border-amber-200' : 'bg-indigo-50/50 border-indigo-200'}`}>
+                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Detalle del Pago</h4>
+                    <div className={`border rounded-lg p-3 ${tipoInfo.boxClass}`}>
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-xs font-bold text-on-surface">Tipo de Abono</span>
-                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide ${isPartial ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'}`}>
-                          {isPartial ? 'Abono Parcial' : 'Pago Completo'}
+                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide ${tipoInfo.badgeClass}`}>
+                          {tipoInfo.drawerLabel}
                         </span>
                       </div>
 
@@ -1736,11 +1843,36 @@ const Payments = () => {
                         </span>
                       </div>
 
-                      {isPartial && (
+                      {tipoInfo.previo > 0 && (
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-[11px] text-on-surface-variant">Pagos Anteriores al Recibo</span>
+                          <span className="font-data-mono text-xs font-medium text-on-surface-variant">
+                            S/ {fmtCurrency(tipoInfo.previo)}
+                          </span>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-[11px] text-on-surface-variant">Monto de este Pago</span>
+                        <span className="font-data-mono text-xs font-bold text-on-surface">
+                          S/ {fmtCurrency(selectedPaymentForDetails.monto_pagado)}
+                        </span>
+                      </div>
+
+                      {tipoInfo.tipo === 'Parcial' && (
                         <div className="flex justify-between items-center pt-2 border-t border-amber-200/50">
-                          <span className="text-[11px] text-amber-900 font-bold">Deuda Actual Restante</span>
+                          <span className="text-[11px] text-amber-900 font-bold">Deuda Restante tras este Pago</span>
                           <span className="font-data-mono text-xs font-bold text-amber-700">
-                            S/ {fmtCurrency(saldo)}
+                            S/ {fmtCurrency(tipoInfo.restante)}
+                          </span>
+                        </div>
+                      )}
+
+                      {tipoInfo.subtextType === 'a_favor' && (
+                        <div className="flex justify-between items-center pt-2 border-t border-emerald-200/50">
+                          <span className="text-[11px] text-emerald-900 font-bold">Saldo a Favor Generado</span>
+                          <span className="font-data-mono text-xs font-bold text-emerald-700">
+                            S/ {fmtCurrency(tipoInfo.aFavor)}
                           </span>
                         </div>
                       )}

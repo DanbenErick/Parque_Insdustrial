@@ -29,8 +29,8 @@ const TenantsAndSectors = () => {
   const [filterRubro, setFilterRubro] = useState('Todos');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Hook de React Query
-  const { tenants, isLoadingTenants: isLoading, globalStats, refetchAll } = useTenants(searchQuery, filterEstado, filterRubro);
+  // Hook de React Query (carga todos los socios para búsqueda y filtrado local instantáneo)
+  const { tenants, isLoadingTenants: isLoading, globalStats, refetchAll } = useTenants();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [actionMenu, setActionMenu] = useState(null);
@@ -56,10 +56,7 @@ const TenantsAndSectors = () => {
   // En TenantsPage ya no necesitamos handleInputChange ni validateField manual, 
   // porque de eso se encarga react-hook-form en TenantFormModal.
 
-  const handleSearchClick = () => {
-    // React Query automáticamente re-fetchea cuando searchQuery, filterEstado o filterRubro cambian,
-    // así que no necesitamos llamar a fetchTenants() manualmente aquí.
-  };
+
 
   const handleRegister = useCallback(async (data) => {
     setIsSubmitting(true);
@@ -307,7 +304,47 @@ const TenantsAndSectors = () => {
     return flattened;
   }, [tenants]);
 
-  const filteredTenants = flattenedTenants;
+  const filteredTenants = useMemo(() => {
+    let result = flattenedTenants;
+
+    // Filtro Estado
+    if (filterEstado !== 'Todos') {
+      const wantActivo = filterEstado === 'Activos';
+      result = result.filter(t => {
+        const isOperativo = t.specificMedidor ? t.specificMedidor.operativo : t.es_activo;
+        return isOperativo === wantActivo;
+      });
+    }
+
+    // Filtro Rubro
+    if (filterRubro !== 'Todos') {
+      result = result.filter(t => (t.actividad_rubro || '').toLowerCase() === filterRubro.toLowerCase());
+    }
+
+    // Búsqueda en tiempo real local en la tabla
+    const term = searchQuery.trim().toLowerCase();
+    if (!term) return result;
+
+    return result.filter(t => {
+      const socio = (t.nombre_razonsocial || '').toLowerCase();
+      const username = (t.username || '').toLowerCase();
+      const doc = (t.documento_identidad || '').toLowerCase();
+      const direccion = (t.specificMedidor?.direccion || t.direccion || '').toLowerCase();
+      const medidor = (t.specificMedidor?.num_serie || '').toLowerCase();
+      const tipoMedidor = (t.specificMedidor?.tipo || '').toLowerCase();
+      const telefono = (t.telefono || '').toLowerCase();
+      const rubro = (t.actividad_rubro || '').toLowerCase();
+
+      return socio.includes(term) ||
+             username.includes(term) ||
+             doc.includes(term) ||
+             direccion.includes(term) ||
+             medidor.includes(term) ||
+             tipoMedidor.includes(term) ||
+             telefono.includes(term) ||
+             rubro.includes(term);
+    });
+  }, [flattenedTenants, searchQuery, filterEstado, filterRubro]);
 
   const onExportExcel = useCallback(() => exportToExcel(filteredTenants), [filteredTenants]);
   const onExportPDF = useCallback(async () => {
@@ -351,13 +388,19 @@ const TenantsAndSectors = () => {
                 type="text"
                 placeholder="Buscar socio..."
                 value={searchQuery}
-                onChange={(e) => {
-                  setSearchQuery(e.target.value);
-                  if (e.target.value === '') setTimeout(handleSearchClick, 100);
-                }}
-                onKeyDown={(e) => e.key === 'Enter' && handleSearchClick()}
-                className="pl-8 pr-3 py-1.5 h-8 border border-outline-variant rounded-md text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-full md:w-48 bg-white transition-all"
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 pr-8 py-1.5 h-8 border border-outline-variant rounded-md text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-full md:w-48 bg-white transition-all"
               />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors"
+                  title="Limpiar búsqueda"
+                >
+                  <span className="material-symbols-outlined text-[14px]" translate="no">close</span>
+                </button>
+              )}
             </div>
 
             <button

@@ -8,7 +8,6 @@ import ProtectedRoute from './components/auth/ProtectedRoute';
 
 // Layouts
 import Sidebar from './layouts/Sidebar';
-import TopBar from './layouts/TopBar';
 import SocioSidebar from './layouts/SocioSidebar';
 import SocioTopBar from './layouts/SocioTopBar';
 import MobileBottomNav from './components/layout/MobileBottomNav';
@@ -16,13 +15,11 @@ import MobileBottomNav from './components/layout/MobileBottomNav';
 // Shared components
 import PageTransition from './components/ui/PageTransition';
 import ReloadPrompt from './components/ui/ReloadPrompt';
+import FullScreenLoader from './components/ui/FullScreenLoader';
 
 // Componente de carga para Lazy Pages
 const PageLoader = () => (
-  <div className="flex-1 flex flex-col items-center justify-center h-full min-h-[50vh] bg-surface gap-4">
-    <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-    <p className="mt-2 text-sm font-medium text-on-surface-variant animate-pulse">Cargando pantalla...</p>
-  </div>
+  <FullScreenLoader title="Cargando pantalla..." subtitle="Preparando la vista del sistema..." />
 );
 
 // Pages (Lazy Loaded)
@@ -72,12 +69,7 @@ function App() {
   const closeMobileMenu = useCallback(() => setIsMobileMenuOpen(false), []);
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-surface gap-4">
-        <div className="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-        <p className="text-on-surface-variant font-body-sm font-bold animate-pulse">Cargando sesión...</p>
-      </div>
-    );
+    return <FullScreenLoader title="Cargando sesión..." subtitle="Verificando credenciales..." />;
   }
 
   if (!isAuthenticated) {
@@ -112,33 +104,33 @@ function App() {
       <ReloadPrompt />
       <div className="bg-surface font-body-md text-on-surface antialiased flex flex-col md:flex-row h-[100dvh] w-full overflow-hidden relative">
 
-        {/* Mobile Top Bar */}
+        {/* Mobile Top Bar (Compacto y único) */}
         {Number(user?.rol_id) === 3 ? (
-          <header className="md:hidden shrink-0 flex items-center justify-between p-4 bg-white border-b border-outline-variant/30 text-emerald-900 shadow-sm z-40 print:hidden">
-            <div className="flex items-center gap-3">
+          <header className="md:hidden shrink-0 flex items-center justify-between px-3.5 py-1.5 h-12 bg-white border-b border-outline-variant/30 text-emerald-900 shadow-xs z-40 print:hidden">
+            <div className="flex items-center gap-2.5">
               <button onClick={() => setIsMobileMenuOpen(true)} className="p-1 hover:bg-emerald-50 rounded-lg transition-colors text-emerald-600">
-                <span className="material-symbols-outlined text-[28px]" translate="no">menu</span>
+                <span className="material-symbols-outlined text-[24px]" translate="no">menu</span>
               </button>
-              <div className="w-8 h-8 bg-emerald-50 rounded-lg flex items-center justify-center overflow-hidden border border-emerald-100">
+              <div className="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center overflow-hidden border border-emerald-100 shrink-0">
                 <img src="/logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-sm" />
               </div>
-              <span className="font-bold text-[14px]">Portal Cliente</span>
+              <span className="font-bold text-[13px]">Portal Cliente</span>
             </div>
-            <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center font-bold text-emerald-700 text-xs uppercase shadow-inner">
+            <div className="w-7 h-7 rounded-full bg-emerald-100 flex items-center justify-center font-bold text-emerald-700 text-[11px] uppercase shadow-inner">
               {user?.nombre_razonsocial ? user.nombre_razonsocial.substring(0, 1) : 'S'}
             </div>
           </header>
         ) : (
-          <header className="md:hidden shrink-0 flex items-center justify-between p-4 bg-surface text-on-surface shadow-sm border-b border-outline-variant/50 z-40 print:hidden">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center overflow-hidden">
+          <header className="md:hidden shrink-0 flex items-center justify-between px-3.5 py-1.5 h-12 bg-surface text-on-surface shadow-xs border-b border-outline-variant/40 z-40 print:hidden">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-outline-variant/30 bg-white">
                 <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
               </div>
               <div className="flex flex-col">
-                <span className="font-bold text-on-surface text-[14px] leading-tight tracking-tight">Parque Industrial</span>
+                <span className="font-bold text-on-surface text-[13px] leading-tight tracking-tight">Parque Industrial</span>
               </div>
             </div>
-            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center font-bold text-on-primary text-xs uppercase shadow-inner shadow-primary/20">
+            <div className="w-7 h-7 rounded-full bg-primary flex items-center justify-center font-bold text-on-primary text-[11px] uppercase shadow-inner shadow-primary/20">
               {user?.nombre_razonsocial ? user.nombre_razonsocial.substring(0, 2) : 'AD'}
             </div>
           </header>
@@ -171,10 +163,7 @@ function App() {
           {Number(user?.rol_id) === 3 ? (
             <SocioTopBar />
           ) : (
-            <>
-              <TopBar screens={visibleScreens} />
-              <MobileBottomNav screens={visibleScreens} />
-            </>
+            <MobileBottomNav screens={visibleScreens} />
           )}
 
           {/* Content */}
