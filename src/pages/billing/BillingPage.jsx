@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
 
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
+import api from '../../api/axiosConfig';
 import ReceiptDetail from '../receipt-detail/ReceiptDetailPage';
 import { useYear } from '../../context/YearContext';
 import GenerateInvoicesModal from '../invoices/GenerateInvoicesModal';
@@ -17,6 +17,7 @@ import {
   HistorialModal,
   formatPeriod,
 } from './index';
+import PagosReciboModal from './PagosReciboModal';
 import { DeudaPersonalizadaModal } from '../manual-billing/components/DeudaPersonalizadaModal';
 
 // Custom hooks
@@ -28,7 +29,6 @@ import LoadingCurtain from '../../components/ui/LoadingCurtain';
 
 const Billing = () => {
   const { activeYear } = useYear();
-  const navigate = useNavigate();
 
 
   // --- UI State ---
@@ -42,6 +42,9 @@ const Billing = () => {
   const [deudaModalOpen, setDeudaModalOpen] = useState(false);
   const [deudaReciboData, setDeudaReciboData] = useState(null);
   const [actionMenu, setActionMenu] = useState(null);
+  const [pagosReciboModal, setPagosReciboModal] = useState(null); // recibo para Ver Pagos
+  const [confirmarPendienteRecibo, setConfirmarPendienteRecibo] = useState(null);
+  const [isProcessingPendiente, setIsProcessingPendiente] = useState(false);
 
   // --- Filter State ---
   const [searchTerm, setSearchTerm] = useState('');
@@ -66,6 +69,43 @@ const Billing = () => {
     debouncedSearchTerm,
     activeYear,
   });
+
+  // --- Manejo para poner recibo en Pendiente ---
+  const handleSolicitarPendiente = useCallback(async (r) => {
+    try {
+      const res = await api.get(`/pagos/recibo/${r.id}`);
+      const pagos = Array.isArray(res.data) ? res.data : [];
+      const pagosActivos = pagos.filter((p) => p.estado_validacion !== 'Anulado' && !p.deleted_at);
+
+      if (pagosActivos.length > 0) {
+        const total = pagosActivos.reduce((sum, p) => sum + parseFloat(p.monto_pagado || 0), 0);
+        setPagosReciboModal({
+          ...r,
+          initialWarning: `Este recibo tiene ${pagosActivos.length} pago(s) activo(s) por un total de S/ ${total.toFixed(2)}. Debe anularlos para poder cambiar el estado a Pendiente.`
+        });
+      } else {
+        setConfirmarPendienteRecibo(r);
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('Error al verificar pagos del recibo');
+    }
+  }, []);
+
+  const handleConfirmarPonerPendiente = useCallback(async () => {
+    if (!confirmarPendienteRecibo) return;
+    setIsProcessingPendiente(true);
+    try {
+      await api.post(`/recibos/${confirmarPendienteRecibo.id}/marcar-pendiente`);
+      toast.success(`Recibo ${confirmarPendienteRecibo.numero_comprobante || ''} cambiado a Pendiente exitosamente`);
+      setConfirmarPendienteRecibo(null);
+      refetchAll();
+    } catch (err) {
+      toast.error(err.response?.data?.error || 'Error al cambiar el recibo a Pendiente');
+    } finally {
+      setIsProcessingPendiente(false);
+    }
+  }, [confirmarPendienteRecibo, refetchAll]);
 
   // --- Ordenamiento alfabético por Empresa / Socio ---
   const [sortAsc, setSortAsc] = useState(true);
@@ -454,6 +494,7 @@ const Billing = () => {
                     recibo={recibo}
                     onViewDetail={setDrawerReceiptId}
                     onViewHistorial={setHistorialReceiptId}
+                    onViewPagos={setPagosReciboModal}
                     onOpenMenu={handleOpenMenu}
                     isMenuOpen={actionMenu?.recibo?.id === recibo.id}
                   />
@@ -557,6 +598,65 @@ const Billing = () => {
         onClose={() => setHistorialReceiptId(null)}
       />
 
+      {pagosReciboModal && (
+        <PagosReciboModal
+          recibo={pagosReciboModal}
+          initialWarning={pagosReciboModal.initialWarning}
+          onClose={() => setPagosReciboModal(null)}
+          onSuccess={refetchAll}
+        />
+      )}
+
+      {/* Modal de confirmación para cambiar a Pendiente */}
+      {confirmarPendienteRecibo && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => !isProcessingPendiente && setConfirmarPendienteRecibo(null)}
+          />
+          <div className="relative z-10 w-full max-w-sm bg-white rounded-2xl shadow-2xl p-5 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-3">
+              <span className="material-symbols-outlined text-[26px] text-amber-600" translate="no">pending_actions</span>
+            </div>
+            <h3 className="text-sm font-bold text-center text-on-surface">
+              ¿Poner recibo en Pendiente?
+            </h3>
+            <p className="text-xs text-on-surface-variant text-center mt-2 leading-relaxed">
+              El recibo <span className="font-bold font-data-mono text-primary">{confirmarPendienteRecibo.numero_comprobante}</span> de <span className="font-medium text-on-surface">{confirmarPendienteRecibo.socio}</span> no tiene pagos activos registrados.
+            </p>
+            <p className="text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded-lg p-2.5 mt-3 text-center font-medium">
+              Su estado cambiará de <span className="font-bold">{confirmarPendienteRecibo.estado}</span> a <span className="font-bold text-amber-900">Pendiente</span>.
+            </p>
+            <div className="flex gap-2.5 mt-4">
+              <button
+                type="button"
+                disabled={isProcessingPendiente}
+                onClick={() => setConfirmarPendienteRecibo(null)}
+                className="flex-1 py-2 rounded-lg border border-outline-variant text-on-surface-variant hover:bg-surface-container font-medium text-xs transition-colors cursor-pointer disabled:opacity-50"
+              >
+                Cancelar
+              </button>
+              <button
+                type="button"
+                disabled={isProcessingPendiente}
+                onClick={handleConfirmarPonerPendiente}
+                className="flex-1 py-2 rounded-lg bg-amber-600 hover:bg-amber-700 active:scale-95 text-white font-bold text-xs transition-all cursor-pointer shadow-xs disabled:opacity-50 flex items-center justify-center gap-1.5"
+              >
+                {isProcessingPendiente ? (
+                  <>
+                    <span className="material-symbols-outlined text-[16px] animate-spin" translate="no">progress_activity</span>
+                    <span>Procesando...</span>
+                  </>
+                ) : (
+                  <span>Sí, cambiar</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
       {/* Dropdown flotante de Acciones */}
       {actionMenu && createPortal(
         <div className="dropdown-portal">
@@ -652,19 +752,35 @@ const Billing = () => {
               )}
             </button>
 
-            {/* Ver Pagos del Socio */}
+            {/* Ver Pagos del Recibo */}
             <button
               type="button"
               onClick={() => {
                 const r = actionMenu.recibo;
                 setActionMenu(null);
-                navigate('/payments', { state: { initialSearch: r.socio || r.nombre_razonsocial || '' } });
+                setPagosReciboModal(r);
               }}
               className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
             >
               <span className="material-symbols-outlined text-[18px] text-indigo-500" translate="no">payments</span>
-              <span>Ver Pagos del Socio</span>
+              <span>Ver Pagos del Recibo</span>
             </button>
+
+            {/* Poner en Pendiente (si no está ya pendiente ni anulado) */}
+            {actionMenu.recibo.estado !== 'Pendiente' && actionMenu.recibo.estado !== 'Anulado' && (
+              <button
+                type="button"
+                onClick={() => {
+                  const r = actionMenu.recibo;
+                  setActionMenu(null);
+                  handleSolicitarPendiente(r);
+                }}
+                className="w-full px-3.5 py-2 text-left text-xs font-medium text-amber-800 hover:bg-amber-50 flex items-center gap-2.5 transition-colors cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[18px] text-amber-600" translate="no">pending_actions</span>
+                <span>Poner en Pendiente</span>
+              </button>
+            )}
 
             {/* Opciones cuando no está pagado ni anulado */}
             {actionMenu.recibo.estado !== 'Pagado' && actionMenu.recibo.estado !== 'Anulado' && (

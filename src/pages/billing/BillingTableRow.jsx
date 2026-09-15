@@ -15,7 +15,7 @@ const ESTADO_CONFIG = {
   'Pago Parcial': { bg: 'bg-orange-100', text: 'text-orange-800' },
 };
 
-const BillingTableRow = memo(({ recibo, onViewDetail, onViewHistorial, onOpenMenu, isMenuOpen }) => {
+const BillingTableRow = memo(({ recibo, onViewDetail, onViewHistorial, onViewPagos, onOpenMenu, isMenuOpen }) => {
   const estado = ESTADO_CONFIG[recibo.estado] || ESTADO_CONFIG.Vencido;
 
   return (
@@ -108,9 +108,15 @@ const BillingTableRow = memo(({ recibo, onViewDetail, onViewHistorial, onOpenMen
       </td>
       <td className="px-4 py-2 text-center">
         <div className="flex flex-col items-center gap-1">
-          <span className={`inline-flex px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wide ${estado.bg} ${estado.text}`}>
-            {recibo.estado}
-          </span>
+          <button
+            type="button"
+            onClick={() => onViewPagos?.(recibo)}
+            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide cursor-pointer transition-all hover:opacity-85 hover:shadow-xs active:scale-95 ${estado.bg} ${estado.text}`}
+            title="Ver pagos registrados de este recibo"
+          >
+            <span className="material-symbols-outlined text-[12px]" translate="no">payments</span>
+            <span>{recibo.estado}</span>
+          </button>
           {Number(recibo.cantidad_anulados || 0) > 0 && (
             <button
               type="button"
