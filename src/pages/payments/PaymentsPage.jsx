@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../../api/axiosConfig';
 import { toast } from 'sonner';
@@ -291,13 +291,14 @@ const PaymentRow = React.memo(({ pago, fallbackPrevio, onSelect, onOpenMenu, isM
 // ── Main Component ───────────────────────────────────────────────────
 const Payments = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { activeYear } = useYear();
   const queryClient = useQueryClient();
 
   // ── State ──────────────────────────────────────────────────────────
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(location.state?.initialSearch || '');
   const [pdfUrl, setPdfUrl] = useState('');
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
   const [selectedPaymentForDetails, setSelectedPaymentForDetails] = useState(null);

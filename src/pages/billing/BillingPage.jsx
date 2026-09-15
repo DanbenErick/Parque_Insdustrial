@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import ReceiptDetail from '../receipt-detail/ReceiptDetailPage';
@@ -26,6 +28,8 @@ import LoadingCurtain from '../../components/ui/LoadingCurtain';
 
 const Billing = () => {
   const { activeYear } = useYear();
+  const navigate = useNavigate();
+
 
   // --- UI State ---
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -646,6 +650,20 @@ const Billing = () => {
                   {actionMenu.recibo.cantidad_anulados}
                 </span>
               )}
+            </button>
+
+            {/* Ver Pagos del Socio */}
+            <button
+              type="button"
+              onClick={() => {
+                const r = actionMenu.recibo;
+                setActionMenu(null);
+                navigate('/payments', { state: { initialSearch: r.socio || r.nombre_razonsocial || '' } });
+              }}
+              className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
+            >
+              <span className="material-symbols-outlined text-[18px] text-indigo-500" translate="no">payments</span>
+              <span>Ver Pagos del Socio</span>
             </button>
 
             {/* Opciones cuando no está pagado ni anulado */}
