@@ -244,12 +244,9 @@ export const useBillingForms = (dataHook, user) => {
         : 0;
 
       const payload = {
-        lectura_anterior: parseSafe(editModalData.lectura_anterior),
+        // Nota: lectura_anterior es calculada por el backend desde la BD real (no se envía)
         lectura_actual: parseSafe(editReadingVal),
-        consumo_calculado: calcConsumoNormal,
-        lectura_anterior_punta: parseSafe(editModalData.lectura_anterior_punta),
         lectura_actual_punta: editReadingValPunta ? parseSafe(editReadingValPunta) : 0,
-        consumo_calculado_punta: calcConsumoPunta,
         factor_potencia: editFactorPotencia ? parseSafe(editFactorPotencia) : 0,
         max_demanda_fuera_punta: editMaxDemandaFueraPunta ? parseSafe(editMaxDemandaFueraPunta) : 0,
         max_demanda_punta: editMaxDemandaPunta ? parseSafe(editMaxDemandaPunta) : 0,
@@ -259,6 +256,7 @@ export const useBillingForms = (dataHook, user) => {
         // Preserve meter change
         es_cambio_medidor: isCambio ? 1 : 0,
         ...(isCambio && {
+          lectura_anterior: parseSafe(editModalData.lectura_anterior),
           lectura_final_viejo: parseSafe(editLecturaFinalAntiguo),
           lectura_inicial_nuevo: parseSafe(editLecturaInicialNuevo),
           ...(isTR && {
@@ -268,19 +266,10 @@ export const useBillingForms = (dataHook, user) => {
         })
       };
 
-      await api.put(`/lecturas/${editModalData.id}`, payload);
-
-      let consumo_calculado = 0;
-      if (isCambio) {
-        let cv = parseSafe(editLecturaFinalAntiguo) - parseSafe(editModalData.lectura_anterior);
-        if (cv < 0) cv = 0;
-        let cn = parseSafe(editReadingVal) - parseSafe(editLecturaInicialNuevo);
-        if (cn < 0) cn = 0;
-        consumo_calculado = cv + cn;
-      } else {
-        consumo_calculado = parseSafe(editReadingVal) - parseSafe(editModalData.lectura_anterior);
-        if (consumo_calculado < 0) consumo_calculado = 0;
-      }
+      const res = await api.put(`/lecturas/${editModalData.id}`, payload);
+      // El backend devuelve el lectura_anterior real y el consumo_calculado correcto
+      const real_lectura_anterior = res.data?.lectura_anterior ?? editModalData.lectura_anterior;
+      const real_consumo = res.data?.consumo_calculado ?? calcConsumoNormal;
 
       let consumo_calculado_punta = 0;
       if (isTR) {
@@ -300,8 +289,11 @@ export const useBillingForms = (dataHook, user) => {
         if (l.id === editModalData.id) {
           return {
             ...l,
-            ...payload, // Spreads all updated values including justificacion and lectura_actual
-            consumo_calculado,
+            ...payload,
+            // Usar valores reales devueltos por el backend
+            lectura_anterior: real_lectura_anterior,
+            lectura_actual: parseSafe(editReadingVal),
+            consumo_calculado: real_consumo,
             consumo_calculado_punta,
             fecha_registro: new Date().toISOString(),
             // Optimistically set the original values if they weren't set already

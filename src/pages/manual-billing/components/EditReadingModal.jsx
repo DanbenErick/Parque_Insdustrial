@@ -60,14 +60,8 @@ export const EditReadingModal = ({
         }
       }
     } else {
-      if (editReadingVal && parseSafe(editReadingVal) < parseSafe(editModalData.lectura_anterior)) {
-        const diff = parseSafe(editReadingVal) - parseSafe(editModalData.lectura_anterior);
-        errors.push(`La lectura es menor al del mes anterior (Diferencia: ${diff.toFixed(2)} kWh)`);
-      }
-      if (isTR && editReadingValPunta && parseSafe(editReadingValPunta) < parseSafe(editModalData.lectura_anterior_punta)) {
-        const diff = parseSafe(editReadingValPunta) - parseSafe(editModalData.lectura_anterior_punta);
-        errors.push(`La lectura Punta es menor al del mes anterior (Diferencia: ${diff.toFixed(2)} kWh)`);
-      }
+      // La validación de lectura < mes anterior la hace el backend con el valor REAL de la BD
+      // No bloqueamos aquí con el valor stale del frontend (editModalData.lectura_anterior)
     }
     
     if (!isValidJustification) errors.push("Justificación incompleta (mínimo 3 palabras)");
