@@ -587,7 +587,12 @@ const Billing = () => {
         selectedMedidor={{
           recibo_id: deudaReciboData?.id,
           usuario_id: deudaReciboData?.usuario_id,
-          propietario: deudaReciboData?.socio
+          propietario: deudaReciboData?.socio,
+          numero_comprobante: deudaReciboData?.numero_comprobante,
+          num_medidor: deudaReciboData?.medidor_num_serie || deudaReciboData?.num_medidor,
+          socio_direccion: deudaReciboData?.direccion || deudaReciboData?.medidor_direccion,
+          estado: deudaReciboData?.estado,
+          total: deudaReciboData?.total
         }}
         activePeriodo={{ id: deudaReciboData?.periodo_id }}
       />
