@@ -96,7 +96,7 @@ const TenantsAndSectors = () => {
       setFormData(INITIAL_FORM);
       setEditId(null);
     } catch (error) {
-      toast.error(error.message || "Error al procesar la solicitud");
+      toast.error(error.message || "Error al procesar la solicitud", { duration: 6000 });
     } finally {
       setIsSubmitting(false);
     }
