@@ -406,11 +406,18 @@ const Payments = () => {
 
   const filteredPagos = useMemo(() => {
     const term = searchTerm.toLowerCase();
-    if (!term) return pagos;
-    return pagos.filter(p =>
-      p.socio?.toLowerCase().includes(term) ||
-      p.numero_comprobante?.toLowerCase().includes(term),
-    );
+    let list = pagos;
+    if (term) {
+      list = pagos.filter(p =>
+        p.socio?.toLowerCase().includes(term) ||
+        p.numero_comprobante?.toLowerCase().includes(term),
+      );
+    }
+    return [...list].sort((a, b) => {
+      const cmp = (a.socio || '').localeCompare(b.socio || '', 'es', { sensitivity: 'base' });
+      if (cmp !== 0) return cmp;
+      return new Date(b.fecha_pago || 0) - new Date(a.fecha_pago || 0);
+    });
   }, [pagos, searchTerm]);
 
   const selectedReciboObj = useMemo(
