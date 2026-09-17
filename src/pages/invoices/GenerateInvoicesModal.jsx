@@ -150,9 +150,13 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
   const cantidadLecturas = lecturasValidas.length;
   const lecturasFaltantes = totalMedidores - cantidadLecturas;
 
-  const handleGenerate = async () => {
-    if (modo === 'Masivo' && lecturasFaltantes > 0) {
-      return toast.error('No se puede generar. Faltan lecturas por registrar.');
+  const handleGenerate = async (soloLecturados = false) => {
+    if (modo === 'Masivo' && !soloLecturados && lecturasFaltantes > 0) {
+      return toast.error('No se puede generar la facturación completa. Aún faltan lecturas por registrar.');
+    }
+
+    if (modo === 'Masivo' && soloLecturados && cantidadLecturas === 0) {
+      return toast.error('No hay medidores con lecturas registradas para facturar.');
     }
     
     if (modo === 'Individual' && !selectedUsuarioId) {
@@ -162,8 +166,10 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
     setIsProcessing(true);
     try {
       if (modo === 'Masivo') {
-        await api.post('/recibos/generar', { periodo_id: selectedPeriodoId });
-        toast.success('Facturas generadas exitosamente');
+        const res = await api.post('/recibos/generar', { periodo_id: selectedPeriodoId });
+        const procesados = res.data?.procesados;
+        const countStr = procesados !== undefined ? ` (${procesados} recibos)` : '';
+        toast.success(`Facturas generadas exitosamente${countStr}`);
       } else {
         await api.post('/recibos/generar/individual', { 
           periodo_id: selectedPeriodoId, 
@@ -437,31 +443,65 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
         </div>
 
         {/* Footer Actions */}
-        <div className="px-6 py-4 bg-surface-container-lowest border-t border-outline-variant/50 flex gap-3">
+        <div className="px-6 py-4 bg-surface-container-lowest border-t border-outline-variant/50 flex flex-col sm:flex-row gap-2.5 sm:justify-end sm:items-center">
           <button 
             onClick={onClose}
             disabled={isProcessing}
-            className="flex-1 py-2.5 rounded-xl font-bold text-sm border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-50"
+            className="py-2.5 px-4 rounded-xl font-bold text-sm border border-outline-variant text-on-surface-variant hover:bg-surface-container transition-colors disabled:opacity-50 order-last sm:order-first"
           >
             Cancelar
           </button>
-          <button 
-            onClick={handleGenerate}
-            disabled={isProcessing || isLoading || (modo === 'Masivo' ? (lecturasFaltantes > 0 || totalMedidores === 0) : !selectedUsuarioId)}
-            className="flex-[2] py-2.5 rounded-xl font-bold text-sm bg-primary text-on-primary hover:brightness-110 hover:shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:shadow-none"
-          >
-            {isProcessing ? (
-              <>
-                <span className="material-symbols-outlined animate-spin text-[18px]" translate="no">sync</span>
-                Generando...
-              </>
-            ) : (
-              <>
-                <span className="material-symbols-outlined text-[18px]" translate="no">magic_button</span>
-                Generar {modo === 'Masivo' ? 'Facturas Masivas' : 'Factura Individual'}
-              </>
-            )}
-          </button>
+
+          {modo === 'Masivo' ? (
+            <>
+              <button 
+                onClick={() => handleGenerate(true)}
+                disabled={isProcessing || isLoading || cantidadLecturas === 0}
+                className="py-2.5 px-3.5 rounded-xl font-bold text-xs sm:text-sm bg-secondary/15 text-secondary border border-secondary/30 hover:bg-secondary/25 hover:shadow-sm transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:shadow-none"
+                title={cantidadLecturas > 0 ? `Generar facturas para los ${cantidadLecturas} medidores con lectura` : 'No hay lecturas disponibles'}
+              >
+                <span className="material-symbols-outlined text-[18px]" translate="no">fact_check</span>
+                Generar factura de medidores lecturados
+              </button>
+
+              <button 
+                onClick={() => handleGenerate(false)}
+                disabled={isProcessing || isLoading || (lecturasFaltantes > 0 || totalMedidores === 0)}
+                className="py-2.5 px-4 rounded-xl font-bold text-xs sm:text-sm bg-primary text-on-primary hover:brightness-110 hover:shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:shadow-none"
+                title={lecturasFaltantes > 0 ? `Aún faltan ${lecturasFaltantes} lecturas para poder generar la facturación completa del mes` : 'Generar facturación completa del mes'}
+              >
+                {isProcessing ? (
+                  <>
+                    <span className="material-symbols-outlined animate-spin text-[18px]" translate="no">sync</span>
+                    Generando...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-[18px]" translate="no">magic_button</span>
+                    Generar facturas del mes
+                  </>
+                )}
+              </button>
+            </>
+          ) : (
+            <button 
+              onClick={() => handleGenerate(false)}
+              disabled={isProcessing || isLoading || !selectedUsuarioId}
+              className="py-2.5 px-6 rounded-xl font-bold text-sm bg-primary text-on-primary hover:brightness-110 hover:shadow-md transition-all active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 disabled:hover:shadow-none"
+            >
+              {isProcessing ? (
+                <>
+                  <span className="material-symbols-outlined animate-spin text-[18px]" translate="no">sync</span>
+                  Generando...
+                </>
+              ) : (
+                <>
+                  <span className="material-symbols-outlined text-[18px]" translate="no">magic_button</span>
+                  Generar Factura Individual
+                </>
+              )}
+            </button>
+          )}
         </div>
 
         </div>
