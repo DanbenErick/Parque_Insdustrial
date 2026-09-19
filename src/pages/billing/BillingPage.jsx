@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import  { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
@@ -144,7 +144,7 @@ const Billing = () => {
   const usuariosPendientes = useMemo(() => parseInt(globalStats?.usuariosPendientes || 0, 10), [globalStats]);
   const deudaVencida = useMemo(() => parseFloat(globalStats?.deudaVencida || 0), [globalStats]);
   const usuariosVencidos = useMemo(() => parseInt(globalStats?.usuariosVencidos || 0, 10), [globalStats]);
-  
+
   const totalMedidores = useMemo(() => parseInt(globalStats?.totalMedidores || 0, 10), [globalStats]);
   const sociosSinMedidor = useMemo(() => parseInt(globalStats?.sociosSinMedidor || 0, 10), [globalStats]);
   const faltanLecturar = useMemo(() => parseInt(globalStats?.faltanLecturar || 0, 10), [globalStats]);
@@ -200,11 +200,7 @@ const Billing = () => {
     }
   }, [filterMes, uniqueMonths, periodos]);
 
-  const handleExportAllFromDropdown = useCallback(() => {
-    setIsDropdownOpen(false);
-    // Re-build exports with updated uniqueMonths
-    exports.handleExportAllPdfV2();
-  }, [exports]);
+
 
   const handleExportPDF = useCallback(async () => {
     if (!recibos || recibos.length === 0) {
@@ -577,7 +573,7 @@ const Billing = () => {
         onClose={refacturar.close}
       />
 
-      <DeudaPersonalizadaModal 
+      <DeudaPersonalizadaModal
         isOpen={deudaModalOpen}
         onClose={() => {
           setDeudaModalOpen(false);

@@ -1,4 +1,4 @@
-import React from 'react';
+import 'react';
 
 export { default as DashboardKPIs } from './DashboardKPIs';
 export { default as QuickAccessBar } from './QuickAccessBar';

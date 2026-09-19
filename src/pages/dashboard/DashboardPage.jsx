@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import  { useState, useCallback, useMemo } from 'react';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -32,7 +32,7 @@ const Dashboard = () => {
   const [chartViewMode, setChartViewMode] = useState('year');
 
   const consumoYear = chartViewMode === 'global' ? 'all' : activeYear;
-  const isGlobal = chartViewMode === 'global';
+
 
   // --- Parallel queries with React Query ---
   const results = useQueries({
@@ -68,14 +68,17 @@ const Dashboard = () => {
     ],
   });
 
-  const [kpisQuery, chartQuery, readingsQuery, recaudacionQuery, alertsQuery] = results;
+  const [kpisQuery, chartQuery, , recaudacionQuery] = results;
 
   const isLoading = results.some((r) => r.isLoading);
 
-  const kpis = kpisQuery.data ?? { totalConsumo: 0, maxConsumo: 0, maxPeriodo: 'N/A', minConsumo: 0, minPeriodo: 'N/A' };
-  const chartData = chartQuery.data ?? [];
+  const kpis = useMemo(
+    () => kpisQuery.data ?? { totalConsumo: 0, maxConsumo: 0, maxPeriodo: 'N/A', minConsumo: 0, minPeriodo: 'N/A' },
+    [kpisQuery.data],
+  );
+  const chartData = useMemo(() => chartQuery.data ?? [], [chartQuery.data]);
   // recaudacionRaw ya viene agregado del server: [{ label, recaudado }]
-  const recaudacionRaw = recaudacionQuery.data ?? [];
+  const recaudacionRaw = useMemo(() => recaudacionQuery.data ?? [], [recaudacionQuery.data]);
 
   // --- All derived data is memoized ---
   const kpiValues = useMemo(() => deriveKpiValues(kpis, chartData), [kpis, chartData]);

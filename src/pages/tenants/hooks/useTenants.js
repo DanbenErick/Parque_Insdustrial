@@ -5,11 +5,10 @@ export const useTenants = () => {
   const queryClient = useQueryClient();
 
   // Fetchear todos los socios para búsqueda y filtrado local instantáneo en el frontend
-  const { 
-    data: tenants = [], 
-    isLoading: isLoadingTenants, 
-    isError: isErrorTenants, 
-    refetch: refetchTenants 
+  const {
+    data: tenants = [],
+    isLoading: isLoadingTenants,
+    isError: isErrorTenants
   } = useQuery({
     queryKey: ['tenants'],
     queryFn: async () => {

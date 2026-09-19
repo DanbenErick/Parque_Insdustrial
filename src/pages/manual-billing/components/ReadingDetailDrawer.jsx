@@ -1,8 +1,8 @@
-import React from 'react';
+import 'react';
 import { BadgeType } from './shared/BadgeType';
 import { formatDateLong, fmtVal, parseSafe } from '../utils';
 
-export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClose, onEdit }) => {
+export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) => {
   if (!record) return null;
 
   const isCambioMedidor = Boolean(record.es_cambio_medidor);
@@ -15,12 +15,12 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
   const tarifaPunta = parseSafe(record.tarifa_kwh_punta) || 0;
   const precioReactiva = parseSafe(record.precio_factor_potencia) || 0;
 
-  const calcConsumoNormal = isCambioMedidor 
+  const calcConsumoNormal = isCambioMedidor
     ? Math.max(0, parseSafe(record.lectura_final_viejo) - parseSafe(record.lectura_anterior)) + Math.max(0, parseSafe(record.lectura_actual) - parseSafe(record.lectura_inicial_nuevo))
     : Math.max(0, parseSafe(record.lectura_actual) - parseSafe(record.lectura_anterior));
 
-  const calcConsumoPunta = isPunta 
-    ? (isCambioMedidor 
+  const calcConsumoPunta = isPunta
+    ? (isCambioMedidor
         ? Math.max(0, parseSafe(record.lectura_final_viejo_punta) - parseSafe(record.lectura_anterior_punta)) + Math.max(0, parseSafe(record.lectura_actual_punta) - parseSafe(record.lectura_inicial_nuevo_punta))
         : Math.max(0, parseSafe(record.lectura_actual_punta) - parseSafe(record.lectura_anterior_punta)))
     : 0;
@@ -33,14 +33,14 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
 
   const montoNormal = Math.round((consumoNormal * tarifaNormal * factor) * 10) / 10;
   const montoPunta = Math.round((consumoPunta * tarifaPunta * factor) * 10) / 10;
-  const montoReactiva = reactivaKvarh > 0 ? Math.round((reactivaKvarh * precioReactiva) * 10) / 10 : 0; 
+  const montoReactiva = reactivaKvarh > 0 ? Math.round((reactivaKvarh * precioReactiva) * 10) / 10 : 0;
 
   const costoPotencia = parseSafe(record.costo_potencia) || 0;
   const costoPotenciaFueraPunta = parseSafe(record.costo_potencia_fuera_punta) || 0;
-  
+
   const montoDemandaP = isPunta ? Math.round((maxDemandaP * costoPotencia) * 10) / 10 : 0;
   const montoDemandaN = isPunta ? Math.round((maxDemandaN * costoPotenciaFueraPunta) * 10) / 10 : 0;
-  
+
   const montoFijo = 10.0; // Hardcoded cargo fijo
 
   const montoTotal = Math.round((montoNormal + montoPunta + montoReactiva + montoDemandaP + montoDemandaN + montoFijo) * 10) / 10;
@@ -101,7 +101,7 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
         </div>
 
         <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-surface-container-lowest">
-          
+
           {/* Modified Alert */}
           {wasModified && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 items-start shadow-sm relative overflow-hidden">

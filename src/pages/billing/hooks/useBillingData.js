@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import api from '../../../api/axiosConfig';
@@ -19,7 +19,7 @@ export const useBillingData = ({ filterMes, filterEstado, debouncedSearchTerm, a
   );
 
   // Reset page when filters change
-  useMemo(() => { setPage(1); }, [filterParams]);
+  useEffect(() => { setPage(1); }, [filterParams]);
 
   // ── Recibos ──────────────────────────────────────────────────────────────
   const {

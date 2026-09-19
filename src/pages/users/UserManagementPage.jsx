@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { useAuth } from '../../context/AuthContext';
+import  { useState, useEffect, useCallback, useMemo } from 'react';
+
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 
@@ -26,19 +26,13 @@ const ROLE_COLORS = {
   Socio: 'bg-secondary-container text-on-secondary-container',
 };
 
-const getInitials = (name) => {
-  if (!name) return 'U';
-  const words = name.split(' ');
-  return words.length >= 2
-    ? (words[0][0] + words[1][0]).toUpperCase()
-    : name.substring(0, 2).toUpperCase();
-};
+
 
 const getRoleColor = (rolName) => ROLE_COLORS[rolName] || 'bg-surface-variant text-on-surface-variant';
 
 // --- Component ---
 const UserManagement = () => {
-  const { token } = useAuth();
+
 
   const [activeTab, setActiveTab] = useState('usuarios'); // 'usuarios' | 'sesiones'
   const [usersList, setUsersList] = useState([]);
@@ -89,10 +83,7 @@ const UserManagement = () => {
   }, [usersList, searchTerm]);
 
   // --- Form handlers ---
-  const handleFormChange = useCallback((e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  }, []);
+
 
   const openAddModal = useCallback(() => {
     setFormData(INITIAL_FORM);

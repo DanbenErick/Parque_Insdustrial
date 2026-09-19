@@ -1,4 +1,4 @@
-import React from 'react';
+import 'react';
 import { formatPeriodo } from '../utils';
 import { ReadingRow } from './shared/ReadingRow';
 import { EmptyStateIcon } from './shared/EmptyStateIcon';

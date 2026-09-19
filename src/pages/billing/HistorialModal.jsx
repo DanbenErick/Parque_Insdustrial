@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 
@@ -7,16 +7,7 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [downloadingId, setDownloadingId] = useState(null);
 
-  useEffect(() => {
-    if (isOpen && reciboId) {
-      fetchHistorial();
-    } else {
-      setHistorial([]);
-    }
-    // eslint-disable-next-line
-  }, [isOpen, reciboId]);
-
-  const fetchHistorial = async () => {
+  async function fetchHistorial() {
     setIsLoading(true);
     try {
       const response = await api.get(`/recibos/${reciboId}/historial`);
@@ -27,7 +18,16 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }
+
+  useEffect(() => {
+    if (isOpen && reciboId) {
+      fetchHistorial();
+    } else {
+      setHistorial([]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, reciboId]);
 
   const handleDownloadPdf = async (item) => {
     setDownloadingId(item.id);
@@ -55,7 +55,7 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-scrim/40 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-surface rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-elevation-3 overflow-hidden animate-in zoom-in-95 duration-200">
-        
+
         {/* Header */}
         <div className="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
           <div className="flex items-center gap-3">
@@ -91,14 +91,14 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
               {historial.map((item, index) => {
                 const isLatest = index === 0;
                 const isAnulado = item.estado === 'Anulado';
-                
+
                 return (
                   <div key={item.id} className="relative pl-6">
                     {/* Timeline dot */}
                     <div className={`absolute -left-[9px] top-1 w-4 h-4 rounded-full border-2 border-surface ${
                       isLatest ? 'bg-primary ring-4 ring-primary/20' : (isAnulado ? 'bg-error' : 'bg-surface-variant')
                     }`}></div>
-                    
+
                     <div className={`bg-surface border rounded-xl p-4 shadow-sm transition-all ${
                       isLatest ? 'border-primary/30 ring-1 ring-primary/10' : 'border-outline-variant opacity-85'
                     }`}>
@@ -123,7 +123,7 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
                           {new Date(item.created_at).toLocaleString('es-PE')}
                         </span>
                       </div>
-                      
+
                       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
                         <div>
                           <p className="text-[10px] font-bold text-on-surface-variant uppercase mb-0.5">Total</p>

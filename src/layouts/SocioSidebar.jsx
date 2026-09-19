@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import  { useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -6,7 +6,7 @@ const SocioSidebar = ({ isMobileMenuOpen, onCloseMobileMenu }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-  
+
   const currentPath = location.pathname.substring(1) || 'dashboard';
 
   const handleNavClick = useCallback((view) => {
@@ -23,7 +23,7 @@ const SocioSidebar = ({ isMobileMenuOpen, onCloseMobileMenu }) => {
 
   return (
     <aside className={`fixed left-0 top-0 h-full w-[280px] md:w-[260px] flex flex-col z-50 bg-white border-r border-outline-variant/30 shadow-lg md:shadow-none transition-transform duration-300 ease-in-out print:hidden ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
-      
+
       {/* Logo Area */}
       <div className="h-20 px-6 flex items-center justify-between border-b border-outline-variant/30 bg-surface-container-lowest">
         <div className="flex items-center gap-3">
@@ -42,7 +42,7 @@ const SocioSidebar = ({ isMobileMenuOpen, onCloseMobileMenu }) => {
 
       <nav className="flex flex-col gap-1 px-4 py-6 flex-grow overflow-y-auto custom-scrollbar">
         <p className="px-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-widest mb-2">Principal</p>
-        
+
         {menuItems.map(item => {
           const isActive = currentPath === item.view;
           return (
@@ -50,14 +50,14 @@ const SocioSidebar = ({ isMobileMenuOpen, onCloseMobileMenu }) => {
               key={item.view}
               onClick={() => handleNavClick(item.view)}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 w-full text-left group relative ${
-                isActive 
-                  ? 'bg-emerald-50 text-emerald-700 font-bold border border-emerald-100 shadow-sm' 
+                isActive
+                  ? 'bg-emerald-50 text-emerald-700 font-bold border border-emerald-100 shadow-sm'
                   : 'text-on-surface-variant hover:bg-surface-container-lowest hover:text-on-surface border border-transparent'
               }`}
             >
               {isActive && <div className="absolute left-0 top-1/2 -translate-y-1/2 h-1/2 w-1 bg-emerald-500 rounded-r-full"></div>}
-              <span translate="no" 
-                className={`material-symbols-outlined text-[20px] transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`} 
+              <span translate="no"
+                className={`material-symbols-outlined text-[20px] transition-transform duration-200 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}
                 style={{ fontVariationSettings: isActive ? "'FILL' 1" : "'FILL' 0" }}
               >
                 {item.icon}
@@ -82,11 +82,11 @@ const SocioSidebar = ({ isMobileMenuOpen, onCloseMobileMenu }) => {
               {user?.documento_identidad || 'RUC/DNI'}
             </p>
           </div>
-          
+
           <div className="flex gap-1 ml-auto">
-            <button 
-              onClick={logout} 
-              className="p-1.5 text-on-surface-variant hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
+            <button
+              onClick={logout}
+              className="p-1.5 text-on-surface-variant hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
               title="Cerrar Sesión"
             >
               <span className="material-symbols-outlined text-[18px]" translate="no">logout</span>

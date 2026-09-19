@@ -1,12 +1,12 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import api from '../../../api/axiosConfig';
 import { toast } from 'sonner';
 import { parseSafe } from '../utils';
 
 export const useBillingForms = (dataHook, user) => {
-  const { 
-    medidores, setMedidores,
-    activePeriodo, 
+  const {
+     setMedidores,
+    activePeriodo,
     lecturasPeriodoActivoMap,
     setLecturas,
     setStats
@@ -14,8 +14,8 @@ export const useBillingForms = (dataHook, user) => {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedMember, setSelectedMember] = useState(null);
-  const [isSearching, setIsSearching] = useState(false);
-  
+  const [isSearching] = useState(false);
+
   // Forms state
   const [currentReading, setCurrentReading] = useState('');
   const [currentReadingPunta, setCurrentReadingPunta] = useState('');
@@ -24,21 +24,21 @@ export const useBillingForms = (dataHook, user) => {
   const [maxDemandaPunta, setMaxDemandaPunta] = useState('');
   const [precioReactiva, setPrecioReactiva] = useState('');
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Cambio de Medidor State
   const [isCambioMedidor, setIsCambioMedidor] = useState(false);
   const [lecturaFinalAntiguo, setLecturaFinalAntiguo] = useState('');
   const [lecturaInicialNuevo, setLecturaInicialNuevo] = useState('0');
-  
+
   // Cambio de Medidor (Punta) State
   const [lecturaFinalAntiguoPunta, setLecturaFinalAntiguoPunta] = useState('');
   const [lecturaInicialNuevoPunta, setLecturaInicialNuevoPunta] = useState('0');
-  
+
   // UI state
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalSearchTerm, setModalSearchTerm] = useState('');
   const [isPeriodModalOpen, setIsPeriodModalOpen] = useState(false);
-  
+
   // Edit Modal State
   const [editModalData, setEditModalData] = useState(null);
   const [editReadingVal, setEditReadingVal] = useState('');
@@ -89,14 +89,14 @@ export const useBillingForms = (dataHook, user) => {
     setEditMaxDemandaPunta(record.max_demanda_punta || '');
     setEditPrecioReactiva(record.precio_factor_potencia || '');
     setEditJustificacion('');
-    
+
     // Set meter change values if they exist
     setEditLecturaFinalAntiguo(record.lectura_final_viejo !== null ? record.lectura_final_viejo : '');
     setEditLecturaInicialNuevo(record.lectura_inicial_nuevo !== null ? record.lectura_inicial_nuevo : '');
     setEditLecturaFinalAntiguoPunta(record.lectura_final_viejo_punta !== null ? record.lectura_final_viejo_punta : '');
     setEditLecturaInicialNuevoPunta(record.lectura_inicial_nuevo_punta !== null ? record.lectura_inicial_nuevo_punta : '');
-    
-    setIsModalOpen(false); 
+
+    setIsModalOpen(false);
   }, []);
 
   const resetForm = useCallback(() => {
@@ -118,15 +118,15 @@ export const useBillingForms = (dataHook, user) => {
   const handleSave = async (e) => {
     e.preventDefault();
     if (!currentReading || !selectedMember || !activePeriodo) return;
-    
+
     const isTR = selectedMember.tipo === 'Hora Punta' || selectedMember.tipo === 'Tiempo Real';
 
-    const calcConsumoNormal = isCambioMedidor 
+    const calcConsumoNormal = isCambioMedidor
       ? Math.max(0, parseSafe(lecturaFinalAntiguo) - parseSafe(selectedMember.ultima_lectura)) + Math.max(0, parseSafe(currentReading) - parseSafe(lecturaInicialNuevo))
       : Math.max(0, parseSafe(currentReading) - parseSafe(selectedMember.ultima_lectura));
 
-    const calcConsumoPunta = isTR 
-      ? (isCambioMedidor 
+    const calcConsumoPunta = isTR
+      ? (isCambioMedidor
           ? Math.max(0, parseSafe(lecturaFinalAntiguoPunta) - parseSafe(selectedMember.ultima_lectura_punta)) + Math.max(0, parseSafe(currentReadingPunta) - parseSafe(lecturaInicialNuevoPunta))
           : Math.max(0, parseSafe(currentReadingPunta) - parseSafe(selectedMember.ultima_lectura_punta)))
       : 0;
@@ -176,7 +176,7 @@ export const useBillingForms = (dataHook, user) => {
       const consumo_calculado_punta = currentReadingPunta ? parseSafe(currentReadingPunta) - parseSafe(selectedMember.ultima_lectura_punta || 0) : 0;
 
       const newLectura = {
-        id: Date.now(), 
+        id: Date.now(),
         propietario: selectedMember.propietario,
         num_serie: selectedMember.num_serie,
         tipo: selectedMember.tipo,
@@ -200,17 +200,17 @@ export const useBillingForms = (dataHook, user) => {
       };
 
       setLecturas(prev => [newLectura, ...prev]);
-      
+
       // Actualizar contador en vivo
       setStats(prev => ({
         ...prev,
         total_registrados: (prev?.total_registrados || 0) + 1
       }));
-      
+
       toast.success('Lectura guardada con éxito');
 
-      setMedidores(prev => prev.map(m => m.id === selectedMember.id ? { 
-        ...m, 
+      setMedidores(prev => prev.map(m => m.id === selectedMember.id ? {
+        ...m,
         ultima_lectura: currentReading,
         ...(currentReadingPunta ? { ultima_lectura_punta: currentReadingPunta } : {}),
         ...(maxDemandaFueraPunta ? { ultima_demanda_maxima_fuera_punta: maxDemandaFueraPunta } : {}),
@@ -233,15 +233,11 @@ export const useBillingForms = (dataHook, user) => {
       const isCambio = editModalData.es_cambio_medidor === 1 || editModalData.es_cambio_medidor === true;
       const isTR = editModalData.medidor_tipo === 'Hora Punta' || editModalData.medidor_tipo === 'Tiempo Real';
 
-      const calcConsumoNormal = isCambio 
+      const calcConsumoNormal = isCambio
         ? Math.max(0, parseSafe(editLecturaFinalAntiguo) - parseSafe(editModalData.lectura_anterior)) + Math.max(0, parseSafe(editReadingVal) - parseSafe(editLecturaInicialNuevo))
         : Math.max(0, parseSafe(editReadingVal) - parseSafe(editModalData.lectura_anterior));
 
-      const calcConsumoPunta = isTR 
-        ? (isCambio 
-            ? Math.max(0, parseSafe(editLecturaFinalAntiguoPunta) - parseSafe(editModalData.lectura_anterior_punta)) + Math.max(0, parseSafe(editReadingValPunta) - parseSafe(editLecturaInicialNuevoPunta))
-            : Math.max(0, parseSafe(editReadingValPunta) - parseSafe(editModalData.lectura_anterior_punta)))
-        : 0;
+
 
       const payload = {
         // Nota: lectura_anterior es calculada por el backend desde la BD real (no se envía)
@@ -305,8 +301,8 @@ export const useBillingForms = (dataHook, user) => {
         return l;
       }));
 
-      setMedidores(prev => prev.map(m => m.num_serie === editModalData.num_serie ? { 
-        ...m, 
+      setMedidores(prev => prev.map(m => m.num_serie === editModalData.num_serie ? {
+        ...m,
         ultima_lectura: editReadingVal,
         ...(editReadingValPunta ? { ultima_lectura_punta: editReadingValPunta } : {})
       } : m));

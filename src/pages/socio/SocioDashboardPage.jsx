@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import  { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -36,13 +36,13 @@ const SocioDashboardPage = () => {
 
   const kpis = useMemo(() => {
     if (!recibos.length) return { deudaTotal: 0, ultimoRecibo: null, estadoUltimo: 'N/A' };
-    
+
     const deudaTotal = recibos
       .filter(r => r.estado === 'Pendiente' || r.estado === 'Vencido' || r.estado === 'Pago Parcial')
       .reduce((sum, r) => sum + Number(r.total), 0);
-      
+
     const ultimoRecibo = recibos[0];
-    
+
     return {
       deudaTotal,
       ultimoRecibo,
@@ -68,7 +68,7 @@ const SocioDashboardPage = () => {
     if (selectedChartMedidor !== 'Todos') {
       recibosFiltrados = recibos.filter(r => r.medidor_num_serie === selectedChartMedidor);
     }
-    
+
     const agrupado = {};
     recibosFiltrados.forEach(r => {
       const per = r.periodo;
@@ -76,7 +76,7 @@ const SocioDashboardPage = () => {
       agrupado[per].normal += Number(r.consumo_calculado || 0);
       agrupado[per].punta += Number(r.consumo_calculado_punta || 0);
     });
-    
+
     // Sort descending by period, take top 6, then reverse for chronological order on chart
     const list = Object.values(agrupado).sort((a,b) => b.p.localeCompare(a.p)).slice(0, 6).reverse();
 
@@ -86,13 +86,13 @@ const SocioDashboardPage = () => {
         {
           label: 'Consumo Fuera Punta (kWh)',
           data: list.map(r => r.normal),
-          backgroundColor: 'rgba(16, 185, 129, 0.8)', 
+          backgroundColor: 'rgba(16, 185, 129, 0.8)',
           borderRadius: 4,
         },
         {
           label: 'Consumo Punta (kWh)',
           data: list.map(r => r.punta),
-          backgroundColor: 'rgba(245, 158, 11, 0.8)', 
+          backgroundColor: 'rgba(245, 158, 11, 0.8)',
           borderRadius: 4,
         }
       ]
@@ -123,7 +123,7 @@ const SocioDashboardPage = () => {
 
   return (
     <main className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[1200px] mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-      
+
       {/* Header Premium (Responsive) */}
       <div className="bg-gradient-to-br from-emerald-600 to-teal-800 rounded-2xl p-5 md:p-8 text-white shadow-lg relative overflow-hidden">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
@@ -156,7 +156,7 @@ const SocioDashboardPage = () => {
           {medidoresConConsumo.map(medidor => (
             <div key={medidor.id} className="bg-white rounded-2xl p-5 border border-outline-variant/60 shadow-sm flex flex-col relative overflow-hidden group hover:border-emerald-500 transition-colors">
               <div className="absolute top-0 right-0 w-2 h-full bg-emerald-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              
+
               <div className="flex justify-between items-start mb-4">
                 <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-xl flex items-center justify-center border border-emerald-100">
                   <span className="material-symbols-outlined text-[24px]" translate="no">power</span>
@@ -167,11 +167,11 @@ const SocioDashboardPage = () => {
                   </span>
                 </div>
               </div>
-              
+
               <div className="mb-4">
                 <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-0.5">Serie del Medidor</p>
                 <h3 className="font-data-mono font-bold text-lg text-on-surface">{medidor.num_serie}</h3>
-                
+
                 {medidor.direccion && (
                   <>
                     <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mt-3 mb-0.5">Dirección</p>
@@ -181,7 +181,7 @@ const SocioDashboardPage = () => {
                   </>
                 )}
               </div>
-              
+
               <div className="mt-auto pt-4 border-t border-outline-variant/30 flex justify-between items-end">
                 <div>
                   <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-1">Último Consumo</p>
@@ -210,7 +210,7 @@ const SocioDashboardPage = () => {
 
       {/* SECCIÓN SECUNDARIA: Estado de Cuenta y Gráfico */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 pt-2">
-        
+
         {/* Resumen de Deuda */}
         <div className="flex flex-col gap-4">
           <div className="bg-white rounded-2xl p-5 border border-outline-variant shadow-sm flex items-center gap-4">

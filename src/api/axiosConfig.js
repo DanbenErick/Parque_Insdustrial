@@ -42,7 +42,7 @@ api.interceptors.response.use(
 
     // 2. Si la sesión expiró o no está autorizada
     if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-      
+
       // No cerrar sesión globalmente si es un error de contraseña incorrecta en login o change-password
       const url = error.config?.url || '';
       if (url.includes('/auth/login') || url.includes('/auth/change-password')) {
@@ -56,7 +56,7 @@ api.interceptors.response.use(
           window.location.href = '/login';
         }, 1500);
       }
-      
+
       // Limpiamos todo
       localStorage.removeItem('luz_token');
       localStorage.removeItem('luz_user');

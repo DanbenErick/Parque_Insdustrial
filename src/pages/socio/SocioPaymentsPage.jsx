@@ -1,4 +1,4 @@
-import React from 'react';
+import 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
@@ -62,7 +62,7 @@ const SocioPaymentsPage = () => {
               const { icon, bg } = getMetodoConfig(pago.metodo_pago);
               return (
                 <div key={pago.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 rounded-xl hover:bg-surface-container-lowest transition-colors border border-transparent hover:border-outline-variant/50 group">
-                  
+
                   <div className="flex items-center gap-4">
                     <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${bg}`}>
                       <span className="material-symbols-outlined" translate="no">{icon}</span>

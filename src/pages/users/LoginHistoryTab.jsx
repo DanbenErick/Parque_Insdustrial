@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import  { useState, useEffect, useCallback } from 'react';
 import api from '../../api/axiosConfig';
 import { toast } from 'sonner';
 
@@ -15,14 +15,14 @@ const LoginHistoryTab = () => {
       const response = await api.get('/auth/sesiones', {
         params: { page: pageNum, limit }
       });
-      
+
       const newLogs = response.data || [];
       if (pageNum === 1) {
         setLogs(newLogs);
       } else {
         setLogs(prev => [...prev, ...newLogs]);
       }
-      
+
       setHasMore(newLogs.length === limit);
     } catch (error) {
       toast.error('Error al cargar historial de sesiones');
@@ -141,7 +141,7 @@ const LoginHistoryTab = () => {
           </button>
         </div>
       )}
-      
+
       {isLoading && logs.length === 0 && (
         <div className="p-10 text-center text-on-surface-variant text-sm">Cargando registros...</div>
       )}

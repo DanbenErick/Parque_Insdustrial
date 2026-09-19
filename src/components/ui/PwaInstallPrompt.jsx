@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 
 const PwaInstallPrompt = () => {
   const [showPrompt, setShowPrompt] = useState(false);
@@ -67,7 +67,7 @@ const PwaInstallPrompt = () => {
         <div className="w-12 h-12 bg-white rounded-xl shrink-0 flex items-center justify-center overflow-hidden">
           <img src="/logo.png" alt="App Logo" className="w-full h-full object-contain" />
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <h4 className="font-bold text-sm truncate">Portal Cliente PQI</h4>
           <p className="text-[11px] text-emerald-200 leading-tight mt-0.5">
@@ -76,13 +76,13 @@ const PwaInstallPrompt = () => {
         </div>
 
         <div className="flex flex-col gap-2 shrink-0">
-          <button 
+          <button
             onClick={handleInstallClick}
             className="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold rounded-lg transition-colors"
           >
             Instalar
           </button>
-          <button 
+          <button
             onClick={handleDismiss}
             className="px-3 py-1 bg-transparent text-emerald-300 text-[10px] font-bold hover:text-white transition-colors"
           >

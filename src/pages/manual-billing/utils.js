@@ -13,7 +13,7 @@ export const formatPeriodo = (periodoStr) => {
   if (!periodoStr) return '';
   const parts = periodoStr.split('-');
   if (parts.length !== 2) return periodoStr;
-  
+
   const isYearFirst = parts[0].length === 4;
   const monthIdx = parseInt(isYearFirst ? parts[1] : parts[0], 10) - 1;
   return monthIdx >= 0 && monthIdx < 12 ? MESES[monthIdx] : periodoStr;

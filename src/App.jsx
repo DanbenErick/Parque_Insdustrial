@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useMemo, useCallback, Suspense, lazy } from 'react';
-import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
+import  { useState, useMemo, useCallback, Suspense, lazy } from 'react';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { useAuth } from './context/AuthContext';
-import { useTheme } from './context/ThemeContext';
+
 import PwaInstallPrompt from './components/ui/PwaInstallPrompt';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
@@ -45,12 +45,12 @@ const SocioProfilePage = lazy(() => import('./pages/socio/SocioProfilePage'));
 
 function App() {
   const { user, isAuthenticated, isLoading } = useAuth();
-  const { isDarkMode } = useTheme();
+
   const location = useLocation();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const userRutas = user?.rutas || [];
+  const userRutas = useMemo(() => user?.rutas || [], [user?.rutas]);
 
   const appScreens = useMemo(() => [
     { view: 'dashboard', name: 'Panel de Control', icon: 'dashboard', keywords: ['inicio', 'home', 'kpi', 'resumen'], hasAccess: userRutas.includes('dashboard') },
@@ -85,8 +85,8 @@ function App() {
 
   return (
     <>
-      <Toaster 
-        position="top-center" 
+      <Toaster
+        position="top-center"
         expand={true}
         duration={4000}
         toastOptions={{
@@ -168,7 +168,7 @@ function App() {
 
           {/* Content */}
           <div className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col pb-[70px] md:pb-0">
-            
+
               <Suspense fallback={<PageLoader />}>
                 <Routes location={location} key={location.pathname}>
                   <Route path="/" element={<Navigate to="/dashboard" />} />
@@ -188,7 +188,7 @@ function App() {
                   <Route path="*" element={<PageTransition><NotFoundPage /></PageTransition>} />
                 </Routes>
               </Suspense>
-            
+
           </div>
 
           {/* Footer removed per user request */}

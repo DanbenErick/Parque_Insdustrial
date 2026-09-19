@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useLocation } from 'react-router-dom';
 
@@ -45,7 +45,7 @@ const SocioTopBar = () => {
       </div>
 
       <div className="flex items-center gap-4">
-        
+
         {/* Support/Contact Info (Optional Visual Element) */}
         <div className="hidden lg:flex items-center gap-2 mr-4 px-4 py-1.5 bg-emerald-50 text-emerald-700 rounded-full border border-emerald-100">
           <span className="material-symbols-outlined text-[16px]" translate="no">support_agent</span>

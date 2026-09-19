@@ -1,13 +1,13 @@
-import React, { useCallback } from 'react';
+import  { useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useYear } from '../context/YearContext';
 
-const Sidebar = ({ isMobileMenuOpen, onCloseMobileMenu, screens }) => {
+const Sidebar = ({  onCloseMobileMenu, screens }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { activeYear, setActiveYear, availableYears, addYear } = useYear();
+  const { activeYear, setActiveYear, availableYears } = useYear();
   const userRole = user?.nombre_rol || 'Socio';
   const currentPath = location.pathname.substring(1) || 'dashboard';
 

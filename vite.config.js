@@ -43,8 +43,11 @@ export default defineConfig({
             if (id.includes('chart.js') || id.includes('react-chartjs-2')) {
               return 'vendor-charts';
             }
-            if (id.includes('exceljs') || id.includes('xlsx')) {
-              return 'vendor-excel';
+            if (id.includes('exceljs')) {
+              return 'vendor-exceljs';
+            }
+            if (id.includes('xlsx')) {
+              return 'vendor-xlsx';
             }
             if (id.includes('sonner') || id.includes('lucide-react')) {
               return 'vendor-ui';
@@ -53,8 +56,9 @@ export default defineConfig({
         }
       }
     },
-    // Alerta si un chunk supera 800KB
-    chunkSizeWarningLimit: 800,
+    // ExcelJS incluye el motor completo de hojas de cálculo (~930 KB minificado).
+    // Conservamos la alerta para cualquier chunk que supere ese tamaño conocido.
+    chunkSizeWarningLimit: 1000,
   }
 })
 

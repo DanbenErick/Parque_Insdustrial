@@ -1,8 +1,8 @@
 import React from 'react';
 
-const OVERLAY = { hidden: { opacity: 0 }, visible: { opacity: 1 } };
-const PANEL = { hidden: { scale: 0.95, opacity: 0 }, visible: { scale: 1, opacity: 1 } };
-const TRANSITION = { duration: 0.2, ease: "easeOut" };
+
+
+
 
 const PdfPreviewModal = ({ pdfBlobUrl, onClose, downloadFileName = 'documento.pdf', title = 'Visor de PDF' }) => {
   return (

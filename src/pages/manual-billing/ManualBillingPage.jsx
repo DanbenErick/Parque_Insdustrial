@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { useYear } from '../../context/YearContext';
 import { useAuth } from '../../context/AuthContext';
 import PeriodFormModal from '../settings/PeriodFormModal';
@@ -11,7 +11,7 @@ import { useBillingForms } from './hooks/useBillingForms';
 import { BillingHeader } from './components/BillingHeader';
 import { MedidoresTable } from './components/MedidoresTable';
 import { RegistrationForm } from './components/RegistrationForm';
-import { HistoryPanel } from './components/HistoryPanel';
+
 import { RegisteredReadingsTab } from './components/RegisteredReadingsTab';
 import { AllReadingsModal } from './components/AllReadingsModal';
 import { EditReadingModal } from './components/EditReadingModal';
@@ -21,7 +21,7 @@ import { exportLecturasToExcel } from './utils/exportLecturasService';
 const ManualBilling = () => {
   const { activeYear } = useYear();
   const { user } = useAuth();
-  
+
   // Data Hook
   const billingData = useBillingData(activeYear);
   const {
@@ -35,9 +35,7 @@ const ManualBilling = () => {
     totalMedidores,
     porcentajeAvance,
     dashOffset,
-    fetchPeriodos,
-    fetchData,
-    isLoading
+    fetchPeriodos
   } = billingData;
 
   // Forms Hook
@@ -79,7 +77,7 @@ const ManualBilling = () => {
   return (
     <main className="p-4 md:p-xl space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow relative flex flex-col h-full">
       <div className="space-y-4 w-full">
-        <BillingHeader 
+        <BillingHeader
           activePeriodo={activePeriodo}
           setActivePeriodo={setActivePeriodo}
           periodosFiltrados={periodosFiltrados}
@@ -160,7 +158,7 @@ const ManualBilling = () => {
         {activeTab === 'registro' && (
           <div className="w-full animate-in fade-in duration-200">
             {selectedMember && (
-              <RegistrationForm 
+              <RegistrationForm
                 selectedMember={selectedMember}
                 onClose={resetForm}
                 lecturaExistente={lecturaExistente}
@@ -180,7 +178,7 @@ const ManualBilling = () => {
               />
             )}
             <div className={selectedMember ? 'hidden' : 'block'}>
-              <MedidoresTable 
+              <MedidoresTable
                 medidores={medidores}
                 searchTerm={searchTerm}
                 handleSearchChange={handleSearchChange}
@@ -196,7 +194,7 @@ const ManualBilling = () => {
         {/* Tab 2: Lecturas Registradas del Periodo */}
         {activeTab === 'registradas' && (
           <div className="w-full animate-in fade-in duration-200">
-            <RegisteredReadingsTab 
+            <RegisteredReadingsTab
               activePeriodo={activePeriodo}
               lecturasPeriodoActivo={lecturasPeriodoActivo}
               medidorMap={medidorMap}
@@ -207,9 +205,9 @@ const ManualBilling = () => {
         )}
       </div>
 
-      
+
         {isModalOpen && (
-          <AllReadingsModal 
+          <AllReadingsModal
             activePeriodo={activePeriodo}
             lecturasPeriodoActivo={lecturasPeriodoActivo}
             medidorMap={medidorMap}
@@ -220,11 +218,11 @@ const ManualBilling = () => {
             onRowClick={(record) => setSelectedDetailRecord(record)}
           />
         )}
-      
 
-      
+
+
         {editModalData && (
-          <EditReadingModal 
+          <EditReadingModal
             editModalData={editModalData}
             medidorMap={medidorMap}
             setEditModalData={setEditModalData}
@@ -242,13 +240,13 @@ const ManualBilling = () => {
             isSaving={isSaving}
           />
         )}
-      
-      
-      <ReadingDetailDrawer 
-        record={selectedDetailRecord} 
+
+
+      <ReadingDetailDrawer
+        record={selectedDetailRecord}
         medidorInfo={selectedDetailRecord ? medidorMap.get(selectedDetailRecord.num_serie) : null}
         activePeriodo={activePeriodo}
-        onClose={() => setSelectedDetailRecord(null)} 
+        onClose={() => setSelectedDetailRecord(null)}
         onEdit={(record) => {
           setSelectedDetailRecord(null); // Close the drawer first
           handleEditFromTable(record);

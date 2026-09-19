@@ -56,9 +56,9 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
             </div>
             <div className="space-y-1">
               <label className={LABEL_CLASS}>Documento</label>
-              <input 
-                type="text" 
-                placeholder="Ej. 76543210" 
+              <input
+                type="text"
+                placeholder="Ej. 76543210"
                 maxLength={11}
                 className={`${INPUT_CLASS} font-data-mono ${errors.documento_identidad ? 'border-error focus:ring-1 focus:ring-error focus:border-error' : 'focus:border-primary focus:ring-1 focus:ring-primary/20'}`}
                 {...register("documento_identidad", {
@@ -76,9 +76,9 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
 
           <div className="space-y-1">
             <label className={LABEL_CLASS}>Nombre Completo</label>
-            <input 
-              type="text" 
-              placeholder="Ej. Juan Pérez" 
+            <input
+              type="text"
+              placeholder="Ej. Juan Pérez"
               className={`${INPUT_CLASS} ${errors.nombre_razonsocial ? 'border-error focus:ring-1 focus:ring-error focus:border-error' : 'focus:border-primary focus:ring-1 focus:ring-primary/20'}`}
               {...register("nombre_razonsocial", {
                 required: "El nombre es obligatorio",
@@ -109,7 +109,7 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
                       return true;
                     }
                   })}
-                  onInput={(e) => { 
+                  onInput={(e) => {
                     if (selectedRol === '3') {
                       e.target.value = e.target.value.replace(/[^0-9]/g, '');
                     }
@@ -120,9 +120,9 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
             )}
             <div className="space-y-1">
               <label className={LABEL_CLASS}>Correo Electrónico</label>
-              <input 
-                type="email" 
-                placeholder="usuario@correo.com" 
+              <input
+                type="email"
+                placeholder="usuario@correo.com"
                 className={`${INPUT_CLASS} ${errors.correo ? 'border-error focus:ring-1 focus:ring-error focus:border-error' : 'focus:border-primary focus:ring-1 focus:ring-primary/20'}`}
                 {...register("correo", {
                   required: "El correo es obligatorio",
@@ -134,12 +134,12 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
               />
               {errors.correo && <p className={ERROR_CLASS}>{errors.correo.message}</p>}
             </div>
-            
+
             {isEdit && (
               <div className="space-y-1">
                 <label className={LABEL_CLASS}>Cargo</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Ej. Gerente / Operador"
                   className={`${INPUT_CLASS} ${errors.cargo_representante ? 'border-error focus:ring-1 focus:ring-error focus:border-error' : 'focus:border-primary focus:ring-1 focus:ring-primary/20'}`}
                   {...register("cargo_representante", {
@@ -156,8 +156,8 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
             {!isEdit && (
               <div className="space-y-1">
                 <label className={LABEL_CLASS}>Cargo</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Ej. Gerente / Operador"
                   className={`${INPUT_CLASS} ${errors.cargo_representante ? 'border-error focus:ring-1 focus:ring-error focus:border-error' : 'focus:border-primary focus:ring-1 focus:ring-primary/20'}`}
                   {...register("cargo_representante", {
@@ -168,12 +168,12 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
                 {errors.cargo_representante && <p className={ERROR_CLASS}>{errors.cargo_representante.message}</p>}
               </div>
             )}
-            
+
             <div className="space-y-1">
               <label className={LABEL_CLASS}>Teléfono de Contacto</label>
-              <input 
-                type="tel" 
-                placeholder="Ej. 999888777" 
+              <input
+                type="tel"
+                placeholder="Ej. 999888777"
                 maxLength={9}
                 className={`${INPUT_CLASS} ${errors.telefono ? 'border-error focus:ring-1 focus:ring-error focus:border-error' : 'focus:border-primary focus:ring-1 focus:ring-primary/20'}`}
                 {...register("telefono", {
@@ -187,12 +187,12 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
               />
               {errors.telefono && <p className={ERROR_CLASS}>{errors.telefono.message}</p>}
             </div>
-            
+
             {isEdit && (
               <div className="space-y-1">
                 <label className={LABEL_CLASS}>Dirección</label>
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   placeholder="Ej. Calle las Artes Mz A"
                   className={`${INPUT_CLASS} ${errors.direccion ? 'border-error focus:ring-1 focus:ring-error focus:border-error' : 'focus:border-primary focus:ring-1 focus:ring-primary/20'}`}
                   {...register("direccion", {
@@ -208,8 +208,8 @@ const UserFormModal = ({ initialData, onSubmit, onClose, isSaving, isEdit, editi
           {!isEdit && (
             <div className="space-y-1">
               <label className={LABEL_CLASS}>Dirección</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 placeholder="Ej. Calle las Artes Mz A"
                 className={`${INPUT_CLASS} ${errors.direccion ? 'border-error focus:ring-1 focus:ring-error focus:border-error' : 'focus:border-primary focus:ring-1 focus:ring-primary/20'}`}
                 {...register("direccion", {

@@ -151,7 +151,7 @@ const AllMembersTableRow = React.memo(({ row }) => (
 ));
 
 // ── Main Component ───────────────────────────────────────────────────
-const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeriod = '' }) => {
+const MemberReport = ({ lecturas = [], recibos = [], selectedPeriod = '' }) => {
   const [selectedMember, setSelectedMember] = useState('Todos');
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -389,7 +389,7 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
               </button>
             </div>
 
-            
+
               {isOpen && (
                 <>
                   <div {...DROPDOWN_BACKDROP} className="fixed inset-0 z-40" onClick={closeDropdown} />
@@ -419,7 +419,7 @@ const MemberReport = ({ lecturas = [], recibos = [], periodos = [], selectedPeri
                   </div>
                 </>
               )}
-            
+
           </div>
         </div>
         <div className="text-right">

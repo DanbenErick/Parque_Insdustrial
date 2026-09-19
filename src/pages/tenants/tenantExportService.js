@@ -5,7 +5,7 @@ export const exportToExcel = async () => {
   try {
     toast.info('Generando Excel, por favor espere...');
     const response = await api.get('/usuarios/export/excel?rol_id=3', { responseType: 'blob' });
-    
+
     // Create blob link to download
     const url = window.URL.createObjectURL(new Blob([response.data]));
     const link = document.createElement('a');
@@ -14,7 +14,7 @@ export const exportToExcel = async () => {
     document.body.appendChild(link);
     link.click();
     link.remove();
-    
+
     toast.success('Excel descargado exitosamente');
   } catch (error) {
     console.error(error);

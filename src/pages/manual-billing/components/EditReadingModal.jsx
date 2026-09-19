@@ -1,4 +1,4 @@
-import React from 'react';
+import 'react';
 import { MODAL_BACKDROP, MODAL_CONTENT, fmtVal, parseSafe } from '../utils';
 
 export const EditReadingModal = ({
@@ -11,7 +11,6 @@ export const EditReadingModal = ({
   editFactorPotencia, setEditFactorPotencia,
   editMaxDemandaFueraPunta, setEditMaxDemandaFueraPunta,
   editMaxDemandaPunta, setEditMaxDemandaPunta,
-  editPrecioReactiva, setEditPrecioReactiva,
   editJustificacion, setEditJustificacion,
   editLecturaFinalAntiguo, setEditLecturaFinalAntiguo,
   editLecturaInicialNuevo, setEditLecturaInicialNuevo,
@@ -22,21 +21,21 @@ export const EditReadingModal = ({
   const isValidJustification = editJustificacion.trim().split(/\s+/).filter(w => w.length > 0).length >= 3;
   const medidorInfo = editModalData ? medidorMap?.get(editModalData.num_serie) : null;
   const tipoStr = medidorInfo?.tipo || editModalData?.medidor_tipo || editModalData?.tipo || '';
-  const isTR = tipoStr === 'Hora Punta' || tipoStr === 'Tiempo Real' || 
-               parseSafe(editModalData?.lectura_anterior_punta) > 0 || 
+  const isTR = tipoStr === 'Hora Punta' || tipoStr === 'Tiempo Real' ||
+               parseSafe(editModalData?.lectura_anterior_punta) > 0 ||
                parseSafe(editModalData?.factor_potencia) > 0 ||
                parseSafe(editModalData?.lectura_actual_punta) > 0;
 
   const getValidationErrors = () => {
     const errors = [];
     if (!editReadingVal) errors.push(isTR ? "Falta Nueva L. Normal" : "Falta Nueva Lectura");
-    
+
     const isCambio = editModalData.es_cambio_medidor === 1 || editModalData.es_cambio_medidor === true;
 
     if (isCambio) {
       if (!editLecturaFinalAntiguo) errors.push("Falta L. Final Dañado");
       if (!editLecturaInicialNuevo) errors.push("Falta L. Inicial Nuevo");
-      
+
       if (editLecturaFinalAntiguo && parseSafe(editLecturaFinalAntiguo) < parseSafe(editModalData.lectura_anterior)) {
         const diff = parseSafe(editLecturaFinalAntiguo) - parseSafe(editModalData.lectura_anterior);
         errors.push(`La L. Final Dañado es menor a la del mes anterior (Diferencia: ${diff.toFixed(2)} kWh)`);
@@ -45,11 +44,11 @@ export const EditReadingModal = ({
         const diff = parseSafe(editReadingVal) - parseSafe(editLecturaInicialNuevo);
         errors.push(`La nueva lectura es menor a la Inicial Nuevo (Diferencia: ${diff.toFixed(2)} kWh)`);
       }
-      
+
       if (isTR) {
         if (!editLecturaFinalAntiguoPunta) errors.push("Falta L. Final Dañado (Punta)");
         if (!editLecturaInicialNuevoPunta) errors.push("Falta L. Inicial Nuevo (Punta)");
-        
+
         if (editLecturaFinalAntiguoPunta && parseSafe(editLecturaFinalAntiguoPunta) < parseSafe(editModalData.lectura_anterior_punta)) {
           const diff = parseSafe(editLecturaFinalAntiguoPunta) - parseSafe(editModalData.lectura_anterior_punta);
           errors.push(`La L. Final Dañado (Punta) es menor a la del mes anterior (Diferencia: ${diff.toFixed(2)} kWh)`);
@@ -63,7 +62,7 @@ export const EditReadingModal = ({
       // La validación de lectura < mes anterior la hace el backend con el valor REAL de la BD
       // No bloqueamos aquí con el valor stale del frontend (editModalData.lectura_anterior)
     }
-    
+
     if (!isValidJustification) errors.push("Justificación incompleta (mínimo 3 palabras)");
     return errors;
   };
@@ -185,7 +184,7 @@ export const EditReadingModal = ({
                     <span className="absolute right-2.5 top-1/2 -translate-y-1/2 font-bold text-[9px] text-on-surface-variant">kWh</span>
                   </div>
                 </div>
-                
+
                 {isTR && (
                   <>
                     <div>

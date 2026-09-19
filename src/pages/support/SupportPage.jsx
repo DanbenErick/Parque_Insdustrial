@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import  { useState, useCallback } from 'react';
 
 const FAQS = [
   {
@@ -46,7 +46,7 @@ const Support = () => {
     <main className="flex-grow flex flex-col relative overflow-hidden bg-background">
       <div className="flex-grow overflow-y-auto p-xl">
         <div className="max-w-6xl mx-auto space-y-lg">
-          
+
           <div className="flex justify-between items-center mb-lg">
             <div>
               <h2 className="font-headline-lg text-headline-lg text-primary font-bold">Centro de Soporte</h2>
@@ -55,15 +55,15 @@ const Support = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-12 gap-lg">
-            
+
             {/* Contact Form */}
             <div className="md:col-span-7 bg-surface border border-outline-variant rounded-xl shadow-sm p-xl">
               <h3 className="font-headline-sm font-bold text-on-surface mb-md">Enviar Ticket de Soporte</h3>
               <p className="text-sm text-on-surface-variant mb-lg">Nuestro equipo técnico responderá tu solicitud en un máximo de 24 horas laborables.</p>
-              
-              
+
+
                 {showSuccess ? (
-                  <div 
+                  <div
                     key="success"
                     className="p-lg bg-[#059669]/10 border border-[#059669]/20 rounded-lg text-center"
                   >
@@ -72,9 +72,9 @@ const Support = () => {
                     <p className="text-sm text-[#059669]/80 mt-1">Tu ticket ha sido registrado exitosamente. Te contactaremos pronto.</p>
                   </div>
                 ) : (
-                  <motion.form 
+                  <form
                     key="form"
-                    onSubmit={handleSubmit} 
+                    onSubmit={handleSubmit}
                     className="space-y-md"
                   >
                     <div className="grid grid-cols-2 gap-md">
@@ -105,14 +105,14 @@ const Support = () => {
                         {isSubmitting ? 'Enviando...' : 'Enviar Mensaje'}
                       </button>
                     </div>
-                  </motion.form>
+                  </form>
                 )}
-              
+
             </div>
 
             {/* Sidebar Info & FAQs */}
             <div className="md:col-span-5 space-y-lg">
-              
+
               {/* Quick Contact Cards */}
               <div className="grid grid-cols-2 gap-md">
                 <div className="bg-primary/5 border border-primary/20 rounded-lg p-md text-center">
@@ -133,8 +133,8 @@ const Support = () => {
                 <div className="divide-y divide-outline-variant">
                   {FAQS.map((faq) => (
                     <div key={faq.id} className="py-sm">
-                      <button 
-                        onClick={() => toggleFaq(faq.id)} 
+                      <button
+                        onClick={() => toggleFaq(faq.id)}
                         className="w-full flex justify-between items-center text-left hover:text-primary transition-colors py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md"
                       >
                         <span className="font-bold text-sm text-on-surface pr-4">{faq.question}</span>
@@ -144,7 +144,7 @@ const Support = () => {
                           expand_more
                         </span>
                       </button>
-                      
+
                         {openFaq === faq.id && (
                           <div
                             className="overflow-hidden"
@@ -152,7 +152,7 @@ const Support = () => {
                             <p className="text-xs text-on-surface-variant pt-2 pb-2 leading-relaxed">{faq.answer}</p>
                           </div>
                         )}
-                      
+
                     </div>
                   ))}
                 </div>

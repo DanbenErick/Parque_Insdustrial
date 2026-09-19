@@ -6,7 +6,7 @@ import { MIME_TYPES, downloadBlob } from '../billingUtils';
 /**
  * useExports — Centralizes all export handlers (Excel, PDF masivo, etc.)
  */
-export const useExports = ({ filterParams, filterMes, activeYear, uniqueMonths, recibos }) => {
+export const useExports = ({ filterParams, filterMes, activeYear }) => {
 
   const handleExportExcel = useCallback(async () => {
     try {
@@ -129,7 +129,7 @@ Te escribimos para enviarte tu recibo de luz correspondiente al periodo *${recib
     window.open(waUrl, '_blank');
 
     toast.success('Descargando PDF para enviar por WhatsApp...', { duration: 2000 });
-    
+
     api.get(`/recibos/${recibo.id}/pdf`, { responseType: 'blob' })
       .then((response) => {
         downloadBlob(

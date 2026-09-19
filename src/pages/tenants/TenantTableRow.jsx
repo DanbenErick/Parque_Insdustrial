@@ -1,10 +1,7 @@
 import React from 'react';
 import Badge from '../../components/ui/Badge';
 
-const getInitials = (name) => {
-  if (!name) return '??';
-  return name.substring(0, 2).toUpperCase();
-};
+
 
 const TenantTableRow = ({ tenant, specificMedidor, onOpenDrawer, onOpenMenu, isMenuOpen }) => {
   const deudaTotal = parseFloat(tenant.deuda_total || 0);

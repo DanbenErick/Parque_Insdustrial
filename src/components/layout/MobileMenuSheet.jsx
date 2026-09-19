@@ -1,4 +1,4 @@
-import React from 'react';
+import 'react';
 import { useAuth } from '../../context/AuthContext';
 import { useYear } from '../../context/YearContext';
 
@@ -11,11 +11,11 @@ const MobileMenuSheet = ({ isOpen, onClose, screens, currentPath, onNavClick }) 
 
   return (
     <>
-      <div 
+      <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] md:hidden animate-in fade-in duration-200"
         onClick={onClose}
       />
-      
+
       <div className="fixed bottom-0 left-0 right-0 bg-surface z-[60] md:hidden rounded-t-3xl shadow-[0_-10px_40px_rgba(0,0,0,0.2)] animate-in slide-in-from-bottom flex flex-col max-h-[85vh]">
         {/* Handle bar */}
         <div className="w-full flex justify-center pt-3 pb-1" onClick={onClose}>
@@ -38,7 +38,7 @@ const MobileMenuSheet = ({ isOpen, onClose, screens, currentPath, onNavClick }) 
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 flex flex-col gap-6">
-          
+
           {/* Year Selector */}
           <div>
             <p className="text-[10px] font-bold text-primary uppercase tracking-widest mb-2">Año Activo</p>

@@ -26,7 +26,7 @@ const TenantDetailDrawer = ({ drawerTenant, setDrawerTenant, handleOpenEdit }) =
         onClick={() => setDrawerTenant(null)}
       />
       <div className="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white shadow-2xl z-[110] flex flex-col !m-0 border-l border-outline-variant/30 animate-slide-in-right">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/30 bg-white">
           <h3 className="font-bold text-lg text-on-surface">Expediente del Socio</h3>
@@ -37,7 +37,7 @@ const TenantDetailDrawer = ({ drawerTenant, setDrawerTenant, handleOpenEdit }) =
 
         {/* Scrollable Body */}
         <div className="flex-1 overflow-y-auto custom-scrollbar">
-          
+
           {/* Main Profile Info */}
           <div className="px-6 py-8 border-b border-outline-variant/30 bg-surface-container-lowest flex flex-col items-center text-center">
             <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center text-xl font-bold mb-4">
@@ -47,7 +47,7 @@ const TenantDetailDrawer = ({ drawerTenant, setDrawerTenant, handleOpenEdit }) =
             <p className="font-data-mono text-sm text-on-surface-variant mt-1.5">
               {drawerTenant.documento_identidad?.length === 8 ? 'DNI' : 'RUC'}: {drawerTenant.documento_identidad}
             </p>
-            
+
             <div className="flex gap-2 mt-4">
               <span className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase tracking-wide ${drawerTenant.es_activo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                 {drawerTenant.es_activo ? 'Activo' : 'Suspendido'}

@@ -1,12 +1,12 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 
-const TopBar = ({ screens }) => {
+const TopBar = () => {
   const navigate = useNavigate();
 
-  const [globalSearchTerm, setGlobalSearchTerm] = useState('');
-  const [globalSearchResults, setGlobalSearchResults] = useState([]);
+
+
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
@@ -31,33 +31,9 @@ const TopBar = ({ screens }) => {
 
 
 
-  const handleGlobalSearch = useCallback(
-    (e) => {
-      const term = e.target.value;
-      setGlobalSearchTerm(term);
 
-      if (term.trim().length > 1) {
-        const results = screens.filter(
-          (screen) =>
-            screen.name.toLowerCase().includes(term.toLowerCase()) ||
-            screen.keywords.some((k) => k.includes(term.toLowerCase())),
-        );
-        setGlobalSearchResults(results);
-      } else {
-        setGlobalSearchResults([]);
-      }
-    },
-    [screens],
-  );
 
-  const handleNavClick = useCallback(
-    (view) => {
-      navigate(`/${view}`);
-      setGlobalSearchTerm('');
-      setGlobalSearchResults([]);
-    },
-    [navigate],
-  );
+
 
   return (
     <header className="sticky top-0 z-40 bg-surface/90 backdrop-blur-md flex md:hidden justify-between items-center w-full px-4 h-12 border-b border-outline-variant print:hidden">

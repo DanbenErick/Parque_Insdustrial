@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import  { useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
@@ -82,7 +82,7 @@ const SocioBillingPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {recibos.map((recibo) => {
               const status = getStatusConfig(recibo.estado);
-              
+
               return (
                 <div key={recibo.id} className="bg-white rounded-2xl border border-outline-variant/60 shadow-sm overflow-hidden flex flex-col hover:shadow-md transition-shadow">
                   {/* Card Header */}
@@ -121,7 +121,7 @@ const SocioBillingPage = () => {
                         </p>
                       </div>
                     </div>
-                    
+
                     <div className="pt-4 border-t border-dashed border-outline-variant/60 flex justify-between items-center">
                       <div>
                         <p className="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-0.5">Total a Pagar</p>
@@ -140,7 +140,7 @@ const SocioBillingPage = () => {
 
                   {/* Card Footer */}
                   <div className="p-3 bg-surface-container-lowest border-t border-outline-variant/30 flex">
-                    <button 
+                    <button
                       onClick={() => handleDownloadPDF(recibo)}
                       className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-50 text-emerald-700 font-bold text-sm hover:bg-emerald-100 transition-colors"
                     >

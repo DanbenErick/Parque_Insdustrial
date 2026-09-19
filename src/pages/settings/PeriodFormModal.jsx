@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 import { useYear } from '../../context/YearContext';
@@ -36,8 +36,8 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
   const [factorMultiplicador, setFactorMultiplicador] = useState('1.0000');
   const [fechaInicio, setFechaInicio] = useState('');
   const [fechaFin, setFechaFin] = useState('');
-  const [fechaInicioLectura, setFechaInicioLectura] = useState('');
-  const [fechaFinLectura, setFechaFinLectura] = useState('');
+  const [, setFechaInicioLectura] = useState('');
+  const [, setFechaFinLectura] = useState('');
   const [fechaEmision, setFechaEmision] = useState('');
   const [fechaVencimiento, setFechaVencimiento] = useState('');
   const [fechaCorte, setFechaCorte] = useState('');
@@ -115,7 +115,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
         setFechaEmision('');
         setFechaVencimiento('');
         setFechaCorte('');
-        
+
         // Predeterminar inicio y fin del mes actual
         if (initialMes) {
           setFechaInicio(`${activeYear}-${initialMes}-01`);
@@ -140,17 +140,17 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
   const handleEmisionChange = (e) => {
     const newEmision = e.target.value;
     setFechaEmision(newEmision);
-    
+
     if (newEmision && !isEditing) {
       const emisionDate = new Date(newEmision);
       // Validar que la fecha sea válida antes de calcular
       if (!isNaN(emisionDate.getTime())) {
         const vencimientoDate = new Date(emisionDate);
         vencimientoDate.setDate(emisionDate.getDate() + 6);
-        
+
         const corteDate = new Date(emisionDate);
         corteDate.setDate(emisionDate.getDate() + 7);
-        
+
         setFechaVencimiento(vencimientoDate.toISOString().split('T')[0]);
         setFechaCorte(corteDate.toISOString().split('T')[0]);
       }
@@ -223,7 +223,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                   </p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={onClose}
                 className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-variant flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors shadow-sm relative z-10 border border-outline-variant/50"
                 title="Cerrar modal"
@@ -231,9 +231,9 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                 <span className="material-symbols-outlined text-[18px]" translate="no">close</span>
               </button>
             </div>
-            
+
             <form onSubmit={handleSave} className="p-6 space-y-6 max-h-[80vh] overflow-y-auto custom-scrollbar bg-surface-container-lowest/50">
-              
+
               {/* Sección: Identificación del Periodo */}
               <div className="bg-surface border border-outline-variant rounded-2xl p-4 shadow-sm relative overflow-hidden group hover:border-primary/30 transition-colors">
                 <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
@@ -250,7 +250,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                       </span>
                     </label>
                     <div className="relative ml-2">
-                      <select 
+                      <select
                         value={mes}
                         onChange={handleMesChange}
                         disabled={isEditing}
@@ -274,7 +274,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
 
               {/* Sección de Tarifas */}
               <div className="flex flex-col gap-6">
-                
+
                 {/* Tarifas - Medidor Fuera Punta (100% ancho) */}
                 <div className="w-full bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-2xl p-5 shadow-inner relative overflow-hidden group">
                   <div className="absolute -right-4 -top-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl group-hover:bg-primary/20 transition-all duration-500" />
@@ -282,7 +282,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                     <span className="material-symbols-outlined text-[16px]" translate="no">payments</span>
                     Medidor Fuera Punta
                   </h4>
-                  
+
                   <div className="flex flex-col relative z-10">
                     <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
@@ -290,13 +290,13 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
-                        <input 
-                          type="number" 
+                        <input
+                          type="number"
                           step="0.0001"
                           required
                           value={tarifaKwh}
                           onChange={(e) => setTarifaKwh(e.target.value)}
-                          placeholder="0.00" 
+                          placeholder="0.00"
                           className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-2 text-sm font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm transition-all"
                         />
                       </div>
@@ -311,7 +311,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                     <span className="material-symbols-outlined text-[16px]" translate="no">electric_meter</span>
                     Medidor Hora Punta
                   </h4>
-                  
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 relative z-10">
                     <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
@@ -319,30 +319,30 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
-                        <input 
-                          type="number" 
+                        <input
+                          type="number"
                           step="0.0001"
                           required
                           value={tarifaKwhTr}
                           onChange={(e) => setTarifaKwhTr(e.target.value)}
-                          placeholder="0.00" 
+                          placeholder="0.00"
                           className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-2 text-sm font-data-mono font-bold text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/20 shadow-sm transition-all"
                         />
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
                         <span className="material-symbols-outlined text-[14px] text-orange-600" translate="no">schedule</span> Costo Punta (kWh)
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
-                        <input 
-                          type="number" 
+                        <input
+                          type="number"
                           step="0.0001"
                           value={tarifaKwhPunta}
                           onChange={(e) => setTarifaKwhPunta(e.target.value)}
-                          placeholder="0.00" 
+                          placeholder="0.00"
                           className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-2 text-sm font-data-mono font-bold text-on-surface focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 shadow-sm transition-all"
                         />
                       </div>
@@ -354,12 +354,12 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
-                        <input 
-                          type="number" 
+                        <input
+                          type="number"
                           step="0.0001"
                           value={costoPotencia}
                           onChange={(e) => setCostoPotencia(e.target.value)}
-                          placeholder="0.00" 
+                          placeholder="0.00"
                           className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-2 text-sm font-data-mono font-bold text-on-surface focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 shadow-sm transition-all"
                         />
                       </div>
@@ -371,29 +371,29 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
-                        <input 
-                          type="number" 
+                        <input
+                          type="number"
                           step="0.0001"
                           value={costoPotenciaFueraPunta}
                           onChange={(e) => setCostoPotenciaFueraPunta(e.target.value)}
-                          placeholder="0.00" 
+                          placeholder="0.00"
                           className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-2 text-sm font-data-mono font-bold text-on-surface focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 shadow-sm transition-all"
                         />
                       </div>
                     </div>
-                    
+
                     <div className="flex flex-col bg-surface/60 backdrop-blur-sm p-3 rounded-xl border border-white/40 shadow-sm hover:shadow-md transition-shadow">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2 flex items-center gap-1">
                         <span className="material-symbols-outlined text-[14px] text-pink-600" translate="no">electric_meter</span> Costo Energía Reactiva
                       </label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-on-surface-variant text-sm">S/</span>
-                        <input 
-                          type="number" 
+                        <input
+                          type="number"
                           step="0.0001"
                           value={precioEnergiaReactiva}
                           onChange={(e) => setPrecioEnergiaReactiva(e.target.value)}
-                          placeholder="0.00" 
+                          placeholder="0.00"
                           className="w-full bg-surface border border-outline-variant rounded-lg pl-8 pr-3 py-2 text-sm font-data-mono font-bold text-on-surface focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 shadow-sm transition-all"
                         />
                       </div>
@@ -404,7 +404,7 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
 
               {/* Cronograma */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                
+
                 {/* Fechas de Periodo */}
                 <div className="bg-surface border border-outline-variant rounded-2xl p-4 shadow-sm hover:border-blue-500/30 transition-colors relative overflow-hidden group">
                   <div className="absolute top-0 left-0 w-1 h-full bg-blue-500" />
@@ -415,8 +415,8 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                   <div className="space-y-3 ml-2">
                     <div className="flex flex-col">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Inicio de Periodo</label>
-                      <input 
-                        type="date" 
+                      <input
+                        type="date"
                         required
                         value={fechaInicio}
                         onChange={(e) => setFechaInicio(e.target.value)}
@@ -425,8 +425,8 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                     </div>
                     <div className="flex flex-col">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Fin de Periodo</label>
-                      <input 
-                        type="date" 
+                      <input
+                        type="date"
                         required
                         value={fechaFin}
                         onChange={(e) => setFechaFin(e.target.value)}
@@ -446,8 +446,8 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                   <div className="space-y-3 ml-2">
                     <div className="flex flex-col">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Emisión de Recibo</label>
-                      <input 
-                        type="date" 
+                      <input
+                        type="date"
                         required
                         value={fechaEmision}
                         onChange={handleEmisionChange}
@@ -457,8 +457,8 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                     <div className="grid grid-cols-2 gap-3">
                       <div className="flex flex-col">
                         <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1">Vencimiento</label>
-                        <input 
-                          type="date" 
+                        <input
+                          type="date"
                           required
                           value={fechaVencimiento}
                           onChange={(e) => setFechaVencimiento(e.target.value)}
@@ -467,8 +467,8 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
                       </div>
                       <div className="flex flex-col">
                         <label className="text-[10px] font-bold text-error uppercase tracking-wider mb-1 flex items-center gap-1"><span className="material-symbols-outlined text-[12px]" translate="no">warning</span> Corte</label>
-                        <input 
-                          type="date" 
+                        <input
+                          type="date"
                           required
                           value={fechaCorte}
                           onChange={(e) => setFechaCorte(e.target.value)}
@@ -482,15 +482,15 @@ const PeriodFormModal = ({ isOpen, onClose, onSuccess, initialData = null, exist
               </div>
 
               <div className="flex w-full gap-4 pt-6 border-t border-outline-variant mt-4">
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   onClick={onClose}
                   className="flex-1 px-5 py-3 rounded-xl font-bold text-sm text-on-surface-variant hover:bg-surface-variant hover:text-on-surface transition-colors border border-outline-variant"
                 >
                   Cancelar
                 </button>
-                <button 
-                  type="submit" 
+                <button
+                  type="submit"
                   disabled={isSaving}
                   className="flex-1 px-6 py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 shadow-sm hover:shadow-md bg-primary text-on-primary hover:opacity-90 disabled:opacity-50 transition-all"
                 >

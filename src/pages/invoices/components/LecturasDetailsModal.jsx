@@ -1,4 +1,4 @@
-import React from 'react';
+import 'react';
 
 const LecturasDetailsModal = ({ isOpen, onClose, lecturas }) => {
   if (!isOpen) return null;

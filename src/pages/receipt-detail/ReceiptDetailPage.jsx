@@ -711,7 +711,7 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
 
   // ── Final render ───────────────────────────────────────────────────
   if (onClose) {
-    return React.createElement(React.Fragment, null, 
+    return React.createElement(React.Fragment, null,
       createPortal(
         <>
           <div

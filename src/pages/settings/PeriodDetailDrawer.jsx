@@ -1,10 +1,10 @@
-import React from 'react';
+import 'react';
 
 const formatPeriodo = (periodoStr) => {
   if (!periodoStr) return '';
   const parts = periodoStr.split('-');
   if (parts.length !== 2) return periodoStr;
-  
+
   let year, month;
   if (parts[0].length === 4) {
     year = parts[0];
@@ -13,10 +13,10 @@ const formatPeriodo = (periodoStr) => {
     month = parts[0];
     year = parts[1];
   }
-  
+
   const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   const monthIndex = parseInt(month, 10) - 1;
-  
+
   if (monthIndex >= 0 && monthIndex < 12) {
     return `${monthNames[monthIndex]} ${year}`;
   }
@@ -123,7 +123,7 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
                     S/ {Number(drawerPeriodo.costo_potencia || 0).toFixed(4)}
                   </p>
                 </div>
-                
+
                 <div className="bg-surface border border-outline-variant rounded-xl p-3 shadow-sm hover:border-indigo-500/30 transition-colors group">
                   <p className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 flex items-center gap-1">
                     <span className="material-symbols-outlined text-[14px] text-indigo-600" translate="no">electric_meter</span> Costo Potencia (F. Punta)
@@ -158,7 +158,7 @@ const PeriodDetailDrawer = ({ drawerPeriodo, setDrawerPeriodo, handleEdit }) => 
                 </div>
               </div>
             </div>
-            
+
             <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden">
               <div className="p-3 bg-orange-50 border-b border-orange-100 flex items-center gap-2">
                 <span className="material-symbols-outlined text-[16px] text-orange-600" translate="no">receipt_long</span>

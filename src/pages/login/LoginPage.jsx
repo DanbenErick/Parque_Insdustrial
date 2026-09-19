@@ -31,13 +31,13 @@ const LoginBackground = React.memo(() => (
 const Login = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
-  
+
   const [focusedInput, setFocusedInput] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState(null);
 
-  const { register, handleSubmit, formState: { errors }, resetField } = useForm({
+  const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       username: '',
       password: ''
@@ -66,29 +66,29 @@ const Login = () => {
 
   return (
     <main className="min-h-[100dvh] w-full relative flex items-center justify-center overflow-hidden font-body-md bg-surface">
-      
+
       {/* Premium Full-Screen Background - Memoized */}
       <LoginBackground />
 
       {/* Floating Glassmorphism Card */}
       <section className="relative z-10 w-full max-w-[380px] px-4 animate-in zoom-in-95 fade-in duration-700">
-        
+
         <div className="bg-white/95 backdrop-blur-2xl border border-white/50 p-5 sm:p-6 rounded-2xl shadow-2xl">
-          
+
           <div className="mb-6 text-center flex flex-col items-center">
             {/* Elegant Logo Container */}
             <div className="w-14 h-14 mb-3 bg-white rounded-xl flex items-center justify-center border border-outline-variant shadow-sm overflow-hidden">
               <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
             </div>
-            
+
             <h2 className="font-headline-sm text-2xl font-bold mb-0.5 tracking-tight text-on-surface">
               Bienvenido
             </h2>
             <p className="text-xs text-on-surface-variant font-medium">Acceso al portal de control</p>
           </div>
-          
+
           <form className="space-y-5 w-full" onSubmit={handleSubmit(onSubmit)} noValidate>
-            
+
             {/* Mensaje de Error de Login */}
             {loginError && (
               <div className="bg-error/10 border-l-[3px] border-error px-3 py-2 rounded-r flex items-start gap-2 mb-4 animate-in fade-in slide-in-from-top-2">
@@ -111,10 +111,10 @@ const Login = () => {
                   <span translate="no" className={`material-symbols-outlined absolute left-3 text-[18px] transition-colors ${getIconClass('username')}`}>
                     person
                   </span>
-                  <input 
-                    id="username" 
-                    type="text" 
-                    {...register("username", { 
+                  <input
+                    id="username"
+                    type="text"
+                    {...register("username", {
                       required: "Este campo es requerido",
                       setValueAs: v => v?.trim()
                     })}
@@ -139,10 +139,10 @@ const Login = () => {
                   <span translate="no" className={`material-symbols-outlined absolute left-3 text-[18px] transition-colors ${getIconClass('password')}`}>
                     lock
                   </span>
-                  <input 
-                    id="password" 
+                  <input
+                    id="password"
                     type={showPassword ? 'text' : 'password'}
-                    {...register("password", { 
+                    {...register("password", {
                       required: "La contraseña es requerida",
                       setValueAs: v => v?.trim()
                     })}
@@ -170,19 +170,19 @@ const Login = () => {
             </div>
 
             {/* Submit Button */}
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               disabled={isLoading}
               className={`w-full h-10 bg-primary hover:bg-primary-fixed-variant text-white font-bold rounded-lg transition-all shadow-sm hover:shadow flex items-center justify-center gap-2 mt-2 ${isLoading ? 'opacity-70 cursor-not-allowed' : 'active:scale-[0.98]'}`}
             >
               <span className="text-xs tracking-wide">{isLoading ? 'Autenticando...' : 'Iniciar Sesión'}</span>
               {!isLoading && <span className="material-symbols-outlined text-[16px]" translate="no">arrow_forward</span>}
             </button>
-            
+
           </form>
-          
+
         </div>
-        
+
         {/* Footer removed per user request */}
       </section>
     </main>

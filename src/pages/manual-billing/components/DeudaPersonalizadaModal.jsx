@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useCallback, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import api from '../../../api/axiosConfig';
 
@@ -10,7 +10,7 @@ export const DeudaPersonalizadaModal = ({ isOpen, onClose, selectedMedidor, acti
   const [isLoadingCargos, setIsLoadingCargos] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
 
-  const loadCargos = async () => {
+  const loadCargos = useCallback(async () => {
     if (!selectedMedidor?.recibo_id) {
       setCargosDinamicos([]);
       return;
@@ -24,7 +24,7 @@ export const DeudaPersonalizadaModal = ({ isOpen, onClose, selectedMedidor, acti
     } finally {
       setIsLoadingCargos(false);
     }
-  };
+  }, [selectedMedidor?.recibo_id]);
 
   useEffect(() => {
     if (isOpen) {
@@ -32,7 +32,7 @@ export const DeudaPersonalizadaModal = ({ isOpen, onClose, selectedMedidor, acti
       setMonto('');
       loadCargos();
     }
-  }, [isOpen, selectedMedidor?.recibo_id]);
+  }, [isOpen, loadCargos]);
 
   if (!isOpen) return null;
 
@@ -90,7 +90,7 @@ export const DeudaPersonalizadaModal = ({ isOpen, onClose, selectedMedidor, acti
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div className="bg-surface rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in-95 duration-300 border border-outline-variant/60 flex flex-col max-h-[90vh]">
-        
+
         {/* Header */}
         <div className="px-6 py-4 border-b border-outline-variant bg-surface-container-lowest flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2.5 text-primary">
@@ -100,7 +100,7 @@ export const DeudaPersonalizadaModal = ({ isOpen, onClose, selectedMedidor, acti
               <p className="text-[11px] text-on-surface-variant">Asigna o retira cargos específicos de este recibo</p>
             </div>
           </div>
-          <button 
+          <button
             onClick={onClose}
             className="p-1.5 rounded-full hover:bg-surface-variant text-on-surface-variant transition-colors"
             title="Cerrar"
@@ -111,7 +111,7 @@ export const DeudaPersonalizadaModal = ({ isOpen, onClose, selectedMedidor, acti
 
         {/* Scrollable Content */}
         <div className="p-6 overflow-y-auto space-y-5">
-          
+
           {/* Tarjeta de Información del Socio y Recibo */}
           <div className="bg-primary/5 rounded-2xl p-3.5 border border-primary/15 space-y-2.5">
             <div className="flex items-center gap-3">

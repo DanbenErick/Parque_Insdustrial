@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import  { useState, useEffect, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import api from '../../api/axiosConfig';
@@ -12,7 +12,7 @@ const formatPeriodo = (periodoStr) => {
   if (!periodoStr) return '';
   const parts = periodoStr.split('-');
   if (parts.length !== 2) return periodoStr;
-  
+
   let year, month;
   if (parts[0].length === 4) {
     year = parts[0];
@@ -21,10 +21,10 @@ const formatPeriodo = (periodoStr) => {
     month = parts[0];
     year = parts[1];
   }
-  
+
   const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   const monthIndex = parseInt(month, 10) - 1;
-  
+
   if (monthIndex >= 0 && monthIndex < 12) {
     return `${monthNames[monthIndex]} ${year}`;
   }
@@ -34,12 +34,12 @@ const formatPeriodo = (periodoStr) => {
 const GenerateInvoices = () => {
   const { activeYear } = useYear();
   const navigate = useNavigate();
-  
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
-  
+
   const [periodos, setPeriodos] = useState([]);
   const [selectedPeriodoId, setSelectedPeriodoId] = useState('');
   const [lecturas, setLecturas] = useState([]);
@@ -52,7 +52,7 @@ const GenerateInvoices = () => {
           // Optimización: Solo descargar las lecturas del año activo
           api.get('/lecturas', { params: { year: activeYear } })
         ]);
-        
+
         setPeriodos(periodosRes.data);
         setLecturas(lecturasRes.data);
       } catch (error) {
@@ -100,27 +100,27 @@ const GenerateInvoices = () => {
 
   const handleGenerate = async () => {
     if (!selectedPeriodoId) return toast.error('Debe seleccionar un periodo');
-    
+
     setIsProcessing(true);
     setProgress(10);
-    
+
     let progressInterval;
-    
+
     try {
       progressInterval = setInterval(() => {
         setProgress(p => Math.min(p + 15, 90));
       }, 500);
 
       await api.post('/recibos/generar', { periodo_id: selectedPeriodoId });
-      
+
       clearInterval(progressInterval);
       setProgress(100);
-      
+
       setTimeout(() => {
         setIsProcessing(false);
         setShowSuccess(true);
       }, 500);
-      
+
     } catch (error) {
       clearInterval(progressInterval); // Bug fix: Clear interval on error to prevent memory leak
       setIsProcessing(false);
@@ -138,7 +138,7 @@ const GenerateInvoices = () => {
     <main className="flex-grow flex flex-col relative overflow-hidden bg-background">
       <div className="flex-grow overflow-y-auto p-xl">
         <div className="max-w-6xl mx-auto space-y-lg">
-          
+
           <div className="flex justify-between items-center mb-lg">
             <div>
               <h2 className="font-headline-lg text-headline-lg text-primary font-bold">Generar Facturación Mensual</h2>
@@ -154,8 +154,8 @@ const GenerateInvoices = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
                   <div className="space-y-xs">
                     <label className="font-label-caps text-[11px] text-on-surface-variant">PERIODO (MES / AÑO)</label>
-                    <select 
-                      className="w-full bg-surface-container border border-outline-variant rounded-md p-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none" 
+                    <select
+                      className="w-full bg-surface-container border border-outline-variant rounded-md p-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none"
                       value={selectedPeriodoId}
                       onChange={(e) => setSelectedPeriodoId(e.target.value)}
                     >
@@ -210,7 +210,7 @@ const GenerateInvoices = () => {
           <div className="bg-surface border border-outline-variant rounded-lg shadow-sm overflow-hidden">
             <div className="px-lg py-md bg-surface-container-low border-b border-outline-variant flex justify-between items-center">
               <h4 className="font-headline-sm text-headline-sm text-on-surface font-bold">Lista de Verificación de Lecturas</h4>
-              <button 
+              <button
                 onClick={() => setShowDetailsModal(true)}
                 className="bg-primary/10 text-primary px-sm py-xs rounded text-[11px] font-bold tracking-wider hover:bg-primary/20 transition-colors"
                 disabled={lecturasDelPeriodo.length === 0}
@@ -256,9 +256,9 @@ const GenerateInvoices = () => {
                   <div className="relative w-24 h-24 flex items-center justify-center">
                     <svg className="absolute inset-0 w-full h-full -rotate-90">
                       <circle className="text-on-surface-variant opacity-20" cx="48" cy="48" fill="transparent" r="44" stroke="currentColor" strokeWidth="4"></circle>
-                      <circle 
-                        className="transition-all duration-300" 
-                        cx="48" cy="48" fill="transparent" r="44" stroke="#00647c" 
+                      <circle
+                        className="transition-all duration-300"
+                        cx="48" cy="48" fill="transparent" r="44" stroke="#00647c"
                         strokeDasharray="276" strokeDashoffset={276 - (276 * progress) / 100} strokeWidth="4">
                       </circle>
                     </svg>
@@ -275,7 +275,7 @@ const GenerateInvoices = () => {
 
           {!isProcessing && !showSuccess && (
             <div className="flex justify-end items-center gap-md py-lg border-t border-outline-variant mt-lg">
-              <button 
+              <button
                 className="px-xl py-2 bg-primary text-on-primary font-bold shadow-md hover:opacity-90 active:scale-95 transition-all rounded-md flex items-center gap-sm disabled:opacity-50"
                 onClick={handleGenerate}
                 disabled={lecturasDelPeriodo.length === 0}
@@ -288,22 +288,22 @@ const GenerateInvoices = () => {
         </div>
       </div>
 
-      
-        <SuccessModal 
-          isOpen={showSuccess} 
-          onClose={handleSuccessClose} 
-          lecturasCount={lecturasDelPeriodo.length} 
-          periodoName={periodoSeleccionado?.mes_anio} 
-        />
-      
 
-      
-        <LecturasDetailsModal 
-          isOpen={showDetailsModal} 
-          onClose={() => setShowDetailsModal(false)} 
-          lecturas={lecturasDelPeriodo} 
+        <SuccessModal
+          isOpen={showSuccess}
+          onClose={handleSuccessClose}
+          lecturasCount={lecturasDelPeriodo.length}
+          periodoName={periodoSeleccionado?.mes_anio}
         />
-      
+
+
+
+        <LecturasDetailsModal
+          isOpen={showDetailsModal}
+          onClose={() => setShowDetailsModal(false)}
+          lecturas={lecturasDelPeriodo}
+        />
+
     </main>
   );
 };

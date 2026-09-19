@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import  { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
@@ -49,11 +49,11 @@ const TenantsAndSectors = () => {
 
   const [editId, setEditId] = useState(null);
   const [formData, setFormData] = useState(INITIAL_FORM);
-  const [errors, setErrors] = useState({});
+  const [, setErrors] = useState({});
 
 
 
-  // En TenantsPage ya no necesitamos handleInputChange ni validateField manual, 
+  // En TenantsPage ya no necesitamos handleInputChange ni validateField manual,
   // porque de eso se encarga react-hook-form en TenantFormModal.
 
 
@@ -109,12 +109,12 @@ const TenantsAndSectors = () => {
   const executeResetPassword = useCallback(async () => {
     const tenant = resetPasswordModal.tenant;
     if (!tenant) return;
-    
+
     setIsResettingPassword(true);
     try {
       const response = await api.post(`/usuarios/${tenant.id}/reset-password`);
       const { newPassword } = response.data;
-      
+
       let phone = tenant.telefono?.replace(/\s+/g, '') || '';
       if (phone) {
         if (!phone.startsWith('+')) {
@@ -259,7 +259,7 @@ const TenantsAndSectors = () => {
         };
         await api.put(`/usuarios/${user.id}`, toggleData);
       }
-      
+
       toast.custom((t) => (
         <div className="bg-surface border-l-4 border-outline-variant shadow-lg rounded-r-lg p-4 flex items-start gap-3 w-[350px] animate-in slide-in-from-top-5" style={{ borderLeftColor: isActivating ? '#059669' : '#d97706' }}>
           <div className={`mt-0.5 w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isActivating ? 'bg-[#059669]/10 text-[#059669]' : 'bg-amber-100 text-amber-700'}`}>

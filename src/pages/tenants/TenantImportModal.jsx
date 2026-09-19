@@ -1,21 +1,10 @@
-import React, { useState, useRef } from 'react';
+import  { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import ExcelJS from 'exceljs';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 
-const TEMPLATE_HEADERS = [
-  'documento_identidad',
-  'nombre_razonsocial',
-  'actividad_rubro',
-  'correo',
-  'telefono',
-  'cargo_representante',
-  'clave_acceso',
-  'medidor_num_serie',
-  'medidor_tipo',
-  'medidor_direccion'
-];
+
 
 const MOCK_DATA = [
   ['10000001', 'Caso 1: Socio normal', 'Comercio', 'test1@mail.com', '999000111', 'Socio', '123456', 'MED-001', 'Normal', 'Avenida Principal 123'],
@@ -89,7 +78,7 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
       const rowIndex = idx + 2;
 
       // Inyectar fórmula en la columna de correo (Columna D = B para nombre)
-      row.getCell('correo').value = { 
+      row.getCell('correo').value = {
         formula: `LOWER(SUBSTITUTE(SUBSTITUTE(B${rowIndex}, " ", ""), ".", "")) & "@gmail.com"`,
         result: dataRow[3]
       };
@@ -111,7 +100,7 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
     for (let i = 0; i < 1000; i++) {
       const rowIndex = MOCK_DATA.length + 2 + i;
       const row = sheet.addRow([]);
-      row.getCell('correo').value = { 
+      row.getCell('correo').value = {
         formula: `IF(ISBLANK(B${rowIndex}), "", LOWER(SUBSTITUTE(SUBSTITUTE(B${rowIndex}, " ", ""), ".", "")) & "@gmail.com")`
       };
       row.getCell('doc').numFmt = '@'; // Mantener formato texto
@@ -148,14 +137,14 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
 
   const handleImport = async () => {
     if (!file) return;
-    
+
     setIsProcessing(true);
     try {
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const rawRows = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false });
-      
+
       // Filtrar filas vacías (donde no hay documento de identidad)
       const rows = rawRows.filter(r => r.documento_identidad && String(r.documento_identidad).trim() !== '');
 
@@ -166,7 +155,7 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
       }
 
       // Format check (at least one valid column)
-      if (!rows[0].hasOwnProperty('documento_identidad')) {
+      if (!Object.hasOwn(rows[0], 'documento_identidad')) {
         toast.error('El formato no es correcto. Falta la columna documento_identidad. Por favor descarga la plantilla.');
         setIsProcessing(false);
         return;
@@ -195,7 +184,7 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
       });
 
       const res = await api.post('/usuarios/bulk', cleanRows);
-      
+
       setResults({
         total: rows.length,
         successful: res.data.successful.length,
@@ -224,7 +213,7 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       <div className="bg-surface w-full max-w-xl rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-outline-variant animate-in zoom-in-95 duration-200">
-        
+
         {/* Header (Mismo estilo que Aperturar Periodo) */}
         <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-outline-variant flex justify-between items-start sm:items-center gap-4 bg-surface relative overflow-hidden shrink-0">
           <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent pointer-events-none" />
@@ -241,9 +230,9 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
               </p>
             </div>
           </div>
-          <button 
-            type="button" 
-            onClick={onClose} 
+          <button
+            type="button"
+            onClick={onClose}
             className="w-8 h-8 rounded-full bg-surface-container hover:bg-surface-variant flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors shadow-sm relative z-10 border border-outline-variant/50 shrink-0"
             title="Cerrar modal"
           >
@@ -265,7 +254,7 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
                   </h4>
                   <p className="text-on-surface-variant text-xs mt-0.5 leading-tight">Descarga la plantilla oficial con el formato correcto.</p>
                 </div>
-                <button 
+                <button
                   onClick={downloadTemplate}
                   className="w-full sm:w-auto justify-center px-4 py-2.5 bg-surface-container-highest text-on-surface font-bold text-xs rounded-xl hover:bg-surface-variant border border-outline-variant flex items-center gap-2 transition-all shadow-sm group-hover:shadow hover:-translate-y-0.5"
                 >
@@ -281,19 +270,19 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
                   <span className="material-symbols-outlined text-[16px]" translate="no">upload</span>
                   Paso 2: Subir archivo completado
                 </h4>
-                
-                <div 
+
+                <div
                   className={`relative z-10 mt-2 border-2 border-dashed rounded-xl p-6 sm:p-8 flex flex-col items-center justify-center text-center transition-all bg-surface/60 backdrop-blur-sm ${file ? 'border-primary shadow-md' : 'border-outline-variant hover:border-primary/50 hover:bg-surface cursor-pointer'}`}
                   onClick={() => !file && fileInputRef.current?.click()}
                 >
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    className="hidden" 
-                    accept=".xlsx, .xls, .csv" 
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    className="hidden"
+                    accept=".xlsx, .xls, .csv"
                     onChange={handleFileChange}
                   />
-                  
+
                   {file ? (
                     <div className="flex flex-col items-center animate-in zoom-in-95 duration-300">
                       <div className="w-14 h-14 rounded-2xl bg-green-500 text-white flex items-center justify-center mb-4 shadow-lg shadow-green-500/30">
@@ -301,7 +290,7 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
                       </div>
                       <p className="font-bold text-base text-on-surface">{file.name}</p>
                       <p className="text-xs text-on-surface-variant font-medium mt-1">{(file.size / 1024).toFixed(2)} KB</p>
-                      <button 
+                      <button
                         onClick={(e) => { e.stopPropagation(); setFile(null); }}
                         className="mt-5 px-4 py-1.5 rounded-lg bg-error/10 text-error text-xs font-bold hover:bg-error/20 transition-colors"
                       >
@@ -387,7 +376,7 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
                 Cancelar
               </button>
               <button
-                type="button" 
+                type="button"
                 disabled={!file || isProcessing}
                 onClick={handleImport}
                 className="w-full sm:w-auto justify-center group px-6 py-2.5 text-sm bg-primary text-on-primary font-bold rounded-xl shadow-md shadow-primary/20 hover:shadow-lg hover:-translate-y-0.5 transition-all flex items-center gap-2 disabled:opacity-50 disabled:shadow-none disabled:cursor-not-allowed disabled:transform-none"

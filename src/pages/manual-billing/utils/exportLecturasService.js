@@ -4,7 +4,7 @@ export const exportLecturasToExcel = async (medidores, lecturasMap, periodo) => 
   if (!medidores || medidores.length === 0) {
     throw new Error('No hay medidores para exportar.');
   }
-  
+
   if (!periodo) {
     throw new Error('No hay periodo seleccionado.');
   }
@@ -51,17 +51,17 @@ export const exportLecturasToExcel = async (medidores, lecturasMap, periodo) => 
     { key: 'medidor', width: 15 },
     { key: 'isTR', width: 12 },
     { key: 'estado', width: 12 },
-    
+
     // Normal / Fuera de Punta
     { key: 'antN', width: 12 },
     { key: 'actN', width: 12 },
     { key: 'consN', width: 12 },
-    
+
     // Punta
     { key: 'antP', width: 12 },
     { key: 'actP', width: 12 },
     { key: 'consP', width: 12 },
-    
+
     { key: 'factorP', width: 15 },
     { key: 'fechaReg', width: 18 },
     { key: 'observacion', width: 25 },
@@ -75,7 +75,7 @@ export const exportLecturasToExcel = async (medidores, lecturasMap, periodo) => 
     'L. ANT (P)', 'L. ACT (P)', 'CONS. (P)',
     'FACTOR POT.', 'FECHA REG.', 'OBSERVACIÓN'
   ];
-  
+
   headerRow.height = 25;
   headerRow.eachCell((cell, colNumber) => {
     cell.font = { name: 'Arial', size: 10, bold: true, color: { argb: 'FFFFFFFF' } };
@@ -83,7 +83,7 @@ export const exportLecturasToExcel = async (medidores, lecturasMap, periodo) => 
     cell.fill = {
       type: 'pattern',
       pattern: 'solid',
-      fgColor: { argb: colNumber >= 7 && colNumber <= 9 ? 'FF2563EB' : colNumber >= 10 && colNumber <= 12 ? 'FFEA580C' : 'FF475569' } 
+      fgColor: { argb: colNumber >= 7 && colNumber <= 9 ? 'FF2563EB' : colNumber >= 10 && colNumber <= 12 ? 'FFEA580C' : 'FF475569' }
       // Azul para Normal, Naranja para Punta, Gris para resto
     };
     cell.border = {
@@ -108,15 +108,15 @@ export const exportLecturasToExcel = async (medidores, lecturasMap, periodo) => 
       medidor: medidor.num_serie,
       isTR: isTR ? 'SÍ' : 'NO',
       estado: registrado ? 'REGISTRADO' : 'PENDIENTE',
-      
+
       antN: lectura ? Number(lectura.lectura_anterior || 0) : '-',
       actN: lectura ? Number(lectura.lectura_actual || 0) : '-',
       consN: lectura ? Number(lectura.consumo_total || 0) : '-',
-      
+
       antP: lectura && isTR ? Number(lectura.lectura_anterior_punta || 0) : '-',
       actP: lectura && isTR ? Number(lectura.lectura_actual_punta || 0) : '-',
       consP: lectura && isTR ? Number(lectura.consumo_punta || 0) : '-',
-      
+
       factorP: lectura && isTR ? Number(lectura.factor_potencia || 0) : '-',
       fechaReg: lectura && lectura.fecha_registro ? new Date(lectura.fecha_registro).toLocaleString('es-ES') : '-',
       observacion: (lectura?.justificacion_modificacion || lectura?.observacion || '')
@@ -141,7 +141,7 @@ export const exportLecturasToExcel = async (medidores, lecturasMap, periodo) => 
           cell.font = { ...cell.font, color: { argb: 'FFDC2626' }, bold: true }; // Rojo
         }
       }
-      
+
       // Formato numérico para lecturas
       if (colNumber >= 7 && colNumber <= 13 && cell.value !== '-') {
          cell.numFmt = '#,##0.00';

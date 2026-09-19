@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import  { useState, useEffect, useCallback, useMemo } from 'react';
 import api from '../../api/axiosConfig';
 import { useYear } from '../../context/YearContext';
 import { toast } from 'sonner';
@@ -30,7 +30,7 @@ ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tool
 
 const MESES_FULL = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
 const MESES_SHORT = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-const ITEMS_PER_PAGE = 5;
+
 
 const parsePeriodParts = (p) => {
   if (!p || !p.includes('-')) return null;
@@ -42,11 +42,7 @@ const parsePeriodParts = (p) => {
   };
 };
 
-const formatPeriodo = (p) => {
-  const parsed = parsePeriodParts(p);
-  if (!parsed) return p || '-';
-  return `${MESES_FULL[parsed.monthIndex] || p} ${parsed.yearPart}`;
-};
+
 
 const formatMonthOnly = (p) => {
   const parsed = parsePeriodParts(p);
@@ -152,7 +148,7 @@ const Reports = () => {
 
   // ── Stats (Memoized) ──────────────────────────────────────────────────────
 
-  const { totalConsumo, totalFacturado, totalRecaudado, totalPendiente, tasaRecaudacion, sortedDistribution } = useMemo(() => {
+  const { totalConsumo, totalFacturado, totalRecaudado, totalPendiente, tasaRecaudacion } = useMemo(() => {
     const tConsumo = filteredLecturas.reduce((sum, l) => sum + (parseFloat(l.consumo_calculado) || 0), 0);
     const tFacturado = filteredRecibos.reduce((sum, r) => sum + (parseFloat(r.total) || 0), 0);
 

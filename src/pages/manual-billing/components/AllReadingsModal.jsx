@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import  { useMemo } from 'react';
 import { formatPeriodo, MODAL_BACKDROP, MODAL_CONTENT } from '../utils';
 import { ReadingTableRow } from './shared/ReadingTableRow';
 
@@ -15,7 +15,7 @@ export const AllReadingsModal = ({
   const filteredModalLecturas = useMemo(() => {
     const term = modalSearchTerm.trim().toLowerCase();
     if (!term) return lecturasPeriodoActivo;
-    
+
     return lecturasPeriodoActivo.filter(record => {
       const medidor = medidorMap.get(record.num_serie);
       const docId = medidor?.documento_identidad?.toLowerCase() || '';

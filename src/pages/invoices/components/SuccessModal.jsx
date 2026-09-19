@@ -1,4 +1,4 @@
-import React from 'react';
+import 'react';
 
 const SuccessModal = ({ isOpen, onClose, lecturasCount, periodoName }) => {
   if (!isOpen) return null;
@@ -16,8 +16,8 @@ const SuccessModal = ({ isOpen, onClose, lecturasCount, periodoName }) => {
         <h3 className="font-headline-md text-headline-md text-on-surface font-bold">¡Proceso Exitoso!</h3>
         <p className="text-on-surface-variant">Se han generado {lecturasCount} recibos correctamente para el periodo {periodoName}.</p>
         <div className="grid grid-cols-1 gap-md pt-lg">
-          <button 
-            className="px-md py-3 bg-primary text-on-primary rounded-md hover:opacity-90 font-bold" 
+          <button
+            className="px-md py-3 bg-primary text-on-primary rounded-md hover:opacity-90 font-bold"
             onClick={onClose}
           >
             Ir a Módulo de Facturación

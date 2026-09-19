@@ -30,7 +30,7 @@ export const MedidoresTable = ({
     }
     handleSelectMember(medidor);
   };
-  
+
   const [modalDeudaOpen, setModalDeudaOpen] = useState(false);
   const [selectedForDeuda, setSelectedForDeuda] = useState(null);
 
@@ -38,7 +38,7 @@ export const MedidoresTable = ({
   const filteredMedidores = useMemo(() => {
     if (!searchTerm.trim()) return medidores;
     const lowerTerm = searchTerm.toLowerCase();
-    return medidores.filter(m => 
+    return medidores.filter(m =>
       (m.num_serie && m.num_serie.toLowerCase().includes(lowerTerm)) ||
       (m.propietario && m.propietario.toLowerCase().includes(lowerTerm)) ||
       (m.documento_identidad && m.documento_identidad.toLowerCase().includes(lowerTerm))
@@ -58,7 +58,7 @@ export const MedidoresTable = ({
           </h3>
           <p className="text-[10px] text-on-surface-variant mt-0.5">Haga clic en 'Seleccionar' para iniciar el registro.</p>
         </div>
-        
+
         <div className="relative w-full md:w-72">
           <div className="absolute inset-y-0 left-0 pl-2.5 flex items-center pointer-events-none">
             <span className="material-symbols-outlined text-on-surface-variant text-[16px]" translate="no">search</span>
@@ -170,7 +170,7 @@ export const MedidoresTable = ({
 
 
 
-      <DeudaPersonalizadaModal 
+      <DeudaPersonalizadaModal
         isOpen={modalDeudaOpen}
         onClose={() => {
           setModalDeudaOpen(false);

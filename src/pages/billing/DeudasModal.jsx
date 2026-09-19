@@ -1,4 +1,4 @@
-import React, { memo, useEffect } from 'react';
+import  { memo, useEffect } from 'react';
 
 /**
  * DeudasModal — Modal for selecting debt report scope (monthly vs historic).

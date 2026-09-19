@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import MobileMenuSheet from './MobileMenuSheet';
 
@@ -10,7 +10,7 @@ const MobileBottomNav = ({ screens }) => {
 
   // Define main quick-access items. We'll pick max 4 items for bottom bar.
   const mainViews = ['dashboard', 'tenants', 'billing', 'payments'];
-  
+
   const bottomScreens = screens.filter(s => mainViews.includes(s.view));
   // Sort them in the exact order as mainViews
   const sortedBottomScreens = bottomScreens.sort((a, b) => mainViews.indexOf(a.view) - mainViews.indexOf(b.view));
@@ -59,10 +59,10 @@ const MobileBottomNav = ({ screens }) => {
         </div>
       </div>
 
-      <MobileMenuSheet 
-        isOpen={isMenuOpen} 
-        onClose={() => setIsMenuOpen(false)} 
-        screens={screens} 
+      <MobileMenuSheet
+        isOpen={isMenuOpen}
+        onClose={() => setIsMenuOpen(false)}
+        screens={screens}
         currentPath={currentPath}
         onNavClick={handleNavClick}
       />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import  { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import api from '../../api/axiosConfig';
 import { toast } from 'sonner';
@@ -9,7 +9,7 @@ const SocioProfilePage = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const { register, handleSubmit, formState: { errors }, reset, watch } = useForm({
     defaultValues: {
       clave_actual: '',
@@ -39,7 +39,7 @@ const SocioProfilePage = () => {
 
   return (
     <main className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[800px] mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
-      
+
       <div className="flex items-center gap-4 mb-6">
         <button onClick={() => navigate(-1)} className="p-2 bg-surface-container-low hover:bg-surface-container rounded-xl text-on-surface-variant transition-colors">
           <span className="material-symbols-outlined text-[20px]" translate="no">arrow_back</span>
@@ -51,7 +51,7 @@ const SocioProfilePage = () => {
       </div>
 
       <div className="bg-white rounded-2xl border border-outline-variant shadow-sm overflow-hidden">
-        
+
         {/* Profile Header */}
         <div className="bg-emerald-50 p-6 md:p-8 border-b border-emerald-100 flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
           <div className="w-24 h-24 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-4xl shadow-md border-4 border-white">
@@ -84,8 +84,8 @@ const SocioProfilePage = () => {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-md">
             <div>
               <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Contraseña Actual</label>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 {...register('clave_actual', { required: 'La contraseña actual es requerida' })}
                 className={`w-full px-4 py-3 rounded-xl border ${errors.clave_actual ? 'border-error bg-error/5' : 'border-outline-variant bg-surface-container-lowest'} focus:outline-none focus:border-emerald-500 transition-colors`}
                 placeholder="••••••••"
@@ -95,8 +95,8 @@ const SocioProfilePage = () => {
 
             <div>
               <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Nueva Contraseña (PIN)</label>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 maxLength={6}
@@ -105,7 +105,7 @@ const SocioProfilePage = () => {
                     e.preventDefault();
                   }
                 }}
-                {...register('clave_nueva', { 
+                {...register('clave_nueva', {
                   required: 'La nueva contraseña es requerida',
                   pattern: { value: /^\d{6}$/, message: 'Debe ser un PIN exacto de 6 dígitos' }
                 })}
@@ -118,8 +118,8 @@ const SocioProfilePage = () => {
 
             <div>
               <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Confirmar Nueva Contraseña</label>
-              <input 
-                type="password" 
+              <input
+                type="password"
                 inputMode="numeric"
                 pattern="[0-9]*"
                 maxLength={6}
@@ -128,7 +128,7 @@ const SocioProfilePage = () => {
                     e.preventDefault();
                   }
                 }}
-                {...register('confirmar_clave', { 
+                {...register('confirmar_clave', {
                   required: 'Debes confirmar la contraseña',
                   validate: value => value === claveNueva || 'Las contraseñas no coinciden'
                 })}
@@ -139,8 +139,8 @@ const SocioProfilePage = () => {
             </div>
 
             <div className="pt-2">
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 disabled={isLoading}
                 className="w-full md:w-auto px-8 py-3 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
               >

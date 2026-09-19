@@ -1,17 +1,10 @@
-import React, { useState, useRef } from 'react';
+import  { useState, useRef } from 'react';
 import * as XLSX from 'xlsx';
 import ExcelJS from 'exceljs';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 
-const TEMPLATE_HEADERS = [
-  'mes_anio', 'documento_identidad', 'num_serie',
-  'lectura_anterior', 'lectura_actual',
-  'lectura_anterior_punta', 'lectura_actual_punta',
-  'factor_potencia', 'precio_factor_potencia',
-  'cargo_fijo', 'cargo_corte', 'multa_manipulacion', 'multa_reconexion', 'deuda_vencida', 'instalacion_medidor', 'descuento',
-  'estado_pago', 'fecha_pago', 'metodo_pago', 'numero_operacion'
-];
+
 
 const MOCK_DATA = [
   ['2026-06', '10050400', 'MED-001', 100, 250, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 'Pagado', '2026-06-15', 'Transferencia', 'OP-001'],
@@ -171,7 +164,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
           setFile(null);
           return;
         }
-        if (!rows[0].hasOwnProperty('mes_anio') || !rows[0].hasOwnProperty('documento_identidad')) {
+        if (!Object.hasOwn(rows[0], 'mes_anio') || !Object.hasOwn(rows[0], 'documento_identidad')) {
           toast.error('El formato no es correcto. Faltan columnas obligatorias (mes_anio, documento_identidad). Descarga la plantilla.');
           setFile(null);
           return;

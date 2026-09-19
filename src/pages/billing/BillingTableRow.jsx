@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import  { memo } from 'react';
 import { formatPeriod } from './billingUtils';
 
 /**
@@ -31,8 +31,8 @@ const BillingTableRow = memo(({ recibo, onViewDetail, onViewHistorial, onViewPag
               {/* Medidor as the primary prominent element */}
               <div className="flex items-center gap-1.5">
                 <span className={`inline-flex items-center gap-1 w-fit px-2 py-0.5 rounded text-[12px] font-extrabold uppercase tracking-wider ${
-                  recibo.medidor_num_serie 
-                    ? 'bg-primary/10 text-primary border border-primary/20' 
+                  recibo.medidor_num_serie
+                    ? 'bg-primary/10 text-primary border border-primary/20'
                     : 'bg-surface-container-high text-on-surface-variant border border-outline-variant'
                 } group-hover/btn:bg-primary/20 transition-colors`}>
                   <span className="material-symbols-outlined text-[14px]" translate="no">
@@ -62,7 +62,7 @@ const BillingTableRow = memo(({ recibo, onViewDetail, onViewHistorial, onViewPag
                   </button>
                 )}
               </div>
-              
+
               {/* Socio name as secondary text */}
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="truncate max-w-[200px] font-medium text-on-surface-variant text-[11px]">

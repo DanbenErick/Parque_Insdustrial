@@ -9,8 +9,8 @@ export const SearchResultRow = React.memo(({ member, onSelect, isLecturado }) =>
   >
     <div className="flex items-center gap-3 overflow-hidden w-full sm:w-auto flex-1">
       <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 border transition-colors ${
-        isLecturado 
-          ? 'bg-green-100 text-green-700 border-green-200 group-hover:bg-green-200' 
+        isLecturado
+          ? 'bg-green-100 text-green-700 border-green-200 group-hover:bg-green-200'
           : 'bg-primary/10 text-primary border-primary/20 group-hover:bg-primary/20'
       }`}>
         <span className="material-symbols-outlined text-[16px]" translate="no">

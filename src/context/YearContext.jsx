@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import  { createContext, useContext, useState, useEffect } from 'react';
 import api from '../api/axiosConfig';
 import { useAuth } from './AuthContext';
 
@@ -23,7 +23,7 @@ export const YearProvider = ({ children }) => {
           const parts = p.mes_anio.split('-');
           return parseInt(parts[0].length === 4 ? parts[0] : parts[1], 10);
         }).filter(y => !isNaN(y));
-        
+
         const uniqueYears = [...new Set([currentYear, ...years])].sort((a, b) => a - b);
         setAvailableYears(uniqueYears);
       } catch (error) {
@@ -31,7 +31,7 @@ export const YearProvider = ({ children }) => {
       }
     };
     fetchYears();
-  }, [isAuthenticated, user?.rol_id]);
+  }, [currentYear, isAuthenticated, user?.rol_id]);
 
   // Function to manually add a year to the list (so it can be selected and populated)
   const addYear = (year) => {

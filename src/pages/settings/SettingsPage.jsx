@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../api/axiosConfig';
@@ -9,7 +9,7 @@ import TenantImportModal from '../tenants/TenantImportModal';
 
 const Settings = () => {
   const { user } = useAuth();
-  
+
   const [activeTab, setActiveTab] = useState('profile');
   const [isSaving, setIsSaving] = useState(false);
 
@@ -23,7 +23,7 @@ const Settings = () => {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
   const [isTenantImportOpen, setIsTenantImportOpen] = useState(false);
-  
+
   // Estados para cuenta bancaria
   const [isEditingAccount, setIsEditingAccount] = useState(false);
   const [isSavingAccount, setIsSavingAccount] = useState(false);
@@ -83,7 +83,7 @@ const Settings = () => {
       const parsed = JSON.parse(savedPrefs);
       if (parsed.notifications) setNotifications(parsed.notifications);
     }
-    
+
     // Cargar configuraciones globales
     api.get('/config').then(res => {
       setTarifas({
@@ -153,7 +153,7 @@ const Settings = () => {
 
   const handleSave = async () => {
     setIsSaving(true);
-    
+
     try {
       if (activeTab === 'profile') {
         if (!profile.nombre_razonsocial?.trim() || !profile.cargo_representante?.trim() || !profile.telefono?.trim() || !profile.correo?.trim()) {
@@ -187,7 +187,7 @@ const Settings = () => {
         localStorage.setItem('luz_prefs', JSON.stringify({
           notifications
         }));
-        
+
         toast.custom((t) => (
           <div className="bg-surface border border-outline-variant rounded-xl shadow-lg p-3.5 flex items-center gap-3.5 w-full min-w-[300px]">
             <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shadow-inner shrink-0">
@@ -215,13 +215,13 @@ const Settings = () => {
     <main className="flex-grow flex flex-col relative overflow-hidden bg-background">
       <div className="flex-grow overflow-y-auto p-4 md:p-6 custom-scrollbar">
         <div className="max-w-6xl mx-auto space-y-4">
-          
+
           <div className="flex justify-between items-center mb-4">
             <div>
               <h2 className="text-2xl text-primary font-bold leading-tight">Configuración del Sistema</h2>
               <p className="text-sm text-on-surface-variant">Gestiona tus preferencias, perfil y notificaciones.</p>
             </div>
-            <button 
+            <button
               onClick={handleSave}
               disabled={isSaving}
               className={`px-4 py-1.5 h-8 text-xs bg-primary text-on-primary font-bold rounded-md shadow-sm transition-all flex items-center gap-1.5 ${isSaving ? 'opacity-70 cursor-not-allowed' : 'hover:opacity-90 active:scale-95'}`}
@@ -240,28 +240,28 @@ const Settings = () => {
           <div className="flex flex-col md:flex-row gap-4">
             {/* Sidebar nav for settings */}
             <div className="w-full md:w-72 space-y-1">
-              <button 
+              <button
                 onClick={() => setActiveTab('profile')}
                 className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left text-xs ${activeTab === 'profile' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
               >
                 <span className="material-symbols-outlined text-[16px]" translate="no">person</span>
                 Perfil de Usuario
               </button>
-              <button 
+              <button
                 onClick={() => setActiveTab('notifications')}
                 className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left text-xs ${activeTab === 'notifications' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
               >
                 <span className="material-symbols-outlined text-[16px]" translate="no">notifications_active</span>
                 Notificaciones
               </button>
-              <button 
+              <button
                 onClick={() => setActiveTab('periodos')}
                 className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left text-xs ${activeTab === 'periodos' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
               >
                 <span className="material-symbols-outlined text-[16px]" translate="no">calendar_month</span>
                 Periodos de Facturación
               </button>
-              <button 
+              <button
                 onClick={() => setActiveTab('tarifas')}
                 className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left text-xs ${activeTab === 'tarifas' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
               >
@@ -271,7 +271,7 @@ const Settings = () => {
 
               <div className="my-2 border-t border-outline-variant/30" />
               <p className="text-[9px] font-bold text-on-surface-variant/50 uppercase tracking-widest px-3 mb-1">Herramientas</p>
-              <button 
+              <button
                 onClick={() => setActiveTab('herramientas')}
                 className={`w-full flex items-center gap-2 px-3 py-1.5 rounded-md transition-colors text-left text-xs ${activeTab === 'herramientas' ? 'bg-primary/10 text-primary font-bold' : 'text-on-surface-variant hover:bg-surface-container-low'}`}
               >
@@ -282,7 +282,7 @@ const Settings = () => {
 
             {/* Content Area */}
             <div className="flex-grow bg-surface border border-outline-variant rounded-lg shadow-sm p-4 md:p-6 min-h-[500px]">
-              
+
               {activeTab === 'profile' && (
                 <div className="animate-in fade-in space-y-6">
                   <div className="flex items-center gap-4 border-b border-outline-variant pb-4">
@@ -301,28 +301,28 @@ const Settings = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div className="space-y-0.5">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Nombre / Razón Social</label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         name="nombre_razonsocial"
                         value={profile.nombre_razonsocial}
                         onChange={handleProfileChange}
-                        className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm" 
+                        className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm"
                       />
                     </div>
                     <div className="space-y-0.5">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Cargo Representante</label>
-                      <input 
-                        type="text" 
+                      <input
+                        type="text"
                         name="cargo_representante"
                         value={profile.cargo_representante}
                         onChange={handleProfileChange}
-                        className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm" 
+                        className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm"
                       />
                     </div>
                     <div className="space-y-0.5">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Teléfono de Contacto</label>
-                      <input 
-                        type="tel" 
+                      <input
+                        type="tel"
                         name="telefono"
                         maxLength="9"
                         value={profile.telefono}
@@ -332,17 +332,17 @@ const Settings = () => {
                             handleProfileChange({ target: { name: 'telefono', value: val } });
                           }
                         }}
-                        className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm" 
+                        className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm"
                       />
                     </div>
                     <div className="space-y-0.5">
                       <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Correo Electrónico</label>
-                      <input 
-                        type="email" 
+                      <input
+                        type="email"
                         name="correo"
                         value={profile.correo}
                         onChange={handleProfileChange}
-                        className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm" 
+                        className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm"
                       />
                     </div>
                   </div>
@@ -353,64 +353,64 @@ const Settings = () => {
                       <div className="space-y-0.5">
                         <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Cuenta Bancaria Principal (BCP)</label>
                         <div className="flex gap-2">
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             name="cuenta_bancaria"
                             placeholder="Ej. BCP: 191-12345678-0-12"
                             value={tarifas.cuenta_bancaria}
                             onChange={(e) => setTarifas(prev => ({ ...prev, cuenta_bancaria: e.target.value }))}
                             disabled={!isEditingAccount}
                             className={`flex-grow border rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm ${
-                              isEditingAccount 
-                                ? 'bg-surface-container-lowest border-outline-variant/50 hover:border-primary/50 focus:border-primary' 
+                              isEditingAccount
+                                ? 'bg-surface-container-lowest border-outline-variant/50 hover:border-primary/50 focus:border-primary'
                                 : 'bg-surface-container-highest border-transparent text-on-surface-variant cursor-not-allowed'
-                            }`} 
+                            }`}
                           />
                         </div>
                       </div>
-                      
+
                       <div className="space-y-0.5">
                         <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Número de Yape / Plin</label>
                         <div className="flex gap-2">
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             name="cuenta_yape"
                             placeholder="Ej. 999 888 777"
                             value={tarifas.cuenta_yape}
                             onChange={(e) => setTarifas(prev => ({ ...prev, cuenta_yape: e.target.value }))}
                             disabled={!isEditingAccount}
                             className={`flex-grow border rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm ${
-                              isEditingAccount 
-                                ? 'bg-surface-container-lowest border-outline-variant/50 hover:border-primary/50 focus:border-primary' 
+                              isEditingAccount
+                                ? 'bg-surface-container-lowest border-outline-variant/50 hover:border-primary/50 focus:border-primary'
                                 : 'bg-surface-container-highest border-transparent text-on-surface-variant cursor-not-allowed'
-                            }`} 
+                            }`}
                           />
                         </div>
                       </div>
                       <div className="space-y-0.5 mt-3 md:mt-0 md:col-span-2">
                         <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Nombre del Titular de las Cuentas</label>
                         <div className="flex gap-2">
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             name="titular_cuenta"
                             placeholder="Ej. Parque Industrial Jicamarca"
                             value={tarifas.titular_cuenta}
                             onChange={(e) => setTarifas(prev => ({ ...prev, titular_cuenta: e.target.value }))}
                             disabled={!isEditingAccount}
                             className={`flex-grow border rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm ${
-                              isEditingAccount 
-                                ? 'bg-surface-container-lowest border-outline-variant/50 hover:border-primary/50 focus:border-primary' 
+                              isEditingAccount
+                                ? 'bg-surface-container-lowest border-outline-variant/50 hover:border-primary/50 focus:border-primary'
                                 : 'bg-surface-container-highest border-transparent text-on-surface-variant cursor-not-allowed'
-                            }`} 
+                            }`}
                           />
                         </div>
                       </div>
                     </div>
-                    
+
                     <div className="mt-3 flex justify-start">
                       {!isEditingAccount ? (
-                        <button 
-                          type="button" 
+                        <button
+                          type="button"
                           onClick={() => setIsEditingAccount(true)}
                           className="px-3 py-1.5 h-8 border border-outline-variant text-on-surface hover:text-primary hover:border-primary hover:bg-primary/5 rounded-md transition-colors text-xs font-bold active:scale-95 flex items-center gap-1"
                         >
@@ -419,16 +419,16 @@ const Settings = () => {
                         </button>
                       ) : (
                         <div className="flex gap-1">
-                          <button 
-                            type="button" 
+                          <button
+                            type="button"
                             onClick={() => setIsEditingAccount(false)}
                             className="px-2 h-8 border border-outline-variant text-on-surface-variant hover:text-on-surface hover:bg-surface-container-highest rounded-md transition-colors flex items-center justify-center active:scale-95"
                             title="Cancelar"
                           >
                             <span className="material-symbols-outlined text-[16px]" translate="no">close</span>
                           </button>
-                          <button 
-                            type="button" 
+                          <button
+                            type="button"
                             onClick={handleSaveAccount}
                             disabled={isSavingAccount}
                             className={`px-3 py-1.5 h-8 bg-primary text-on-primary rounded-md shadow-sm transition-all text-xs font-bold flex items-center gap-1 ${
@@ -450,13 +450,13 @@ const Settings = () => {
 
                   <div className="pt-4 border-t border-outline-variant/30 mt-6">
                     <h4 className="text-sm text-on-surface font-bold mb-2">Seguridad</h4>
-                    
+
                     {!showPasswordForm ? (
                       <div>
                         <p className="text-xs text-on-surface-variant mb-3">
                           Para proteger tu cuenta, te recomendamos usar una contraseña segura. El cambio afectará únicamente a tu sesión activa.
                         </p>
-                        <button 
+                        <button
                           onClick={() => setShowPasswordForm(true)}
                           className="px-3 py-1.5 h-8 border border-primary text-primary hover:bg-primary/5 rounded-md transition-colors text-xs font-bold active:scale-95 duration-150"
                         >
@@ -470,8 +470,8 @@ const Settings = () => {
                             <span className="material-symbols-outlined text-[16px] text-primary" translate="no">key</span>
                             Actualizar Contraseña
                           </span>
-                          <button 
-                            type="button" 
+                          <button
+                            type="button"
                             onClick={() => {
                               setShowPasswordForm(false);
                               setPasswordForm({ clave_actual: '', clave_nueva: '', clave_confirmar: '' });
@@ -481,50 +481,50 @@ const Settings = () => {
                             <span className="material-symbols-outlined text-[14px]" translate="no">close</span>
                           </button>
                         </div>
-                        
+
                         <div className="space-y-2">
                           <div className="space-y-0.5">
                             <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Contraseña Actual</label>
-                            <input 
+                            <input
                               required
-                              type="password" 
-                              name="clave_actual" 
-                              value={passwordForm.clave_actual} 
+                              type="password"
+                              name="clave_actual"
+                              value={passwordForm.clave_actual}
                               onChange={handlePasswordInputChange}
-                              placeholder="••••••••" 
-                              className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 h-8 text-xs outline-none transition-colors shadow-sm" 
+                              placeholder="••••••••"
+                              className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 h-8 text-xs outline-none transition-colors shadow-sm"
                             />
                           </div>
                           <div className="space-y-0.5">
                             <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Nueva Contraseña</label>
-                            <input 
+                            <input
                               required
-                              type="password" 
+                              type="password"
                               name="clave_nueva"
                               minLength="6"
-                              value={passwordForm.clave_nueva} 
+                              value={passwordForm.clave_nueva}
                               onChange={handlePasswordInputChange}
-                              placeholder="Mínimo 6 caracteres" 
-                              className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 h-8 text-xs outline-none transition-colors shadow-sm" 
+                              placeholder="Mínimo 6 caracteres"
+                              className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 h-8 text-xs outline-none transition-colors shadow-sm"
                             />
                           </div>
                           <div className="space-y-0.5">
                             <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Confirmar Nueva Contraseña</label>
-                            <input 
+                            <input
                               required
-                              type="password" 
-                              name="clave_confirmar" 
-                              value={passwordForm.clave_confirmar} 
+                              type="password"
+                              name="clave_confirmar"
+                              value={passwordForm.clave_confirmar}
                               onChange={handlePasswordInputChange}
-                              placeholder="Repite la contraseña" 
-                              className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 h-8 text-xs outline-none transition-colors shadow-sm" 
+                              placeholder="Repite la contraseña"
+                              className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 h-8 text-xs outline-none transition-colors shadow-sm"
                             />
                           </div>
                         </div>
 
                         <div className="flex justify-end gap-2 pt-2">
-                          <button 
-                            type="button" 
+                          <button
+                            type="button"
                             onClick={() => {
                               setShowPasswordForm(false);
                               setPasswordForm({ clave_actual: '', clave_nueva: '', clave_confirmar: '' });
@@ -533,8 +533,8 @@ const Settings = () => {
                           >
                             Cancelar
                           </button>
-                          <button 
-                            type="submit" 
+                          <button
+                            type="submit"
                             disabled={isChangingPassword}
                             className="px-3 py-1.5 bg-primary text-on-primary h-8 text-xs font-bold rounded-md shadow-sm hover:opacity-90 disabled:opacity-50 transition-opacity flex items-center gap-1"
                           >
@@ -564,7 +564,7 @@ const Settings = () => {
                         <div className={`w-3 h-3 bg-white rounded-full absolute top-0.5 shadow-sm transition-all ${notifications.pagos ? 'right-0.5' : 'left-0.5'}`}></div>
                       </div>
                     </div>
-                    
+
                     <div className="px-4 py-3 flex items-center justify-between hover:bg-surface-container-lowest" onClick={() => toggleNotification('facturas')}>
                       <div>
                         <p className="font-bold text-on-surface text-[11px]">Generación de Facturas Exitosas</p>

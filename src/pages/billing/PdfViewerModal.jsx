@@ -1,10 +1,10 @@
-import React, { memo, useEffect } from 'react';
+import  { memo, useEffect } from 'react';
 
 /**
  * PdfViewerModal — Full-screen PDF viewer with download capability.
  * Extracted from Billing.jsx to reduce parent component complexity.
  */
-const PdfViewerModal = memo(({ isOpen, pdfUrl, pdfId, onDownload, onClose }) => {
+const PdfViewerModal = memo(({ isOpen, pdfUrl, onDownload, onClose }) => {
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e) => { if (e.key === 'Escape') onClose(); };

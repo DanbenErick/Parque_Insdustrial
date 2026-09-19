@@ -1,20 +1,20 @@
 import React from 'react';
 
-const OVERLAY = { hidden: { opacity: 0 }, visible: { opacity: 1 } };
-const PANEL = { hidden: { scale: 0.95, opacity: 0 }, visible: { scale: 1, opacity: 1 } };
-const TRANSITION = { duration: 0.2, ease: "easeOut" };
 
-const ConfirmActionModal = ({ 
-  title, 
-  message, 
-  warningText, 
-  confirmText = 'Confirmar', 
-  cancelText = 'Cancelar', 
-  isDestructive = false, 
-  isLoading = false, 
+
+
+
+const ConfirmActionModal = ({
+  title,
+  message,
+  warningText,
+  confirmText = 'Confirmar',
+  cancelText = 'Cancelar',
+  isDestructive = false,
+  isLoading = false,
   icon = 'warning',
-  onConfirm, 
-  onClose 
+  onConfirm,
+  onClose
 }) => {
   return (
     <div

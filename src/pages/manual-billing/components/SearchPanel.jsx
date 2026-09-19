@@ -1,4 +1,4 @@
-import React from 'react';
+import 'react';
 import { SearchResultRow } from './shared/SearchResultRow';
 
 export const SearchPanel = ({
@@ -50,10 +50,10 @@ export const SearchPanel = ({
         <div className="absolute top-full left-0 right-0 mt-3 bg-white/90 backdrop-blur-2xl border border-primary/20 rounded-2xl shadow-[0_20px_40px_-15px_rgba(0,0,0,0.1)] overflow-hidden max-h-80 overflow-y-auto animate-in slide-in-from-top-3 fade-in z-50">
           <ul className="p-1.5 space-y-1">
             {currentSearchResults.map(m => (
-              <SearchResultRow 
-                key={m.id} 
-                member={m} 
-                onSelect={handleSelectMember} 
+              <SearchResultRow
+                key={m.id}
+                member={m}
+                onSelect={handleSelectMember}
                 isLecturado={lecturasPeriodoActivoMap?.has(m.num_serie)}
               />
             ))}

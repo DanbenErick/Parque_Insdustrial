@@ -1,4 +1,4 @@
-import React from 'react';
+import 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 
 export default function ReloadPrompt() {
@@ -40,7 +40,7 @@ export default function ReloadPrompt() {
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center justify-end gap-2 mt-2">
           <button
             onClick={close}

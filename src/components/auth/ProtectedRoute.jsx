@@ -1,4 +1,4 @@
-import React from 'react';
+import 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
@@ -27,7 +27,7 @@ const ProtectedRoute = ({ requiredRoute, children }) => {
 
   if (requiredRoute) {
     const userRutas = user.rutas || [];
-    
+
     // Si la validación falla para un administrador o socio que intenta forzar la URL
     if (!userRutas.includes(requiredRoute)) {
       // Mostrar un toast amigable si intentan acceder forzosamente

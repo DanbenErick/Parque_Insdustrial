@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 export const useBillingData = (activeYear) => {
   const [medidores, setMedidores] = useState([]);
   const [periodos, setPeriodos] = useState([]);
-  const [lecturas, setLecturas] = useState([]); 
+  const [lecturas, setLecturas] = useState([]);
   const [activePeriodo, setActivePeriodo] = useState(null);
 
   const [isLoading, setIsLoading] = useState(false);
@@ -71,17 +71,17 @@ export const useBillingData = (activeYear) => {
     }
   }, [periodosFiltrados]);
 
-  const lecturasPeriodoActivo = useMemo(() => 
+  const lecturasPeriodoActivo = useMemo(() =>
     activePeriodo ? lecturas.filter(l => l.periodo === activePeriodo.mes_anio) : [],
   [lecturas, activePeriodo]);
 
   const totalRegistrados = stats.total_registrados !== undefined ? Number(stats.total_registrados) : 0;
   const totalMedidores = stats.total_medidores !== undefined ? Number(stats.total_medidores) : 0;
-  const porcentajeAvance = stats.porcentaje_avance !== undefined 
-    ? Number(stats.porcentaje_avance) 
+  const porcentajeAvance = stats.porcentaje_avance !== undefined
+    ? Number(stats.porcentaje_avance)
     : (totalMedidores > 0 ? Math.min(100, Math.round((totalRegistrados / totalMedidores) * 100)) : 0);
-  const pendientes = stats.pendientes !== undefined 
-    ? Number(stats.pendientes) 
+  const pendientes = stats.pendientes !== undefined
+    ? Number(stats.pendientes)
     : Math.max(0, totalMedidores - totalRegistrados);
   const dashOffset = 100.5 - (100.5 * porcentajeAvance) / 100;
 

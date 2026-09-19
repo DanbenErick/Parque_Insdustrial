@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import  { memo } from 'react';
 
 /**
  * BillingKPICards — KPI summary cards + progress bar.
@@ -20,7 +20,7 @@ const BillingKPICards = memo(({ totalRecaudado, pendienteCobro, deudaVencida, us
     <>
       {/* Resumen de Operaciones - Dos Bloques con el mismo estilo de las cards de abajo */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-        
+
         {/* Bloque 1: Inventario / Padrón */}
         <div className="bg-surface border border-outline-variant hover:border-primary/30 rounded-xl p-3 shadow-sm transition-colors flex flex-col justify-between">
           <div className="flex items-center justify-between pb-2 mb-2 border-b border-outline-variant/40">

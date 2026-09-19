@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import api from '../../../api/axiosConfig';
 import { toast } from 'sonner';
-import { MIME_TYPES, downloadBlob } from '../billingUtils';
+import { MIME_TYPES } from '../billingUtils';
 
 /**
  * usePdfViewer — Manages all PDF viewer modal state and handlers.

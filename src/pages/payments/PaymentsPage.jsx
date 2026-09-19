@@ -11,15 +11,11 @@ const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Jul
 
 const CURRENCY_OPTS = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
 
-const METODO_PAGO_ICONS = {
-  Transferencia: 'account_balance',
-  Efectivo: 'payments',
-  default: 'credit_card',
-};
+
 
 const MODAL_BACKDROP = { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.2 } };
 const MODAL_CONTENT = { initial: { scale: 0.95, opacity: 0 }, animate: { scale: 1, opacity: 1 }, exit: { scale: 0.95, opacity: 0 }, transition: { duration: 0.2, ease: 'easeOut' } };
-const DRAWER_SPRING = { type: 'spring', stiffness: 300, damping: 30 };
+
 
 const PARTIAL_THRESHOLD = 0.02;
 
@@ -38,7 +34,7 @@ const formatPeriod = (periodoStr) => {
   return periodoStr;
 };
 
-const getMetodoPagoIcon = (metodo) => METODO_PAGO_ICONS[metodo] || METODO_PAGO_ICONS.default;
+
 
 const getPagoTipoInfo = (pago, fallbackPrevio = 0) => {
   if (!pago) {
@@ -334,9 +330,18 @@ const Payments = () => {
     onError: () => toast.error('Error al cargar datos de pagos'),
   });
 
-  const pagos = Array.isArray(fetchedData?.pagos) ? fetchedData.pagos : (fetchedData?.pagos?.data ?? []);
-  const allRecibos = Array.isArray(fetchedData?.recibos) ? fetchedData.recibos : (fetchedData?.recibos?.data ?? []);
-  const periodos = Array.isArray(fetchedData?.periodos) ? fetchedData.periodos : (fetchedData?.periodos?.data ?? []);
+  const pagos = useMemo(
+    () => Array.isArray(fetchedData?.pagos) ? fetchedData.pagos : (fetchedData?.pagos?.data ?? []),
+    [fetchedData?.pagos],
+  );
+  const allRecibos = useMemo(
+    () => Array.isArray(fetchedData?.recibos) ? fetchedData.recibos : (fetchedData?.recibos?.data ?? []),
+    [fetchedData?.recibos],
+  );
+  const periodos = useMemo(
+    () => Array.isArray(fetchedData?.periodos) ? fetchedData.periodos : (fetchedData?.periodos?.data ?? []),
+    [fetchedData?.periodos],
+  );
 
   const refetchAll = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ['pagos-data'] });
@@ -400,7 +405,7 @@ const Payments = () => {
   const porcentajeRecaudado = stats.porcentajeRecaudado ?? (totalFacturado > 0 ? (totalRecaudado / totalFacturado) * 100 : 0);
   const facturasPagadas = stats.facturasPagadas ?? 0;
   const totalFacturas = stats.totalFacturas ?? 0;
-  const transaccionesHoy = stats.transaccionesHoy ?? 0;
+
   const recaudadoEfectivo = stats.recaudadoEfectivo ?? 0;
   const recaudadoTransferencia = stats.recaudadoTransferencia ?? 0;
 
@@ -449,11 +454,7 @@ const Payments = () => {
   }, [recibosDisponibles, searchSocio]);
 
   // Map recibo_id -> saldo_pendiente for fast lookups in table rows
-  const reciboSaldoMap = useMemo(() => {
-    const map = new Map();
-    allRecibos.forEach(r => map.set(r.id, r.saldo_pendiente || 0));
-    return map;
-  }, [allRecibos]);
+
 
   // Map pago_id -> previous accumulated payment for its receipt (fallback if not provided by backend)
   const fallbackPrevioMap = useMemo(() => {
@@ -499,7 +500,7 @@ const Payments = () => {
 
   const handleSelectSocio = useCallback((recibo) => {
     setSelectedRecibo(recibo.id);
-    const displayText = recibo.medidor_num_serie 
+    const displayText = recibo.medidor_num_serie
       ? `${recibo.socio} (Medidor: ${recibo.medidor_num_serie})`
       : recibo.socio;
     setSearchSocio(displayText);
@@ -656,7 +657,7 @@ const Payments = () => {
     const fecha = new Date(pago.fecha_pago).toLocaleDateString('es-PE');
     const comprobante = pago.numero_comprobante || 'S/N';
     const msg = `Hola *${pago.socio}*, confirmamos la recepción de su pago por *S/ ${monto}* el día *${fecha}* correspondiente al comprobante *${comprobante}*. ¡Gracias por su puntualidad!`;
-    
+
     window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
   }, []);
 
@@ -695,16 +696,7 @@ const Payments = () => {
     }
   }, []);
 
-  const handleAnularPago = useCallback(async (pagoId) => {
-    if (!window.confirm('¿Está seguro de anular este pago? Esta acción no se puede deshacer y ajustará los saldos pendientes.')) return;
-    try {
-      await api.post(`/pagos/${pagoId}/anular`);
-      toast.success('Pago anulado exitosamente');
-      refetchAll();
-    } catch (error) {
-      toast.error(error.response?.data?.error || 'Error al anular el pago');
-    }
-  }, [refetchAll]);
+
 
   const isFilterSpecific = filterMes !== 'Todos' && filterMes !== 'TodosHistorico';
 

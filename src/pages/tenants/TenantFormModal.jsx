@@ -90,15 +90,15 @@ const TenantFormModal = ({
                 </div>
                 <h4 className="font-bold text-on-surface text-sm tracking-wide">DATOS DEL SOCIO</h4>
               </div>
-              
+
               <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4 bg-surface">
                 <div className="flex flex-col gap-1 md:col-span-2">
                   <label className={LABEL_CLASS}>Nombre del Socio o Razón Social *</label>
-                  <input 
-                    {...register('nombre_razonsocial', { required: 'El nombre es obligatorio' })} 
-                    className={errors.nombre_razonsocial ? ERROR_INPUT_CLASS : INPUT_CLASS} 
-                    placeholder="Nombre completo o Empresa" 
-                    type="text" 
+                  <input
+                    {...register('nombre_razonsocial', { required: 'El nombre es obligatorio' })}
+                    className={errors.nombre_razonsocial ? ERROR_INPUT_CLASS : INPUT_CLASS}
+                    placeholder="Nombre completo o Empresa"
+                    type="text"
                   />
                   {errors.nombre_razonsocial && <span className="text-[10px] text-error font-bold">{errors.nombre_razonsocial.message}</span>}
                 </div>
@@ -117,39 +117,39 @@ const TenantFormModal = ({
                       </button>
                     )}
                   </div>
-                  <input 
-                    {...register('documento_identidad', { 
+                  <input
+                    {...register('documento_identidad', {
                       required: 'El documento es obligatorio',
                       pattern: { value: /(^\d{8}$|^\d{11}$)/, message: 'Debe tener 8 u 11 dígitos' }
-                    })} 
-                    className={`${errors.documento_identidad ? ERROR_INPUT_CLASS : INPUT_CLASS} font-data-mono`} 
-                    placeholder="8 u 11 dígitos" 
-                    type="text" 
+                    })}
+                    className={`${errors.documento_identidad ? ERROR_INPUT_CLASS : INPUT_CLASS} font-data-mono`}
+                    placeholder="8 u 11 dígitos"
+                    type="text"
                   />
                   {errors.documento_identidad && <span className="text-[10px] text-error font-bold">{errors.documento_identidad.message}</span>}
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className={LABEL_CLASS}>Teléfono de Contacto *</label>
-                  <input 
-                    {...register('telefono', { 
+                  <input
+                    {...register('telefono', {
                       required: 'El teléfono es obligatorio',
                       pattern: { value: /^\d{9}$/, message: 'Debe tener 9 dígitos' }
-                    })} 
-                    className={errors.telefono ? ERROR_INPUT_CLASS : INPUT_CLASS} 
-                    placeholder="900 000 000" 
-                    type="tel" 
+                    })}
+                    className={errors.telefono ? ERROR_INPUT_CLASS : INPUT_CLASS}
+                    placeholder="900 000 000"
+                    type="tel"
                   />
                   {errors.telefono && <span className="text-[10px] text-error font-bold">{errors.telefono.message}</span>}
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className={LABEL_CLASS}>Correo Electrónico (Opcional)</label>
-                  <input 
-                    {...register('correo', { 
+                  <input
+                    {...register('correo', {
                       validate: (value) => !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || 'Correo inválido'
-                    })} 
-                    className={errors.correo ? ERROR_INPUT_CLASS : INPUT_CLASS} 
-                    placeholder="email@empresa.com" 
-                    type="email" 
+                    })}
+                    className={errors.correo ? ERROR_INPUT_CLASS : INPUT_CLASS}
+                    placeholder="email@empresa.com"
+                    type="email"
                   />
                   {errors.correo && <span className="text-[10px] text-error font-bold">{errors.correo.message}</span>}
                 </div>
@@ -187,7 +187,7 @@ const TenantFormModal = ({
                   const tipoValue = watch(`medidores.${index}.tipo`);
                   const isSinMedidor = tipoValue === 'Sin Medidor';
                   const theme = METER_THEMES[index % METER_THEMES.length];
-                  
+
                   return (
                     <div key={field.id} className={`flex flex-col rounded-xl border ${theme.border} ${theme.bg} overflow-hidden shadow-sm transition-all duration-300`}>
                       <input type="hidden" {...register(`medidores.${index}.medidor_id`)} />
@@ -209,7 +209,7 @@ const TenantFormModal = ({
 
                       {/* Cuerpo del Medidor */}
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4">
-                        
+
                         <div className="flex flex-col gap-1 md:col-span-4">
                         <label className={LABEL_CLASS}>Número de Serie {index > 0 ? '*' : '(Opcional)'}</label>
                         <input
@@ -222,12 +222,12 @@ const TenantFormModal = ({
                           type="text"
                         />
                       </div>
-                      
+
                       <div className="flex flex-col gap-1 md:col-span-3">
                         <label className={LABEL_CLASS}>Tipo de Medidor *</label>
                         <div className="relative">
-                          <select 
-                            {...register(`medidores.${index}.tipo`)} 
+                          <select
+                            {...register(`medidores.${index}.tipo`)}
                             className={`${INPUT_CLASS} appearance-none w-full bg-surface`}
                           >
                             <option value="Normal">Medidor Normal</option>
@@ -237,7 +237,7 @@ const TenantFormModal = ({
                           <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[18px]" translate="no">expand_more</span>
                         </div>
                       </div>
-                      
+
                       <div className="flex flex-col gap-1 md:col-span-5">
                         <label className={LABEL_CLASS}>Dirección del Medidor *</label>
                         <input
@@ -280,7 +280,7 @@ const TenantFormModal = ({
                             />
                             <p className="text-[10px] text-on-surface-variant leading-tight">Valor inicial en horario punta.</p>
                           </div>
-                          
+
                           <div className="flex flex-col gap-1 md:col-span-6">
                             <label className={LABEL_CLASS}>Máxima Demanda Fuera de Punta (kW)</label>
                             <input
@@ -292,7 +292,7 @@ const TenantFormModal = ({
                             />
                             <p className="text-[10px] text-on-surface-variant leading-tight">Potencia máxima registrada en horario fuera de punta. (Informativo: no se suma, cada mes tiene su demanda)</p>
                           </div>
-                          
+
                           <div className="flex flex-col gap-1 md:col-span-6">
                             <label className={LABEL_CLASS}>Máxima Demanda Hora Punta (kW)</label>
                             <input

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import  { useState, useEffect, useCallback, useMemo } from 'react';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 import CargoFormModal from './CargoFormModal';
@@ -171,7 +171,7 @@ const CargosSettingsTab = () => {
                   <td className="py-2.5 px-4 font-bold text-on-surface text-xs">
                     {cargo.descripcion}
                     <div className="text-[10px] text-on-surface-variant font-normal mt-0.5">
-                      {(cargo.es_global === 1 || cargo.es_global === true) 
+                      {(cargo.es_global === 1 || cargo.es_global === true)
                         ? <span className="text-primary font-bold flex items-center gap-1"><span className="material-symbols-outlined text-[12px]" translate="no">public</span> Global (Todos)</span>
                         : `${cargo.periodos_ids?.length || 0} periodos asignados`}
                     </div>
@@ -199,7 +199,7 @@ const CargosSettingsTab = () => {
       </div>
 
       {/* Modal — isolated in its own component to prevent table re-renders on form input */}
-      
+
         {isModalOpen && (
           <CargoFormModal
             formData={formData}
@@ -210,7 +210,7 @@ const CargosSettingsTab = () => {
             isSubmitting={isSubmitting}
           />
         )}
-      
+
     </div>
   );
 };

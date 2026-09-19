@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import  { useState, useMemo } from 'react';
 import { formatPeriodo } from '../utils';
 import { ReadingTableRow } from './shared/ReadingTableRow';
 import { EmptyStateIcon } from './shared/EmptyStateIcon';

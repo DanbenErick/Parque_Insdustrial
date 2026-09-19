@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import  { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 import { useYear } from '../../context/YearContext';
@@ -9,7 +9,7 @@ const formatPeriodo = (periodoStr) => {
   if (!periodoStr) return '';
   const parts = periodoStr.split('-');
   if (parts.length !== 2) return periodoStr;
-  
+
   let year, month;
   if (parts[0].length === 4) {
     year = parts[0];
@@ -18,10 +18,10 @@ const formatPeriodo = (periodoStr) => {
     month = parts[0];
     year = parts[1];
   }
-  
+
   const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
   const monthIndex = parseInt(month, 10) - 1;
-  
+
   if (monthIndex >= 0 && monthIndex < 12) {
     return `${monthNames[monthIndex]} ${year}`;
   }
@@ -81,18 +81,18 @@ const PeriodosSettingsTab = () => {
         <div>
           <h3 className="text-base font-bold text-on-surface mb-1">Periodos de Facturación</h3>
           <p className="text-[11px] text-on-surface-variant">
-            Historial de tarifas aplicadas por mes en el año {activeYear}. 
+            Historial de tarifas aplicadas por mes en el año {activeYear}.
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button 
+          <button
             onClick={handleAddYear}
             className="flex items-center gap-1.5 bg-surface-container-high text-on-surface px-3 py-1.5 h-8 rounded-md text-xs font-bold shadow-sm hover:bg-surface-container-highest transition-colors border border-outline-variant"
           >
             <span className="material-symbols-outlined text-[16px]" translate="no">calendar_add_on</span>
             Nuevo Año
           </button>
-          <button 
+          <button
             onClick={handleCreate}
             className="flex items-center gap-1.5 bg-primary text-on-primary px-3 py-1.5 h-8 rounded-md text-xs font-bold shadow-sm hover:opacity-90 transition-opacity"
           >
@@ -116,7 +116,7 @@ const PeriodosSettingsTab = () => {
               <p className="font-bold text-lg text-on-surface">No hay periodos en {activeYear}</p>
               <p className="text-sm max-w-md mx-auto mt-2">Apertura el primer periodo de este año para comenzar a registrar lecturas y generar facturas.</p>
             </div>
-            <button 
+            <button
               onClick={handleCreate}
               className="mt-2 px-6 py-2 bg-surface-container-high hover:bg-surface-container-highest rounded-full text-sm font-bold transition-colors"
             >
@@ -140,8 +140,8 @@ const PeriodosSettingsTab = () => {
               </thead>
               <tbody className="divide-y divide-outline-variant text-xs">
                 {periodosFiltrados.map((p) => (
-                  <tr 
-                    key={p.id} 
+                  <tr
+                    key={p.id}
                     className="hover:bg-surface-container-lowest transition-colors cursor-pointer group"
                     onClick={() => setDrawerPeriodo(p)}
                   >
@@ -170,7 +170,7 @@ const PeriodosSettingsTab = () => {
                       {p.creador_nombre ? p.creador_nombre.split(' ')[0] : 'Sistema'}
                     </td>
                     <td className="py-2.5 px-4 text-right">
-                      <button 
+                      <button
                         onClick={(e) => { e.stopPropagation(); handleEdit(p); }}
                         className="p-1.5 text-on-surface-variant hover:text-primary hover:bg-primary/10 rounded-md transition-colors"
                         title="Editar Periodo"
@@ -186,7 +186,7 @@ const PeriodosSettingsTab = () => {
         )}
       </div>
 
-      <PeriodFormModal 
+      <PeriodFormModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         initialData={editingPeriodo}
@@ -194,7 +194,7 @@ const PeriodosSettingsTab = () => {
         existentes={periodos}
       />
 
-      <PeriodDetailDrawer 
+      <PeriodDetailDrawer
         drawerPeriodo={drawerPeriodo}
         setDrawerPeriodo={setDrawerPeriodo}
         handleEdit={(p) => {

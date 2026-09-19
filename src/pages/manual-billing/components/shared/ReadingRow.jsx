@@ -12,7 +12,7 @@ export const ReadingRow = React.memo(({ record, medidorInfo, onEdit = null, show
     : null;
 
   return (
-    <li 
+    <li
       onClick={onClick}
       className={`bg-surface hover:bg-surface-container-lowest border ${onEdit ? 'border-outline-variant/50 hover:border-primary/30 p-3 shadow-sm' : 'border-transparent hover:border-outline-variant/50 p-2'} rounded-lg transition-colors flex flex-col md:grid md:grid-cols-12 md:items-center gap-4 group ${onClick ? 'cursor-pointer' : ''}`}
     >
@@ -20,8 +20,8 @@ export const ReadingRow = React.memo(({ record, medidorInfo, onEdit = null, show
         {/* Nombre del socio - Elemento principal más destacado */}
         <div className="flex items-center gap-1.5">
           <span className="material-symbols-outlined text-[15px] text-primary shrink-0" translate="no">person</span>
-          <p 
-            className="font-bold text-on-surface text-[13px] sm:text-[14px] truncate group-hover:text-primary transition-colors leading-tight" 
+          <p
+            className="font-bold text-on-surface text-[13px] sm:text-[14px] truncate group-hover:text-primary transition-colors leading-tight"
             title={record.propietario}
           >
             {record.propietario || 'Sin Propietario'}
@@ -62,7 +62,7 @@ export const ReadingRow = React.memo(({ record, medidorInfo, onEdit = null, show
           </span>
         </div>
       </div>
-      
+
       <div className="md:col-span-5 flex flex-row flex-wrap items-center gap-x-6 gap-y-2 pt-2 md:pt-0 border-t md:border-t-0 border-outline-variant/50">
       <div className="flex flex-col">
         <div className="font-data-mono font-bold text-primary text-sm sm:text-base leading-none">
@@ -99,7 +99,7 @@ export const ReadingRow = React.memo(({ record, medidorInfo, onEdit = null, show
         </div>
       )}
     </div>
-    
+
     <div className="md:col-span-2 flex items-center md:justify-end gap-2 shrink-0 mt-2 md:mt-0">
       {onClick && !onEdit && (
         <button

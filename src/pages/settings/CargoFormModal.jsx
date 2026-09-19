@@ -1,16 +1,10 @@
 import React, { useMemo, useCallback } from 'react';
 
-const OVERLAY_VARIANTS = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-};
 
-const MODAL_VARIANTS = {
-  hidden: { scale: 0.95, opacity: 0 },
-  visible: { scale: 1, opacity: 1 },
-};
 
-const TRANSITION = { duration: 0.2, ease: 'easeOut' };
+
+
+
 
 const CargoFormModal = ({ formData, setFormData, periodos, onClose, onSubmit, isSubmitting }) => {
 
@@ -137,7 +131,7 @@ const CargoFormModal = ({ formData, setFormData, periodos, onClose, onSubmit, is
                   </div>
                   <span className="text-sm font-bold text-on-surface">Activo (Disponible)</span>
                 </label>
-                
+
                 <label className="flex items-center gap-2 cursor-pointer w-fit" onClick={() => setFormData(p => ({...p, es_global: !p.es_global}))}>
                   <div className={`w-10 h-6 rounded-full relative shadow-inner transition-colors ${formData.es_global ? 'bg-orange-500' : 'bg-surface-container-high'}`}>
                     <div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow-sm transition-all ${formData.es_global ? 'right-1' : 'left-1'}`}></div>

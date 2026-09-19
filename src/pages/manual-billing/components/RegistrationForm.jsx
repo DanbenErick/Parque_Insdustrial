@@ -1,4 +1,4 @@
-import React from 'react';
+import 'react';
 import { BadgeType } from './shared/BadgeType';
 import { formatPeriodo, fmtVal, parseSafe } from '../utils';
 
@@ -9,7 +9,6 @@ export const RegistrationForm = ({
   currentReading, setCurrentReading,
   currentReadingPunta, setCurrentReadingPunta,
   factorPotencia, setFactorPotencia,
-  precioReactiva, setPrecioReactiva,
   maxDemandaFueraPunta, setMaxDemandaFueraPunta,
   maxDemandaPunta, setMaxDemandaPunta,
   isCambioMedidor, setIsCambioMedidor,
@@ -21,7 +20,7 @@ export const RegistrationForm = ({
   onClose
 }) => {
   const isTR = selectedMember?.tipo === 'Hora Punta' || selectedMember?.tipo === 'Tiempo Real';
-  
+
   const getValidationErrors = () => {
     const errors = [];
     if (!currentReading) errors.push(isTR ? "Falta L. Actual (F.P.)" : "Falta L. Actual");
@@ -36,7 +35,7 @@ export const RegistrationForm = ({
         if (!lecturaInicialNuevoPunta) errors.push("Falta L. Inicial Punta (Nuevo)");
       }
     }
-    
+
     // Validaciones lógicas (Valores menores al anterior)
     if (isCambioMedidor) {
       if (lecturaFinalAntiguo && parseSafe(lecturaFinalAntiguo) < parseSafe(selectedMember?.ultima_lectura)) {
@@ -67,21 +66,21 @@ export const RegistrationForm = ({
         errors.push(`La lectura Punta es menor al del mes anterior (Diferencia: ${diff.toFixed(2)} kWh)`);
       }
     }
-    
+
     return errors;
   };
-  
+
   const validationErrors = getValidationErrors();
 
-  const subTotalNormal = isCambioMedidor 
+  const subTotalNormal = isCambioMedidor
     ? Math.max(0, parseSafe(lecturaFinalAntiguo) - parseSafe(selectedMember?.ultima_lectura)) + Math.max(0, parseSafe(currentReading) - parseSafe(lecturaInicialNuevo))
     : Math.max(0, parseSafe(currentReading) - parseSafe(selectedMember?.ultima_lectura));
-    
+
   const subTotalPunta = isCambioMedidor && isTR
     ? Math.max(0, parseSafe(lecturaFinalAntiguoPunta) - parseSafe(selectedMember?.ultima_lectura_punta)) + Math.max(0, parseSafe(currentReadingPunta) - parseSafe(lecturaInicialNuevoPunta))
     : Math.max(0, parseSafe(currentReadingPunta) - parseSafe(selectedMember?.ultima_lectura_punta));
 
-  const tarifaFueraPunta = isTR 
+  const tarifaFueraPunta = isTR
     ? (parseSafe(activePeriodo?.tarifa_kwh_tr) || parseSafe(activePeriodo?.tarifa_kwh) || 0)
     : (parseSafe(activePeriodo?.tarifa_kwh) || 0);
 
@@ -166,7 +165,7 @@ export const RegistrationForm = ({
           </>
         ) : (
           <form onSubmit={handleSave} className="flex flex-col gap-3">
-            
+
             <div className="flex items-center justify-between bg-surface-container-lowest px-3 py-2 rounded-lg border border-outline-variant/50">
               <span className="text-xs font-bold text-on-surface-variant flex items-center gap-1.5">
                 <span className="material-symbols-outlined text-[16px]" translate="no">swap_horiz</span>
@@ -191,7 +190,7 @@ export const RegistrationForm = ({
                   </div>
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-error/50 pointer-events-none">kWh</span>
                 </div>
-                
+
                 <span className="material-symbols-outlined text-error/30 hidden md:block text-[18px]" translate="no">arrow_forward</span>
 
                 <div className="flex-1 w-full relative h-[48px]">
@@ -243,7 +242,7 @@ export const RegistrationForm = ({
                     <span className="text-[11px] font-extrabold text-primary uppercase tracking-widest leading-none mb-1">Subtotal Fuera Punta</span>
                     <span className="text-xs text-primary font-black bg-white/80 px-2.5 py-1 rounded-md border border-primary/20 inline-block w-max shadow-sm tracking-wide font-data-mono">
                       <span className="text-[9px] text-primary/60 uppercase tracking-widest mr-1">Consumo:</span>
-                      {isCambioMedidor 
+                      {isCambioMedidor
                         ? `${(Math.max(0, parseSafe(lecturaFinalAntiguo) - parseSafe(selectedMember?.ultima_lectura))).toFixed(2)} + ${(Math.max(0, parseSafe(currentReading) - parseSafe(lecturaInicialNuevo))).toFixed(2)} = ${subTotalNormal.toFixed(2)} kWh`
                         : `${subTotalNormal.toFixed(2)} kWh`
                       } <span className="text-primary/60 font-bold mx-0.5">×</span> S/ {tarifaFueraPunta.toFixed(4)}
@@ -274,7 +273,7 @@ export const RegistrationForm = ({
                       </div>
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-error/50 pointer-events-none">kWh</span>
                     </div>
-                    
+
                     <span className="material-symbols-outlined text-error/30 hidden md:block text-[18px]" translate="no">arrow_forward</span>
 
                     <div className="flex-1 w-full relative h-[48px]">
@@ -326,7 +325,7 @@ export const RegistrationForm = ({
                         <span className="text-[11px] font-extrabold text-orange-700 uppercase tracking-widest leading-none mb-1">Subtotal Punta</span>
                         <span className="text-xs text-orange-700 font-black bg-white/80 px-2.5 py-1 rounded-md border border-orange-500/30 inline-block w-max shadow-sm tracking-wide font-data-mono">
                           <span className="text-[9px] text-orange-600/60 uppercase tracking-widest mr-1">Consumo:</span>
-                          {isCambioMedidor 
+                          {isCambioMedidor
                             ? `${(Math.max(0, parseSafe(lecturaFinalAntiguoPunta) - parseSafe(selectedMember?.ultima_lectura_punta))).toFixed(2)} + ${(Math.max(0, parseSafe(currentReadingPunta) - parseSafe(lecturaInicialNuevoPunta))).toFixed(2)} = ${subTotalPunta.toFixed(2)} kWh`
                             : `${subTotalPunta.toFixed(2)} kWh`
                           } <span className="text-orange-600/60 font-bold mx-0.5">×</span> S/ {parseFloat(activePeriodo.tarifa_kwh_punta || 0).toFixed(4)}
@@ -431,7 +430,7 @@ export const RegistrationForm = ({
                     <span className="absolute right-3 top-1/2 -translate-y-1/2 font-bold text-[10px] text-purple-600/70 pointer-events-none">kVARh</span>
                   </div>
                 </div>
-                
+
                 {factorPotencia && !isNaN(factorPotencia) && activePeriodo && (
                   <div className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 rounded-xl p-3 flex flex-col sm:flex-row justify-between items-center border border-purple-500/20 shadow-sm mt-2 relative overflow-hidden animate-in fade-in zoom-in-95 duration-300">
                     <div className="absolute right-0 top-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
