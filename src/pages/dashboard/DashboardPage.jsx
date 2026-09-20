@@ -22,6 +22,7 @@ import {
   RECAUDACION_CHART_OPTIONS,
   deriveKpiValues,
 } from './';
+import LoadingCurtain from '../../components/ui/LoadingCurtain';
 
 // --- Register Chart.js once at module level ---
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, ChartTooltip, Legend, Filler);
@@ -103,10 +104,13 @@ const Dashboard = () => {
   const handleSetGlobal = useCallback(() => setChartViewMode('global'), []);
 
   return (
-    <main
-      className={`p-4 md:p-lg space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow transition-opacity duration-300 ${isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'
-        }`}
-    >
+    <>
+      <LoadingCurtain
+        isOpen={isLoading}
+        title="Actualizando el panel"
+        subtitle="Calculando indicadores y tendencias del periodo seleccionado."
+      />
+      <main className="p-4 md:p-lg space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow">
       {/* Header + View Mode Tabs */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
         <div className="flex flex-col">
@@ -206,7 +210,8 @@ const Dashboard = () => {
 
       {/* Quick Access */}
       <QuickAccessBar />
-    </main>
+      </main>
+    </>
   );
 };
 

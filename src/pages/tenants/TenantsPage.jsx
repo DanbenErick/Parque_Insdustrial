@@ -6,12 +6,13 @@ import { useTenants } from './hooks/useTenants';
 
 import { exportToExcel, generatePDFPreview } from './tenantExportService';
 import TenantKPICards from './TenantKPICards';
-import TenantTableRow from './TenantTableRow';
 import TenantFormModal from './TenantFormModal';
 import TenantDetailDrawer from './TenantDetailDrawer';
 import TenantImportModal from './TenantImportModal';
 import ConfirmActionModal from '../../components/ui/ConfirmActionModal';
 import PdfPreviewModal from '../../components/ui/PdfPreviewModal';
+import LoadingCurtain from '../../components/ui/LoadingCurtain';
+import TenantDirectory from './components/TenantDirectory';
 
 const INITIAL_FORM = {
   nombre_razonsocial: '',
@@ -50,13 +51,6 @@ const TenantsAndSectors = () => {
   const [editId, setEditId] = useState(null);
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [, setErrors] = useState({});
-
-
-
-  // En TenantsPage ya no necesitamos handleInputChange ni validateField manual,
-  // porque de eso se encarga react-hook-form en TenantFormModal.
-
-
 
   const handleRegister = useCallback(async (data) => {
     setIsSubmitting(true);
@@ -112,21 +106,10 @@ const TenantsAndSectors = () => {
 
     setIsResettingPassword(true);
     try {
-      const response = await api.post(`/usuarios/${tenant.id}/reset-password`);
-      const { newPassword } = response.data;
-
-      let phone = tenant.telefono?.replace(/\s+/g, '') || '';
-      if (phone) {
-        if (!phone.startsWith('+')) {
-          if (phone.length === 9) phone = '51' + phone;
-        } else {
-          phone = phone.replace('+', '');
-        }
-        const msg = `Hola *${tenant.nombre_razonsocial}*, tu contraseña ha sido restablecida. Tu nueva clave de acceso al sistema es: *${newPassword}*. Te recomendamos cambiarla luego de ingresar.`;
-        window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
-      } else {
-        toast.success(`Contraseña restablecida. La nueva clave es: ${newPassword}`, { duration: 10000 });
-      }
+      await api.post(`/usuarios/${tenant.id}/reset-password`);
+      toast.success('Contraseña restablecida a 123456. El socio debe cambiarla al ingresar.', {
+        duration: 10000,
+      });
       setResetPasswordModal({ show: false, tenant: null });
     } catch {
       toast.error('Error al restablecer contraseña');
@@ -195,7 +178,9 @@ const TenantsAndSectors = () => {
 
   const toggleUserStatus = useCallback((tenant, specificMedidor) => {
     // Si la fila tiene un medidor específico, usamos el estado del medidor; si no, el del usuario
-    const isActivating = specificMedidor ? !specificMedidor.operativo : !tenant.es_activo;
+    const isActivating = specificMedidor
+      ? (specificMedidor.operativo === false || specificMedidor.operativo === 0 || specificMedidor.operativo === '0')
+      : !tenant.es_activo;
     setConfirmModal({ show: true, user: tenant, specificMedidor, isActivating });
   }, []);
 
@@ -242,7 +227,7 @@ const TenantsAndSectors = () => {
 
     try {
       if (specificMedidor) {
-        // Suspender/Reactivar solo el medidor
+        // Dar de baja o reactivar solo el medidor
         await api.put(`/medidores/${specificMedidor.id}`, { operativo: isActivating });
       } else {
         // Suspender/Reactivar todo el usuario
@@ -264,15 +249,19 @@ const TenantsAndSectors = () => {
         <div className="bg-surface border-l-4 border-outline-variant shadow-lg rounded-r-lg p-4 flex items-start gap-3 w-[350px] animate-in slide-in-from-top-5" style={{ borderLeftColor: isActivating ? '#059669' : '#d97706' }}>
           <div className={`mt-0.5 w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${isActivating ? 'bg-[#059669]/10 text-[#059669]' : 'bg-amber-100 text-amber-700'}`}>
             <span className="material-symbols-outlined text-[18px]" translate="no">
-              {isActivating ? 'power' : 'power_off'}
+              {isActivating ? 'bolt' : 'power_off'}
             </span>
           </div>
           <div className="flex-1">
             <h4 className="font-bold text-sm text-on-surface">
-              {isActivating ? 'Conexión Reactivada' : 'Servicio Suspendido'}
+              {specificMedidor
+                ? (isActivating ? 'Medidor Reactivado' : 'Medidor Dado de Baja')
+                : (isActivating ? 'Socio Reactivado' : 'Socio Suspendido')}
             </h4>
             <p className="text-xs text-on-surface-variant mt-1 leading-relaxed">
-              El suministro de <strong className="text-on-surface">{specificMedidor ? (specificMedidor.num_serie || 'Sin Medidor') : user.nombre_razonsocial}</strong> ha sido actualizado con éxito.
+              {specificMedidor
+                ? `El medidor ${specificMedidor.num_serie || 'Sin Serie'} ha sido ${isActivating ? 'reactivado' : 'dado de baja'} con éxito.`
+                : `El socio ${user.nombre_razonsocial} ha sido ${isActivating ? 'reactivado' : 'suspendido'} con éxito.`}
             </p>
           </div>
           <button onClick={() => toast.dismiss(t)} className="text-on-surface-variant hover:text-on-surface transition-colors">
@@ -311,7 +300,9 @@ const TenantsAndSectors = () => {
     if (filterEstado !== 'Todos') {
       const wantActivo = filterEstado === 'Activos';
       result = result.filter(t => {
-        const isOperativo = t.specificMedidor ? t.specificMedidor.operativo : t.es_activo;
+        const isOperativo = t.specificMedidor
+          ? (t.specificMedidor.operativo !== false && t.specificMedidor.operativo !== 0 && t.specificMedidor.operativo !== '0')
+          : Boolean(t.es_activo);
         return isOperativo === wantActivo;
       });
     }
@@ -355,7 +346,13 @@ const TenantsAndSectors = () => {
   }, [filteredTenants]);
 
   return (
-    <main className={`p-4 md:p-6 space-y-4 max-w-[1600px] mx-auto w-full flex-grow transition-opacity duration-300 ${isLoading && tenants.length === 0 ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+    <>
+      <LoadingCurtain
+        isOpen={isLoading && tenants.length === 0}
+        title="Cargando el directorio"
+        subtitle="Consultando socios, medidores y estados de suministro."
+      />
+      <main className="p-4 md:p-6 space-y-4 max-w-[1600px] mx-auto w-full flex-grow">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
         <div>
           <h2 className="text-2xl text-on-surface font-bold leading-tight">Directorio de Socios</h2>
@@ -375,147 +372,24 @@ const TenantsAndSectors = () => {
 
       <TenantKPICards globalStats={globalStats} />
 
-      <section className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-md">
-        {/* Cabecera Principal */}
-        <div className="px-4 py-3 border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-surface-container-low">
-          <div className="flex items-center">
-            <h4 className="text-base text-on-surface font-bold">Socios Empadronados</h4>
-          </div>
-          <div className="flex flex-wrap items-center gap-2 w-full lg:w-auto">
-            <div className="relative flex-grow md:flex-grow-0">
-              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">search</span>
-              <input
-                type="text"
-                placeholder="Buscar socio..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-8 pr-8 py-1.5 h-8 border border-outline-variant rounded-md text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-full md:w-48 bg-white transition-all"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors"
-                  title="Limpiar búsqueda"
-                >
-                  <span className="material-symbols-outlined text-[14px]" translate="no">close</span>
-                </button>
-              )}
-            </div>
-
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 h-8 font-bold text-xs rounded-md transition-colors border ${showFilters ? 'bg-primary/10 text-primary border-primary/20' : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container'}`}
-            >
-              <span className="material-symbols-outlined text-[16px]" translate="no">filter_list</span>
-              Filtros {(filterEstado !== 'Todos' || filterRubro !== 'Todos') && <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse ml-0.5"></span>}
-            </button>
-
-            <button
-              onClick={onExportExcel}
-              className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-xs rounded-md transition-colors border border-[#107C41]/20"
-            >
-              <span className="material-symbols-outlined text-[16px]" translate="no">table_view</span>
-              Excel
-            </button>
-            <button
-              onClick={onExportPDF}
-              disabled={isGeneratingPdf}
-              className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-error/10 text-error hover:bg-error/20 font-bold text-xs rounded-md transition-colors border border-error/20 disabled:opacity-50"
-            >
-              <span translate="no" className={`material-symbols-outlined text-[16px] ${isGeneratingPdf ? 'animate-spin' : ''}`}>
-                {isGeneratingPdf ? 'sync' : 'picture_as_pdf'}
-              </span>
-              PDF
-            </button>
-          </div>
-        </div>
-
-        {/* Panel de Filtros Desplegable */}
-        {showFilters && (
-          <div className="px-lg py-sm border-b border-outline-variant bg-surface-container-lowest flex flex-wrap items-center gap-md animate-in slide-in-from-top-2 fade-in duration-200">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-on-surface-variant">Estado:</span>
-              <select
-                value={filterEstado}
-                onChange={(e) => setFilterEstado(e.target.value)}
-                className="border border-outline-variant rounded-lg font-body-sm text-body-sm bg-white focus:border-primary focus:ring-1 focus:ring-primary px-3 py-1.5 cursor-pointer"
-              >
-                <option value="Todos">Todos los Estados</option>
-                <option value="Activos">Solo Activos</option>
-                <option value="Suspendidos">Suspendidos</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-on-surface-variant">Rubro:</span>
-              <select
-                value={filterRubro}
-                onChange={(e) => setFilterRubro(e.target.value)}
-                className="border border-outline-variant rounded-lg font-body-sm text-body-sm bg-white focus:border-primary focus:ring-1 focus:ring-primary px-3 py-1.5 cursor-pointer"
-              >
-                <option value="Todos">Todos los Rubros</option>
-                <option value="Metalmecánica">Metalmecánica</option>
-                <option value="Alimentos">Alimentos</option>
-                <option value="Logística">Logística</option>
-                <option value="Textil">Textil</option>
-                <option value="General">General</option>
-              </select>
-            </div>
-
-            {(filterEstado !== 'Todos' || filterRubro !== 'Todos') && (
-              <button
-                onClick={() => { setFilterEstado('Todos'); setFilterRubro('Todos'); }}
-                className="text-xs font-bold text-error hover:underline ml-auto flex items-center gap-1"
-              >
-                <span className="material-symbols-outlined text-[14px]" translate="no">close</span>
-                Limpiar Filtros
-              </button>
-            )}
-          </div>
-        )}
-
-        <div className="overflow-x-auto overflow-y-auto max-h-[500px] custom-scrollbar relative">
-          <table className="w-full min-w-[900px] text-left border-collapse whitespace-nowrap">
-            <thead className="sticky top-0 z-10 shadow-sm bg-surface-container-lowest text-on-surface-variant text-[11px] uppercase tracking-wider">
-              <tr className="border-b border-outline-variant">
-                <th className="px-4 py-2 font-semibold bg-surface-container-lowest">Nombres / Documento</th>
-                <th className="px-4 py-2 font-semibold bg-surface-container-lowest">Dirección</th>
-                <th className="px-4 py-2 font-semibold bg-surface-container-lowest">Medidor</th>
-                <th className="px-4 py-2 font-semibold bg-surface-container-lowest">Estado</th>
-                <th className="px-4 py-2 font-semibold text-right bg-surface-container-lowest">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-outline-variant/50 bg-surface text-body-sm">
-              {filteredTenants.map((tenant) => {
-                const rowKey = `${tenant.id}-${tenant.specificMedidor ? tenant.specificMedidor.id : 'none'}`;
-                return (
-                  <TenantTableRow
-                    key={rowKey}
-                    tenant={tenant}
-                    specificMedidor={tenant.specificMedidor}
-                    onOpenDrawer={setDrawerTenant}
-                    onOpenMenu={handleOpenMenu}
-                    isMenuOpen={actionMenu?.key === rowKey}
-                  />
-                );
-              })}
-              {filteredTenants.length === 0 && (
-                <tr>
-                  <td colSpan="5" className="px-5 py-12 text-center text-on-surface-variant">No se encontraron socios registrados.</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Foot of table (Total items count) */}
-        <div className="px-lg py-sm border-t border-outline-variant bg-surface-container-lowest flex justify-end items-center gap-4">
-          <span className="text-xs text-on-surface-variant font-medium">
-            Total: {filteredTenants.length} registros
-          </span>
-        </div>
-      </section>
+      <TenantDirectory
+        tenants={filteredTenants}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        showFilters={showFilters}
+        onToggleFilters={() => setShowFilters((current) => !current)}
+        filterEstado={filterEstado}
+        onEstadoChange={setFilterEstado}
+        filterRubro={filterRubro}
+        onRubroChange={setFilterRubro}
+        onClearFilters={() => { setFilterEstado('Todos'); setFilterRubro('Todos'); }}
+        onExportExcel={onExportExcel}
+        onExportPDF={onExportPDF}
+        isGeneratingPdf={isGeneratingPdf}
+        onOpenDrawer={setDrawerTenant}
+        onOpenMenu={handleOpenMenu}
+        actionMenuKey={actionMenu?.key}
+      />
 
       {/* --- Modals and Drawers --- */}
 
@@ -542,18 +416,35 @@ const TenantsAndSectors = () => {
         />
       )}
 
-
       {confirmModal.show && (
         <ConfirmActionModal
-          title={confirmModal.isActivating ? 'Reactivar Servicio' : 'Cortar Servicio'}
-          message={`¿Estás seguro de que deseas ${confirmModal.isActivating ? 'reactivar' : 'cortar'} el servicio de ${confirmModal.user?.nombre_razonsocial}?`}
-          warningText={!confirmModal.isActivating ? 'El socio aparecerá como "Suspendido / Cortado" en todo el sistema.' : undefined}
-          confirmText={confirmModal.isActivating ? 'Sí, reactivar' : 'Sí, cortar'}
+          title={
+            confirmModal.specificMedidor
+              ? (confirmModal.isActivating ? 'Reactivar Medidor' : 'Dar de Baja Medidor')
+              : (confirmModal.isActivating ? 'Reactivar Socio' : 'Suspender Socio')
+          }
+          message={
+            confirmModal.specificMedidor
+              ? `¿Estás seguro de que deseas ${confirmModal.isActivating ? 'reactivar' : 'dar de baja'} el medidor ${confirmModal.specificMedidor?.num_serie || 'Sin Serie'} de ${confirmModal.user?.nombre_razonsocial}?`
+              : `¿Estás seguro de que deseas ${confirmModal.isActivating ? 'reactivar' : 'suspender'} a ${confirmModal.user?.nombre_razonsocial}?`
+          }
+          warningText={
+            !confirmModal.isActivating
+              ? (confirmModal.specificMedidor
+                  ? 'Mientras esté dado de baja, no aparecerá en la toma de lecturas ni se le emitirá facturación mensual.'
+                  : 'El socio aparecerá como "Suspendido" en todo el sistema.')
+              : undefined
+          }
+          confirmText={
+            confirmModal.specificMedidor
+              ? (confirmModal.isActivating ? 'Sí, reactivar medidor' : 'Sí, dar de baja')
+              : (confirmModal.isActivating ? 'Sí, reactivar' : 'Sí, suspender')
+          }
           isDestructive={!confirmModal.isActivating}
           isLoading={isSavingToggle}
           icon={confirmModal.isActivating ? 'bolt' : 'power_off'}
           onConfirm={executeToggleUser}
-          onClose={() => setConfirmModal({ show: false, user: null, isActivating: false })}
+          onClose={() => setConfirmModal({ show: false, user: null, specificMedidor: null, isActivating: false })}
         />
       )}
 
@@ -561,7 +452,7 @@ const TenantsAndSectors = () => {
         <ConfirmActionModal
           title="Restablecer Contraseña"
           message={`¿Estás seguro de que deseas restablecer la contraseña de ${resetPasswordModal.tenant?.nombre_razonsocial}?`}
-          warningText="Se le asignará una nueva clave por defecto y, si tiene número de teléfono registrado, se abrirá WhatsApp automáticamente para notificarle."
+          warningText="Se asignará la clave temporal 123456. El socio deberá cambiarla después de ingresar a su cuenta."
           confirmText="Sí, restablecer clave"
           isDestructive={true}
           isLoading={isResettingPassword}
@@ -571,16 +462,12 @@ const TenantsAndSectors = () => {
         />
       )}
 
-
-
       {pdfBlobUrl && (
         <PdfPreviewModal
           pdfBlobUrl={pdfBlobUrl}
           onClose={() => setPdfBlobUrl(null)}
         />
       )}
-
-
 
       {drawerTenant && (
         <TenantDetailDrawer
@@ -590,7 +477,6 @@ const TenantsAndSectors = () => {
         />
       )}
 
-      {/* Dropdown flotante de Acciones */}
       {actionMenu && createPortal(
         <div className="dropdown-portal">
           <div
@@ -680,7 +566,7 @@ const TenantsAndSectors = () => {
 
             <div className="my-1 border-t border-outline-variant/50" />
 
-            {/* Cortar o Reactivar Servicio */}
+            {/* Dar de Baja o Reactivar Servicio / Medidor */}
             <button
               type="button"
               onClick={() => {
@@ -689,23 +575,30 @@ const TenantsAndSectors = () => {
                 toggleUserStatus(tenant, specificMedidor);
               }}
               className={`w-full px-3.5 py-2 text-left text-xs font-medium flex items-center gap-2.5 transition-colors cursor-pointer ${
-                (actionMenu.specificMedidor ? actionMenu.specificMedidor.operativo : actionMenu.tenant.es_activo)
+                (actionMenu.specificMedidor
+                  ? (actionMenu.specificMedidor.operativo !== false && actionMenu.specificMedidor.operativo !== 0 && actionMenu.specificMedidor.operativo !== '0')
+                  : actionMenu.tenant.es_activo)
                   ? 'text-error hover:bg-error/10'
                   : 'text-primary hover:bg-primary/10'
               }`}
             >
               <span className="material-symbols-outlined text-[18px]" translate="no">
-                {(actionMenu.specificMedidor ? actionMenu.specificMedidor.operativo : actionMenu.tenant.es_activo) ? 'power_off' : 'bolt'}
+                {(actionMenu.specificMedidor
+                  ? (actionMenu.specificMedidor.operativo !== false && actionMenu.specificMedidor.operativo !== 0 && actionMenu.specificMedidor.operativo !== '0')
+                  : actionMenu.tenant.es_activo) ? 'power_off' : 'bolt'}
               </span>
               <span>
-                {(actionMenu.specificMedidor ? actionMenu.specificMedidor.operativo : actionMenu.tenant.es_activo) ? 'Cortar Servicio' : 'Reactivar Servicio'}
+                {actionMenu.specificMedidor
+                  ? ((actionMenu.specificMedidor.operativo !== false && actionMenu.specificMedidor.operativo !== 0 && actionMenu.specificMedidor.operativo !== '0') ? 'Dar de Baja Medidor' : 'Reactivar Medidor')
+                  : (actionMenu.tenant.es_activo ? 'Suspender Socio' : 'Reactivar Socio')}
               </span>
             </button>
           </div>
         </div>,
         document.body,
       )}
-    </main>
+      </main>
+    </>
   );
 };
 

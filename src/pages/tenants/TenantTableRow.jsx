@@ -56,9 +56,17 @@ const TenantTableRow = ({ tenant, specificMedidor, onOpenDrawer, onOpenMenu, isM
       </td>
 
       <td className="px-4 py-2">
-        <Badge variant={(specificMedidor ? specificMedidor.operativo : tenant.es_activo) ? 'success' : 'error'}>
-          {(specificMedidor ? specificMedidor.operativo : tenant.es_activo) ? 'Activo' : 'Suspendido'}
-        </Badge>
+        {specificMedidor ? (
+          (specificMedidor.operativo !== false && specificMedidor.operativo !== 0 && specificMedidor.operativo !== '0') ? (
+            <Badge variant="success">Activo</Badge>
+          ) : (
+            <Badge variant="warning">Dado de Baja</Badge>
+          )
+        ) : (
+          <Badge variant={tenant.es_activo ? 'success' : 'error'}>
+            {tenant.es_activo ? 'Activo' : 'Suspendido'}
+          </Badge>
+        )}
       </td>
       <td className="px-4 py-2 text-right">
         <div className="flex items-center justify-end">

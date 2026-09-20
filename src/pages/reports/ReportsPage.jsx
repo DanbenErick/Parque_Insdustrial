@@ -4,9 +4,10 @@ import { useYear } from '../../context/YearContext';
 import { toast } from 'sonner';
 import { Bar, Doughnut } from 'react-chartjs-2';
 import MemberReport from '../member-report/MemberReportPage';
-import ReportKPICard from './ReportKPICard';
+import ReportsOverviewHeader from './components/ReportsOverviewHeader';
 import ReportTableRow from './ReportTableRow';
 import { handleExportPDF, handleExportExcel } from './reportExportService';
+import FullScreenLoader from '../../components/ui/FullScreenLoader';
 import {
   FINANCIAL_CHART_OPTIONS,
   CONSUMO_CHART_OPTIONS,
@@ -137,7 +138,6 @@ const Reports = () => {
 
   const handleTabMember = useCallback(() => setActiveTab('member'), []);
   const handleSearchChange = useCallback((e) => setSearchTerm(e.target.value), []);
-  const handlePeriodChange = useCallback((e) => setSelectedPeriod(e.target.value), []);
 
   // ── Filtered Data (Memoized) ───────────────────────────────────────────────
 
@@ -320,102 +320,25 @@ const Reports = () => {
   // ── Loading State ─────────────────────────────────────────────────────────
 
   if (isLoading) {
-    return (
-      <main className="flex-grow flex items-center justify-center bg-background min-h-screen">
-        <div className="flex flex-col items-center gap-md">
-          <span className="material-symbols-outlined animate-spin text-primary text-4xl" translate="no">progress_activity</span>
-          <p className="text-body-md text-on-surface-variant font-medium">Cargando reportes...</p>
-        </div>
-      </main>
-    );
+    return <FullScreenLoader title="Preparando reportes" subtitle="Organizando indicadores, lecturas y gráficos del periodo seleccionado." />;
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
     <main className="p-4 md:p-lg space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow">
-      {/* Header and Controls */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-        <h2 className="text-2xl text-on-surface font-bold leading-tight">Modulo de Reportes</h2>
-
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <div className="flex items-center bg-white border border-outline-variant rounded-md px-3 h-8 cursor-pointer hover:border-primary/50 transition-colors relative flex-1 md:flex-none">
-            <span className="material-symbols-outlined text-[16px] text-on-surface-variant mr-2" translate="no">calendar_today</span>
-            <select
-              value={selectedPeriod}
-              onChange={handlePeriodChange}
-              className="bg-transparent text-xs font-bold outline-none border-none pr-6 cursor-pointer appearance-none text-on-surface w-full md:w-auto"
-            >
-              {yearPeriodos.map(p => (
-                <option key={p.mes_anio} value={p.mes_anio}>{formatMonthOnly(p.mes_anio)}</option>
-              ))}
-              {yearPeriodos.length === 0 && (
-                <option value="" disabled>Sin periodos en {activeYear}</option>
-              )}
-            </select>
-            <span className="material-symbols-outlined text-[16px] absolute right-2 pointer-events-none text-on-surface-variant" translate="no">expand_more</span>
-          </div>
-
-          <button
-            className="flex items-center justify-center gap-1.5 bg-primary text-white px-3 h-8 rounded-md hover:bg-primary/90 transition-colors text-xs font-bold shadow-sm"
-            onClick={handleUpdate}
-          >
-            <span translate="no" className={`material-symbols-outlined text-[16px] ${isUpdating ? 'animate-spin' : ''}`}>refresh</span>
-            <span className="hidden sm:inline">Actualizar Datos</span>
-          </button>
-        </div>
-      </div>
-
-      {/* KPIs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4 mb-4">
-        <ReportKPICard
-          icon="bolt"
-          label="Consumo Total"
-          value={totalConsumo.toLocaleString('es-PE', { minimumFractionDigits: 1 })}
-          badge="kWh"
-          subtitle="Total en lecturas del mes"
-          variant="primary"
-        />
-        <ReportKPICard
-          icon="receipt_long"
-          label="Total Facturado"
-          value={`S/ ${totalFacturado.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`}
-          subtitle="Monto de recibos generados"
-          variant="neutral"
-        />
-        <ReportKPICard
-          icon="payments"
-          label="Total Recaudado"
-          value={`S/ ${totalRecaudado.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`}
-          subtitle={`Cobrado: ${tasaRecaudacion.toFixed(1)}% del total`}
-          variant="success"
-        />
-        <ReportKPICard
-          icon="warning"
-          label="Monto Pendiente"
-          value={`S/ ${totalPendiente.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`}
-          subtitle="Por cobrar en este mes"
-          variant="error"
-        />
-      </div>
-
-      {/* Tabs */}
-      <div className="flex border-b border-outline-variant mb-lg gap-md">
-        <button
-          onClick={handleTabGeneral}
-          className={`flex items-center gap-xs pb-sm px-xs font-body-md text-body-md font-bold border-b-2 transition-all ${activeTab === 'general' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
-        >
-          <span className="material-symbols-outlined text-[20px]" translate="no">analytics</span>
-          Reporte General
-        </button>
-        <button
-          onClick={handleTabMember}
-          className={`flex items-center gap-xs pb-sm px-xs font-body-md text-body-md font-bold border-b-2 transition-all ${activeTab === 'member' ? 'border-primary text-primary' : 'border-transparent text-on-surface-variant hover:text-on-surface'}`}
-        >
-          <span className="material-symbols-outlined text-[20px]" translate="no">pie_chart</span>
-          Reporte por Empresa
-        </button>
-      </div>
+      <ReportsOverviewHeader
+        periods={yearPeriodos}
+        selectedPeriod={selectedPeriod}
+        onPeriodChange={setSelectedPeriod}
+        year={activeYear}
+        isUpdating={isUpdating}
+        onUpdate={handleUpdate}
+        metrics={{ totalConsumo, totalFacturado, totalRecaudado, totalPendiente, tasaRecaudacion }}
+        activeTab={activeTab}
+        onTabChange={(tab) => tab === 'general' ? handleTabGeneral() : handleTabMember()}
+        formatPeriod={formatMonthOnly}
+      />
 
       {activeTab === 'general' ? (
         <>

@@ -27,6 +27,69 @@
 }
 
 @layer utilities {
+  @keyframes page-enter {
+    0% {
+      opacity: 0.35;
+      transform: translateY(7px) scale(0.998);
+    }
+    65% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes page-progress {
+    0% {
+      opacity: 0;
+      transform: scaleX(0);
+    }
+    18% {
+      opacity: 0.75;
+    }
+    82% {
+      opacity: 0.45;
+      transform: scaleX(0.82);
+    }
+    100% {
+      opacity: 0;
+      transform: scaleX(1);
+    }
+  }
+
+  .page-transition {
+    animation: page-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    transform-origin: top center;
+    will-change: opacity, transform;
+  }
+
+  .page-transition-indicator {
+    position: absolute;
+    inset: 0 auto auto 0;
+    z-index: 50;
+    width: 100%;
+    height: 2px;
+    background-color: var(--color-primary, #365314);
+    pointer-events: none;
+    transform-origin: left center;
+    animation: page-progress 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .page-transition,
+    .page-transition-indicator {
+      animation: none;
+    }
+  }
+
+  @keyframes loader-slide {
+    0% { transform: translateX(-105%); }
+    50% { transform: translateX(50%); }
+    100% { transform: translateX(205%); }
+  }
+
   .material-symbols-outlined {
     font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
     vertical-align: middle;

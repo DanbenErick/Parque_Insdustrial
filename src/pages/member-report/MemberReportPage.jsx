@@ -1,622 +1,202 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Bar, Doughnut } from 'react-chartjs-2';
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend
-} from 'chart.js';
+import { ArcElement, BarElement, CategoryScale, Chart as ChartJS, Legend, LinearScale, Title, Tooltip } from 'chart.js';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Title, Tooltip, Legend);
 
-// ── Constants ────────────────────────────────────────────────────────
-const MESES_FULL = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-const MESES_SHORT = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-
-const CURRENCY_OPTS = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
-const KWH_OPTS = { minimumFractionDigits: 1 };
-const FILL_1 = { fontVariationSettings: "'FILL' 1" };
-
-const SECTOR_COLORS = ['#00647c', '#059669', '#f59e0b', '#dc2626', '#7c3aed', '#db2777'];
-
-const ESTADO_CONFIG = {
-  Pagado:  { badge: 'bg-green-100 text-green-700', icon: 'check_circle', dot: 'bg-green-500', text: 'text-green-600', iconBg: 'bg-green-600/5 text-green-600 border-green-600/10' },
-  Vencido: { badge: 'bg-error/10 text-error', icon: 'warning', dot: 'bg-red-500', text: 'text-red-600', iconBg: 'bg-red-600/5 text-red-600 border-red-600/10' },
-};
-const ESTADO_DEFAULT = { badge: 'bg-yellow-100 text-yellow-700', icon: 'schedule', dot: 'bg-yellow-500', text: 'text-yellow-600', iconBg: 'bg-yellow-600/5 text-yellow-600 border-yellow-600/10' };
-
-const getEstadoConfig = (estado) => ESTADO_CONFIG[estado] || ESTADO_DEFAULT;
-
-const DROPDOWN_BACKDROP = { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.15 } };
-const DROPDOWN_CONTENT = { initial: { opacity: 0, y: -10 }, animate: { opacity: 1, y: 0 }, exit: { opacity: 0, y: -10 }, transition: { duration: 0.15 } };
-
-// ── Helpers ──────────────────────────────────────────────────────────
-const fmtCurrency = (v) => parseFloat(v || 0).toLocaleString('es-PE', CURRENCY_OPTS);
-const fmtKwh = (v) => parseFloat(v || 0).toLocaleString('es-PE', KWH_OPTS);
-
-const parsePeriodParts = (p) => {
-  if (!p || !p.includes('-')) return null;
-  const parts = p.split('-');
-  const isYearFirst = parts[0].length === 4;
-  return { year: isYearFirst ? parts[0] : parts[1], monthIdx: parseInt(isYearFirst ? parts[1] : parts[0], 10) - 1 };
+const MONTHS = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+const SHORT_MONTHS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+const TYPE_COLORS = ['#515B3A', '#565e74', '#825100', '#00647c', '#7c3aed', '#9f1239'];
+const FILL_ICON = { fontVariationSettings: "'FILL' 1" };
+const STATUS = {
+  Pagado: ['bg-green-100 text-green-700', 'check_circle'],
+  'Pago Parcial': ['bg-blue-100 text-blue-700', 'payments'],
+  Vencido: ['bg-red-100 text-red-700', 'warning'],
+  Pendiente: ['bg-yellow-100 text-yellow-800', 'schedule'],
+  Anulado: ['bg-slate-100 text-slate-600', 'cancel'],
 };
 
-const formatPeriodo = (p) => {
-  const parsed = parsePeriodParts(p);
-  if (!parsed) return p || '-';
-  const { year, monthIdx } = parsed;
-  return monthIdx >= 0 && monthIdx < 12 ? `${MESES_FULL[monthIdx]} ${year}` : p;
+const num = (value) => Number.parseFloat(value) || 0;
+const money = (value) => num(value).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const kwh = (value) => num(value).toLocaleString('es-PE', { minimumFractionDigits: 1, maximumFractionDigits: 2 });
+const periodOf = (item) => item?.periodo || item?.mes_anio || '';
+const memberKey = (item) => item?.usuario_id != null ? String(item.usuario_id) : `nombre:${item?.socio || item?.propietario || ''}`;
+const meterKey = (item) => item?.medidor_id != null ? String(item.medidor_id) : `serie:${item?.medidor_num_serie || item?.num_serie || 'sin-medidor'}`;
+const meterDetails = (item) => ({
+  key: meterKey(item),
+  address: item?.medidor_direccion || item?.direccion || item?.socio_direccion || 'Sin dirección',
+  serial: item?.medidor_num_serie || item?.num_serie || 'Sin medidor',
+  type: item?.medidor_tipo || item?.tipo || 'No especificado',
+});
+const pendingAmount = (receipt) => Math.max(0, num(receipt?.saldo_pendiente));
+const paidAmount = (receipt) => Math.min(num(receipt?.total), Math.max(0, num(receipt?.total) - pendingAmount(receipt)));
+
+const parsePeriod = (period) => {
+  if (!period?.includes('-')) return null;
+  const parts = period.split('-');
+  const yearFirst = parts[0].length === 4;
+  return { year: yearFirst ? parts[0] : parts[1], month: Number.parseInt(yearFirst ? parts[1] : parts[0], 10) - 1 };
 };
 
-const formatPeriodoShort = (p) => {
-  const parsed = parsePeriodParts(p);
-  if (!parsed) return p;
-  const { year, monthIdx } = parsed;
-  return monthIdx >= 0 && monthIdx < 12 ? `${MESES_SHORT[monthIdx]} ${year.slice(2)}` : p;
+const periodOrder = (period) => {
+  const parsed = parsePeriod(period);
+  return parsed ? Number(parsed.year) * 12 + parsed.month : 0;
 };
 
-// Chart gradient factory
-const makeGradient = (r, g, b, direction = 'horizontal') => (context) => {
-  const { ctx, chartArea } = context.chart;
-  if (!chartArea) return null;
-  const gradient = direction === 'horizontal'
-    ? ctx.createLinearGradient(chartArea.left, 0, chartArea.right, 0)
-    : ctx.createLinearGradient(0, chartArea.bottom, 0, chartArea.top);
-  gradient.addColorStop(0, `rgba(${r}, ${g}, ${b}, 0.15)`);
-  gradient.addColorStop(1, `rgba(${r}, ${g}, ${b}, 0.85)`);
-  return gradient;
+const formatPeriod = (period, short = false) => {
+  const parsed = parsePeriod(period);
+  if (!parsed || parsed.month < 0 || parsed.month > 11) return period || '-';
+  return short ? `${SHORT_MONTHS[parsed.month]} ${parsed.year.slice(-2)}` : `${MONTHS[parsed.month]} ${parsed.year}`;
 };
 
-const consumoTooltipCallback = {
-  label: (context) => `Consumo: ${parseFloat(context.raw).toLocaleString('es-PE')} kWh`
-};
-
-// ── Sub-components ───────────────────────────────────────────────────
-const EstadoBadge = React.memo(({ estado }) => {
-  const cfg = getEstadoConfig(estado);
-  return (
-    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-tight leading-none ${cfg.badge}`}>
-      <span className="material-symbols-outlined text-[12px]" translate="no" style={FILL_1}>{cfg.icon}</span>
-      {estado}
-    </span>
-  );
+const StatusBadge = React.memo(({ value = 'Pendiente' }) => {
+  const [className, icon] = STATUS[value] || STATUS.Pendiente;
+  return <span className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[9px] font-bold uppercase ${className}`}><span className="material-symbols-outlined text-[12px]" translate="no" style={FILL_ICON}>{icon}</span>{value}</span>;
 });
 
-const KpiCard = React.memo(({ icon, label, children, subtitle, iconClassName = 'bg-primary/5 text-primary border-primary/10' }) => (
-  <div className="bg-surface border border-outline-variant hover:border-primary/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
-    <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${iconClassName}`}>
-      <span className="material-symbols-outlined text-[20px]" translate="no">{icon}</span>
-    </div>
-    <div className="flex flex-col justify-center overflow-hidden flex-1">
-      <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider leading-tight truncate">{label}</span>
-      {children}
-      <span className="text-[9px] text-on-surface-variant/70 mt-1 truncate">{subtitle}</span>
-    </div>
+const KpiCard = React.memo(({ icon, label, value, subtitle, tone = 'text-primary bg-primary/5 border-primary/10' }) => (
+  <div className="flex items-center gap-3 rounded-xl border border-outline-variant bg-surface p-3 shadow-sm">
+    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full border ${tone}`}><span className="material-symbols-outlined text-[20px]" translate="no">{icon}</span></div>
+    <div className="min-w-0 flex-1"><p className="truncate text-[9px] font-bold uppercase tracking-wider text-on-surface-variant">{label}</p><p className="truncate font-data-mono text-lg font-bold leading-tight text-on-surface">{value}</p><p className="truncate text-[9px] text-on-surface-variant/70">{subtitle}</p></div>
   </div>
 ));
 
-const ChartCard = React.memo(({ title, subtitle, children, className = '', colSpan = '' }) => (
-  <div className={`${colSpan} bg-white border border-outline-variant rounded-lg p-md flex flex-col h-[360px] shadow-sm ${className}`}>
-    <div className="mb-md">
-      <h4 className="font-headline-sm text-headline-sm font-bold text-on-surface">{title}</h4>
-      <p className="text-body-sm text-on-surface-variant">{subtitle}</p>
-    </div>
-    <div className="flex-grow relative">{children}</div>
-  </div>
+const ChartCard = React.memo(({ title, subtitle, children, className = '' }) => (
+  <section className={`flex h-[360px] flex-col rounded-xl border border-outline-variant bg-surface p-4 shadow-sm ${className}`}><div className="mb-3"><h3 className="text-base font-bold text-on-surface">{title}</h3><p className="text-xs text-on-surface-variant">{subtitle}</p></div><div className="relative min-h-0 flex-1">{children}</div></section>
 ));
 
-const EmptyState = React.memo(({ message }) => (
-  <div className="h-full flex items-center justify-center text-on-surface-variant text-body-sm">
-    {message}
-  </div>
-));
+const EmptyState = ({ children }) => <div className="flex h-full items-center justify-center px-4 text-center text-sm text-on-surface-variant">{children}</div>;
 
-const AllMembersTableRow = React.memo(({ row }) => (
-  <tr className="hover:bg-surface-container-low transition-colors group">
-    <td className="px-5 py-3">
-      <div className="flex items-center gap-1.5 text-on-surface font-bold text-xs">
-        <span className="material-symbols-outlined text-[14px] text-on-surface-variant" translate="no">person</span>
-        <span className="truncate max-w-[200px]" title={row.propietario}>{row.propietario}</span>
-      </div>
-    </td>
-    <td className="px-5 py-3">
-      <div className="flex items-center gap-1.5 text-[11px] font-bold text-primary">
-        <span className="material-symbols-outlined text-[14px]" translate="no" style={FILL_1}>bolt</span>
-        {fmtKwh(row.consumo)} kWh
-      </div>
-    </td>
-    <td className="px-5 py-3">
-      <div className="flex flex-col gap-0.5 text-[10px]">
-        <div className="flex items-center gap-1.5 text-on-surface-variant">
-          <span className="w-8">Neto:</span>
-          <span className="font-data-mono">S/ {fmtCurrency(row.neto)}</span>
-        </div>
-        <div className="flex items-center gap-1.5 text-on-surface-variant">
-          <span className="w-8">IGV:</span>
-          <span className="font-data-mono">S/ {fmtCurrency(row.igv)}</span>
-        </div>
-      </div>
-    </td>
-    <td className="px-5 py-3 text-right">
-      <div className="flex flex-col items-end gap-1">
-        <span className="font-data-mono text-sm font-bold text-on-surface leading-none">S/ {fmtCurrency(row.total)}</span>
-        <EstadoBadge estado={row.estado} />
-      </div>
-    </td>
+const ReceiptRow = React.memo(({ receipt, showPeriod = false }) => (
+  <tr className="transition-colors hover:bg-surface-container-low">
+    <td className="px-4 py-3"><p className="max-w-[240px] truncate text-xs font-bold text-on-surface" title={receipt.socio}>{receipt.socio || 'Socio no identificado'}</p><p className="mt-0.5 flex items-center gap-1 text-[10px] text-on-surface-variant"><span className="material-symbols-outlined text-[12px]" translate="no">electric_meter</span>{receipt.medidor_num_serie || 'Sin medidor'} · {receipt.medidor_tipo || 'No especificado'}</p>{showPeriod && <p className="mt-0.5 text-[10px] font-semibold text-primary">{formatPeriod(periodOf(receipt))}</p>}</td>
+    <td className="px-4 py-3"><p className="font-data-mono text-xs font-bold text-primary">{kwh(receipt.consumo_kwh)} kWh</p>{num(receipt.consumo_kwh_punta) > 0 && <p className="text-[10px] text-on-surface-variant">Punta: {kwh(receipt.consumo_kwh_punta)} kWh</p>}</td>
+    <td className="px-4 py-3 text-[10px] text-on-surface-variant"><p>Subtotal: <span className="font-data-mono">S/ {money(receipt.subtotal)}</span></p><p>IGV real: <span className="font-data-mono">S/ {money(receipt.igv)}</span></p></td>
+    <td className="px-4 py-3 text-[10px] text-on-surface-variant"><p>Pagado: <span className="font-data-mono text-green-700">S/ {money(paidAmount(receipt))}</span></p><p>Saldo: <span className="font-data-mono text-amber-700">S/ {money(pendingAmount(receipt))}</span></p></td>
+    <td className="px-4 py-3 text-right"><p className="font-data-mono text-sm font-bold text-on-surface">S/ {money(receipt.total)}</p><StatusBadge value={receipt.estado} /></td>
   </tr>
 ));
 
-// ── Main Component ───────────────────────────────────────────────────
+const ReportTable = ({ receipts, historical = false }) => (
+  <div className="max-h-[460px] overflow-auto custom-scrollbar"><table className="w-full min-w-[950px] border-collapse text-left"><thead className="sticky top-0 z-10 bg-surface-container-lowest text-[10px] uppercase tracking-wider text-on-surface-variant"><tr><th className="px-4 py-3">Socio / suministro</th><th className="px-4 py-3">Consumo</th><th className="px-4 py-3">Subtotal / IGV</th><th className="px-4 py-3">Pagado / saldo</th><th className="px-4 py-3 text-right">Total / estado</th></tr></thead><tbody className="divide-y divide-outline-variant/50">{receipts.map((receipt) => <ReceiptRow key={receipt.id} receipt={receipt} showPeriod={historical} />)}{!receipts.length && <tr><td colSpan="5" className="px-4 py-12 text-center text-sm text-on-surface-variant">No hay recibos para mostrar.</td></tr>}</tbody></table></div>
+);
+
 const MemberReport = ({ lecturas = [], recibos = [], selectedPeriod = '' }) => {
   const [selectedMember, setSelectedMember] = useState('Todos');
+  const [selectedMeter, setSelectedMeter] = useState('Todos');
   const [isOpen, setIsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [search, setSearch] = useState('');
 
-  // ── Memoised derived data ──────────────────────────────────────────
-  const allMembers = useMemo(() =>
-    Array.from(new Set(lecturas.map(l => l.propietario).filter(p => p && p !== 'N/A'))).sort(),
-    [lecturas],
-  );
+  const members = useMemo(() => {
+    const result = new Map();
+    const addMember = (item, name) => {
+      const key = memberKey(item);
+      if (key === 'nombre:') return;
+      const member = result.get(key) || { key, name: name || 'Socio sin nombre', supplies: new Map() };
+      const supply = meterDetails(item);
+      if (!member.supplies.has(supply.key)) member.supplies.set(supply.key, supply);
+      result.set(key, member);
+    };
+    recibos.forEach((item) => addMember(item, item.socio));
+    lecturas.forEach((item) => addMember(item, item.propietario));
+    return [...result.values()]
+      .map((member) => ({ ...member, supplies: [...member.supplies.values()] }))
+      .sort((a, b) => a.name.localeCompare(b.name, 'es'));
+  }, [lecturas, recibos]);
 
-  const filteredMembersList = useMemo(() => {
-    const q = searchQuery.toLowerCase();
-    return q ? allMembers.filter(m => m.toLowerCase().includes(q)) : allMembers;
-  }, [allMembers, searchQuery]);
+  const searchedMembers = useMemo(() => {
+    const query = search.trim().toLocaleLowerCase('es');
+    return query ? members.filter((member) => {
+      const searchableText = [
+        member.name,
+        ...member.supplies.flatMap((supply) => [supply.address, supply.serial, supply.type]),
+      ].join(' ').toLocaleLowerCase('es');
+      return searchableText.includes(query);
+    }) : members;
+  }, [members, search]);
 
-  const filteredLecturas = useMemo(
-    () => lecturas.filter(l => l.periodo === selectedPeriod),
-    [lecturas, selectedPeriod],
-  );
+  const periodReadings = useMemo(() => lecturas.filter((item) => periodOf(item) === selectedPeriod), [lecturas, selectedPeriod]);
+  const periodReceipts = useMemo(() => recibos.filter((item) => periodOf(item) === selectedPeriod), [recibos, selectedPeriod]);
+  const uniqueMembers = useMemo(() => new Set(periodReceipts.map(memberKey)).size, [periodReceipts]);
 
-  const filteredRecibos = useMemo(
-    () => recibos.filter(r => r.periodo === selectedPeriod || r.mes_anio === selectedPeriod),
-    [recibos, selectedPeriod],
-  );
+  const periodSummary = useMemo(() => ({
+    consumption: periodReadings.reduce((sum, item) => sum + num(item.consumo_calculado), 0),
+    billed: periodReceipts.reduce((sum, item) => sum + num(item.total), 0),
+    paid: periodReceipts.reduce((sum, item) => sum + paidAmount(item), 0),
+    pending: periodReceipts.reduce((sum, item) => sum + pendingAmount(item), 0),
+  }), [periodReadings, periodReceipts]);
 
-  // Build a lookup map: socio -> recibo (for O(1) lookups instead of O(n) .find())
-  const recibosBySocio = useMemo(() => {
-    const map = new Map();
-    filteredRecibos.forEach(r => { if (!map.has(r.socio)) map.set(r.socio, r); });
-    return map;
-  }, [filteredRecibos]);
+  const topConsumers = useMemo(() => {
+    const result = new Map();
+    periodReadings.forEach((item) => { const key = memberKey(item); const current = result.get(key) || { name: item.propietario || 'Socio sin nombre', value: 0 }; current.value += num(item.consumo_calculado); result.set(key, current); });
+    return [...result.values()].sort((a, b) => b.value - a.value).slice(0, 5);
+  }, [periodReadings]);
 
-  // Table data for "Todos" view
-  const tableData = useMemo(() =>
-    filteredLecturas.map(l => {
-      const matchingRecibo = recibosBySocio.get(l.propietario);
-      const total = matchingRecibo ? parseFloat(matchingRecibo.total) || 0 : 0;
-      const neto = total / 1.18;
-      return {
-        id: l.id,
-        propietario: l.propietario,
-        medidor: l.id_medidor || 'N/A',
-        consumo: parseFloat(l.consumo_calculado) || 0,
-        neto,
-        igv: total - neto,
-        total,
-        estado: matchingRecibo?.estado || 'Pendiente',
-      };
-    }),
-    [filteredLecturas, recibosBySocio],
-  );
+  const consumptionByType = useMemo(() => {
+    const result = {};
+    periodReadings.forEach((item) => { const type = item.medidor_tipo || 'No especificado'; result[type] = (result[type] || 0) + num(item.consumo_calculado); });
+    return result;
+  }, [periodReadings]);
 
-  // Top consumers chart data
-  const topConsumers = useMemo(
-    () => [...tableData].sort((a, b) => b.consumo - a.consumo).slice(0, 5),
-    [tableData],
-  );
+  const typeTotal = useMemo(() => Object.values(consumptionByType).reduce((sum, value) => sum + value, 0), [consumptionByType]);
+  const selectedName = useMemo(() => members.find((member) => member.key === selectedMember)?.name || '', [members, selectedMember]);
+  const memberReceipts = useMemo(() => selectedMember === 'Todos' ? [] : recibos.filter((item) => memberKey(item) === selectedMember), [recibos, selectedMember]);
+  const memberReadings = useMemo(() => selectedMember === 'Todos' ? [] : lecturas.filter((item) => memberKey(item) === selectedMember), [lecturas, selectedMember]);
 
-  const consumersChartData = useMemo(() => ({
-    labels: topConsumers.map(c => c.propietario),
-    datasets: [{
-      label: 'Consumo (kWh)',
-      data: topConsumers.map(c => c.consumo),
-      backgroundColor: makeGradient(0, 100, 124, 'horizontal'),
-      borderRadius: 4,
-    }],
-  }), [topConsumers]);
+  const meters = useMemo(() => {
+    const result = new Map();
+    memberReceipts.forEach((item) => result.set(meterKey(item), { key: meterKey(item), serial: item.medidor_num_serie || 'Sin medidor', type: item.medidor_tipo || '' }));
+    memberReadings.forEach((item) => { if (!result.has(meterKey(item))) result.set(meterKey(item), { key: meterKey(item), serial: item.num_serie || 'Sin medidor', type: item.medidor_tipo || '' }); });
+    return [...result.values()].sort((a, b) => a.serial.localeCompare(b.serial, 'es'));
+  }, [memberReadings, memberReceipts]);
 
-  const consumersChartOptions = useMemo(() => ({
-    indexAxis: 'y',
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: { callbacks: consumoTooltipCallback } },
-    scales: { x: { beginAtZero: true }, y: { grid: { display: false } } },
-  }), []);
+  const scopedReceipts = useMemo(() => selectedMeter === 'Todos' ? memberReceipts : memberReceipts.filter((item) => meterKey(item) === selectedMeter), [memberReceipts, selectedMeter]);
+  const scopedReadings = useMemo(() => selectedMeter === 'Todos' ? memberReadings : memberReadings.filter((item) => meterKey(item) === selectedMeter), [memberReadings, selectedMeter]);
+  const currentReceipts = useMemo(() => scopedReceipts.filter((item) => periodOf(item) === selectedPeriod), [scopedReceipts, selectedPeriod]);
+  const currentReadings = useMemo(() => scopedReadings.filter((item) => periodOf(item) === selectedPeriod), [scopedReadings, selectedPeriod]);
+  const recentReceipts = useMemo(() => [...scopedReceipts].sort((a, b) => periodOrder(periodOf(b)) - periodOrder(periodOf(a))).slice(0, 8), [scopedReceipts]);
 
-  // Sector distribution
-  const sectorData = useMemo(() => {
-    const data = {};
-    // Build a lookup: propietario -> direccion
-    const direccionMap = new Map();
-    filteredLecturas.forEach(l => { if (!direccionMap.has(l.propietario)) direccionMap.set(l.propietario, l.direccion || 'No registrada'); });
+  const memberSummary = useMemo(() => ({
+    consumption: currentReadings.reduce((sum, item) => sum + num(item.consumo_calculado), 0),
+    billed: currentReceipts.reduce((sum, item) => sum + num(item.total), 0),
+    paid: currentReceipts.reduce((sum, item) => sum + paidAmount(item), 0),
+    pending: currentReceipts.reduce((sum, item) => sum + pendingAmount(item), 0),
+  }), [currentReadings, currentReceipts]);
 
-    tableData.forEach(c => {
-      const sector = direccionMap.get(c.propietario) || 'Otros';
-      data[sector] = (data[sector] || 0) + c.consumo;
-    });
-    return data;
-  }, [tableData, filteredLecturas]);
+  const history = useMemo(() => {
+    const result = new Map();
+    scopedReadings.forEach((item) => result.set(periodOf(item), (result.get(periodOf(item)) || 0) + num(item.consumo_calculado)));
+    return [...result.entries()].sort((a, b) => periodOrder(a[0]) - periodOrder(b[0])).slice(-6);
+  }, [scopedReadings]);
 
-  const sectorChartData = useMemo(() => ({
-    labels: Object.keys(sectorData),
-    datasets: [{
-      data: Object.values(sectorData),
-      backgroundColor: SECTOR_COLORS,
-      borderWidth: 1,
-      borderColor: '#ffffff',
-    }],
-  }), [sectorData]);
+  const topData = useMemo(() => ({ labels: topConsumers.map((item) => item.name), datasets: [{ data: topConsumers.map((item) => item.value), backgroundColor: '#00647c', borderRadius: 5 }] }), [topConsumers]);
+  const typeData = useMemo(() => ({ labels: Object.keys(consumptionByType), datasets: [{ data: Object.values(consumptionByType), backgroundColor: TYPE_COLORS, borderColor: '#fff', borderWidth: 2 }] }), [consumptionByType]);
+  const historyData = useMemo(() => ({ labels: history.map(([period]) => formatPeriod(period, true)), datasets: [{ data: history.map(([, value]) => value), backgroundColor: '#515B3A', borderRadius: 5 }] }), [history]);
+  const barOptions = useMemo(() => ({ responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => `${kwh(context.raw)} kWh` } } }, scales: { y: { beginAtZero: true } } }), []);
+  const topOptions = useMemo(() => ({ ...barOptions, indexAxis: 'y', scales: { x: { beginAtZero: true }, y: { grid: { display: false } } } }), [barOptions]);
+  const typeOptions = useMemo(() => ({ responsive: true, maintainAspectRatio: false, cutout: '62%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, usePointStyle: true } }, tooltip: { callbacks: { label: (context) => `${context.label}: ${kwh(context.raw)} kWh (${typeTotal ? ((num(context.raw) / typeTotal) * 100).toFixed(1) : 0}%)` } } } }), [typeTotal]);
 
-  const sectorTotal = useMemo(
-    () => Object.values(sectorData).reduce((s, v) => s + v, 0),
-    [sectorData],
-  );
+  const selectMember = useCallback((key) => { setSelectedMember(key); setSelectedMeter('Todos'); setSearch(''); setIsOpen(false); }, []);
 
-  const sectorChartOptions = useMemo(() => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        position: 'bottom',
-        labels: { boxWidth: 10, font: { family: 'Hanken Grotesk', size: 11 } },
-      },
-      tooltip: {
-        callbacks: {
-          label: (context) => {
-            const val = context.raw || 0;
-            const pct = sectorTotal > 0 ? ((val / sectorTotal) * 100).toFixed(1) : 0;
-            return `${context.label}: ${parseFloat(val).toLocaleString('es-PE')} kWh (${pct}%)`;
-          },
-        },
-      },
-    },
-    cutout: '60%',
-  }), [sectorTotal]);
-
-  // ── Specific member data ───────────────────────────────────────────
-  const currentLectura = useMemo(
-    () => filteredLecturas.find(l => l.propietario === selectedMember),
-    [filteredLecturas, selectedMember],
-  );
-
-  const currentRecibo = useMemo(
-    () => recibosBySocio.get(selectedMember),
-    [recibosBySocio, selectedMember],
-  );
-
-  const memberConsumo = currentLectura ? parseFloat(currentLectura.consumo_calculado) || 0 : 0;
-  const memberTotal = currentRecibo ? parseFloat(currentRecibo.total) || 0 : 0;
-  const memberEstado = currentRecibo?.estado || 'Pendiente';
-  const memberSector = currentLectura ? (currentLectura.direccion || 'No registrada') : 'N/A';
-  const memberEstadoConfig = getEstadoConfig(memberEstado);
-
-  const memberAllLecturas = useMemo(
-    () => lecturas.filter(l => l.propietario === selectedMember),
-    [lecturas, selectedMember],
-  );
-
-  const avgConsumo = useMemo(
-    () => memberAllLecturas.length > 0
-      ? memberAllLecturas.reduce((sum, l) => sum + (parseFloat(l.consumo_calculado) || 0), 0) / memberAllLecturas.length
-      : 0,
-    [memberAllLecturas],
-  );
-
-  const memberLecturas = useMemo(
-    () => [...memberAllLecturas].sort((a, b) => a.periodo.localeCompare(b.periodo)).slice(-6),
-    [memberAllLecturas],
-  );
-
-  // Build recibo lookup for member invoices: periodo -> recibo
-  const memberRecibosByPeriodo = useMemo(() => {
-    const map = new Map();
-    recibos.filter(r => r.socio === selectedMember).forEach(r => {
-      const key = r.periodo || r.mes_anio;
-      if (!map.has(key)) map.set(key, r);
-    });
-    return map;
-  }, [recibos, selectedMember]);
-
-  const historyChartData = useMemo(() => ({
-    labels: memberLecturas.map(l => formatPeriodoShort(l.periodo)),
-    datasets: [{
-      label: 'Consumo (kWh)',
-      data: memberLecturas.map(l => parseFloat(l.consumo_calculado) || 0),
-      backgroundColor: makeGradient(5, 150, 105, 'vertical'),
-      borderRadius: 4,
-    }],
-  }), [memberLecturas]);
-
-  const historyChartOptions = useMemo(() => ({
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: { legend: { display: false }, tooltip: { callbacks: consumoTooltipCallback } },
-    scales: { y: { beginAtZero: true } },
-  }), []);
-
-  // ── Callbacks ──────────────────────────────────────────────────────
-  const handleSelectMember = useCallback((member) => {
-    setSelectedMember(member);
-    setIsOpen(false);
-    setSearchQuery('');
-  }, []);
-
-  const handleSearchChange = useCallback((e) => {
-    setSearchQuery(e.target.value);
-    setIsOpen(true);
-  }, []);
-
-  const handleInputFocus = useCallback(() => {
-    setIsOpen(true);
-    setSearchQuery('');
-  }, []);
-
-  const toggleDropdown = useCallback(() => setIsOpen(prev => !prev), []);
-  const closeDropdown = useCallback(() => setIsOpen(false), []);
-
-  const isAllView = selectedMember === 'Todos';
-
-  // ── Render ─────────────────────────────────────────────────────────
   return (
-    <div className="space-y-lg animate-in fade-in duration-300">
-
-      {/* Member Selector */}
-      <div className="bg-white border border-outline-variant rounded-lg p-md flex flex-col md:flex-row md:items-center justify-between gap-md shadow-sm relative z-50">
-        <div className="flex-grow max-w-md space-y-xs relative">
-          <label className="font-label-caps text-[11px] uppercase tracking-wider text-on-surface-variant font-bold">Seleccionar Socio / Propietario</label>
-          <div className="relative">
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]" translate="no">corporate_fare</span>
-              <input
-                type="text"
-                placeholder="Buscar socio..."
-                value={isOpen ? searchQuery : (isAllView ? 'Ver Todos los Socios' : selectedMember)}
-                onChange={handleSearchChange}
-                onFocus={handleInputFocus}
-                className="w-full bg-surface border border-outline-variant rounded-md pl-10 pr-10 py-2 text-sm focus:border-primary outline-none font-bold text-on-surface cursor-pointer"
-              />
-              <button
-                type="button"
-                onClick={toggleDropdown}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface focus:outline-none"
-              >
-                <span className="material-symbols-outlined" translate="no">{isOpen ? 'expand_less' : 'expand_more'}</span>
-              </button>
-            </div>
-
-
-              {isOpen && (
-                <>
-                  <div {...DROPDOWN_BACKDROP} className="fixed inset-0 z-40" onClick={closeDropdown} />
-                  <div {...DROPDOWN_CONTENT} className="absolute top-full left-0 right-0 mt-1 max-h-60 bg-white border border-outline-variant rounded-lg shadow-xl overflow-y-auto z-50 custom-scrollbar">
-                    <div
-                      onClick={() => handleSelectMember('Todos')}
-                      className={`px-md py-2.5 hover:bg-primary/5 cursor-pointer text-sm font-semibold transition-colors flex items-center gap-xs ${isAllView ? 'bg-primary/10 text-primary' : 'text-on-surface'}`}
-                    >
-                      <span className="material-symbols-outlined text-[16px]" translate="no">group</span>
-                      Ver Todos los Socios
-                    </div>
-                    {filteredMembersList.map(m => (
-                      <div
-                        key={m}
-                        onClick={() => handleSelectMember(m)}
-                        className={`px-md py-2.5 hover:bg-primary/5 cursor-pointer text-sm font-semibold transition-colors flex items-center justify-between ${selectedMember === m ? 'bg-primary/10 text-primary' : 'text-on-surface'}`}
-                      >
-                        <span className="truncate">{m}</span>
-                        {selectedMember === m && <span className="material-symbols-outlined text-primary text-[16px]" translate="no">check</span>}
-                      </div>
-                    ))}
-                    {filteredMembersList.length === 0 && (
-                      <div className="px-md py-3 text-center text-xs text-on-surface-variant italic">
-                        No se encontraron socios
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-
-          </div>
+    <div className="space-y-5 animate-in fade-in duration-300">
+      <section className="relative z-20 flex flex-col gap-4 rounded-xl border border-outline-variant bg-surface p-4 shadow-sm md:flex-row md:items-end md:justify-between">
+        <div className="relative w-full max-w-md"><label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Socio / propietario</label><button type="button" onClick={() => setIsOpen((value) => !value)} className="flex h-10 w-full items-center justify-between rounded-lg border border-outline-variant bg-white px-3 text-left text-sm font-bold text-on-surface hover:border-primary/50"><span className="flex min-w-0 items-center gap-2"><span className="material-symbols-outlined text-[18px] text-primary" translate="no">group</span><span className="truncate">{selectedMember === 'Todos' ? 'Ver todos los socios' : selectedName}</span></span><span className="material-symbols-outlined text-[18px]" translate="no">{isOpen ? 'expand_less' : 'expand_more'}</span></button>
+          {isOpen && <><button type="button" aria-label="Cerrar selector" className="fixed inset-0 z-30 cursor-default" onClick={() => setIsOpen(false)} /><div className="absolute left-0 right-0 top-full z-40 mt-1 overflow-hidden rounded-xl border border-outline-variant bg-white shadow-xl"><div className="border-b border-outline-variant p-2"><input autoFocus value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Buscar socio, dirección o medidor..." className="h-9 w-full rounded-md border border-outline-variant px-3 text-sm outline-none focus:border-primary" /></div><div className="max-h-80 overflow-y-auto py-1 custom-scrollbar"><button type="button" onClick={() => selectMember('Todos')} className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm font-bold text-primary hover:bg-primary/5"><span className="material-symbols-outlined text-[16px]" translate="no">groups</span>Ver todos los socios</button>{searchedMembers.map((member) => <button key={member.key} type="button" onClick={() => selectMember(member.key)} className="block w-full border-t border-outline-variant/40 px-3 py-2.5 text-left hover:bg-primary/5"><span className="block truncate text-sm font-semibold text-on-surface" title={member.name}>{member.name}</span>{member.supplies.map((supply) => <span key={supply.key} className="mt-1 block text-[10px] leading-snug text-on-surface-variant"><span className="flex min-w-0 items-center gap-1"><span className="material-symbols-outlined shrink-0 text-[12px]" translate="no">location_on</span><span className="truncate" title={supply.address}>{supply.address}</span></span><span className="flex min-w-0 items-center gap-1"><span className="material-symbols-outlined shrink-0 text-[12px]" translate="no">electric_meter</span><span className="truncate" title={`${supply.serial} · ${supply.type}`}>{supply.serial} · {supply.type}</span></span></span>)}</button>)}{!searchedMembers.length && <p className="px-3 py-4 text-center text-xs text-on-surface-variant">No se encontraron socios.</p>}</div></div></>}
         </div>
-        <div className="text-right">
-          <p className="text-xs text-on-surface-variant">Periodo Reportado</p>
-          <p className="font-bold text-primary text-body-md uppercase">
-            {selectedPeriod ? formatPeriodo(selectedPeriod) : 'N/A'}
-          </p>
-        </div>
-      </div>
+        {selectedMember !== 'Todos' && meters.length > 1 && <div className="w-full md:max-w-xs"><label className="mb-1 block text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Suministro</label><select value={selectedMeter} onChange={(event) => setSelectedMeter(event.target.value)} className="h-10 w-full rounded-lg border border-outline-variant bg-white px-3 text-sm font-bold text-on-surface outline-none focus:border-primary"><option value="Todos">Todos los medidores</option>{meters.map((meter) => <option key={meter.key} value={meter.key}>{meter.serial}{meter.type ? ` · ${meter.type}` : ''}</option>)}</select></div>}
+        <div className="shrink-0 md:text-right"><p className="text-xs text-on-surface-variant">Periodo reportado</p><p className="font-bold uppercase text-primary">{formatPeriod(selectedPeriod)}</p></div>
+      </section>
 
-      {isAllView ? (
-        <>
-          {/* Charts Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-lg">
-            <ChartCard colSpan="lg:col-span-2" title="Comparativa de Consumo por Socio" subtitle="Top Consumidores del mes (kWh)">
-              {topConsumers.length > 0
-                ? <Bar data={consumersChartData} options={consumersChartOptions} />
-                : <EmptyState message="No hay datos de consumo disponibles." />
-              }
-            </ChartCard>
-
-            <ChartCard title="Consumo por Manzana" subtitle="Distribución del consumo por sector">
-              <div className="flex items-center justify-center h-full">
-                {Object.keys(sectorData).length > 0
-                  ? <div className="w-full h-[220px]"><Doughnut data={sectorChartData} options={sectorChartOptions} /></div>
-                  : <EmptyState message="No hay datos de distribución." />
-                }
-              </div>
-            </ChartCard>
-          </div>
-
-          {/* Detailed Table */}
-          <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-md">
-            <div className="p-4 border-b border-outline-variant bg-surface-container-lowest flex justify-between items-center">
-              <h4 className="text-base text-on-surface font-bold">Desglose de Facturación por Socio</h4>
-              <span className="text-xs text-on-surface-variant font-medium">Mostrando {tableData.length} socios</span>
-            </div>
-            <div className="overflow-x-auto relative custom-scrollbar max-h-[400px]">
-              <table className="w-full text-left border-collapse whitespace-nowrap min-w-[700px]">
-                <thead className="sticky top-0 z-10 shadow-sm bg-surface-container-lowest text-on-surface-variant text-[11px] uppercase tracking-wider">
-                  <tr className="border-b border-outline-variant">
-                    <th className="px-5 py-4 font-semibold bg-surface-container-lowest w-[30%]">Socio / Propietario</th>
-                    <th className="px-5 py-4 font-semibold bg-surface-container-lowest w-[25%]">Consumo</th>
-                    <th className="px-5 py-4 font-semibold bg-surface-container-lowest w-[25%]">Desglose (Neto / IGV)</th>
-                    <th className="px-5 py-4 font-semibold bg-surface-container-lowest text-right w-[20%]">Total y Estado</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-outline-variant/50 bg-surface text-body-sm">
-                  {tableData.map(row => <AllMembersTableRow key={row.id} row={row} />)}
-                  {tableData.length === 0 && (
-                    <tr>
-                      <td colSpan="4" className="text-center px-5 py-12 text-on-surface-variant text-sm">
-                        No hay registros en este período.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </>
-      ) : (
-        <>
-          {/* Specific Member KPIs */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-4 mb-4">
-            <KpiCard icon="bolt" label="Consumo del Período" subtitle={`Sector: ${memberSector}`}>
-              <div className="flex items-end justify-between mt-0.5">
-                <span className="font-data-mono text-lg text-primary font-bold leading-none truncate">
-                  {fmtKwh(memberConsumo)}
-                </span>
-                <span className="text-[10px] text-primary font-bold mb-px ml-1 bg-primary/10 px-1 rounded-sm border border-primary/20">kWh</span>
-              </div>
-            </KpiCard>
-
-            <KpiCard icon="receipt_long" label="Monto Facturado" subtitle="Total con cargos e IGV">
-              <div className="flex items-end justify-between mt-0.5">
-                <span className="font-data-mono text-lg text-on-surface font-bold leading-none truncate">
-                  S/ {fmtCurrency(memberTotal)}
-                </span>
-              </div>
-            </KpiCard>
-
-            <KpiCard icon={memberEstadoConfig.icon} label="Estado de Pago" subtitle="Para el período actual" iconClassName={memberEstadoConfig.iconBg}>
-              <div className="flex items-end justify-between mt-0.5">
-                <span className={`font-bold leading-none truncate text-sm mt-1 uppercase ${memberEstadoConfig.text}`}>
-                  {memberEstado}
-                </span>
-              </div>
-            </KpiCard>
-
-            <KpiCard icon="history" label="Promedio Histórico" subtitle="Promedio de los últimos 6 meses" iconClassName="bg-secondary-container/50 text-on-secondary-container border-secondary-container">
-              <div className="flex items-end justify-between mt-0.5">
-                <span className="font-data-mono text-lg text-on-surface font-bold leading-none truncate">
-                  {fmtKwh(avgConsumo)}
-                </span>
-                <span className="text-[10px] text-on-surface-variant font-bold mb-px ml-1 bg-surface-container px-1 rounded-sm border border-outline-variant/50">kWh</span>
-              </div>
-            </KpiCard>
-          </div>
-
-          {/* Charts Row: Historical + Invoices */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-lg">
-            <ChartCard colSpan="lg:col-span-2" title="Historial de Consumo Personal" subtitle="Consumo mensual registrado en los últimos 6 meses (kWh)">
-              {memberLecturas.length > 0
-                ? <Bar data={historyChartData} options={historyChartOptions} />
-                : <EmptyState message="No hay suficientes lecturas registradas." />
-              }
-            </ChartCard>
-
-            {/* Invoices List Summary */}
-            <div className="bg-white border border-outline-variant rounded-lg p-md flex flex-col h-[360px] shadow-sm">
-              <div className="mb-md">
-                <h4 className="font-headline-sm text-headline-sm font-bold text-on-surface">Resumen de Recibos</h4>
-                <p className="text-body-sm text-on-surface-variant">Consolidado de recibos de los últimos meses</p>
-              </div>
-              <div className="space-y-sm flex-grow overflow-y-auto pr-xs custom-scrollbar">
-                {memberLecturas.map(l => {
-                  const matchingRec = memberRecibosByPeriodo.get(l.periodo);
-                  const total = matchingRec ? parseFloat(matchingRec.total) || 0 : 0;
-                  const estado = matchingRec?.estado || 'Pendiente';
-                  const estadoCfg = getEstadoConfig(estado);
-                  return (
-                    <div key={l.id} className="flex items-center justify-between p-sm border border-outline-variant rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
-                      <div>
-                        <p className="font-bold text-xs text-on-surface">{formatPeriodo(l.periodo)}</p>
-                        <p className="text-[10px] text-on-surface-variant">{fmtKwh(l.consumo_calculado)} kWh consumidos</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="font-bold text-sm text-primary">S/ {fmtCurrency(total)}</p>
-                        <span className={`inline-block w-2.5 h-2.5 rounded-full ${estadoCfg.dot}`} title={estado} />
-                      </div>
-                    </div>
-                  );
-                })}
-                {memberLecturas.length === 0 && <EmptyState message="No hay cobros registrados." />}
-              </div>
-            </div>
-          </div>
-
-          {/* Readings History Table */}
-          <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-md">
-            <div className="p-4 border-b border-outline-variant bg-surface-container-lowest">
-              <h4 className="text-base text-on-surface font-bold">Historial de Lecturas Registradas</h4>
-            </div>
-            <div className="overflow-x-auto relative custom-scrollbar max-h-[400px]">
-              <table className="w-full text-left border-collapse whitespace-nowrap min-w-[700px]">
-                <thead className="sticky top-0 z-10 shadow-sm bg-surface-container-lowest text-on-surface-variant text-[11px] uppercase tracking-wider">
-                  <tr className="border-b border-outline-variant">
-                    <th className="px-5 py-4 font-semibold bg-surface-container-lowest w-[25%]">Periodo / Mes</th>
-                    <th className="px-5 py-4 font-semibold bg-surface-container-lowest w-[45%]">Lecturas y Consumo</th>
-                    <th className="px-5 py-4 font-semibold bg-surface-container-lowest text-right w-[30%]">Total y Estado</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-outline-variant/50 bg-surface text-body-sm">
-                  {memberLecturas.map(l => {
-                    const matchingRec = memberRecibosByPeriodo.get(l.periodo);
-                    const total = matchingRec ? parseFloat(matchingRec.total) || 0 : 0;
-                    const estado = matchingRec?.estado || 'Pendiente';
-                    return (
-                      <tr key={l.id} className="hover:bg-surface-container-low transition-colors group">
-                        <td className="px-5 py-3 font-bold text-on-surface truncate">{formatPeriodo(l.periodo)}</td>
-                        <td className="px-5 py-3">
-                          <div className="flex flex-col">
-                            <div className="flex items-center gap-1.5 text-[11px]">
-                              <span className="material-symbols-outlined text-[14px] text-on-surface-variant" translate="no">electric_meter</span>
-                              <span className="text-on-surface-variant">Ant: <span className="font-data-mono">{fmtKwh(l.lectura_anterior)}</span></span>
-                              <span className="text-on-surface-variant px-1">•</span>
-                              <span className="text-on-surface-variant">Act: <span className="font-data-mono">{fmtKwh(l.lectura_actual)}</span></span>
-                            </div>
-                            <div className="flex items-center gap-1.5 text-[11px] font-bold text-primary mt-1">
-                              <span className="material-symbols-outlined text-[14px]" translate="no" style={FILL_1}>bolt</span>
-                              Consumo: {fmtKwh(l.consumo_calculado)} kWh
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-5 py-3 text-right">
-                          <div className="flex flex-col items-end gap-1">
-                            <span className="font-data-mono text-sm font-bold text-on-surface leading-none">S/ {fmtCurrency(total)}</span>
-                            <EstadoBadge estado={estado} />
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {memberLecturas.length === 0 && (
-                    <tr>
-                      <td colSpan="3" className="text-center px-5 py-12 text-on-surface-variant text-sm">
-                        No hay lecturas registradas.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </>
-      )}
+      {selectedMember === 'Todos' ? <>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4"><KpiCard icon="groups" label="Socios facturados" value={uniqueMembers.toLocaleString('es-PE')} subtitle={`${periodReceipts.length} recibos emitidos`} /><KpiCard icon="bolt" label="Consumo total" value={`${kwh(periodSummary.consumption)} kWh`} subtitle="Suma real de lecturas" /><KpiCard icon="receipt_long" label="Total facturado" value={`S/ ${money(periodSummary.billed)}`} subtitle="Incluye cargos y ajustes" tone="text-slate-700 bg-slate-50 border-slate-200" /><KpiCard icon="account_balance_wallet" label="Saldo pendiente" value={`S/ ${money(periodSummary.pending)}`} subtitle={`Pagado: S/ ${money(periodSummary.paid)}`} tone="text-amber-700 bg-amber-50 border-amber-200" /></div>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3"><ChartCard className="lg:col-span-2" title="Socios con mayor consumo" subtitle="Top 5 del periodo, sumando todos sus medidores">{topConsumers.length ? <Bar data={topData} options={topOptions} /> : <EmptyState>No hay lecturas para este periodo.</EmptyState>}</ChartCard><ChartCard title="Consumo por tipo de medidor" subtitle="Distribución real por modalidad de suministro">{Object.keys(consumptionByType).length ? <Doughnut data={typeData} options={typeOptions} /> : <EmptyState>No hay datos de medidores.</EmptyState>}</ChartCard></div>
+        <section className="overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-sm"><div className="flex flex-col gap-1 border-b border-outline-variant bg-surface-container-lowest px-4 py-3 sm:flex-row sm:items-center sm:justify-between"><div><h3 className="text-base font-bold text-on-surface">Facturación por socio y suministro</h3><p className="text-[11px] text-on-surface-variant">Valores reales registrados en cada recibo</p></div><span className="text-xs font-medium text-on-surface-variant">{periodReceipts.length} recibos · {uniqueMembers} socios</span></div><ReportTable receipts={periodReceipts} /></section>
+      </> : <>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4"><KpiCard icon="bolt" label="Consumo del periodo" value={`${kwh(memberSummary.consumption)} kWh`} subtitle={selectedMeter === 'Todos' ? `${meters.length} suministro(s)` : 'Suministro seleccionado'} /><KpiCard icon="receipt_long" label="Total facturado" value={`S/ ${money(memberSummary.billed)}`} subtitle={`${currentReceipts.length} recibo(s)`} tone="text-slate-700 bg-slate-50 border-slate-200" /><KpiCard icon="payments" label="Total pagado" value={`S/ ${money(memberSummary.paid)}`} subtitle="Pagos aplicados al periodo" tone="text-green-700 bg-green-50 border-green-200" /><KpiCard icon="pending_actions" label="Saldo pendiente" value={`S/ ${money(memberSummary.pending)}`} subtitle="Monto aún por cobrar" tone="text-amber-700 bg-amber-50 border-amber-200" /></div>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3"><ChartCard className="lg:col-span-2" title="Historial de consumo" subtitle="Consumo consolidado de los últimos 6 periodos">{history.length ? <Bar data={historyData} options={barOptions} /> : <EmptyState>No hay lecturas históricas registradas.</EmptyState>}</ChartCard><ChartCard title="Recibos recientes" subtitle="Importes, saldos y estados registrados"><div className="h-full space-y-2 overflow-y-auto pr-1 custom-scrollbar">{recentReceipts.map((receipt) => <div key={receipt.id} className="rounded-lg border border-outline-variant bg-surface-container-low p-2.5"><div className="flex items-start justify-between gap-2"><div><p className="text-xs font-bold text-on-surface">{formatPeriod(periodOf(receipt))}</p><p className="text-[10px] text-on-surface-variant">{receipt.medidor_num_serie || 'Sin medidor'}</p></div><div className="text-right"><p className="font-data-mono text-xs font-bold text-on-surface">S/ {money(receipt.total)}</p><StatusBadge value={receipt.estado} /></div></div>{pendingAmount(receipt) > 0 && <p className="mt-1 text-right text-[10px] font-semibold text-amber-700">Saldo: S/ {money(pendingAmount(receipt))}</p>}</div>)}{!recentReceipts.length && <EmptyState>No hay recibos registrados.</EmptyState>}</div></ChartCard></div>
+        <section className="overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-sm"><div className="border-b border-outline-variant bg-surface-container-lowest px-4 py-3"><h3 className="text-base font-bold text-on-surface">Historial de facturación de {selectedName}</h3><p className="text-[11px] text-on-surface-variant">Un registro por recibo y suministro</p></div><ReportTable receipts={recentReceipts} historical /></section>
+      </>}
     </div>
   );
 };

@@ -1,288 +1,23 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../../api/axiosConfig';
 import { toast } from 'sonner';
 import { useYear } from '../../context/YearContext';
+import PdfPreviewModal from '../../components/ui/PdfPreviewModal';
+import { PaymentDetailRow as DetailRow } from './components/PaymentPresentation';
+import { PaymentHistoryTable, PaymentsDashboard } from './components/PaymentsDashboard';
+import CancelPaymentModal from './components/CancelPaymentModal';
+import EditPaymentModal from './components/EditPaymentModal';
+import { buildFilterParams, fmtCurrency, formatPeriod, getPagoTipoInfo } from './paymentUtils';
 
 // ── Constants ────────────────────────────────────────────────────────
-const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-
-const CURRENCY_OPTS = { minimumFractionDigits: 2, maximumFractionDigits: 2 };
-
-
-
 const MODAL_BACKDROP = { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.2 } };
 const MODAL_CONTENT = { initial: { scale: 0.95, opacity: 0 }, animate: { scale: 1, opacity: 1 }, exit: { scale: 0.95, opacity: 0 }, transition: { duration: 0.2, ease: 'easeOut' } };
 
 
 const PARTIAL_THRESHOLD = 0.02;
-
-// ── Helpers ──────────────────────────────────────────────────────────
-const fmtCurrency = (value) =>
-  parseFloat(value || 0).toLocaleString('en-US', CURRENCY_OPTS);
-
-const formatPeriod = (periodoStr) => {
-  if (!periodoStr) return '';
-  const parts = periodoStr.split('-');
-  if (parts.length !== 2) return periodoStr;
-  const year = parts[0].length === 4 ? parts[0] : parts[1];
-  const month = parts[0].length === 4 ? parts[1] : parts[0];
-  const monthIndex = parseInt(month, 10) - 1;
-  if (monthIndex >= 0 && monthIndex < 12) return `${MONTH_NAMES[monthIndex]} ${year}`;
-  return periodoStr;
-};
-
-
-
-const getPagoTipoInfo = (pago, fallbackPrevio = 0) => {
-  if (!pago) {
-    return {
-      tipo: 'Completo',
-      badgeLabel: 'Completo',
-      drawerLabel: 'Pago Completo',
-      badgeClass: 'bg-indigo-100 text-indigo-800',
-      boxClass: 'bg-indigo-50/50 border-indigo-200',
-      subtextType: 'none',
-      subtextMonto: 0,
-      restante: 0,
-      aFavor: 0,
-      previo: 0,
-      acumulado: 0,
-    };
-  }
-
-  if (pago.estado_validacion === 'Anulado') {
-    return {
-      tipo: 'Anulado',
-      badgeLabel: 'Anulado',
-      drawerLabel: 'Pago Anulado',
-      badgeClass: 'bg-error/15 text-error border border-error/30',
-      boxClass: 'bg-red-50/50 border-red-200',
-      subtextType: 'none',
-      subtextMonto: 0,
-      restante: 0,
-      aFavor: 0,
-      previo: 0,
-      acumulado: 0,
-    };
-  }
-
-  const monto = parseFloat(pago.monto_pagado || 0);
-  const totalRecibo = parseFloat(pago.recibo_total || 0);
-  const previo = (pago.previo_pagado !== undefined && pago.previo_pagado !== null)
-    ? parseFloat(pago.previo_pagado)
-    : parseFloat(fallbackPrevio || 0);
-
-  const acumulado = previo + monto;
-  const EPSILON = 0.05;
-
-  // 1. Si antes de este pago el recibo ya estaba totalmente cubierto (previo >= totalRecibo):
-  // Este pago es completamente un pago extra / adicional que genera saldo a favor.
-  if (totalRecibo > 0 && previo >= totalRecibo - EPSILON) {
-    return {
-      tipo: 'Adicional',
-      badgeLabel: 'Adicional',
-      drawerLabel: 'Pago Adicional / Excedente',
-      badgeClass: 'bg-emerald-100 text-emerald-800 border border-emerald-300/40',
-      boxClass: 'bg-emerald-50/50 border-emerald-200',
-      subtextType: 'a_favor',
-      subtextMonto: monto,
-      restante: 0,
-      aFavor: monto,
-      previo,
-      acumulado,
-    };
-  }
-
-  // 2. Si el acumulado aún no llega a cubrir el total del recibo:
-  if (totalRecibo > 0 && acumulado < totalRecibo - EPSILON) {
-    const restante = Math.max(0, totalRecibo - acumulado);
-    return {
-      tipo: 'Parcial',
-      badgeLabel: 'Parcial',
-      drawerLabel: 'Abono Parcial',
-      badgeClass: 'bg-amber-100 text-amber-800',
-      boxClass: 'bg-amber-50/50 border-amber-200',
-      subtextType: 'restante',
-      subtextMonto: restante,
-      restante,
-      aFavor: 0,
-      previo,
-      acumulado,
-    };
-  }
-
-  // 3. Este pago completa el recibo (o lo completa y tiene un saldo excedente a favor)
-  const excedente = (totalRecibo > 0 && acumulado > totalRecibo + EPSILON) ? (acumulado - totalRecibo) : 0;
-  return {
-    tipo: 'Completo',
-    badgeLabel: 'Completo',
-    drawerLabel: excedente > 0 ? 'Pago Completo con Excedente' : 'Pago Completo',
-    badgeClass: 'bg-indigo-100 text-indigo-800',
-    boxClass: 'bg-indigo-50/50 border-indigo-200',
-    subtextType: excedente > 0 ? 'a_favor' : 'none',
-    subtextMonto: excedente,
-    restante: 0,
-    aFavor: excedente,
-    previo,
-    acumulado,
-  };
-};
-
-const buildFilterParams = (filterMes, activeYear) => {
-  const params = {};
-  if (filterMes && filterMes !== 'Todos' && filterMes !== 'TodosHistorico') {
-    params.periodo = filterMes;
-  } else if (filterMes === 'Todos') {
-    params.year = activeYear;
-  }
-  return params;
-};
-
-// ── Sub-components ───────────────────────────────────────────────────
-const KPI_COLORS = {
-  primary: {
-    bg: 'bg-primary/10 text-primary border-primary/20',
-    val: 'text-on-surface',
-  },
-  emerald: {
-    bg: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20',
-    val: 'text-emerald-600',
-  },
-  tertiary: {
-    bg: 'bg-tertiary/10 text-tertiary border-tertiary/20',
-    val: 'text-tertiary',
-  },
-  amber: {
-    bg: 'bg-amber-500/10 text-amber-700 border-amber-500/20',
-    val: 'text-amber-700',
-  },
-  secondary: {
-    bg: 'bg-secondary/10 text-secondary border-secondary/20',
-    val: 'text-secondary',
-  },
-};
-
-const KpiCard = React.memo(({ icon, label, value, subtitle, colorScheme = 'primary', subtitleIcon }) => {
-  const c = KPI_COLORS[colorScheme] || KPI_COLORS.primary;
-  return (
-    <div className="bg-surface border border-outline-variant hover:border-primary/30 rounded-xl p-3 flex items-center gap-3 transition-colors shadow-sm">
-      <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border ${c.bg}`}>
-        <span className="material-symbols-outlined text-[20px]" translate="no">{icon}</span>
-      </div>
-      <div className="flex flex-col justify-center overflow-hidden">
-        <span className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider leading-tight truncate">{label}</span>
-        <span className={`font-data-mono text-lg font-bold leading-none mt-0.5 truncate ${c.val}`}>
-          {value}
-        </span>
-        {subtitleIcon ? (
-          <div className="flex items-center gap-1 mt-1 opacity-80">
-            <span className="material-symbols-outlined text-[10px]" translate="no">{subtitleIcon}</span>
-            <span className="text-[9px] truncate">{subtitle}</span>
-          </div>
-        ) : (
-          <span className="text-[9px] text-on-surface-variant/70 mt-1 truncate">{subtitle}</span>
-        )}
-      </div>
-    </div>
-  );
-});
-
-const DetailRow = React.memo(({ icon, label, value, valueClassName = 'text-xs font-bold text-on-surface' }) => (
-  <div className="flex justify-between items-center p-3">
-    <span className="text-[11px] text-on-surface-variant flex items-center gap-1.5">
-      <span className="material-symbols-outlined text-[14px]" translate="no">{icon}</span> {label}
-    </span>
-    <span className={valueClassName}>{value}</span>
-  </div>
-));
-
-const PaymentRow = React.memo(({ pago, fallbackPrevio, onSelect, onOpenMenu, isMenuOpen }) => {
-  const tipoInfo = useMemo(() => getPagoTipoInfo(pago, fallbackPrevio), [pago, fallbackPrevio]);
-
-  return (
-    <tr className={`hover:bg-surface-container-lowest transition-colors group ${pago.estado_validacion === 'Anulado' ? 'bg-red-500/5 hover:bg-red-500/10' : ''}`}>
-      <td className="px-4 py-2">
-        <button
-          onClick={() => onSelect(pago)}
-          className="font-bold text-on-surface text-[11px] hover:text-primary transition-colors text-left focus:outline-none block mb-0.5"
-          title="Ver Detalles del Pago"
-        >
-          {pago.socio}
-        </button>
-        {pago.medidor_num_serie ? (
-          <span className="text-[10px] text-on-surface-variant flex items-center gap-1 mt-0.5">
-            <span className="material-symbols-outlined text-[12px]" translate="no">speed</span>
-            {pago.medidor_num_serie}
-          </span>
-        ) : (
-          <span className="text-[10px] text-on-surface-variant italic mt-0.5 block">Sin Medidor</span>
-        )}
-        {pago.saldo_a_favor_socio > 0 && (
-          <span className="text-[9px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-bold mt-1 inline-block">
-            💰 Saldo a favor: S/ {fmtCurrency(pago.saldo_a_favor_socio)}
-          </span>
-        )}
-      </td>
-      <td className="px-4 py-2">
-        <div className="flex flex-col">
-          <span className="text-[11px] text-on-surface font-medium">
-            {pago.metodo_pago}
-            {pago.numero_operacion && <span className="font-data-mono ml-1 text-[10px] text-on-surface-variant">(Op: {pago.numero_operacion})</span>}
-          </span>
-          <span className="text-[10px] text-on-surface-variant">
-            {new Date(pago.fecha_pago).toLocaleString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
-          </span>
-        </div>
-      </td>
-      <td className="px-4 py-2 text-center">
-        <div className="flex flex-col items-center">
-          <span className={`text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wide ${tipoInfo.badgeClass}`}>
-            {tipoInfo.badgeLabel}
-          </span>
-          {pago.motivo_anulacion && (
-            <span className="text-[9px] text-error font-medium italic mt-0.5 truncate max-w-[150px]" title={`Motivo: ${pago.motivo_anulacion}`}>
-              {pago.motivo_anulacion}
-            </span>
-          )}
-        </div>
-      </td>
-      <td className="px-4 py-2 text-right">
-        <div className={`font-data-mono font-bold text-[12px] ${pago.estado_validacion === 'Anulado' ? 'line-through text-on-surface-variant/60' : 'text-on-surface'}`}>
-          S/ {fmtCurrency(pago.monto_pagado)}
-        </div>
-        {pago.estado_validacion !== 'Anulado' && tipoInfo.subtextType === 'restante' && (
-          <div className="text-[9px] text-amber-700 font-bold">
-            Restante: S/ {fmtCurrency(tipoInfo.subtextMonto)}
-          </div>
-        )}
-        {pago.estado_validacion !== 'Anulado' && tipoInfo.subtextType === 'a_favor' && (
-          <div className="text-[9px] text-emerald-700 font-bold">
-            A favor: S/ {fmtCurrency(tipoInfo.subtextMonto)}
-          </div>
-        )}
-      </td>
-      <td className="px-4 py-2 text-right">
-        <div className="flex items-center justify-end">
-          <button
-            type="button"
-            onClick={(e) => onOpenMenu(pago, e)}
-            className={`w-7 h-7 rounded-md flex items-center justify-center transition-colors cursor-pointer ${
-              isMenuOpen
-                ? 'bg-primary/15 text-primary ring-1 ring-primary/30'
-                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-            }`}
-            title="Opciones de pago"
-          >
-            <span className="material-symbols-outlined text-[20px]" translate="no">more_vert</span>
-          </button>
-        </div>
-      </td>
-    </tr>
-  );
-});
 
 // ── Main Component ───────────────────────────────────────────────────
 const Payments = () => {
@@ -661,13 +396,6 @@ const Payments = () => {
     window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(msg)}`, '_blank');
   }, []);
 
-  const handleDownloadPdf = useCallback(() => {
-    const link = document.createElement('a');
-    link.href = pdfUrl;
-    link.download = `Pagos_Parque_Industrial_${new Date().toISOString().slice(0, 10)}.pdf`;
-    link.click();
-  }, [pdfUrl]);
-
   const handleViewRecibo = useCallback(() => {
     if (!selectedPaymentForDetails) return;
     const reciboId = selectedPaymentForDetails.recibo_id;
@@ -833,228 +561,37 @@ const Payments = () => {
   return (
     <main className="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-6 space-y-4 max-w-[1600px] w-full mx-auto relative">
 
-      {/* Page Title & Header */}
-      <div className="mb-4 flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <div>
-          <h2 className="text-2xl text-on-surface font-bold leading-tight">Modulo de Pagos</h2>
-          <p className="text-sm text-on-surface-variant">Seguimiento detallado de ingresos por servicios energéticos</p>
-        </div>
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="flex flex-col gap-0.5">
-            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-1">Periodo a Filtrar</label>
-            <div className="relative">
-              <select
-                className="appearance-none border border-outline-variant rounded-md pl-3 pr-8 py-1.5 h-8 bg-surface-container-lowest text-on-surface text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-w-[180px] transition-all font-medium cursor-pointer shadow-sm hover:border-primary/50"
-                value={filterMes}
-                onChange={(e) => setFilterMes(e.target.value)}
-              >
-                <option value="Todos">Todos los meses ({activeYear})</option>
-                <option value="TodosHistorico">Histórico (Todos los años)</option>
-                {uniqueMonths.map(m => (
-                  <option key={m} value={m}>{formatPeriod(m)}</option>
-                ))}
-              </select>
-              <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[16px]" translate="no">expand_more</span>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <label className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity">
-              <div className="relative">
-                <input type="checkbox" className="sr-only" checked={showAnulados} onChange={(e) => setShowAnulados(e.target.checked)} />
-                <div className={`block w-8 h-4 rounded-full transition-colors ${showAnulados ? 'bg-error' : 'bg-surface-variant'}`}></div>
-                <div className={`dot absolute left-1 top-0.5 bg-white w-3 h-3 rounded-full transition-transform ${showAnulados ? 'transform translate-x-3.5' : ''}`}></div>
-              </div>
-              <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Ver Anulados</span>
-            </label>
-            <button
-              onClick={openModal}
-            disabled={!isFilterSpecific}
-            className={`flex items-center px-3 py-1.5 h-8 font-bold rounded-md transition-opacity shadow-sm text-xs ${!isFilterSpecific
-                ? 'bg-surface-variant text-on-surface-variant cursor-not-allowed opacity-70'
-                : 'bg-primary text-on-primary hover:opacity-90 active:scale-95'
-              }`}
-          >
-            <span className="material-symbols-outlined mr-1 text-[16px]" translate="no">add_card</span>
-            Registrar Pago
-          </button>
-          </div>
-        </div>
-      </div>
+      <PaymentsDashboard
+        filterMes={filterMes}
+        onFilterChange={setFilterMes}
+        year={activeYear}
+        months={uniqueMonths}
+        formatPeriod={formatPeriod}
+        showAnulados={showAnulados}
+        onShowAnuladosChange={setShowAnulados}
+        onRegister={openModal}
+        canRegister={isFilterSpecific}
+        metrics={{ totalFacturado, totalRecaudado, facturasPagadas, totalFacturas, pendienteRecaudar, porcentajeRecaudado, recaudadoEfectivo, recaudadoTransferencia }}
+        formatCurrency={fmtCurrency}
+      />
 
-      {/* KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3 mb-4">
-        <KpiCard icon="request_quote" label="Total Facturado" value={`S/ ${fmtCurrency(totalFacturado)}`} subtitle="En el periodo seleccionado" colorScheme="primary" />
-        <KpiCard icon="account_balance_wallet" label="Total Recaudado" value={`S/ ${fmtCurrency(totalRecaudado)}`} subtitle="Ingresos reales" colorScheme="emerald" subtitleIcon="trending_up" />
-        <KpiCard icon="checklist" label="Avance de Cobro" value={<>{facturasPagadas}<span className="font-data-mono text-[10px] text-on-surface-variant font-bold">/ {totalFacturas}</span></>} subtitle="Facturas pagadas" colorScheme="tertiary" />
-        <KpiCard icon="pending_actions" label="Pendiente de Cobro" value={`S/ ${fmtCurrency(pendienteRecaudar)}`} subtitle="Resto que falta cobrar" colorScheme="amber" />
-      </div>
-
-      {/* Progress Bars & Dashboards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-        {/* Avance de Recaudación */}
-        <div className="bg-surface border border-outline-variant rounded-xl p-4 shadow-sm flex flex-col gap-2">
-          <div className="flex justify-between items-end">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] text-primary" translate="no">monitoring</span>
-              <span className="text-xs font-bold text-on-surface uppercase tracking-wider">Avance de Recaudación</span>
-            </div>
-            <span className="font-data-mono font-bold text-primary text-sm">{porcentajeRecaudado.toFixed(1)}%</span>
-          </div>
-
-          <div className="relative w-full h-3 bg-surface-container-highest rounded-full overflow-hidden flex">
-            <div
-              className="h-full bg-primary transition-all duration-1000 ease-out"
-              style={{ width: `${Math.min(porcentajeRecaudado, 100)}%` }}
-            />
-          </div>
-
-          <div className="flex justify-between text-[10px] text-on-surface-variant font-medium mt-1">
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 rounded-full bg-[#059669]" />
-              <span>Recaudado (S/ {fmtCurrency(totalRecaudado)})</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span>Pendiente (S/ {fmtCurrency(pendienteRecaudar)})</span>
-              <div className="w-2 h-2 rounded-full bg-surface-container-highest" />
-            </div>
-          </div>
-        </div>
-
-        {/* Desglose por Método de Pago */}
-        <div className="bg-surface border border-outline-variant rounded-xl p-4 shadow-sm flex flex-col gap-2">
-          <div className="flex justify-between items-end">
-            <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px] text-indigo-600" translate="no">pie_chart</span>
-              <span className="text-xs font-bold text-on-surface uppercase tracking-wider">Ingresos por Método</span>
-            </div>
-          </div>
-
-          <div className="relative w-full h-3 bg-surface-container-highest rounded-full overflow-hidden flex">
-            {totalRecaudado > 0 ? (
-              <>
-                <div
-                  className="h-full bg-emerald-500 transition-all duration-1000 ease-out"
-                  style={{ width: `${(recaudadoEfectivo / totalRecaudado) * 100}%` }}
-                  title="Efectivo"
-                />
-                <div
-                  className="h-full bg-indigo-500 transition-all duration-1000 ease-out"
-                  style={{ width: `${(recaudadoTransferencia / totalRecaudado) * 100}%` }}
-                  title="Transferencia"
-                />
-              </>
-            ) : (
-              <div className="w-full h-full bg-surface-container-highest" />
-            )}
-          </div>
-
-          <div className="flex justify-between text-[10px] text-on-surface-variant font-medium mt-1">
-            <div className="flex items-center gap-1">
-              <div className="w-2 h-2 rounded-full bg-emerald-500" />
-              <span>Efectivo (S/ {fmtCurrency(recaudadoEfectivo)})</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <span>Transferencia (S/ {fmtCurrency(recaudadoTransferencia)})</span>
-              <div className="w-2 h-2 rounded-full bg-indigo-500" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Data Table */}
-      <div className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden shadow-sm">
-        <div className="px-4 py-3 border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-surface-container-low">
-          <h4 className="text-base font-bold text-on-surface">Historial de Pagos</h4>
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="relative">
-              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">search</span>
-              <input
-                type="text"
-                placeholder="Buscar por socio o recibo..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 pr-3 py-1.5 h-8 border border-outline-variant rounded-md text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-48 bg-white transition-all"
-              />
-            </div>
-            <button
-              onClick={() => setShowAnulados(!showAnulados)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 h-8 font-bold text-xs rounded-md transition-colors border ${
-                showAnulados
-                  ? 'bg-amber-500/15 text-amber-800 border-amber-500/30'
-                  : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container'
-              }`}
-              title={showAnulados ? 'Ocultar pagos anulados' : 'Ver pagos anulados'}
-            >
-              <span className="material-symbols-outlined text-[16px]" translate="no">
-                {showAnulados ? 'visibility_off' : 'visibility'}
-              </span>
-              {showAnulados ? 'Ocultar Anulados' : 'Ver Anulados'}
-            </button>
-            <button
-              onClick={handleExportExcel}
-              className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-xs rounded-md transition-colors border border-[#107C41]/20"
-            >
-              <span className="material-symbols-outlined text-[16px]" translate="no">table_view</span>
-              Excel
-            </button>
-            <button
-              onClick={handleExportPDF}
-              className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-error/10 text-error hover:bg-error/20 font-bold text-xs rounded-md transition-colors border border-error/20"
-            >
-              <span className="material-symbols-outlined text-[16px]" translate="no">picture_as_pdf</span>
-              Reporte PDF
-            </button>
-            <button
-              onClick={handleExportAllPdf}
-              className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-primary/10 text-primary hover:bg-primary/20 font-bold text-xs rounded-md transition-colors border border-primary/20"
-            >
-              <span className="material-symbols-outlined text-[16px]" translate="no">print</span>
-              Tickets A5
-            </button>
-          </div>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse table-auto whitespace-nowrap">
-            <thead className="bg-surface-container-lowest border-b border-outline-variant text-on-surface-variant text-[11px] uppercase tracking-wider">
-              <tr>
-                <th className="px-4 py-2 font-semibold">Socio</th>
-                <th className="px-4 py-2 font-semibold">Detalle / Fecha</th>
-                <th className="px-4 py-2 font-semibold text-center">Estado</th>
-                <th className="px-4 py-2 font-semibold text-right">Monto</th>
-                <th className="px-4 py-2 font-semibold text-right w-16">Acciones</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-outline-variant/50 bg-surface">
-              {isLoading ? (
-                <tr>
-                  <td colSpan="5" className="text-center p-8 text-on-surface-variant">
-                    <span className="material-symbols-outlined animate-spin text-[24px]" translate="no">sync</span>
-                  </td>
-                </tr>
-              ) : filteredPagos.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="text-center p-8 text-on-surface-variant">
-                    <span className="material-symbols-outlined text-[32px] opacity-20 mb-2 block" translate="no">search_off</span>
-                    <p className="font-bold">No se encontraron pagos</p>
-                  </td>
-                </tr>
-              ) : (
-                filteredPagos.map((pago) => (
-                  <PaymentRow
-                    key={pago.id}
-                    pago={pago}
-                    fallbackPrevio={fallbackPrevioMap.get(pago.id) || 0}
-                    onSelect={setSelectedPaymentForDetails}
-                    onOpenMenu={handleOpenMenu}
-                    isMenuOpen={actionMenu?.pago?.id === pago.id}
-                  />
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <PaymentHistoryTable
+        payments={filteredPagos}
+        loading={isLoading}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        showAnulados={showAnulados}
+        onToggleAnulados={() => setShowAnulados((current) => !current)}
+        onExportExcel={handleExportExcel}
+        onExportPDF={handleExportPDF}
+        onExportTickets={handleExportAllPdf}
+        fallbackMap={fallbackPrevioMap}
+        onSelect={setSelectedPaymentForDetails}
+        onOpenMenu={handleOpenMenu}
+        openMenuPaymentId={actionMenu?.pago?.id}
+        getTipoInfo={getPagoTipoInfo}
+        formatCurrency={fmtCurrency}
+      />
 
       {/* Modal Registrar Pago */}
 
@@ -1334,43 +871,7 @@ const Payments = () => {
       )}
 
 
-      {/* Modal PDF (Portal) */}
-
-      {isPdfModalOpen && createPortal(
-        <div {...MODAL_BACKDROP} className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-          <div {...MODAL_CONTENT} className="bg-surface rounded-2xl w-full max-w-5xl shadow-2xl overflow-hidden flex flex-col h-[90vh]">
-            <div className="flex justify-between items-center p-6 border-b border-outline-variant">
-              <div>
-                <h3 className="font-headline-sm text-on-surface">Visor de PDF</h3>
-                <p className="text-sm text-on-surface-variant">Historial de Pagos</p>
-              </div>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleDownloadPdf}
-                  className="px-4 py-2 bg-primary text-on-primary rounded-xl font-bold hover:opacity-90 transition-opacity flex items-center gap-2"
-                >
-                  <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  Descargar
-                </button>
-                <button
-                  onClick={closePdfModal}
-                  className="p-2 hover:bg-surface-variant rounded-full transition-colors text-on-surface-variant"
-                >
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            <div className="flex-1 bg-surface-variant">
-              <iframe src={pdfUrl} className="w-full h-full border-none" title="Visor PDF" />
-            </div>
-          </div>
-        </div>,
-        document.body,
-      )}
+      {isPdfModalOpen && <PdfPreviewModal pdfBlobUrl={pdfUrl} title="Historial de Pagos" downloadFileName={`Pagos_Parque_Industrial_${new Date().toISOString().slice(0, 10)}.pdf`} onClose={closePdfModal} />}
 
       {/* Dropdown flotante de Acciones */}
       {actionMenu && createPortal(
@@ -1512,241 +1013,21 @@ const Payments = () => {
         document.body
       )}
 
-      {/* Modal Anular Pago */}
       {isAnularModalOpen && pagoToAnular && (
-        <div {...MODAL_BACKDROP} className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div {...MODAL_CONTENT} className="bg-surface rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden border border-outline-variant animate-in fade-in zoom-in-95 duration-150">
-            {/* Header */}
-            <div className="px-5 py-4 border-b border-outline-variant bg-error/5 flex justify-between items-center">
-              <h3 className="text-base text-error font-bold flex items-center gap-2">
-                <span className="material-symbols-outlined text-[22px]" translate="no">cancel</span>
-                Anular Pago
-              </h3>
-              <button
-                onClick={() => {
-                  if (!isSubmittingAnular) {
-                    setIsAnularModalOpen(false);
-                    setPagoToAnular(null);
-                    setMotivoAnulacion('');
-                  }
-                }}
-                disabled={isSubmittingAnular}
-                className="w-7 h-7 rounded-full hover:bg-surface-variant flex items-center justify-center text-on-surface-variant transition-colors disabled:opacity-50"
-              >
-                <span className="material-symbols-outlined text-[18px]" translate="no">close</span>
-              </button>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleConfirmAnularPago} className="p-5 space-y-4">
-              {/* Resumen del pago */}
-              <div className="bg-surface-container-low border border-outline-variant/60 rounded-xl p-3.5 space-y-2 text-xs">
-                <div className="flex justify-between items-center">
-                  <span className="text-on-surface-variant font-medium">Socio:</span>
-                  <span className="font-bold text-on-surface text-right">{pagoToAnular.socio}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-on-surface-variant font-medium">Recibo / Comprobante:</span>
-                  <span className="font-data-mono font-bold text-on-surface">{pagoToAnular.numero_comprobante}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-on-surface-variant font-medium">Monto Pagado:</span>
-                  <span className="font-data-mono font-bold text-error text-sm">S/ {fmtCurrency(pagoToAnular.monto_pagado)}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-on-surface-variant font-medium">Fecha de Pago:</span>
-                  <span className="text-on-surface">{new Date(pagoToAnular.fecha_pago).toLocaleDateString('es-PE')}</span>
-                </div>
-              </div>
-
-              {/* Advertencia */}
-              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg text-xs text-amber-900 flex items-start gap-2">
-                <span className="material-symbols-outlined text-[18px] text-amber-700 shrink-0 mt-0.5" translate="no">warning</span>
-                <span>
-                  Al anular este pago, el estado y saldo de la deuda del recibo se recalcularán automáticamente. Si este pago generó saldo a favor, será deducido.
-                </span>
-              </div>
-
-              {/* Motivo Input */}
-              <div>
-                <label className="text-[11px] font-bold text-on-surface block mb-1.5">
-                  Motivo de Anulación <span className="text-error">*</span>
-                </label>
-                <textarea
-                  required
-                  rows={3}
-                  value={motivoAnulacion}
-                  onChange={(e) => setMotivoAnulacion(e.target.value)}
-                  placeholder="Especifique el motivo de anulación (ej. comprobante duplicado, error en monto, transferencia no acreditada)..."
-                  className="w-full border border-outline-variant rounded-lg p-2.5 text-xs bg-white focus:border-error focus:ring-1 focus:ring-error outline-none transition-all resize-none shadow-inner"
-                  autoFocus
-                />
-              </div>
-
-              {/* Acciones */}
-              <div className="flex justify-end items-center gap-2 pt-2 border-t border-outline-variant">
-                <button
-                  type="button"
-                  disabled={isSubmittingAnular}
-                  onClick={() => {
-                    setIsAnularModalOpen(false);
-                    setPagoToAnular(null);
-                    setMotivoAnulacion('');
-                  }}
-                  className="px-4 py-2 text-xs font-semibold text-on-surface-variant hover:bg-surface-variant rounded-md transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmittingAnular || !motivoAnulacion.trim()}
-                  className="px-4 py-2 text-xs font-bold text-white bg-error hover:bg-error/90 rounded-md transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  {isSubmittingAnular ? (
-                    <>
-                      <span className="material-symbols-outlined animate-spin text-[16px]" translate="no">sync</span>
-                      Anulando...
-                    </>
-                  ) : (
-                    <>
-                      <span className="material-symbols-outlined text-[16px]" translate="no">delete_forever</span>
-                      Confirmar Anulación
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <CancelPaymentModal
+          payment={pagoToAnular}
+          reason={motivoAnulacion}
+          onReasonChange={setMotivoAnulacion}
+          onSubmit={handleConfirmAnularPago}
+          onClose={() => { if (!isSubmittingAnular) { setIsAnularModalOpen(false); setPagoToAnular(null); setMotivoAnulacion(''); } }}
+          isSubmitting={isSubmittingAnular}
+          formatCurrency={fmtCurrency}
+          backdropProps={MODAL_BACKDROP}
+          contentProps={MODAL_CONTENT}
+        />
       )}
 
-      {/* Modal Modificar Pago */}
-      {isEditModalOpen && pagoToEdit && (
-        <div {...MODAL_BACKDROP} className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div {...MODAL_CONTENT} className="bg-surface rounded-2xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden border border-outline-variant animate-in fade-in zoom-in-95 duration-150">
-            {/* Header */}
-            <div className="px-5 py-4 border-b border-outline-variant bg-amber-500/10 flex justify-between items-center">
-              <h3 className="text-base text-amber-900 font-bold flex items-center gap-2">
-                <span className="material-symbols-outlined text-[22px] text-amber-700" translate="no">edit_square</span>
-                Modificar Información del Pago
-              </h3>
-              <button
-                onClick={handleCloseEditModal}
-                disabled={isSubmittingEdit}
-                className="w-7 h-7 rounded-full hover:bg-surface-variant flex items-center justify-center text-on-surface-variant transition-colors disabled:opacity-50"
-              >
-                <span className="material-symbols-outlined text-[18px]" translate="no">close</span>
-              </button>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleConfirmEditPago} className="p-5 space-y-4">
-              {/* Resumen del pago */}
-              <div className="bg-surface-container-low border border-outline-variant/60 rounded-xl p-3.5 space-y-2 text-xs">
-                <div className="flex justify-between items-center">
-                  <span className="text-on-surface-variant font-medium">Socio:</span>
-                  <span className="font-bold text-on-surface text-right">{pagoToEdit.socio}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-on-surface-variant font-medium">Recibo / Comprobante:</span>
-                  <span className="font-data-mono font-bold text-on-surface">{pagoToEdit.numero_comprobante}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-on-surface-variant font-medium">Monto Pagado:</span>
-                  <span className="font-data-mono font-bold text-primary text-sm">S/ {fmtCurrency(pagoToEdit.monto_pagado)}</span>
-                </div>
-              </div>
-
-              {/* Campos modificables */}
-              <div className="space-y-3">
-                {/* Método de Pago */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-0.5">
-                    Método de Pago <span className="text-error">*</span>
-                  </label>
-                  <div className="relative">
-                    <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">account_balance</span>
-                    <select
-                      className="appearance-none w-full border border-outline-variant rounded-md pl-8 pr-8 py-1.5 h-8 bg-white text-xs font-medium focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors cursor-pointer"
-                      value={editMetodoPago}
-                      onChange={(e) => setEditMetodoPago(e.target.value)}
-                      required
-                    >
-                      <option value="Transferencia">Transferencia</option>
-                      <option value="Efectivo">Efectivo</option>
-                      <option value="Cheque">Cheque</option>
-                      <option value="Depósito">Depósito en Cuenta</option>
-                    </select>
-                    <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[16px]" translate="no">expand_more</span>
-                  </div>
-                </div>
-
-                {/* Nº Operación */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-0.5">
-                    Nº Operación / Referencia
-                  </label>
-                  <div className="relative">
-                    <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">tag</span>
-                    <input
-                      type="text"
-                      className="w-full border border-outline-variant rounded-md pl-8 pr-3 py-1.5 h-8 bg-white font-data-mono text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
-                      value={editNumeroOperacion}
-                      onChange={(e) => setEditNumeroOperacion(e.target.value)}
-                      placeholder="Ej. 04829102"
-                    />
-                  </div>
-                </div>
-
-                {/* Fecha de Pago */}
-                <div className="flex flex-col gap-1">
-                  <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-0.5">
-                    Fecha de Pago <span className="text-error">*</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="date"
-                      className="w-full border border-outline-variant rounded-md px-3 py-1.5 h-8 bg-white font-data-mono text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
-                      value={editFechaPago}
-                      onChange={(e) => setEditFechaPago(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Botones de acción */}
-              <div className="flex justify-end items-center gap-2 pt-3 border-t border-outline-variant">
-                <button
-                  type="button"
-                  disabled={isSubmittingEdit}
-                  onClick={handleCloseEditModal}
-                  className="px-4 py-2 text-xs font-semibold text-on-surface-variant hover:bg-surface-variant rounded-md transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSubmittingEdit || !editFechaPago || !editMetodoPago}
-                  className="px-4 py-2 text-xs font-bold text-white bg-amber-600 hover:bg-amber-700 rounded-md transition-all shadow-sm flex items-center gap-1.5 disabled:opacity-50"
-                >
-                  {isSubmittingEdit ? (
-                    <>
-                      <span className="material-symbols-outlined animate-spin text-[16px]" translate="no">sync</span>
-                      Guardando...
-                    </>
-                  ) : (
-                    <>
-                      <span className="material-symbols-outlined text-[16px]" translate="no">save</span>
-                      Guardar Cambios
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
+      {isEditModalOpen && pagoToEdit && <EditPaymentModal payment={pagoToEdit} method={editMetodoPago} onMethodChange={setEditMetodoPago} operation={editNumeroOperacion} onOperationChange={setEditNumeroOperacion} date={editFechaPago} onDateChange={setEditFechaPago} onSubmit={handleConfirmEditPago} onClose={handleCloseEditModal} isSubmitting={isSubmittingEdit} formatCurrency={fmtCurrency} backdropProps={MODAL_BACKDROP} contentProps={MODAL_CONTENT} />}
 
       {/* Drawer de Detalles del Pago (Portal) */}
 

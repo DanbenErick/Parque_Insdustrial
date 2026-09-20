@@ -8,6 +8,7 @@ import { ThemeProvider } from './context/ThemeContext'
 import { YearProvider } from './context/YearContext'
 import './index.css'
 import App from './App.jsx'
+import AppErrorBoundary from './components/ui/AppErrorBoundary.jsx'
 
 // Desactivar el cambio de valor por scroll en los input[type="number"]
 document.addEventListener('wheel', (e) => {
@@ -34,7 +35,9 @@ createRoot(document.getElementById('root')).render(
         <ThemeProvider>
           <AuthProvider>
             <YearProvider>
-              <App />
+              <AppErrorBoundary>
+                <App />
+              </AppErrorBoundary>
             </YearProvider>
           </AuthProvider>
         </ThemeProvider>

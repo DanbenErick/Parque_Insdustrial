@@ -22,7 +22,7 @@ export const useBillingData = (activeYear) => {
 
   const fetchMedidores = useCallback(async () => {
     try {
-      const res = await api.get('/medidores');
+      const res = await api.get('/medidores?operativo=true');
       setMedidores(res.data);
     } catch (error) {
       console.error('Error al cargar medidores', error);

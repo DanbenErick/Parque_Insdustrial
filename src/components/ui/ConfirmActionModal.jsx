@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useId, useRef } from 'react';
 
 
 
@@ -16,15 +16,32 @@ const ConfirmActionModal = ({
   onConfirm,
   onClose
 }) => {
+  const titleId = useId();
+  const cancelButtonRef = useRef(null);
+
+  useEffect(() => {
+    cancelButtonRef.current?.focus();
+
+    const handleEscape = (event) => {
+      if (event.key === 'Escape' && !isLoading) onClose();
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isLoading, onClose]);
+
   return (
     <div
       className="fixed inset-0 z-[60] flex items-center justify-center p-md bg-black/60 backdrop-blur-sm !m-0"
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         className="bg-surface border border-outline-variant rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"
       >
         <div className={`px-lg py-md flex justify-between items-center border-b-0 ${isDestructive ? 'bg-error' : 'bg-primary'}`}>
-          <h3 className="font-headline-sm font-bold text-white flex items-center gap-2">
+          <h3 id={titleId} className="font-headline-sm font-bold text-white flex items-center gap-2">
             <span className="material-symbols-outlined text-white" translate="no">
               {icon}
             </span>
@@ -43,6 +60,7 @@ const ConfirmActionModal = ({
         </div>
         <div className="px-lg py-md border-t border-outline-variant bg-surface-container-lowest flex justify-end gap-md">
           <button
+            ref={cancelButtonRef}
             type="button"
             onClick={onClose}
             disabled={isLoading}

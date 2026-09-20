@@ -1,4 +1,4 @@
-import  { useState, useMemo, useCallback, Suspense, lazy } from 'react';
+import { useState, useMemo, useCallback, Suspense, lazy } from 'react';
 import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { useAuth } from './context/AuthContext';
@@ -19,7 +19,7 @@ import FullScreenLoader from './components/ui/FullScreenLoader';
 
 // Componente de carga para Lazy Pages
 const PageLoader = () => (
-  <FullScreenLoader title="Cargando pantalla..." subtitle="Preparando la vista del sistema..." />
+  <FullScreenLoader title="Abriendo la sección" subtitle="Preparando el contenido que necesitas." />
 );
 
 // Pages (Lazy Loaded)
@@ -33,7 +33,6 @@ const GenerateInvoicesPage = lazy(() => import('./pages/invoices/GenerateInvoice
 const ReceiptDetailPage = lazy(() => import('./pages/receipt-detail/ReceiptDetailPage'));
 const ManualBillingPage = lazy(() => import('./pages/manual-billing/ManualBillingPage'));
 const SettingsPage = lazy(() => import('./pages/settings/SettingsPage'));
-const SupportPage = lazy(() => import('./pages/support/SupportPage'));
 const UserManagementPage = lazy(() => import('./pages/users/UserManagementPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
@@ -44,6 +43,7 @@ const SocioPaymentsPage = lazy(() => import('./pages/socio/SocioPaymentsPage'));
 const SocioProfilePage = lazy(() => import('./pages/socio/SocioProfilePage'));
 
 function App() {
+
   const { user, isAuthenticated, isLoading } = useAuth();
 
   const location = useLocation();
@@ -61,7 +61,6 @@ function App() {
     { view: 'manual_billing', name: 'Lecturas', icon: 'edit_document', keywords: ['lectura', 'kwh', 'medidor', 'consumo'], hasAccess: userRutas.includes('manual_billing') },
     { view: 'users', name: 'Gestión de Usuarios', icon: 'manage_accounts', keywords: ['administradores', 'moderadores', 'cuentas', 'permisos', 'contraseñas'], isConfig: true, hasAccess: userRutas.includes('users') },
     { view: 'settings', name: 'Ajustes Generales', icon: 'settings', keywords: ['configuracion', 'parametros', 'sistema'], isConfig: true, hasAccess: userRutas.includes('settings') },
-    { view: 'support', name: 'Soporte Técnico', icon: 'support_agent', keywords: ['ayuda', 'contacto', 'problemas', 'ticket'], hasAccess: userRutas.includes('support') },
   ], [userRutas]);
 
   const visibleScreens = useMemo(() => appScreens.filter(s => s.hasAccess), [appScreens]);
@@ -69,7 +68,7 @@ function App() {
   const closeMobileMenu = useCallback(() => setIsMobileMenuOpen(false), []);
 
   if (isLoading) {
-    return <FullScreenLoader title="Cargando sesión..." subtitle="Verificando credenciales..." />;
+    return <FullScreenLoader title="Recuperando tu sesión" subtitle="Validando tus credenciales y preferencias de acceso." />;
   }
 
   if (!isAuthenticated) {
@@ -169,25 +168,24 @@ function App() {
           {/* Content */}
           <div className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col pb-[70px] md:pb-0">
 
-              <Suspense fallback={<PageLoader />}>
-                <Routes location={location} key={location.pathname}>
-                  <Route path="/" element={<Navigate to="/dashboard" />} />
-                  <Route path="/dashboard" element={<ProtectedRoute requiredRoute={Number(user?.rol_id) === 3 ? null : "dashboard"}><PageTransition>{Number(user?.rol_id) === 3 ? <SocioDashboardPage /> : <DashboardPage />}</PageTransition></ProtectedRoute>} />
-                  <Route path="/tenants" element={<ProtectedRoute requiredRoute="tenants"><PageTransition><TenantsPage /></PageTransition></ProtectedRoute>} />
-                  <Route path="/billing" element={<ProtectedRoute requiredRoute={Number(user?.rol_id) === 3 ? null : "billing"}><PageTransition>{Number(user?.rol_id) === 3 ? <SocioBillingPage /> : <BillingPage />}</PageTransition></ProtectedRoute>} />
-                  <Route path="/payments" element={<ProtectedRoute requiredRoute={Number(user?.rol_id) === 3 ? null : "payments"}><PageTransition>{Number(user?.rol_id) === 3 ? <SocioPaymentsPage /> : <PaymentsPage />}</PageTransition></ProtectedRoute>} />
-                  <Route path="/profile" element={<ProtectedRoute requiredRoute={Number(user?.rol_id) === 3 ? null : "profile"}><PageTransition>{Number(user?.rol_id) === 3 ? <SocioProfilePage /> : <Navigate to="/dashboard" />}</PageTransition></ProtectedRoute>} />
-                  <Route path="/reports" element={<ProtectedRoute requiredRoute="reports"><PageTransition><ReportsPage /></PageTransition></ProtectedRoute>} />
-                  <Route path="/generate_invoices" element={<ProtectedRoute requiredRoute="billing"><PageTransition><GenerateInvoicesPage /></PageTransition></ProtectedRoute>} />
-                  <Route path="/manual_billing" element={<ProtectedRoute requiredRoute="manual_billing"><PageTransition><ManualBillingPage /></PageTransition></ProtectedRoute>} />
-                  <Route path="/receipt_detail" element={<ProtectedRoute requiredRoute="billing"><PageTransition><ReceiptDetailPage /></PageTransition></ProtectedRoute>} />
-                  <Route path="/users" element={<ProtectedRoute requiredRoute="users"><PageTransition><UserManagementPage /></PageTransition></ProtectedRoute>} />
-                  <Route path="/settings" element={<ProtectedRoute requiredRoute="settings"><PageTransition><SettingsPage /></PageTransition></ProtectedRoute>} />
-                  <Route path="/support" element={<ProtectedRoute requiredRoute="support"><PageTransition><SupportPage /></PageTransition></ProtectedRoute>} />
-                  <Route path="/login" element={<Navigate to="/dashboard" />} />
-                  <Route path="*" element={<PageTransition><NotFoundPage /></PageTransition>} />
-                </Routes>
-              </Suspense>
+            <Suspense fallback={<PageLoader />}>
+              <Routes location={location} key={`${location.pathname}${location.search}`}>
+                <Route path="/" element={<Navigate to="/dashboard" />} />
+                <Route path="/dashboard" element={<ProtectedRoute requiredRoute={Number(user?.rol_id) === 3 ? null : "dashboard"}><PageTransition>{Number(user?.rol_id) === 3 ? <SocioDashboardPage /> : <DashboardPage />}</PageTransition></ProtectedRoute>} />
+                <Route path="/tenants" element={<ProtectedRoute requiredRoute="tenants"><PageTransition><TenantsPage /></PageTransition></ProtectedRoute>} />
+                <Route path="/billing" element={<ProtectedRoute requiredRoute={Number(user?.rol_id) === 3 ? null : "billing"}><PageTransition>{Number(user?.rol_id) === 3 ? <SocioBillingPage /> : <BillingPage />}</PageTransition></ProtectedRoute>} />
+                <Route path="/payments" element={<ProtectedRoute requiredRoute={Number(user?.rol_id) === 3 ? null : "payments"}><PageTransition>{Number(user?.rol_id) === 3 ? <SocioPaymentsPage /> : <PaymentsPage />}</PageTransition></ProtectedRoute>} />
+                <Route path="/profile" element={<ProtectedRoute requiredRoute={Number(user?.rol_id) === 3 ? null : "profile"}><PageTransition>{Number(user?.rol_id) === 3 ? <SocioProfilePage /> : <Navigate to="/dashboard" />}</PageTransition></ProtectedRoute>} />
+                <Route path="/reports" element={<ProtectedRoute requiredRoute="reports"><PageTransition><ReportsPage /></PageTransition></ProtectedRoute>} />
+                <Route path="/generate_invoices" element={<ProtectedRoute requiredRoute="billing"><PageTransition><GenerateInvoicesPage /></PageTransition></ProtectedRoute>} />
+                <Route path="/manual_billing" element={<ProtectedRoute requiredRoute="manual_billing"><PageTransition><ManualBillingPage /></PageTransition></ProtectedRoute>} />
+                <Route path="/receipt_detail" element={<ProtectedRoute requiredRoute="billing"><PageTransition><ReceiptDetailPage /></PageTransition></ProtectedRoute>} />
+                <Route path="/users" element={<ProtectedRoute requiredRoute="users"><PageTransition><UserManagementPage /></PageTransition></ProtectedRoute>} />
+                <Route path="/settings" element={<ProtectedRoute requiredRoute="settings"><PageTransition><SettingsPage /></PageTransition></ProtectedRoute>} />
+                <Route path="/login" element={<Navigate to="/dashboard" />} />
+                <Route path="*" element={<PageTransition><NotFoundPage /></PageTransition>} />
+              </Routes>
+            </Suspense>
 
           </div>
 

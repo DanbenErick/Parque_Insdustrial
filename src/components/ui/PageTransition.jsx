@@ -3,8 +3,9 @@ import 'react';
 const PageTransition = ({ children }) => {
   return (
     <div
-      className="h-full w-full flex flex-col"
+      className="page-transition relative h-full w-full flex flex-col"
     >
+      <span className="page-transition-indicator" aria-hidden="true" />
       {children}
     </div>
   );

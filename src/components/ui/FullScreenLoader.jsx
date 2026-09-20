@@ -1,58 +1,57 @@
 import React from 'react';
 
 const FullScreenLoader = ({
-  title = 'Cargando pantalla...',
-  subtitle = 'Preparando la vista del sistema...',
+  title = 'Estamos preparando todo',
+  subtitle = 'Esto tomará solo un momento.',
   badgeText = 'Parque Industrial Jicamarca',
   logoSrc = '/logo.png',
 }) => {
   return (
-    <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-surface text-on-surface select-none p-4 animate-in fade-in duration-150">
-      <div className="flex flex-col items-center max-w-sm w-full text-center">
-        {/* Logo con anillo animado */}
-        <div className="relative flex items-center justify-center mb-6">
-          {/* Resplandor sutil */}
-          <div className="absolute w-24 h-24 rounded-full bg-primary/15 blur-xl animate-pulse pointer-events-none" />
+    <div
+      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-slate-950/85 p-4 text-white backdrop-blur-[6px] select-none animate-in fade-in duration-200"
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <div className="relative flex w-full max-w-[380px] flex-col items-center px-5 py-8 text-center">
+        <div className="relative mb-5 flex items-center justify-center">
+          <div aria-hidden="true" className="absolute h-24 w-24 rounded-full bg-black/20 blur-xl" />
+          <div aria-hidden="true" className="h-24 w-24 rounded-[30px] border border-white/15 bg-black/10 shadow-inner" />
+          <div aria-hidden="true" className="absolute h-24 w-24 rounded-[30px] border-2 border-white/15 border-r-emerald-300 border-t-emerald-300 motion-safe:animate-spin motion-reduce:border-emerald-300/60" />
 
-          {/* Anillo giratorio */}
-          <div className="w-24 h-24 rounded-full border-4 border-primary/20 border-t-primary animate-spin" />
-
-          {/* Contenedor del logo institucional */}
-          <div className="absolute w-16 h-16 rounded-2xl bg-white shadow-md flex items-center justify-center p-2 overflow-hidden border border-slate-100 dark:border-slate-800">
+          <div className="absolute flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-white/20 bg-white p-2 shadow-xl shadow-black/30">
             <img
               src={logoSrc}
               alt="Logo Parque Industrial Jicamarca"
-              className="w-full h-full object-contain drop-shadow-sm"
+              className="h-full w-full object-contain"
             />
           </div>
         </div>
 
-        {/* Insignia corporativa */}
         {badgeText && (
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-primary/10 text-primary text-[11px] font-bold uppercase tracking-wider mb-2.5 border border-primary/20 shadow-sm">
-            <span className="material-symbols-outlined text-[14px]" translate="no">bolt</span>
+          <div className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-black/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.13em] text-emerald-200">
+            <span className="material-symbols-outlined text-[13px]" translate="no" aria-hidden="true">bolt</span>
             <span>{badgeText}</span>
           </div>
         )}
 
-        {/* Título de estado */}
-        <h3 className="text-lg md:text-xl font-bold text-on-surface tracking-tight">
+        <h2 className="text-xl font-bold tracking-tight text-white sm:text-[22px]">
           {title}
-        </h3>
+        </h2>
 
-        {/* Subtítulo descriptivo */}
         {subtitle && (
-          <p className="text-xs md:text-sm text-on-surface-variant mt-1.5 font-medium max-w-[280px] leading-relaxed">
+          <p className="mt-2 max-w-[290px] text-xs font-medium leading-relaxed text-slate-300 sm:text-sm">
             {subtitle}
           </p>
         )}
 
-        {/* Indicador de progreso con puntos animados */}
-        <div className="flex items-center gap-1.5 mt-5">
-          <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]" />
-          <span className="w-2 h-2 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]" />
-          <span className="w-2 h-2 rounded-full bg-primary animate-bounce" />
+        <div className="mt-6 h-1.5 w-full max-w-[220px] overflow-hidden rounded-full bg-white/10" aria-hidden="true">
+          <div className="h-full w-1/2 rounded-full bg-emerald-300 shadow-[0_0_14px_rgba(110,231,183,0.45)] motion-safe:animate-[loader-slide_1.35s_ease-in-out_infinite] motion-reduce:w-full" />
         </div>
+
+        <p className="mt-3 text-[10px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+          Procesando información
+        </p>
       </div>
     </div>
   );

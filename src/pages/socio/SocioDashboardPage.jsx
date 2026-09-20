@@ -13,6 +13,7 @@ import {
 import api from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
+import FullScreenLoader from '../../components/ui/FullScreenLoader';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -113,12 +114,7 @@ const SocioDashboardPage = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-4 text-emerald-600">
-        <span className="material-symbols-outlined animate-spin text-[40px]" translate="no">sync</span>
-        <p className="font-bold animate-pulse">Cargando su portal...</p>
-      </div>
-    );
+    return <FullScreenLoader title="Preparando tu portal" subtitle="Consultando tus medidores, consumos y recibos más recientes." />;
   }
 
   return (

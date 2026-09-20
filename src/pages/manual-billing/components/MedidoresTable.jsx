@@ -34,11 +34,12 @@ export const MedidoresTable = ({
   const [modalDeudaOpen, setModalDeudaOpen] = useState(false);
   const [selectedForDeuda, setSelectedForDeuda] = useState(null);
 
-  // Filtrado local por término de búsqueda
+  // Filtrado local por término de búsqueda y exclusión de medidores dados de baja
   const filteredMedidores = useMemo(() => {
-    if (!searchTerm.trim()) return medidores;
+    const operacionales = (medidores || []).filter(m => m.operativo !== false && m.operativo !== 0 && m.operativo !== '0');
+    if (!searchTerm.trim()) return operacionales;
     const lowerTerm = searchTerm.toLowerCase();
-    return medidores.filter(m =>
+    return operacionales.filter(m =>
       (m.num_serie && m.num_serie.toLowerCase().includes(lowerTerm)) ||
       (m.propietario && m.propietario.toLowerCase().includes(lowerTerm)) ||
       (m.documento_identidad && m.documento_identidad.toLowerCase().includes(lowerTerm))

@@ -4,6 +4,8 @@ import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import { toast } from 'sonner';
 import HistorialModal from '../billing/HistorialModal';
+import FullScreenLoader from '../../components/ui/FullScreenLoader';
+import { CargoLine, CargoLineConditional, InfoRow, SectionHeader } from './components/ReceiptDetailPrimitives';
 
 // ── Constants ────────────────────────────────────────────────────────
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -41,37 +43,6 @@ const formatPeriodo = (p) => {
 };
 
 const getEstadoConfig = (estado) => ESTADO_CONFIG[estado] || ESTADO_DEFAULT;
-
-// ── Sub-components ───────────────────────────────────────────────────
-const CargoLine = React.memo(({ label, amount, className = 'text-on-surface' }) => (
-  <div className={`flex justify-between items-center text-xs ${className}`}>
-    <span>{label}</span>
-    <span className="font-data-mono font-bold">S/ {formatCurrency(amount)}</span>
-  </div>
-));
-
-const CargoLineConditional = React.memo(({ value, label, className = 'text-error font-medium' }) => {
-  const parsed = parseFloat(value || 0);
-  if (parsed <= 0) return null;
-  return <CargoLine label={label} amount={value} className={className} />;
-});
-
-const InfoRow = React.memo(({ label, value, valueClassName = 'text-on-surface font-bold', hasBorder = true }) => (
-  <div className={`flex justify-between items-center ${hasBorder ? 'border-b border-outline-variant/50 pb-2' : ''}`}>
-    <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">{label}</span>
-    <span className={`text-xs ${valueClassName}`}>{value}</span>
-  </div>
-));
-
-const SectionHeader = React.memo(({ icon, title, children }) => (
-  <div className="flex items-center justify-between mb-3 border-b border-outline-variant/50 pb-2">
-    <div className="flex items-center gap-2">
-      <span className="material-symbols-outlined text-primary/70 text-[18px]" translate="no">{icon}</span>
-      <h4 className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant">{title}</h4>
-    </div>
-    {children}
-  </div>
-));
 
 // ── Main Component ───────────────────────────────────────────────────
 const ReceiptDetail = ({ receiptId, onClose }) => {
@@ -268,12 +239,7 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
 
   // ── Render helpers ─────────────────────────────────────────────────
   const renderLoading = () => (
-    <div className="flex-grow flex items-center justify-center bg-background min-h-[50vh]">
-      <div className="flex flex-col items-center gap-md">
-        <span className="material-symbols-outlined animate-spin text-primary text-4xl" translate="no">progress_activity</span>
-        <p className="text-body-md text-on-surface-variant font-medium">Cargando detalle del recibo...</p>
-      </div>
-    </div>
+    <FullScreenLoader title="Abriendo el recibo" subtitle="Estamos reuniendo consumos, cargos e historial de pagos." />
   );
 
   const renderError = () => (

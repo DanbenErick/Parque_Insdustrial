@@ -2,6 +2,7 @@ import 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
+import FullScreenLoader from '../../components/ui/FullScreenLoader';
 
 const METODO_CONFIG = {
   Transferencia: { icon: 'account_balance', bg: 'bg-blue-100 text-blue-700' },
@@ -22,12 +23,7 @@ const SocioPaymentsPage = () => {
   });
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-4 text-teal-600">
-        <span className="material-symbols-outlined animate-spin text-[40px]" translate="no">sync</span>
-        <p className="font-bold animate-pulse">Cargando historial de pagos...</p>
-      </div>
-    );
+    return <FullScreenLoader title="Consultando tus pagos" subtitle="Ordenando comprobantes y movimientos registrados." />;
   }
 
   if (isError) {

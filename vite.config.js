@@ -13,6 +13,7 @@ export default defineConfig({
         name: 'Sistema Luz Jicamarca',
         short_name: 'Luz Jicamarca',
         description: 'Gestión de cobros y lecturas del Parque Industrial Jicamarca',
+        lang: 'es',
         theme_color: '#515B3A',
         background_color: '#ffffff',
         display: 'standalone',
@@ -29,6 +30,11 @@ export default defineConfig({
             purpose: 'any maskable'
           }
         ]
+      },
+      workbox: {
+        // Los motores de Excel se descargan únicamente cuando el usuario abre
+        // una función de importación/exportación; no forman parte del arranque offline.
+        globIgnores: ['**/vendor-exceljs-*.js', '**/vendor-xlsx-*.js']
       }
     })
   ],

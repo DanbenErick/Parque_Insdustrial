@@ -26,6 +26,8 @@ import { usePdfViewer } from './hooks/usePdfViewer';
 import { useRefacturar } from './hooks/useRefacturar';
 import { useExports } from './hooks/useExports';
 import LoadingCurtain from '../../components/ui/LoadingCurtain';
+import { BillingHeader } from './components/BillingWorkspace';
+import BillingTableControls from './components/BillingTableControls';
 
 const Billing = () => {
   const { activeYear } = useYear();
@@ -266,62 +268,19 @@ const Billing = () => {
 
   return (
     <main className="p-4 md:p-xl space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow relative">
-      {/* Cortina de Carga de Pantalla Completa con Logo Institucional */}
       <LoadingCurtain
         isOpen={isLoading}
-        title="Cargando datos..."
-        subtitle="Obteniendo información del periodo seleccionado"
+        title="Preparando la facturación"
+        subtitle="Consultando recibos, estadísticas y periodos disponibles."
       />
 
-      {/* Cortina de Generación de PDF */}
       <LoadingCurtain
         isOpen={pdf.isGenerating}
-        title="Generando PDF..."
-        subtitle="Por favor espere, procesando el documento."
+        title="Creando tu documento"
+        subtitle="Estamos organizando la información y generando el archivo PDF."
       />
 
-      {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
-        <div>
-          <h2 className="text-2xl text-on-surface font-bold leading-tight">Módulo de Facturación</h2>
-          <p className="text-sm text-on-surface-variant">
-            Ciclo activo: <span className="font-bold text-on-surface">{activeHeaderTitle}</span>
-          </p>
-        </div>
-        <div className="flex flex-wrap items-end gap-3">
-          <div className="flex flex-col gap-0.5">
-            <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-1">Periodo a Filtrar</label>
-            <div className="relative">
-              <select
-                value={filterMes}
-                onChange={(e) => setFilterMes(e.target.value)}
-                className="appearance-none border border-outline-variant rounded-md pl-3 pr-8 py-1.5 h-8 bg-surface-container-lowest text-on-surface text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary min-w-[180px] transition-all font-medium cursor-pointer shadow-sm hover:border-primary/50"
-              >
-                <option value="Todos">Todos los meses ({activeYear})</option>
-                <option value="TodosHistorico">Histórico (Todos los años)</option>
-                {uniqueMonths.map((m) => (
-                  <option key={m} value={m}>{formatPeriod(m)}</option>
-                ))}
-              </select>
-              <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-on-surface-variant text-[16px]" translate="no">expand_more</span>
-            </div>
-          </div>
-
-          {/* Generar Facturas Button */}
-          <button
-            onClick={handleGenerateFromDropdown}
-            disabled={filterMes === 'Todos' || filterMes === 'TodosHistorico'}
-            className={`flex items-center px-3 py-1.5 h-8 font-bold rounded-md transition-opacity shadow-sm text-xs ${
-              filterMes === 'Todos' || filterMes === 'TodosHistorico'
-                ? 'bg-surface-variant text-on-surface-variant cursor-not-allowed opacity-70'
-                : 'bg-primary text-on-primary hover:opacity-90 active:scale-95'
-            }`}
-          >
-            <span className="material-symbols-outlined mr-1 text-[16px]" translate="no">receipt_long</span>
-            Generar Facturas
-          </button>
-        </div>
-      </div>
+      <BillingHeader activeTitle={activeHeaderTitle} filterMes={filterMes} onFilterChange={setFilterMes} year={activeYear} months={uniqueMonths} onGenerate={handleGenerateFromDropdown} />
 
       {/* KPI Cards + Progress Bar */}
       <BillingKPICards
@@ -338,110 +297,22 @@ const Billing = () => {
 
       {/* Table Area */}
       <div className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden shadow-sm">
-        {/* Table Header */}
-        <div className="px-4 py-3 border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-surface-container-low">
-          <h4 className="text-base font-bold text-on-surface">Detalle de Facturación por Empresa</h4>
-          <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
-            {/* Search */}
-            <div className="relative flex-grow md:flex-grow-0">
-              <span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">search</span>
-              <input
-                type="text"
-                placeholder="Buscar socio o doc..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 pr-3 py-1.5 h-8 border border-outline-variant rounded-md text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-full md:w-48 bg-white transition-all"
-              />
-            </div>
-
-            {/* Filter Toggle */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 h-8 font-bold text-xs rounded-md transition-colors border ${
-                showFilters ? 'bg-primary/10 text-primary border-primary/20' : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[16px]" translate="no">filter_list</span>
-              Filtros {filterEstado !== 'Todos' && <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse ml-0.5"></span>}
-            </button>
-
-            <button
-              onClick={exports.handleExportExcel}
-              className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-xs rounded-md transition-colors border border-[#107C41]/20"
-            >
-              <span className="material-symbols-outlined text-[16px]" translate="no">table_view</span>
-              Excel
-            </button>
-            <button
-              onClick={() => setShowDeudasModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-[#ea580c]/10 text-[#ea580c] hover:bg-[#ea580c]/20 font-bold text-xs rounded-md transition-colors border border-[#ea580c]/20"
-            >
-              <span className="material-symbols-outlined text-[16px]" translate="no">request_quote</span>
-              Reporte Deudas
-            </button>
-            <button
-              onClick={handleExportPDF}
-              className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-error/10 text-error hover:bg-error/20 font-bold text-xs rounded-md transition-colors border border-error/20 tooltip-trigger"
-              title="Reporte Tabla"
-            >
-              <span className="material-symbols-outlined text-[16px]" translate="no">list_alt</span>
-              Reporte
-            </button>
-            <button
-              onClick={exports.handleExportAllPdfV2}
-              className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-primary/10 text-primary hover:bg-primary/20 font-bold text-xs rounded-md transition-colors border border-primary/20 tooltip-trigger"
-              title="Descargar todos los recibos para imprimir"
-            >
-              <span className="material-symbols-outlined text-[16px]" translate="no">print</span>
-              Imprimir Recibos
-            </button>
-          </div>
-        </div>
-
-        {/* Collapsible Filters Panel */}
-        {showFilters && (
-          <div className="px-lg py-sm border-b border-outline-variant bg-surface-container-lowest flex flex-wrap items-center gap-md animate-in slide-in-from-top-2 fade-in duration-200">
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-on-surface-variant">Mes:</span>
-              <select
-                value={filterMes}
-                onChange={(e) => setFilterMes(e.target.value)}
-                className="border border-outline-variant rounded-lg font-body-sm text-body-sm bg-white focus:border-primary focus:ring-1 focus:ring-primary px-3 py-1.5 cursor-pointer"
-              >
-                <option value="Todos">Todos los meses ({activeYear})</option>
-                <option value="TodosHistorico">Histórico (Todos los años)</option>
-                {uniqueMonths.map((m) => (
-                  <option key={m} value={m}>{formatPeriod(m)}</option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-semibold text-on-surface-variant">Estado del Recibo:</span>
-              <select
-                value={filterEstado}
-                onChange={(e) => setFilterEstado(e.target.value)}
-                className="border border-outline-variant rounded-lg font-body-sm text-body-sm bg-white focus:border-primary focus:ring-1 focus:ring-primary px-3 py-1.5 cursor-pointer"
-              >
-                <option value="Todos">Todos</option>
-                <option value="Pagado">Pagados</option>
-                <option value="Pendiente">Pendientes</option>
-                <option value="Vencido">Vencidos</option>
-                <option value="Anulado">Anulados</option>
-              </select>
-            </div>
-
-            {filterEstado !== 'Todos' && (
-              <button
-                onClick={() => setFilterEstado('Todos')}
-                className="text-xs font-bold text-error hover:underline ml-auto flex items-center gap-1"
-              >
-                <span className="material-symbols-outlined text-[14px]" translate="no">close</span>
-                Limpiar Filtro
-              </button>
-            )}
-          </div>
-        )}
+        <BillingTableControls
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          showFilters={showFilters}
+          onToggleFilters={() => setShowFilters((current) => !current)}
+          filterEstado={filterEstado}
+          onStatusChange={setFilterEstado}
+          filterMes={filterMes}
+          onPeriodChange={setFilterMes}
+          year={activeYear}
+          months={uniqueMonths}
+          onExportExcel={exports.handleExportExcel}
+          onOpenDebts={() => setShowDeudasModal(true)}
+          onExportPDF={handleExportPDF}
+          onPrintReceipts={exports.handleExportAllPdfV2}
+        />
 
         {/* Table */}
         <div className="overflow-x-auto overflow-y-auto custom-scrollbar max-h-[500px]">

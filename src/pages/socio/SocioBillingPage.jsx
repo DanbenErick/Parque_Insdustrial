@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
+import FullScreenLoader from '../../components/ui/FullScreenLoader';
 
 const STATUS_CONFIG = {
   Pendiente: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', icon: 'schedule' },
@@ -44,12 +45,7 @@ const SocioBillingPage = () => {
   }, [user?.nombre_razonsocial]);
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-4 text-emerald-600">
-        <span className="material-symbols-outlined animate-spin text-[40px]" translate="no">sync</span>
-        <p className="font-bold animate-pulse">Cargando sus recibos...</p>
-      </div>
-    );
+    return <FullScreenLoader title="Consultando tus recibos" subtitle="Estamos verificando importes, vencimientos y estados de pago." />;
   }
 
   if (isError) {

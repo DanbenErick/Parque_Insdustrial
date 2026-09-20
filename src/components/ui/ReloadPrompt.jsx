@@ -35,7 +35,7 @@ export default function ReloadPrompt() {
             </h3>
             <p className="text-xs text-on-surface-variant mt-1">
               {offlineReady
-                ? 'La aplicación se ha instalado y está lista para trabajar sin conexión.'
+                ? 'La interfaz quedó disponible. La consulta y actualización de datos requiere conexión con el servidor.'
                 : 'Hay una nueva versión disponible. Por favor, actualiza para ver los cambios.'}
             </p>
           </div>

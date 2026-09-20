@@ -1,7 +1,8 @@
-import 'react';
+import { useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
+import FullScreenLoader from '../ui/FullScreenLoader';
 
 /**
  * Envoltorio para proteger rutas basándose en los permisos del usuario.
@@ -13,12 +14,7 @@ const ProtectedRoute = ({ requiredRoute, children }) => {
   const { user, isAuthenticated, isLoading } = useAuth();
 
   if (isLoading) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center h-full min-h-[50vh] bg-surface gap-4">
-        <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-        <p className="mt-2 text-sm font-medium text-on-surface-variant animate-pulse">Verificando accesos...</p>
-      </div>
-    );
+    return <FullScreenLoader title="Verificando tu acceso" subtitle="Validando los permisos necesarios para abrir esta sección." />;
   }
 
   if (!isAuthenticated || !user) {
@@ -30,15 +26,19 @@ const ProtectedRoute = ({ requiredRoute, children }) => {
 
     // Si la validación falla para un administrador o socio que intenta forzar la URL
     if (!userRutas.includes(requiredRoute)) {
-      // Mostrar un toast amigable si intentan acceder forzosamente
-      setTimeout(() => {
-        toast.error('No tienes permisos para acceder a esta sección.');
-      }, 0);
-      return <Navigate to="/dashboard" replace />;
+      return <AccessDeniedRedirect />;
     }
   }
 
   return children;
+};
+
+const AccessDeniedRedirect = () => {
+  useEffect(() => {
+    toast.error('No tienes permisos para acceder a esta sección.');
+  }, []);
+
+  return <Navigate to="/dashboard" replace />;
 };
 
 export default ProtectedRoute;
