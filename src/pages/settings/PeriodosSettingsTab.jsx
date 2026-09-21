@@ -1,6 +1,7 @@
-import  { useState, useEffect } from 'react';
+import  { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import api from '../../api/axiosConfig';
+import { periodosQueryOptions, queryKeys } from '../../api/queryOptions';
 import { useYear } from '../../context/YearContext';
 import PeriodFormModal from './PeriodFormModal';
 import PeriodDetailDrawer from './PeriodDetailDrawer';
@@ -30,27 +31,13 @@ const formatPeriodo = (periodoStr) => {
 
 const PeriodosSettingsTab = () => {
   const { activeYear, addYear } = useYear();
-  const [periodos, setPeriodos] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: periodos = [], isLoading } = useQuery(periodosQueryOptions);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingPeriodo, setEditingPeriodo] = useState(null);
   const [drawerPeriodo, setDrawerPeriodo] = useState(null);
 
-  const fetchPeriodos = async () => {
-    setIsLoading(true);
-    try {
-      const res = await api.get('/periodos');
-      setPeriodos(res.data);
-    } catch (error) {
-      toast.error('Error al cargar historial de periodos');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchPeriodos();
-  }, []);
+  const fetchPeriodos = () => queryClient.invalidateQueries({ queryKey: queryKeys.periodos });
 
   const periodosFiltrados = periodos.filter(p => {
     if (!p.mes_anio) return false;

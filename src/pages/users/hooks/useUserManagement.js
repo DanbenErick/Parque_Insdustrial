@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import api from '../../../api/axiosConfig';
+import { createBlobUrl, downloadBlob, MIME_TYPES } from '../../../utils/downloadFile';
 
 const INITIAL_FORM = {
   rol_id: '2', nombre_razonsocial: '', correo: '', cargo_representante: '',
@@ -113,18 +114,10 @@ export const useUserManagement = () => {
   const handleExport = useCallback(async (type) => {
     try {
       const response = await api.get(`/usuarios/export/${type}`, { responseType: 'blob' });
-      const blob = new Blob([response.data], { type: type === 'excel' ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' : 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
       if (type === 'pdf') {
-        setPdfPreviewUrl(url);
+        setPdfPreviewUrl(createBlobUrl(response.data, MIME_TYPES.PDF));
       } else {
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `usuarios_${new Date().toISOString().slice(0, 10)}.xlsx`;
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        window.URL.revokeObjectURL(url);
+        downloadBlob(response.data, `usuarios_${new Date().toISOString().slice(0, 10)}.xlsx`, MIME_TYPES.EXCEL);
         toast.success('Archivo EXCEL descargado');
       }
     } catch {

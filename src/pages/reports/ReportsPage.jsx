@@ -1,5 +1,7 @@
 import  { useState, useEffect, useCallback, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import api from '../../api/axiosConfig';
+import { lecturasQueryOptions, periodosQueryOptions } from '../../api/queryOptions';
 import { useYear } from '../../context/YearContext';
 import { toast } from 'sonner';
 import { Bar, Doughnut } from 'react-chartjs-2';
@@ -8,6 +10,7 @@ import ReportsOverviewHeader from './components/ReportsOverviewHeader';
 import ReportTableRow from './ReportTableRow';
 import { handleExportPDF, handleExportExcel } from './reportExportService';
 import FullScreenLoader from '../../components/ui/FullScreenLoader';
+import { ExcelIcon } from '../../components/ui/ExcelIcon';
 import {
   FINANCIAL_CHART_OPTIONS,
   CONSUMO_CHART_OPTIONS,
@@ -72,62 +75,64 @@ const RECAUDACION_OPTIONS = buildRecaudacionOptions();
 const Reports = () => {
   const { activeYear } = useYear();
   const [activeTab, setActiveTab] = useState('general');
-  const [periodos, setPeriodos] = useState([]);
   const [selectedPeriod, setSelectedPeriod] = useState('');
-  const [recibos, setRecibos] = useState([]);
-  const [lecturas, setLecturas] = useState([]);
-  const [chartData, setChartData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   // ── Data Fetching ──────────────────────────────────────────────────────────
-
-  const fetchData = useCallback(async () => {
-    try {
-      setIsLoading(true);
-      const [periodosRes, recibosRes, lecturasRes, chartRes] = await Promise.all([
-        api.get('/periodos'),
-        api.get('/recibos'),
-        api.get('/lecturas'),
-        api.get('/dashboard/chart')
-      ]);
-
-      const newPeriodos = periodosRes.data || [];
-      setPeriodos(newPeriodos);
-      setRecibos(Array.isArray(recibosRes.data) ? recibosRes.data : (recibosRes.data?.data || []));
-      setLecturas(Array.isArray(lecturasRes.data) ? lecturasRes.data : (lecturasRes.data?.data || []));
-      setChartData(Array.isArray(chartRes.data) ? chartRes.data : (chartRes.data?.data || []));
-
-      if (newPeriodos.length > 0) {
-        const yearPeriods = newPeriodos.filter(p => p.mes_anio?.includes(activeYear.toString()));
-        setSelectedPeriod(yearPeriods.length > 0 ? yearPeriods[0].mes_anio : newPeriodos[0].mes_anio);
-      }
-    } catch (error) {
-      console.error('Error al cargar datos del reporte:', error);
-      toast.error('Error al cargar la información del reporte');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [activeYear]);
-
-  useEffect(() => { fetchData(); }, [fetchData]);
+  const { data: periodos = [], isLoading: isLoadingPeriodos, isError: isPeriodosError, refetch: refetchPeriodos } = useQuery(periodosQueryOptions);
+  const { data: recibosResponse, isLoading: isLoadingRecibos, isError: isRecibosError, refetch: refetchRecibos } = useQuery({
+    queryKey: ['reportes-recibos', activeYear],
+    queryFn: () => api.get('/recibos', { params: { year: activeYear } }).then((response) => response.data),
+    staleTime: 2 * 60 * 1000,
+  });
+  const recibos = useMemo(
+    () => Array.isArray(recibosResponse) ? recibosResponse : (recibosResponse?.data || []),
+    [recibosResponse],
+  );
+  const {
+    data: lecturas = [],
+    isLoading: isLoadingLecturas,
+    isError: isLecturasError,
+    refetch: refetchLecturas,
+  } = useQuery(lecturasQueryOptions(
+    { periodo: selectedPeriod, limit: 10000 },
+    { enabled: Boolean(selectedPeriod) },
+  ));
+  const { data: chartResponse, isLoading: isLoadingChart, isError: isChartError, refetch: refetchChart } = useQuery({
+    queryKey: ['dashboard-chart', activeYear],
+    queryFn: () => api.get('/dashboard/chart', { params: { year: activeYear } }).then((response) => response.data),
+    staleTime: 5 * 60 * 1000,
+  });
+  const chartData = useMemo(
+    () => Array.isArray(chartResponse) ? chartResponse : (chartResponse?.data || []),
+    [chartResponse],
+  );
+  const isLoading = isLoadingPeriodos || isLoadingRecibos || isLoadingChart || (Boolean(selectedPeriod) && isLoadingLecturas);
 
   useEffect(() => {
-    if (periodos.length > 0) {
-      const yearPeriods = periodos.filter(p => p.mes_anio?.includes(activeYear.toString()));
-      if (yearPeriods.length > 0) setSelectedPeriod(yearPeriods[0].mes_anio);
+    if (isPeriodosError || isRecibosError || isLecturasError || isChartError) {
+      toast.error('Error al cargar la información del reporte');
     }
+  }, [isChartError, isLecturasError, isPeriodosError, isRecibosError]);
+
+  useEffect(() => {
+    const yearPeriods = periodos.filter(p => p.mes_anio?.includes(activeYear.toString()));
+    setSelectedPeriod((current) => (
+      yearPeriods.some((periodo) => periodo.mes_anio === current)
+        ? current
+        : (yearPeriods[0]?.mes_anio || '')
+    ));
   }, [activeYear, periodos]);
 
   // ── Handlers ───────────────────────────────────────────────────────────────
 
   const handleUpdate = useCallback(async () => {
     setIsUpdating(true);
-    await fetchData();
+    await Promise.all([refetchPeriodos(), refetchRecibos(), refetchLecturas(), refetchChart()]);
     setIsUpdating(false);
     toast.success('Datos actualizados correctamente');
-  }, [fetchData]);
+  }, [refetchChart, refetchLecturas, refetchPeriodos, refetchRecibos]);
 
   const onExportPDF = useCallback(() => handleExportPDF(selectedPeriod), [selectedPeriod]);
   const onExportExcel = useCallback(() => handleExportExcel(selectedPeriod), [selectedPeriod]);
@@ -142,7 +147,7 @@ const Reports = () => {
   // ── Filtered Data (Memoized) ───────────────────────────────────────────────
 
   const filteredRecibos = useMemo(() => recibos.filter(r => r.periodo === selectedPeriod || r.mes_anio === selectedPeriod), [recibos, selectedPeriod]);
-  const filteredLecturas = useMemo(() => lecturas.filter(l => l.periodo === selectedPeriod), [lecturas, selectedPeriod]);
+  const filteredLecturas = lecturas;
 
   const yearPeriodos = useMemo(() => periodos.filter(p => p.mes_anio?.includes(activeYear.toString())), [periodos, activeYear]);
 
@@ -466,13 +471,15 @@ const Reports = () => {
                   />
                 </div>
                 <button
+                  type="button"
                   onClick={onExportExcel}
                   className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-xs rounded-md transition-colors border border-[#107C41]/20"
                 >
-                  <span className="material-symbols-outlined text-[16px]" translate="no">table_view</span>
+                  <ExcelIcon className="w-4 h-4" />
                   Excel
                 </button>
                 <button
+                  type="button"
                   onClick={onExportPDF}
                   className="flex items-center gap-1.5 px-3 py-1.5 h-8 bg-error/10 text-error hover:bg-error/20 font-bold text-xs rounded-md transition-colors border border-error/20"
                 >

@@ -1,3 +1,6 @@
+import { ExcelIcon } from '../../../components/ui/ExcelIcon';
+import UserMobileCard from './UserMobileCard';
+
 const ROLE_COLORS = {
   Admin: 'bg-primary-container text-on-primary-container',
   Operario: 'bg-tertiary-container text-on-tertiary-container',
@@ -38,10 +41,15 @@ const UserDirectory = ({ users, searchTerm, onSearchChange, onExport, onEdit, on
       <div className="flex flex-col"><div className="flex items-center gap-2"><h2 className="text-base text-on-surface font-bold tracking-tight">Personal y Administradores</h2><span className="bg-surface-variant text-on-surface-variant text-[10px] font-bold px-2 py-0.5 rounded-full">{users.length}</span></div><span className="text-[11px] text-on-surface-variant font-medium">Directorio de cuentas con acceso al panel</span></div>
       <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
         <div className="relative flex-grow md:flex-grow-0"><span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]" translate="no">search</span><input type="search" placeholder="Buscar usuario..." value={searchTerm} onChange={(event) => onSearchChange(event.target.value)} className="bg-surface-container-lowest border border-outline-variant rounded-xl pl-10 pr-4 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all w-full md:w-[260px] shadow-sm" /></div>
-        <div className="flex items-center gap-2"><div className="h-8 w-px bg-outline-variant mx-1 hidden sm:block" /><button type="button" onClick={() => onExport('excel')} className="group flex items-center gap-1.5 px-3 py-2 bg-[#107C41]/10 border border-transparent hover:border-[#107C41]/30 hover:bg-[#107C41]/20 text-[#107C41] font-bold text-xs rounded-xl transition-all shadow-sm"><span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform" translate="no">table_view</span><span className="hidden sm:inline">Excel</span></button><button type="button" onClick={() => onExport('pdf')} className="group flex items-center gap-1.5 px-3 py-2 bg-error/10 border border-transparent hover:border-error/30 hover:bg-error/20 text-error font-bold text-xs rounded-xl transition-all shadow-sm"><span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform" translate="no">picture_as_pdf</span><span className="hidden sm:inline">PDF</span></button></div>
+        <div className="flex items-center gap-2"><div className="h-8 w-px bg-outline-variant mx-1 hidden sm:block" /><button type="button" onClick={() => onExport('excel')} className="group flex items-center gap-1.5 px-3 py-2 bg-[#107C41]/10 border border-transparent hover:border-[#107C41]/30 hover:bg-[#107C41]/20 text-[#107C41] font-bold text-xs rounded-xl transition-all shadow-sm"><ExcelIcon className="w-4 h-4 group-hover:scale-110 transition-transform" /><span className="hidden sm:inline">Excel</span></button><button type="button" onClick={() => onExport('pdf')} className="group flex items-center gap-1.5 px-3 py-2 bg-error/10 border border-transparent hover:border-error/30 hover:bg-error/20 text-error font-bold text-xs rounded-xl transition-all shadow-sm"><span className="material-symbols-outlined text-[18px] group-hover:scale-110 transition-transform" translate="no">picture_as_pdf</span><span className="hidden sm:inline">PDF</span></button></div>
       </div>
     </div>
-    <div className="overflow-x-auto">
+    <div className="md:hidden divide-y divide-outline-variant/60 bg-surface">
+      {isLoading ? <div className="p-10 text-center text-on-surface-variant">Cargando usuarios...</div> : users.length === 0 ? (
+        <div className="flex flex-col items-center justify-center px-5 py-12 text-center text-on-surface-variant"><span className="material-symbols-outlined text-4xl mb-2 opacity-50" translate="no">search_off</span><p>No se encontraron usuarios que coincidan con la búsqueda.</p></div>
+      ) : users.map((user) => <UserMobileCard key={user.id} user={user} onEdit={onEdit} onToggle={onToggle} />)}
+    </div>
+    <div className="hidden md:block overflow-x-auto">
       {isLoading ? <div className="p-10 text-center text-on-surface-variant">Cargando usuarios...</div> : (
         <table className="w-full text-left border-collapse table-auto whitespace-nowrap">
           <thead><tr className="bg-surface-container-lowest border-b border-outline-variant text-on-surface-variant text-[11px] uppercase tracking-wider"><th className="px-4 py-2 font-semibold">Nombre / Correo</th><th className="px-4 py-2 font-semibold">Cargo & Rol</th><th className="px-4 py-2 font-semibold">Documento</th><th className="px-4 py-2 font-semibold">Estado</th><th className="px-4 py-2 font-semibold">Dirección</th><th className="px-4 py-2 font-semibold text-right">Acciones</th></tr></thead>

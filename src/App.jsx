@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback, Suspense, lazy } from 'react';
-import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'sonner';
 import { useAuth } from './context/AuthContext';
 
@@ -16,6 +16,7 @@ import MobileBottomNav from './components/layout/MobileBottomNav';
 import PageTransition from './components/ui/PageTransition';
 import ReloadPrompt from './components/ui/ReloadPrompt';
 import FullScreenLoader from './components/ui/FullScreenLoader';
+import { useNavigationFeedback } from './context/NavigationFeedbackContext';
 
 // Componente de carga para Lazy Pages
 const PageLoader = () => (
@@ -45,8 +46,7 @@ const SocioProfilePage = lazy(() => import('./pages/socio/SocioProfilePage'));
 function App() {
 
   const { user, isAuthenticated, isLoading } = useAuth();
-
-  const location = useLocation();
+  const { navigationTarget } = useNavigationFeedback();
 
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -111,7 +111,7 @@ function App() {
                 <span className="material-symbols-outlined text-[24px]" translate="no">menu</span>
               </button>
               <div className="w-7 h-7 bg-emerald-50 rounded-lg flex items-center justify-center overflow-hidden border border-emerald-100 shrink-0">
-                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-sm" />
+                <img src="/logo-192.png" alt="Logo" className="w-full h-full object-contain drop-shadow-sm" />
               </div>
               <span className="font-bold text-[13px]">Portal Cliente</span>
             </div>
@@ -123,7 +123,7 @@ function App() {
           <header className="md:hidden shrink-0 flex items-center justify-between px-3.5 py-1.5 h-12 bg-surface text-on-surface shadow-xs border-b border-outline-variant/40 z-40 print:hidden">
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-outline-variant/30 bg-white">
-                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+                <img src="/logo-192.png" alt="Logo" className="w-full h-full object-contain" />
               </div>
               <div className="flex flex-col">
                 <span className="font-bold text-on-surface text-[13px] leading-tight tracking-tight">Parque Industrial</span>
@@ -168,8 +168,17 @@ function App() {
           {/* Content */}
           <div className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col pb-[70px] md:pb-0">
 
+            {navigationTarget && (
+              <div className={`fixed left-0 right-0 top-12 z-[70] md:left-[260px] md:top-0 md:bottom-0 ${Number(user?.rol_id) === 3 ? 'bottom-0' : 'bottom-16'}`}>
+                <FullScreenLoader
+                  title={`Redirigiendo a ${navigationTarget.label}`}
+                  subtitle="Preparando la siguiente pantalla. Esto puede tomar unos segundos según tu conexión."
+                />
+              </div>
+            )}
+
             <Suspense fallback={<PageLoader />}>
-              <Routes location={location} key={`${location.pathname}${location.search}`}>
+              <Routes>
                 <Route path="/" element={<Navigate to="/dashboard" />} />
                 <Route path="/dashboard" element={<ProtectedRoute requiredRoute={Number(user?.rol_id) === 3 ? null : "dashboard"}><PageTransition>{Number(user?.rol_id) === 3 ? <SocioDashboardPage /> : <DashboardPage />}</PageTransition></ProtectedRoute>} />
                 <Route path="/tenants" element={<ProtectedRoute requiredRoute="tenants"><PageTransition><TenantsPage /></PageTransition></ProtectedRoute>} />

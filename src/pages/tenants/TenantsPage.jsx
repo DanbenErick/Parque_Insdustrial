@@ -1,5 +1,4 @@
-import  { useState, useEffect, useMemo, useCallback } from 'react';
-import { createPortal } from 'react-dom';
+import  { lazy, Suspense, useState, useEffect, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 import { useTenants } from './hooks/useTenants';
@@ -8,11 +7,14 @@ import { exportToExcel, generatePDFPreview } from './tenantExportService';
 import TenantKPICards from './TenantKPICards';
 import TenantFormModal from './TenantFormModal';
 import TenantDetailDrawer from './TenantDetailDrawer';
-import TenantImportModal from './TenantImportModal';
 import ConfirmActionModal from '../../components/ui/ConfirmActionModal';
 import PdfPreviewModal from '../../components/ui/PdfPreviewModal';
 import LoadingCurtain from '../../components/ui/LoadingCurtain';
 import TenantDirectory from './components/TenantDirectory';
+import { useFloatingActionMenu } from '../../hooks/useFloatingActionMenu';
+import TenantActionMenu from './components/TenantActionMenu';
+
+const TenantImportModal = lazy(() => import('./TenantImportModal'));
 
 const INITIAL_FORM = {
   nombre_razonsocial: '',
@@ -26,15 +28,32 @@ const INITIAL_FORM = {
 
 const TenantsAndSectors = () => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [filterEstado, setFilterEstado] = useState('Todos');
   const [filterRubro, setFilterRubro] = useState('Todos');
   const [showFilters, setShowFilters] = useState(false);
 
-  // Hook de React Query (carga todos los socios para búsqueda y filtrado local instantáneo)
-  const { tenants, isLoadingTenants: isLoading, globalStats, refetchAll } = useTenants();
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 350);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const {
+    tenants,
+    isLoadingTenants: isLoading,
+    isFetchingTenants,
+    pagination,
+    globalStats,
+    refetchAll,
+  } = useTenants({
+    search: debouncedSearch,
+    estado: filterEstado === 'Todos' ? '' : (filterEstado === 'Activos' ? 'activos' : 'suspendidos'),
+    rubro: filterRubro === 'Todos' ? '' : filterRubro,
+    limit: 10000,
+  });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [actionMenu, setActionMenu] = useState(null);
+  const { actionMenu, setActionMenu, openActionMenu } = useFloatingActionMenu({ menuHeight: 250 });
 
   // Modals / Drawers state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -185,41 +204,9 @@ const TenantsAndSectors = () => {
   }, []);
 
   const handleOpenMenu = useCallback((tenant, specificMedidor, e) => {
-    e.stopPropagation();
     const menuKey = `${tenant.id}-${specificMedidor ? specificMedidor.id : 'none'}`;
-    if (actionMenu?.key === menuKey) {
-      setActionMenu(null);
-      return;
-    }
-    const rect = e.currentTarget.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const menuHeight = 250;
-    const openUp = spaceBelow < menuHeight && rect.top > menuHeight;
-
-    setActionMenu({
-      key: menuKey,
-      tenant,
-      specificMedidor,
-      top: openUp ? undefined : rect.bottom + 4,
-      bottom: openUp ? window.innerHeight - rect.top + 4 : undefined,
-      right: Math.max(12, window.innerWidth - rect.right),
-    });
-  }, [actionMenu]);
-
-  // Cerrar menú de acciones al presionar Escape, hacer scroll o redimensionar
-  useEffect(() => {
-    if (!actionMenu) return;
-    const handleKeyDown = (e) => { if (e.key === 'Escape') setActionMenu(null); };
-    const handleScrollOrResize = () => setActionMenu(null);
-    document.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('scroll', handleScrollOrResize, true);
-    window.addEventListener('resize', handleScrollOrResize);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('scroll', handleScrollOrResize, true);
-      window.removeEventListener('resize', handleScrollOrResize);
-    };
-  }, [actionMenu]);
+    openActionMenu(e, { tenant, specificMedidor }, menuKey);
+  }, [openActionMenu]);
 
   const executeToggleUser = useCallback(async () => {
     const { user, specificMedidor, isActivating } = confirmModal;
@@ -389,6 +376,8 @@ const TenantsAndSectors = () => {
         onOpenDrawer={setDrawerTenant}
         onOpenMenu={handleOpenMenu}
         actionMenuKey={actionMenu?.key}
+        isFetching={isFetchingTenants}
+        totalRecords={pagination.total || 0}
       />
 
       {/* --- Modals and Drawers --- */}
@@ -408,12 +397,14 @@ const TenantsAndSectors = () => {
       )}
 
       {isImportModalOpen && (
-        <TenantImportModal
-          onClose={() => setIsImportModalOpen(false)}
-          onImportSuccess={() => {
-            refetchAll();
-          }}
-        />
+        <Suspense fallback={null}>
+          <TenantImportModal
+            onClose={() => setIsImportModalOpen(false)}
+            onImportSuccess={() => {
+              refetchAll();
+            }}
+          />
+        </Suspense>
       )}
 
       {confirmModal.show && (
@@ -477,126 +468,15 @@ const TenantsAndSectors = () => {
         />
       )}
 
-      {actionMenu && createPortal(
-        <div className="dropdown-portal">
-          <div
-            className="fixed inset-0 z-[80]"
-            onClick={() => setActionMenu(null)}
-            onContextMenu={(e) => { e.preventDefault(); setActionMenu(null); }}
-          />
-          <div
-            style={{
-              top: actionMenu.top !== undefined ? `${actionMenu.top}px` : 'auto',
-              bottom: actionMenu.bottom !== undefined ? `${actionMenu.bottom}px` : 'auto',
-              right: `${actionMenu.right}px`,
-            }}
-            className="fixed z-[85] w-60 bg-white rounded-xl shadow-2xl border border-outline-variant/80 py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-100"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header del dropdown */}
-            <div className="px-3.5 py-2 mb-1 border-b border-outline-variant/50 bg-surface-container-lowest">
-              <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider block">Opciones de Socio</span>
-              <p className="text-[11px] font-bold text-on-surface truncate mt-0.5">
-                {actionMenu.tenant.nombre_razonsocial || 'Socio'}
-              </p>
-              {actionMenu.specificMedidor?.num_serie && (
-                <span className="font-data-mono text-[9px] text-primary font-bold">
-                  Medidor: {actionMenu.specificMedidor.num_serie}
-                </span>
-              )}
-            </div>
-
-            {/* Ver Expediente */}
-            <button
-              type="button"
-              onClick={() => {
-                const t = actionMenu.tenant;
-                setActionMenu(null);
-                setDrawerTenant(t);
-              }}
-              className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[18px] text-primary" translate="no">visibility</span>
-              <span>Ver Expediente</span>
-            </button>
-
-            {/* Enviar WhatsApp */}
-            <button
-              type="button"
-              onClick={() => {
-                const t = actionMenu.tenant;
-                setActionMenu(null);
-                handleWhatsApp(t);
-              }}
-              className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
-            >
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="currentColor" className="text-[#25D366] shrink-0">
-                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.662-2.062-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
-              </svg>
-              <span>Enviar WhatsApp</span>
-            </button>
-
-            {/* Restablecer Contraseña */}
-            <button
-              type="button"
-              onClick={() => {
-                const t = actionMenu.tenant;
-                setActionMenu(null);
-                handleResetPassword(t);
-              }}
-              className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[18px] text-secondary" translate="no">key</span>
-              <span>Restablecer Clave</span>
-            </button>
-
-            {/* Editar Socio */}
-            <button
-              type="button"
-              onClick={() => {
-                const { tenant, specificMedidor } = actionMenu;
-                setActionMenu(null);
-                handleOpenEdit(tenant, specificMedidor);
-              }}
-              className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-[18px] text-blue-600" translate="no">edit</span>
-              <span>Editar Socio</span>
-            </button>
-
-            <div className="my-1 border-t border-outline-variant/50" />
-
-            {/* Dar de Baja o Reactivar Servicio / Medidor */}
-            <button
-              type="button"
-              onClick={() => {
-                const { tenant, specificMedidor } = actionMenu;
-                setActionMenu(null);
-                toggleUserStatus(tenant, specificMedidor);
-              }}
-              className={`w-full px-3.5 py-2 text-left text-xs font-medium flex items-center gap-2.5 transition-colors cursor-pointer ${
-                (actionMenu.specificMedidor
-                  ? (actionMenu.specificMedidor.operativo !== false && actionMenu.specificMedidor.operativo !== 0 && actionMenu.specificMedidor.operativo !== '0')
-                  : actionMenu.tenant.es_activo)
-                  ? 'text-error hover:bg-error/10'
-                  : 'text-primary hover:bg-primary/10'
-              }`}
-            >
-              <span className="material-symbols-outlined text-[18px]" translate="no">
-                {(actionMenu.specificMedidor
-                  ? (actionMenu.specificMedidor.operativo !== false && actionMenu.specificMedidor.operativo !== 0 && actionMenu.specificMedidor.operativo !== '0')
-                  : actionMenu.tenant.es_activo) ? 'power_off' : 'bolt'}
-              </span>
-              <span>
-                {actionMenu.specificMedidor
-                  ? ((actionMenu.specificMedidor.operativo !== false && actionMenu.specificMedidor.operativo !== 0 && actionMenu.specificMedidor.operativo !== '0') ? 'Dar de Baja Medidor' : 'Reactivar Medidor')
-                  : (actionMenu.tenant.es_activo ? 'Suspender Socio' : 'Reactivar Socio')}
-              </span>
-            </button>
-          </div>
-        </div>,
-        document.body,
-      )}
+      <TenantActionMenu
+        menu={actionMenu}
+        onClose={() => setActionMenu(null)}
+        onView={setDrawerTenant}
+        onWhatsApp={handleWhatsApp}
+        onResetPassword={handleResetPassword}
+        onEdit={handleOpenEdit}
+        onToggleStatus={toggleUserStatus}
+      />
       </main>
     </>
   );

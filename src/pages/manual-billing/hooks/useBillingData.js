@@ -1,59 +1,84 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../../../api/axiosConfig';
+import {
+  lecturasQueryOptions,
+  medidoresQueryOptions,
+  periodosQueryOptions,
+  queryKeys,
+} from '../../../api/queryOptions';
 import { toast } from 'sonner';
 
 export const useBillingData = (activeYear) => {
-  const [medidores, setMedidores] = useState([]);
-  const [periodos, setPeriodos] = useState([]);
-  const [lecturas, setLecturas] = useState([]);
+  const queryClient = useQueryClient();
   const [activePeriodo, setActivePeriodo] = useState(null);
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [stats, setStats] = useState({ total_medidores: 0, total_registrados: 0 });
+  const lecturasParams = useMemo(() => ({
+    periodo: activePeriodo?.mes_anio,
+    limit: 10000,
+  }), [activePeriodo?.mes_anio]);
 
-  const fetchPeriodos = useCallback(async () => {
-    try {
-      const res = await api.get('/periodos');
-      setPeriodos(res.data);
-    } catch (error) {
-      toast.error('Error al cargar periodos');
-    }
-  }, []);
-
-  const fetchMedidores = useCallback(async () => {
-    try {
-      const res = await api.get('/medidores?operativo=true');
-      setMedidores(res.data);
-    } catch (error) {
-      console.error('Error al cargar medidores', error);
-    }
-  }, []);
+  const { data: periodos = [], isLoading: isLoadingPeriodos, isError: isPeriodosError } = useQuery(periodosQueryOptions);
+  const { data: medidores = [], isLoading: isLoadingMedidores, isError: isMedidoresError } = useQuery(medidoresQueryOptions({ operativo: true }));
+  const {
+    data: lecturas = [],
+    isLoading: isLoadingLecturas,
+    isError: isLecturasError,
+  } = useQuery(lecturasQueryOptions(lecturasParams, { enabled: Boolean(activePeriodo) }));
+  const {
+    data: stats = { total_medidores: 0, total_registrados: 0 },
+    isLoading: isLoadingStats,
+    isError: isStatsError,
+  } = useQuery({
+    queryKey: queryKeys.periodoStats(activePeriodo?.mes_anio),
+    queryFn: () => api.get(`/periodos/${activePeriodo.mes_anio}/stats`).then((response) => response.data),
+    enabled: Boolean(activePeriodo),
+    staleTime: 30 * 1000,
+  });
+  const {
+    data: omisiones = [],
+    isLoading: isLoadingOmisiones,
+    isError: isOmisionesError,
+  } = useQuery({
+    queryKey: queryKeys.omisiones(activePeriodo?.id),
+    queryFn: () => api.get('/lecturas/omisiones', { params: { periodo_id: activePeriodo.id } }).then((response) => response.data || []),
+    enabled: Boolean(activePeriodo),
+    staleTime: 30 * 1000,
+  });
 
   useEffect(() => {
-    fetchPeriodos();
-    fetchMedidores();
-  }, [fetchPeriodos, fetchMedidores]);
+    if (isPeriodosError) toast.error('Error al cargar periodos');
+  }, [isPeriodosError]);
 
-  // Sync data for active period
   useEffect(() => {
-    const fetchPeriodData = async () => {
-      if (!activePeriodo) return;
-      setIsLoading(true);
-      try {
-        const [statsRes, lecturasRes] = await Promise.all([
-          api.get(`/periodos/${activePeriodo.mes_anio}/stats`),
-          api.get(`/lecturas?periodo=${activePeriodo.mes_anio}`)
-        ]);
-        setStats(statsRes.data);
-        setLecturas(lecturasRes.data);
-      } catch (error) {
-        toast.error('Error al sincronizar datos del periodo');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchPeriodData();
-  }, [activePeriodo]);
+    if (isMedidoresError || isLecturasError || isStatsError || isOmisionesError) {
+      toast.error('Error al sincronizar datos del periodo');
+    }
+  }, [isLecturasError, isMedidoresError, isOmisionesError, isStatsError]);
+
+  const updateQueryData = useCallback((key, valueOrUpdater, fallback) => {
+    queryClient.setQueryData(key, (current = fallback) => (
+      typeof valueOrUpdater === 'function' ? valueOrUpdater(current) : valueOrUpdater
+    ));
+  }, [queryClient]);
+
+  const setMedidores = useCallback((value) => {
+    updateQueryData(queryKeys.medidores({ operativo: true }), value, []);
+  }, [updateQueryData]);
+  const setPeriodos = useCallback((value) => {
+    updateQueryData(queryKeys.periodos, value, []);
+  }, [updateQueryData]);
+  const setLecturas = useCallback((value) => {
+    updateQueryData(queryKeys.lecturas(lecturasParams), value, []);
+  }, [lecturasParams, updateQueryData]);
+  const setOmisiones = useCallback((value) => {
+    updateQueryData(queryKeys.omisiones(activePeriodo?.id), value, []);
+  }, [activePeriodo?.id, updateQueryData]);
+  const setStats = useCallback((value) => {
+    updateQueryData(queryKeys.periodoStats(activePeriodo?.mes_anio), value, { total_medidores: 0, total_registrados: 0 });
+  }, [activePeriodo?.mes_anio, updateQueryData]);
+
+  const fetchPeriodos = useCallback(() => queryClient.invalidateQueries({ queryKey: queryKeys.periodos }), [queryClient]);
 
   const periodosFiltrados = useMemo(() => {
     if (!activeYear) return [];
@@ -64,16 +89,17 @@ export const useBillingData = (activeYear) => {
   }, [periodos, activeYear]);
 
   useEffect(() => {
-    if (periodosFiltrados.length > 0) {
-      setActivePeriodo(periodosFiltrados[periodosFiltrados.length - 1]);
-    } else {
-      setActivePeriodo(null);
-    }
+    setActivePeriodo((current) => {
+      if (periodosFiltrados.length === 0) return null;
+      const matchingPeriod = current && periodosFiltrados.find((periodo) => periodo.id === current.id);
+      return matchingPeriod || periodosFiltrados[periodosFiltrados.length - 1];
+    });
   }, [periodosFiltrados]);
 
-  const lecturasPeriodoActivo = useMemo(() =>
-    activePeriodo ? lecturas.filter(l => l.periodo === activePeriodo.mes_anio) : [],
-  [lecturas, activePeriodo]);
+  const lecturasPeriodoActivo = useMemo(
+    () => activePeriodo ? lecturas : [],
+    [activePeriodo, lecturas],
+  );
 
   const totalRegistrados = stats.total_registrados !== undefined ? Number(stats.total_registrados) : 0;
   const totalMedidores = stats.total_medidores !== undefined ? Number(stats.total_medidores) : 0;
@@ -101,10 +127,17 @@ export const useBillingData = (activeYear) => {
     return map;
   }, [medidores]);
 
+  const omisionesMap = useMemo(() => {
+    const map = new Map();
+    for (const omission of omisiones) map.set(Number(omission.medidor_id), omission);
+    return map;
+  }, [omisiones]);
+
   return {
     medidores, setMedidores,
     periodos, setPeriodos, fetchPeriodos,
     lecturas, setLecturas,
+    omisiones, setOmisiones, omisionesMap,
     activePeriodo, setActivePeriodo,
     periodosFiltrados,
     lecturasPeriodoActivo,
@@ -116,7 +149,7 @@ export const useBillingData = (activeYear) => {
     porcentajeAvance,
     dashOffset,
     fetchData: fetchPeriodos,
-    isLoading,
+    isLoading: isLoadingPeriodos || isLoadingMedidores || (Boolean(activePeriodo) && (isLoadingLecturas || isLoadingStats || isLoadingOmisiones)),
     setStats
   };
 };

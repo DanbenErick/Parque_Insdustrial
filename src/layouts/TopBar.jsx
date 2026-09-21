@@ -1,9 +1,9 @@
 import  { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useAppNavigate } from '../context/NavigationFeedbackContext';
 
 
 const TopBar = () => {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
 
 
 
@@ -40,7 +40,7 @@ const TopBar = () => {
       {/* Logo & Marca en móvil */}
       <div className="flex items-center gap-2">
         <div className="w-7 h-7 bg-white rounded-full flex items-center justify-center overflow-hidden shrink-0 border border-outline-variant/30">
-          <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+          <img src="/logo-192.png" alt="Logo" className="w-full h-full object-contain" />
         </div>
         <div className="flex flex-col">
           <span className="font-bold text-xs text-on-surface leading-none">Parque Industrial</span>

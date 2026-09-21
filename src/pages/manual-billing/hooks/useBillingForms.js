@@ -5,10 +5,13 @@ import { parseSafe } from '../utils';
 
 export const useBillingForms = (dataHook, user) => {
   const {
-     setMedidores,
+    medidores,
+    setMedidores,
     activePeriodo,
     lecturasPeriodoActivoMap,
+    omisionesMap,
     setLecturas,
+    setOmisiones,
     setStats
   } = dataHook;
 
@@ -24,6 +27,7 @@ export const useBillingForms = (dataHook, user) => {
   const [maxDemandaPunta, setMaxDemandaPunta] = useState('');
   const [precioReactiva, setPrecioReactiva] = useState('');
   const [isSaving, setIsSaving] = useState(false);
+  const [isSkipping, setIsSkipping] = useState(false);
 
   // Cambio de Medidor State
   const [isCambioMedidor, setIsCambioMedidor] = useState(false);
@@ -47,7 +51,7 @@ export const useBillingForms = (dataHook, user) => {
   const [editMaxDemandaFueraPunta, setEditMaxDemandaFueraPunta] = useState('');
   const [editMaxDemandaPunta, setEditMaxDemandaPunta] = useState('');
   const [editPrecioReactiva, setEditPrecioReactiva] = useState('');
-  const [editJustificacion, setEditJustificacion] = useState('');
+  const [editJustificacion, setEditJustificacion] = useState('Error de digitación');
 
   // Edit Cambio de Medidor
   const [editLecturaFinalAntiguo, setEditLecturaFinalAntiguo] = useState('');
@@ -61,12 +65,10 @@ export const useBillingForms = (dataHook, user) => {
 
   const handleSearchChange = useCallback((e) => {
     setSearchTerm(e.target.value);
-    setSelectedMember(null);
   }, []);
 
   const handleSelectMember = useCallback((member) => {
     setSelectedMember(member);
-    setSearchTerm(member.propietario || member.num_serie);
     setCurrentReading('');
     setCurrentReadingPunta('');
     setFactorPotencia('');
@@ -80,28 +82,8 @@ export const useBillingForms = (dataHook, user) => {
     setLecturaInicialNuevoPunta('0');
   }, [activePeriodo]);
 
-  const handleEditFromTable = useCallback((record) => {
-    setEditModalData(record);
-    setEditReadingVal(record.lectura_actual);
-    setEditReadingValPunta(record.lectura_actual_punta || '');
-    setEditFactorPotencia(record.factor_potencia || '');
-    setEditMaxDemandaFueraPunta(record.max_demanda_fuera_punta || '');
-    setEditMaxDemandaPunta(record.max_demanda_punta || '');
-    setEditPrecioReactiva(record.precio_factor_potencia || '');
-    setEditJustificacion('');
-
-    // Set meter change values if they exist
-    setEditLecturaFinalAntiguo(record.lectura_final_viejo !== null ? record.lectura_final_viejo : '');
-    setEditLecturaInicialNuevo(record.lectura_inicial_nuevo !== null ? record.lectura_inicial_nuevo : '');
-    setEditLecturaFinalAntiguoPunta(record.lectura_final_viejo_punta !== null ? record.lectura_final_viejo_punta : '');
-    setEditLecturaInicialNuevoPunta(record.lectura_inicial_nuevo_punta !== null ? record.lectura_inicial_nuevo_punta : '');
-
-    setIsModalOpen(false);
-  }, []);
-
-  const resetForm = useCallback(() => {
+  const closeForm = useCallback(() => {
     setSelectedMember(null);
-    setSearchTerm('');
     setCurrentReading('');
     setCurrentReadingPunta('');
     setFactorPotencia('');
@@ -114,6 +96,53 @@ export const useBillingForms = (dataHook, user) => {
     setLecturaFinalAntiguoPunta('');
     setLecturaInicialNuevoPunta('0');
   }, []);
+
+  const getNextPending = useCallback((currentId) => {
+    const query = searchTerm.trim().toLowerCase();
+    const matchesSearch = (meter) => !query || [
+      meter.num_serie,
+      meter.propietario,
+      meter.documento_identidad,
+      meter.socio_direccion,
+      meter.direccion,
+      meter.tipo
+    ].some(value => String(value || '').toLowerCase().includes(query));
+    const pendingQueue = medidores
+      .filter(meter => meter.operativo !== false && meter.operativo !== 0 && meter.operativo !== '0')
+      .filter(meter => meter.id === currentId || (
+        !lecturasPeriodoActivoMap.has(meter.num_serie) && !omisionesMap.has(Number(meter.id))
+      ))
+      .filter(meter => meter.id === currentId || matchesSearch(meter))
+      .sort((a, b) => (a.propietario || '').localeCompare(b.propietario || '', 'es'));
+    const currentIndex = pendingQueue.findIndex(meter => meter.id === currentId);
+    if (pendingQueue.length <= 1) return null;
+    const next = pendingQueue[(currentIndex >= 0 ? currentIndex + 1 : 0) % pendingQueue.length];
+    return next?.id === currentId ? null : next;
+  }, [searchTerm, medidores, lecturasPeriodoActivoMap, omisionesMap]);
+
+  const handleEditFromTable = useCallback((record) => {
+    setEditModalData(record);
+    setEditReadingVal(record.lectura_actual);
+    setEditReadingValPunta(record.lectura_actual_punta || '');
+    setEditFactorPotencia(record.factor_potencia || '');
+    setEditMaxDemandaFueraPunta(record.max_demanda_fuera_punta || '');
+    setEditMaxDemandaPunta(record.max_demanda_punta || '');
+    setEditPrecioReactiva(record.precio_factor_potencia || '');
+    setEditJustificacion('Error de digitación');
+
+    // Set meter change values if they exist
+    setEditLecturaFinalAntiguo(record.lectura_final_viejo !== null ? record.lectura_final_viejo : '');
+    setEditLecturaInicialNuevo(record.lectura_inicial_nuevo !== null ? record.lectura_inicial_nuevo : '');
+    setEditLecturaFinalAntiguoPunta(record.lectura_final_viejo_punta !== null ? record.lectura_final_viejo_punta : '');
+    setEditLecturaInicialNuevoPunta(record.lectura_inicial_nuevo_punta !== null ? record.lectura_inicial_nuevo_punta : '');
+
+    setIsModalOpen(false);
+  }, []);
+
+  const resetForm = useCallback(() => {
+    closeForm();
+    setSearchTerm('');
+  }, [closeForm]);
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -216,11 +245,63 @@ export const useBillingForms = (dataHook, user) => {
         ...(maxDemandaFueraPunta ? { ultima_demanda_maxima_fuera_punta: maxDemandaFueraPunta } : {}),
         ...(maxDemandaPunta ? { ultima_demanda_maxima_punta: maxDemandaPunta } : {})
       } : m));
-      resetForm();
+
+      const nextMember = getNextPending(selectedMember.id);
+
+      if (nextMember && nextMember.id !== selectedMember.id) {
+        handleSelectMember(nextMember);
+      } else {
+        closeForm();
+      }
     } catch (error) {
       toast.error(error.response?.data?.error || 'Error al guardar la lectura');
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleSkip = async ({ motivo, detalle }) => {
+    if (!selectedMember || !activePeriodo || !motivo) return;
+    setIsSkipping(true);
+    try {
+      const response = await api.post('/lecturas/omisiones', {
+        medidor_id: selectedMember.id,
+        periodo_id: activePeriodo.id,
+        motivo,
+        detalle
+      });
+      const omission = {
+        id: response.data.id,
+        medidor_id: selectedMember.id,
+        periodo_id: activePeriodo.id,
+        motivo,
+        detalle,
+        num_serie: selectedMember.num_serie,
+        propietario: selectedMember.propietario,
+        operario: user?.nombre_razonsocial || 'Tú',
+        created_at: new Date().toISOString()
+      };
+      setOmisiones(previous => [omission, ...previous.filter(item => Number(item.medidor_id) !== Number(selectedMember.id))]);
+      toast.success('Medidor omitido temporalmente');
+
+      const nextMember = getNextPending(selectedMember.id);
+      if (nextMember) handleSelectMember(nextMember);
+      else closeForm();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'No se pudo omitir el medidor');
+      throw error;
+    } finally {
+      setIsSkipping(false);
+    }
+  };
+
+  const handleResumeOmission = async (omission) => {
+    try {
+      await api.delete(`/lecturas/omisiones/${omission.id}`);
+      setOmisiones(previous => previous.filter(item => item.id !== omission.id));
+      toast.success('Medidor devuelto a pendientes');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'No se pudo reactivar el medidor');
     }
   };
 
@@ -318,7 +399,7 @@ export const useBillingForms = (dataHook, user) => {
 
   return {
     searchTerm, handleSearchChange, setSearchTerm,
-    selectedMember, handleSelectMember, setSelectedMember, resetForm,
+    selectedMember, handleSelectMember, setSelectedMember, resetForm, closeForm,
     currentReading, setCurrentReading,
     currentReadingPunta, setCurrentReadingPunta,
     factorPotencia, setFactorPotencia,
@@ -331,6 +412,7 @@ export const useBillingForms = (dataHook, user) => {
     lecturaFinalAntiguoPunta, setLecturaFinalAntiguoPunta,
     lecturaInicialNuevoPunta, setLecturaInicialNuevoPunta,
     isSaving, handleSave, lecturaExistente,
+    isSkipping, handleSkip, handleResumeOmission,
     isModalOpen, setIsModalOpen,
     modalSearchTerm, setModalSearchTerm,
     isPeriodModalOpen, setIsPeriodModalOpen,

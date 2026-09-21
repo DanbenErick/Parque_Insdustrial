@@ -1,10 +1,11 @@
 import  { useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useYear } from '../context/YearContext';
+import { useAppNavigate } from '../context/NavigationFeedbackContext';
 
 const Sidebar = ({  onCloseMobileMenu, screens }) => {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
   const { activeYear, setActiveYear, availableYears } = useYear();
@@ -22,7 +23,7 @@ const Sidebar = ({  onCloseMobileMenu, screens }) => {
       <div className="h-20 px-6 flex items-center justify-between border-b border-white/10 bg-surface-dim">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden shrink-0">
-            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+            <img src="/logo-192.png" alt="Logo" className="w-full h-full object-contain" />
           </div>
           <div className="flex flex-col mt-1">
             <span className="font-bold text-white text-[15px] leading-tight tracking-wide font-headline-sm">Parque Industrial</span>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useAppNavigate } from '../../context/NavigationFeedbackContext';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
@@ -30,7 +30,7 @@ const LoginBackground = React.memo(() => (
 
 const Login = () => {
   const { login } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
 
   const [focusedInput, setFocusedInput] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -78,7 +78,7 @@ const Login = () => {
           <div className="mb-6 text-center flex flex-col items-center">
             {/* Elegant Logo Container */}
             <div className="w-14 h-14 mb-3 bg-white rounded-xl flex items-center justify-center border border-outline-variant shadow-sm overflow-hidden">
-              <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+              <img src="/logo-192.png" alt="Logo" className="w-full h-full object-contain" />
             </div>
 
             <h2 className="font-headline-sm text-2xl font-bold mb-0.5 tracking-tight text-on-surface">

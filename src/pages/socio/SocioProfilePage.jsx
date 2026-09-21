@@ -3,11 +3,11 @@ import { useForm } from 'react-hook-form';
 import api from '../../api/axiosConfig';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useAppNavigate } from '../../context/NavigationFeedbackContext';
 
 const SocioProfilePage = () => {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
   const { register, handleSubmit, formState: { errors }, reset, watch } = useForm({

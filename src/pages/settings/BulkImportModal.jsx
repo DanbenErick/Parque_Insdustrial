@@ -1,8 +1,7 @@
 import  { useState, useRef } from 'react';
-import * as XLSX from 'xlsx';
-import ExcelJS from 'exceljs';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
+import { downloadBlob, MIME_TYPES } from '../../utils/downloadFile';
 
 
 
@@ -24,6 +23,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
   if (!isOpen) return null;
 
   const downloadTemplate = async () => {
+    const { default: ExcelJS } = await import('exceljs');
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Facturación', {
       views: [{ state: 'frozen', ySplit: 1 }]
@@ -130,15 +130,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
     });
 
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = 'Plantilla_Importacion_Facturacion.xlsx';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadBlob(buffer, 'Plantilla_Importacion_Facturacion.xlsx', MIME_TYPES.EXCEL);
   };
 
   const handleFileChange = (e) => {
@@ -153,7 +145,8 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
 
       // Parsear inmediatamente
       const reader = new FileReader();
-      reader.onload = (evt) => {
+      reader.onload = async (evt) => {
+        const XLSX = await import('xlsx');
         const data = new Uint8Array(evt.target.result);
         const workbook = XLSX.read(data);
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];

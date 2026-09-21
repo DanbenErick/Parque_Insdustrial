@@ -2,7 +2,7 @@ import 'react';
 import { BadgeType } from './shared/BadgeType';
 import { formatDateLong, fmtVal, parseSafe } from '../utils';
 
-export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) => {
+export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClose, onEdit }) => {
   if (!record) return null;
 
   const isCambioMedidor = Boolean(record.es_cambio_medidor);
@@ -41,9 +41,11 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
   const montoDemandaP = isPunta ? Math.round((maxDemandaP * costoPotencia) * 10) / 10 : 0;
   const montoDemandaN = isPunta ? Math.round((maxDemandaN * costoPotenciaFueraPunta) * 10) / 10 : 0;
 
-  const montoFijo = 10.0; // Hardcoded cargo fijo
+  const montoMantenimiento = isPunta
+    ? parseSafe(activePeriodo?.tarifa_mantenimiento_tiempo_real)
+    : parseSafe(activePeriodo?.tarifa_mantenimiento_normal);
 
-  const montoTotal = Math.round((montoNormal + montoPunta + montoReactiva + montoDemandaP + montoDemandaN + montoFijo) * 10) / 10;
+  const montoTotal = Math.round((montoNormal + montoPunta + montoReactiva + montoDemandaP + montoDemandaN + montoMantenimiento) * 10) / 10;
 
   const wasModified = Boolean(record.justificacion);
 
@@ -343,8 +345,8 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
               </div>
             )}
 
-            {/* Cargo Fijo Informativo */}
-            {montoFijo > 0 && (
+            {/* Mantenimiento configurado para el periodo */}
+            {montoMantenimiento > 0 && (
               <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
                 <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
                   <div className="flex items-center gap-2">
@@ -353,8 +355,8 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, onClose, onEdit }) =>
                   </div>
                 </div>
                 <div className="p-4 flex items-center justify-between">
-                  <p className="text-[10px] font-bold uppercase text-slate-600">Costo Fijo Mensual</p>
-                  <p className="font-data-mono font-black text-sm text-slate-800">S/ {fmtVal(montoFijo)}</p>
+                  <p className="text-[10px] font-bold uppercase text-slate-600">Tarifa del periodo</p>
+                  <p className="font-data-mono font-black text-sm text-slate-800">S/ {fmtVal(montoMantenimiento)}</p>
                 </div>
               </div>
             )}

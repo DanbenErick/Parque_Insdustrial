@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react';
 import { parseSafe } from '../utils';
+import { SkipReadingModal } from './SkipReadingModal';
 import {
   DemandInput,
   ExistingReadingCard,
@@ -57,8 +59,11 @@ export const RegistrationForm = ({
   lecturaInicialNuevo, setLecturaInicialNuevo,
   lecturaFinalAntiguoPunta, setLecturaFinalAntiguoPunta,
   lecturaInicialNuevoPunta, setLecturaInicialNuevoPunta,
-  isSaving, handleSave, onClose
+  isSaving, handleSave, onClose,
+  isSkipping, handleSkip
 }) => {
+  const [skipModalOpen, setSkipModalOpen] = useState(false);
+  const [anomalyConfirmed, setAnomalyConfirmed] = useState(false);
   const isTR = selectedMember?.tipo === 'Hora Punta' || selectedMember?.tipo === 'Tiempo Real';
   const validationErrors = getValidationErrors({
     isTR,
@@ -72,6 +77,23 @@ export const RegistrationForm = ({
   const peakBefore = consumption(lecturaFinalAntiguoPunta, selectedMember?.ultima_lectura_punta);
   const peakAfter = consumption(currentReadingPunta, lecturaInicialNuevoPunta);
   const peakTotal = isCambioMedidor ? peakBefore + peakAfter : consumption(currentReadingPunta, selectedMember?.ultima_lectura_punta);
+  const totalConsumption = normalTotal + (isTR ? peakTotal : 0);
+  const historicalAverage = parseSafe(selectedMember?.promedio_consumo_3m);
+  const historicalSamples = Number(selectedMember?.muestras_consumo_3m) || 0;
+  const hasCurrentValues = hasNumericValue(currentReading) && (!isTR || hasNumericValue(currentReadingPunta));
+  let anomaly = null;
+  if (hasCurrentValues && historicalSamples >= 2 && historicalAverage > 0) {
+    const ratio = totalConsumption / historicalAverage;
+    if (ratio >= 2 && totalConsumption - historicalAverage >= 100) {
+      anomaly = { tone: 'high', label: 'Consumo inusualmente alto', ratio };
+    } else if (ratio <= 0.25 && historicalAverage - totalConsumption >= 50) {
+      anomaly = { tone: 'low', label: 'Consumo inusualmente bajo', ratio };
+    }
+  }
+
+  useEffect(() => {
+    setAnomalyConfirmed(false);
+  }, [selectedMember?.id, currentReading, currentReadingPunta, isCambioMedidor]);
   const normalTariff = isTR ? parseSafe(activePeriodo?.tarifa_kwh_tr) || parseSafe(activePeriodo?.tarifa_kwh) : parseSafe(activePeriodo?.tarifa_kwh);
   const peakTariff = parseSafe(activePeriodo?.tarifa_kwh_punta);
 
@@ -80,7 +102,7 @@ export const RegistrationForm = ({
   );
   const simpleFormula = (value, unit, tariff) => <>{Number(value).toFixed(2)} {unit} <span className="font-bold mx-0.5">×</span> S/ {tariff.toFixed(4)}</>;
 
-  return (
+  return <>
     <div className="bg-surface border border-primary/20 rounded-xl shadow-sm overflow-hidden animate-in slide-in-from-top-4 fade-in duration-300">
       <MemberReadingHeader member={selectedMember} onClose={onClose} />
       <div className="p-4">
@@ -111,10 +133,26 @@ export const RegistrationForm = ({
                 {hasNumericValue(factorPotencia) && activePeriodo && <ReadingCalculationSummary icon="electric_meter" title="Subtotal Reactiva" measureLabel="Reactiva" formula={simpleFormula(factorPotencia, 'kVARh', parseSafe(activePeriodo.precio_energia_reactiva))} amount={parseSafe(factorPotencia) * parseSafe(activePeriodo.precio_energia_reactiva)} tone="purple" />}
               </>
             )}
-            <ReadingActions errors={validationErrors} isSaving={isSaving} />
+            {anomaly && (
+              <div className="rounded-xl border border-amber-300 bg-amber-50 p-3 text-amber-900" role="alert">
+                <div className="flex items-start gap-2">
+                  <span className="material-symbols-outlined mt-0.5 text-[19px] text-amber-700" translate="no">warning</span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-bold">{anomaly.label}</p>
+                    <p className="mt-1 text-[11px] leading-relaxed text-amber-800">El consumo calculado es {totalConsumption.toLocaleString('es-PE', { maximumFractionDigits: 2 })} kWh. El promedio de los últimos {historicalSamples} registros es {historicalAverage.toLocaleString('es-PE', { maximumFractionDigits: 2 })} kWh ({Math.round(anomaly.ratio * 100)}%).</p>
+                    <label className="mt-2 flex min-h-9 cursor-pointer items-center gap-2 rounded-lg bg-white/70 px-2.5 py-1.5 text-[11px] font-bold">
+                      <input type="checkbox" checked={anomalyConfirmed} onChange={(event) => setAnomalyConfirmed(event.target.checked)} className="h-4 w-4 rounded border-amber-400 text-primary focus:ring-primary" />
+                      Confirmo que verifiqué la lectura del medidor
+                    </label>
+                  </div>
+                </div>
+              </div>
+            )}
+            <ReadingActions errors={validationErrors} isSaving={isSaving} submitLabel="Guardar y siguiente" disabled={Boolean(anomaly && !anomalyConfirmed)} onSkip={() => setSkipModalOpen(true)} />
           </form>
         )}
       </div>
     </div>
-  );
+    <SkipReadingModal isOpen={skipModalOpen} member={selectedMember} isSubmitting={isSkipping} onClose={() => setSkipModalOpen(false)} onSubmit={handleSkip} />
+  </>;
 };

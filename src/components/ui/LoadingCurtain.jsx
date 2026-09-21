@@ -1,10 +1,9 @@
 import React from 'react';
-import { createPortal } from 'react-dom';
 import FullScreenLoader from './FullScreenLoader';
 
 /**
- * LoadingCurtain - Cortina de carga de pantalla completa con el logo institucional
- * del Parque Industrial Jicamarca y diseño glassmorphism prémium.
+ * LoadingCurtain - Carga limitada a la sección de contenido actual.
+ * Mantiene visibles los elementos persistentes de navegación.
  *
  * @param {boolean} isOpen - Estado de visibilidad de la cortina
  * @param {string} title - Título principal (ej. "Cargando datos...")
@@ -17,18 +16,17 @@ const LoadingCurtain = ({
   title = 'Cargando datos...',
   subtitle = 'Obteniendo información del periodo seleccionado',
   badgeText = 'Parque Industrial Jicamarca',
-  logoSrc = '/logo.png',
+  logoSrc = '/logo-192.png',
 }) => {
   if (!isOpen) return null;
 
-  return createPortal(
+  return (
     <FullScreenLoader
       title={title}
       subtitle={subtitle}
       badgeText={badgeText}
       logoSrc={logoSrc}
-    />,
-    document.body,
+    />
   );
 };
 

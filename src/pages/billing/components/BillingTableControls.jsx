@@ -1,6 +1,12 @@
 import { formatPeriod } from '../billingUtils';
+import { ExcelIcon } from '../../../components/ui/ExcelIcon';
 
-const ActionButton = ({ icon, label, onClick, className }) => <button type="button" onClick={onClick} className={`flex items-center gap-1.5 px-3 py-1.5 h-8 font-bold text-xs rounded-md transition-colors border ${className}`}><span className="material-symbols-outlined text-[16px]" translate="no">{icon}</span>{label}</button>;
+const ActionButton = ({ icon, customIcon, label, onClick, className }) => (
+  <button type="button" onClick={onClick} className={`flex items-center gap-1.5 px-3 py-1.5 h-8 font-bold text-xs rounded-md transition-colors border ${className}`}>
+    {customIcon ? customIcon : <span className="material-symbols-outlined text-[16px]" translate="no">{icon}</span>}
+    {label}
+  </button>
+);
 
 const BillingTableControls = ({ searchTerm, onSearchChange, showFilters, onToggleFilters, filterEstado, onStatusChange, filterMes, onPeriodChange, year, months, onExportExcel, onOpenDebts, onExportPDF, onPrintReceipts }) => (
   <>
@@ -9,7 +15,7 @@ const BillingTableControls = ({ searchTerm, onSearchChange, showFilters, onToggl
       <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
         <div className="relative flex-grow md:flex-grow-0"><span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">search</span><input type="search" placeholder="Buscar socio o doc..." value={searchTerm} onChange={(event) => onSearchChange(event.target.value)} className="pl-8 pr-3 py-1.5 h-8 border border-outline-variant rounded-md text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-full md:w-48 bg-white transition-all" /></div>
         <button type="button" onClick={onToggleFilters} className={`flex items-center gap-1.5 px-3 py-1.5 h-8 font-bold text-xs rounded-md transition-colors border ${showFilters ? 'bg-primary/10 text-primary border-primary/20' : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container'}`}><span className="material-symbols-outlined text-[16px]" translate="no">filter_list</span>Filtros {filterEstado !== 'Todos' && <span className="w-1.5 h-1.5 rounded-full bg-primary" />}</button>
-        <ActionButton icon="table_view" label="Excel" onClick={onExportExcel} className="bg-[#107C41]/10 text-[#107C41] border-[#107C41]/20" />
+        <ActionButton customIcon={<ExcelIcon className="w-4 h-4" />} label="Excel" onClick={onExportExcel} className="bg-[#107C41]/10 text-[#107C41] border-[#107C41]/20 hover:bg-[#107C41]/20" />
         <ActionButton icon="request_quote" label="Reporte Deudas" onClick={onOpenDebts} className="bg-[#ea580c]/10 text-[#ea580c] border-[#ea580c]/20" />
         <ActionButton icon="list_alt" label="Reporte" onClick={onExportPDF} className="bg-error/10 text-error border-error/20" />
         <ActionButton icon="print" label="Imprimir Recibos" onClick={onPrintReceipts} className="bg-primary/10 text-primary border-primary/20" />

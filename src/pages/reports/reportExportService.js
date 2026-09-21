@@ -1,27 +1,12 @@
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
-
-/**
- * Downloads a blob response from the API as a file.
- * @param {Blob} blob - The blob data to download.
- * @param {string} filename - The desired filename.
- */
-const downloadBlob = (blob, filename) => {
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.setAttribute('download', filename);
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.URL.revokeObjectURL(url);
-};
+import { downloadBlob, MIME_TYPES } from '../../utils/downloadFile';
 
 export const handleExportPDF = async (selectedPeriod) => {
   try {
     toast.info('Generando PDF, por favor espere...');
     const response = await api.get(`/recibos/reporte/pdf?periodo=${selectedPeriod}`, { responseType: 'blob' });
-    downloadBlob(new Blob([response.data], { type: 'application/pdf' }), `Reporte_Consumo_Facturacion_${selectedPeriod}.pdf`);
+    downloadBlob(response.data, `Reporte_Consumo_Facturacion_${selectedPeriod}.pdf`, MIME_TYPES.PDF);
     toast.success('Reporte PDF descargado exitosamente');
   } catch (error) {
     console.error('Error al generar PDF:', error);
@@ -33,7 +18,7 @@ export const handleExportExcel = async (selectedPeriod) => {
   try {
     toast.info('Generando Excel, por favor espere...');
     const response = await api.get(`/recibos/reporte/excel?periodo=${selectedPeriod}`, { responseType: 'blob' });
-    downloadBlob(new Blob([response.data]), `Reporte_Facturacion_${selectedPeriod}.xlsx`);
+    downloadBlob(response.data, `Reporte_Facturacion_${selectedPeriod}.xlsx`, MIME_TYPES.EXCEL);
     toast.success('Reporte Excel descargado exitosamente');
   } catch (error) {
     console.error('Error al exportar a Excel:', error);

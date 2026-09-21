@@ -4,11 +4,11 @@ const FullScreenLoader = ({
   title = 'Estamos preparando todo',
   subtitle = 'Esto tomará solo un momento.',
   badgeText = 'Parque Industrial Jicamarca',
-  logoSrc = '/logo.png',
+  logoSrc = '/logo-192.png',
 }) => {
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden bg-slate-950/85 p-4 text-white backdrop-blur-[6px] select-none animate-in fade-in duration-200"
+      className="absolute inset-0 z-[60] flex min-h-full items-center justify-center overflow-hidden bg-[#252838] p-4 text-white select-none animate-in fade-in duration-200"
       role="status"
       aria-live="polite"
       aria-busy="true"

@@ -7,17 +7,12 @@ const getFileName = (ext) =>
   `Lecturas_Parque_Industrial_${new Date().toISOString().slice(0, 10)}.${ext}`;
 
 import api from '../../api/axiosConfig';
+import { downloadBlob, MIME_TYPES } from '../../utils/downloadFile';
 
 export const handleExportExcel = async () => {
   try {
     const response = await api.get('/dashboard/export/excel', { responseType: 'blob' });
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', getFileName('xlsx'));
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    downloadBlob(response.data, getFileName('xlsx'), MIME_TYPES.EXCEL);
   } catch (error) {
     console.error('Error al exportar a Excel', error);
     alert('Error al exportar a Excel');
@@ -27,13 +22,7 @@ export const handleExportExcel = async () => {
 export const handleExportPDF = async () => {
   try {
     const response = await api.get('/dashboard/export/pdf', { responseType: 'blob' });
-    const url = window.URL.createObjectURL(new Blob([response.data]));
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', getFileName('pdf'));
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+    downloadBlob(response.data, getFileName('pdf'), MIME_TYPES.PDF);
   } catch (error) {
     console.error('Error al exportar a PDF', error);
     alert('Error al exportar a PDF');
@@ -55,14 +44,7 @@ export const handleExportCSV = (readings) => {
 
     const csvContent = [headers.join(','), ...rows.map(e => e.join(','))].join('\n');
     const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.setAttribute('href', url);
-    link.setAttribute('download', getFileName('csv'));
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadBlob(blob, getFileName('csv'), 'text/csv;charset=utf-8;');
   } catch (error) {
     console.error('Error al exportar a CSV', error);
     alert('Error al exportar a CSV');

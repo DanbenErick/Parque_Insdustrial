@@ -46,26 +46,4 @@ export const formatPeriod = (periodoStr) => {
   return periodoStr;
 };
 
-/**
- * Creates a Blob URL from an API response and triggers a download.
- * Used by Excel/PDF export handlers.
- */
-export const downloadBlob = (data, filename, mimeType) => {
-  const blob = new Blob([data], { type: mimeType });
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  window.URL.revokeObjectURL(url);
-};
-
-/**
- * MIME types used across the module.
- */
-export const MIME_TYPES = {
-  PDF: 'application/pdf',
-  EXCEL: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-};
+export { downloadBlob, MIME_TYPES } from '../../utils/downloadFile';

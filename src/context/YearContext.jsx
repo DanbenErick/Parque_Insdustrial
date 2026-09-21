@@ -1,5 +1,6 @@
-import  { createContext, useContext, useState, useEffect } from 'react';
-import api from '../api/axiosConfig';
+import  { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { periodosQueryOptions } from '../api/queryOptions';
 import { useAuth } from './AuthContext';
 
 const YearContext = createContext();
@@ -7,40 +8,32 @@ const YearContext = createContext();
 export const YearProvider = ({ children }) => {
   const currentYear = new Date().getFullYear();
   const [activeYear, setActiveYear] = useState(currentYear);
-  const [availableYears, setAvailableYears] = useState([currentYear]);
+  const [manualYears, setManualYears] = useState([]);
   const { user, isAuthenticated } = useAuth();
 
-  // Fetch all periods to extract unique years that have data
-  // Only for Admin and Operario — Socios (rol_id=3) don't have access to /periodos
-  useEffect(() => {
-    const isSocio = Number(user?.rol_id) === 3;
-    if (!isAuthenticated || isSocio) return;
+  const isSocio = Number(user?.rol_id) === 3;
+  const { data: periodos = [] } = useQuery({
+    ...periodosQueryOptions,
+    enabled: isAuthenticated && !isSocio,
+  });
 
-    const fetchYears = async () => {
-      try {
-        const res = await api.get('/periodos');
-        const years = res.data.map(p => {
-          const parts = p.mes_anio.split('-');
-          return parseInt(parts[0].length === 4 ? parts[0] : parts[1], 10);
-        }).filter(y => !isNaN(y));
+  const availableYears = useMemo(() => {
+    const periodYears = periodos.map((periodo) => {
+      const parts = periodo.mes_anio?.split('-') || [];
+      return parseInt(parts[0]?.length === 4 ? parts[0] : parts[1], 10);
+    }).filter((year) => !Number.isNaN(year));
 
-        const uniqueYears = [...new Set([currentYear, ...years])].sort((a, b) => a - b);
-        setAvailableYears(uniqueYears);
-      } catch (error) {
-        console.error("Error al cargar años de los periodos", error);
-      }
-    };
-    fetchYears();
-  }, [currentYear, isAuthenticated, user?.rol_id]);
+    return [...new Set([currentYear, ...manualYears, ...periodYears])].sort((a, b) => a - b);
+  }, [currentYear, manualYears, periodos]);
 
   // Function to manually add a year to the list (so it can be selected and populated)
-  const addYear = (year) => {
+  const addYear = useCallback((year) => {
     const parsedYear = parseInt(year, 10);
-    if (!isNaN(parsedYear) && !availableYears.includes(parsedYear)) {
-      setAvailableYears(prev => [...prev, parsedYear].sort((a, b) => a - b));
+    if (!Number.isNaN(parsedYear)) {
+      setManualYears((current) => current.includes(parsedYear) ? current : [...current, parsedYear]);
+      setActiveYear(parsedYear);
     }
-    setActiveYear(parsedYear);
-  };
+  }, []);
 
   return (
     <YearContext.Provider value={{ activeYear, setActiveYear, availableYears, addYear }}>

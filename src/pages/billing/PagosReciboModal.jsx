@@ -2,11 +2,11 @@ import  { useEffect, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
+import { getPaymentMethodConfig } from '../../constants/paymentMethods';
 
 const fmtCurrency = (v) => parseFloat(v || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
 
-const METODO_ICON = { Transferencia: 'account_balance', Efectivo: 'payments' };
 
 /**
  * PagosReciboModal
@@ -220,7 +220,7 @@ const PagosReciboModal = ({ recibo, onClose, onSuccess, initialWarning }) => {
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-lg bg-green-50 border border-green-200 flex items-center justify-center shrink-0">
                       <span className="material-symbols-outlined text-[18px] text-green-600" translate="no">
-                        {METODO_ICON[p.metodo_pago] || 'credit_card'}
+                        {getPaymentMethodConfig(p.metodo_pago).icon}
                       </span>
                     </div>
                     <div className="min-w-0">

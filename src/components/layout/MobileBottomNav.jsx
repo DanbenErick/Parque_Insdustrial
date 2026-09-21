@@ -1,9 +1,10 @@
 import  { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import MobileMenuSheet from './MobileMenuSheet';
+import { useAppNavigate } from '../../context/NavigationFeedbackContext';
 
 const MobileBottomNav = ({ screens }) => {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const location = useLocation();
   const currentPath = location.pathname.substring(1) || 'dashboard';
   const [isMenuOpen, setIsMenuOpen] = useState(false);

@@ -1,8 +1,8 @@
 import 'react';
-import { useNavigate } from 'react-router-dom';
+import { useAppNavigate } from '../context/NavigationFeedbackContext';
 
 const NotFoundPage = () => {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
 
   return (
     <main className="flex-1 flex flex-col items-center justify-center p-8 bg-background min-h-[60vh]">

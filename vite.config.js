@@ -8,7 +8,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'logo.png'],
+      includeAssets: ['logo-192.png', 'logo-512.png'],
       manifest: {
         name: 'Sistema Luz Jicamarca',
         short_name: 'Luz Jicamarca',
@@ -19,12 +19,12 @@ export default defineConfig({
         display: 'standalone',
         icons: [
           {
-            src: '/logo.png', // Fallback
+            src: '/logo-192.png',
             sizes: '192x192',
             type: 'image/png'
           },
           {
-            src: '/logo.png', // Fallback
+            src: '/logo-512.png',
             sizes: '512x512',
             type: 'image/png',
             purpose: 'any maskable'
@@ -55,7 +55,7 @@ export default defineConfig({
             if (id.includes('xlsx')) {
               return 'vendor-xlsx';
             }
-            if (id.includes('sonner') || id.includes('lucide-react')) {
+            if (id.includes('sonner')) {
               return 'vendor-ui';
             }
           }

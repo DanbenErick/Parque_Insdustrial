@@ -23,7 +23,7 @@ const RefacturarModal = memo(({ isOpen, motivo, isProcessing, onMotivoChange, on
           >
             {/* Header with gradient */}
             <div className="relative px-6 py-4 bg-orange-500 overflow-hidden">
-              <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10 mix-blend-overlay"></div>
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,rgba(255,255,255,0.28)_1px,transparent_0)] bg-[size:12px_12px] opacity-30"></div>
               <div className="relative z-10 flex items-center justify-between">
                 <div className="flex items-center gap-3 text-white">
                   <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner border border-white/30">

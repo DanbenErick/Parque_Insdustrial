@@ -2,6 +2,7 @@ import { useState, useCallback } from 'react';
 import api from '../../../api/axiosConfig';
 import { toast } from 'sonner';
 import { MIME_TYPES } from '../billingUtils';
+import { createBlobUrl } from '../../../utils/downloadFile';
 
 /**
  * usePdfViewer — Manages all PDF viewer modal state and handlers.
@@ -18,8 +19,7 @@ export const usePdfViewer = () => {
       // El backend ahora utiliza /pdf para generar el recibo actual
       const endpoint = 'pdf';
       const response = await api.get(`/recibos/${id}/${endpoint}`, { responseType: 'blob' });
-      const blob = new Blob([response.data], { type: MIME_TYPES.PDF });
-      const url = window.URL.createObjectURL(blob);
+      const url = createBlobUrl(response.data, MIME_TYPES.PDF);
 
       // Revoke previous URL to prevent memory leaks
       setPdfUrl((prev) => {
@@ -39,8 +39,7 @@ export const usePdfViewer = () => {
     setIsGenerating(true);
     try {
       const response = await api.get('/recibos/reporte/pdf', { params: filterParams, responseType: 'blob' });
-      const blob = new Blob([response.data], { type: MIME_TYPES.PDF });
-      const url = window.URL.createObjectURL(blob);
+      const url = createBlobUrl(response.data, MIME_TYPES.PDF);
 
       setPdfUrl((prev) => {
         if (prev) window.URL.revokeObjectURL(prev);

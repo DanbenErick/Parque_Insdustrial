@@ -1,7 +1,9 @@
 import  { useState, useEffect, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useAppNavigate } from '../../context/NavigationFeedbackContext';
 import api from '../../api/axiosConfig';
+import { lecturasQueryOptions, periodosQueryOptions } from '../../api/queryOptions';
 import { useYear } from '../../context/YearContext';
 import SuccessModal from './components/SuccessModal';
 import LecturasDetailsModal from './components/LecturasDetailsModal';
@@ -33,34 +35,23 @@ const formatPeriodo = (periodoStr) => {
 
 const GenerateInvoices = () => {
   const { activeYear } = useYear();
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
+  const queryClient = useQueryClient();
 
   const [isProcessing, setIsProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [showSuccess, setShowSuccess] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
 
-  const [periodos, setPeriodos] = useState([]);
   const [selectedPeriodoId, setSelectedPeriodoId] = useState('');
-  const [lecturas, setLecturas] = useState([]);
+  const { data: periodos = [], isError: isPeriodosError } = useQuery(periodosQueryOptions);
+  const { data: lecturas = [], isError: isLecturasError } = useQuery(
+    lecturasQueryOptions({ year: activeYear, limit: 10000 }),
+  );
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const [periodosRes, lecturasRes] = await Promise.all([
-          api.get('/periodos'),
-          // Optimización: Solo descargar las lecturas del año activo
-          api.get('/lecturas', { params: { year: activeYear } })
-        ]);
-
-        setPeriodos(periodosRes.data);
-        setLecturas(lecturasRes.data);
-      } catch (error) {
-        toast.error('Error al cargar datos del servidor');
-      }
-    };
-    fetchData();
-  }, [activeYear]);
+    if (isPeriodosError || isLecturasError) toast.error('Error al cargar datos del servidor');
+  }, [isLecturasError, isPeriodosError]);
 
   // Optimización: useMemo para evitar recalcular en cada render
   const periodosFiltrados = useMemo(() => {
@@ -112,6 +103,11 @@ const GenerateInvoices = () => {
       }, 500);
 
       await api.post('/recibos/generar', { periodo_id: selectedPeriodoId });
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['recibos'] }),
+        queryClient.invalidateQueries({ queryKey: ['recibos-stats'] }),
+        queryClient.invalidateQueries({ queryKey: ['reportes-recibos'] }),
+      ]);
 
       clearInterval(progressInterval);
       setProgress(100);

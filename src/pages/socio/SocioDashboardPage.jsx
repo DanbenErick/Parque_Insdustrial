@@ -12,13 +12,14 @@ import {
 } from 'chart.js';
 import api from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
-import { Link } from 'react-router-dom';
 import FullScreenLoader from '../../components/ui/FullScreenLoader';
+import { useAppNavigate } from '../../context/NavigationFeedbackContext';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const SocioDashboardPage = () => {
   const { user } = useAuth();
+  const navigate = useAppNavigate();
   const [selectedChartMedidor, setSelectedChartMedidor] = useState('Todos');
 
   const { data: recibos = [], isLoading: isLoadingRecibos } = useQuery({
@@ -245,12 +246,12 @@ const SocioDashboardPage = () => {
           </div>
 
           <div className="flex gap-2">
-            <Link to="/billing" className="flex-1 text-center bg-surface-container hover:bg-surface-container-high transition-colors p-3 rounded-xl text-xs font-bold text-on-surface">
+            <button type="button" onClick={() => navigate('/billing')} className="flex-1 text-center bg-surface-container hover:bg-surface-container-high transition-colors p-3 rounded-xl text-xs font-bold text-on-surface">
               Ver Recibos
-            </Link>
-            <Link to="/payments" className="flex-1 text-center bg-emerald-50 hover:bg-emerald-100 transition-colors p-3 rounded-xl text-xs font-bold text-emerald-700">
+            </button>
+            <button type="button" onClick={() => navigate('/payments')} className="flex-1 text-center bg-emerald-50 hover:bg-emerald-100 transition-colors p-3 rounded-xl text-xs font-bold text-emerald-700">
               Ver Pagos
-            </Link>
+            </button>
           </div>
         </div>
 

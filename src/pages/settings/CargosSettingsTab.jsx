@@ -1,6 +1,8 @@
 import  { useState, useEffect, useCallback, useMemo } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
+import { periodosQueryOptions, queryKeys } from '../../api/queryOptions';
 import CargoFormModal from './CargoFormModal';
 
 // --- Constant: avoids duplicating the initial form state ---
@@ -15,34 +17,25 @@ const INITIAL_FORM_DATA = {
 };
 
 const CargosSettingsTab = () => {
-  const [cargos, setCargos] = useState([]);
-  const [periodos, setPeriodos] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const queryClient = useQueryClient();
+  const { data: cargos = [], isLoading: isLoadingCargos, isError: isCargosError } = useQuery({
+    queryKey: queryKeys.catalogoCargos,
+    queryFn: () => api.get('/catalogo-cargos').then((response) => response.data || []),
+    staleTime: 2 * 60 * 1000,
+  });
+  const { data: periodos = [], isLoading: isLoadingPeriodos, isError: isPeriodosError } = useQuery(periodosQueryOptions);
+  const isLoading = isLoadingCargos || isLoadingPeriodos;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState(INITIAL_FORM_DATA);
 
-  // --- useCallback: stable reference for fetchData ---
-  const fetchData = useCallback(async () => {
-    setIsLoading(true);
-    try {
-      const [cargosRes, periodosRes] = await Promise.all([
-        api.get('/catalogo-cargos'),
-        api.get('/periodos'),
-      ]);
-      setCargos(cargosRes.data);
-      setPeriodos(periodosRes.data);
-    } catch (error) {
-      toast.error('Error al cargar datos');
-      console.error(error);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const fetchData = useCallback(() => (
+    queryClient.invalidateQueries({ queryKey: queryKeys.catalogoCargos })
+  ), [queryClient]);
 
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    if (isCargosError || isPeriodosError) toast.error('Error al cargar datos');
+  }, [isCargosError, isPeriodosError]);
 
   // --- Memoized: pre-format monto for each cargo row ---
   const formattedCargos = useMemo(() =>
@@ -86,8 +79,8 @@ const CargosSettingsTab = () => {
         descripcion: formData.descripcion,
         monto_defecto: parseFloat(formData.monto_defecto),
         es_activo: formData.es_activo,
-        es_global: formData.es_global,
-        periodos_ids: formData.es_global ? [] : formData.periodos_ids,
+        es_global: formData.tipo === 'Costo' && formData.es_global,
+        periodos_ids: formData.tipo === 'Costo' && !formData.es_global ? formData.periodos_ids : [],
       };
 
       if (formData.id) {
@@ -171,9 +164,11 @@ const CargosSettingsTab = () => {
                   <td className="py-2.5 px-4 font-bold text-on-surface text-xs">
                     {cargo.descripcion}
                     <div className="text-[10px] text-on-surface-variant font-normal mt-0.5">
-                      {(cargo.es_global === 1 || cargo.es_global === true)
-                        ? <span className="text-primary font-bold flex items-center gap-1"><span className="material-symbols-outlined text-[12px]" translate="no">public</span> Global (Todos)</span>
-                        : `${cargo.periodos_ids?.length || 0} periodos asignados`}
+                      {cargo.tipo === 'Multa'
+                        ? <span className="text-error font-bold flex items-center gap-1"><span className="material-symbols-outlined text-[12px]" translate="no">person_check</span> Aplicación manual</span>
+                        : (cargo.es_global === 1 || cargo.es_global === true)
+                          ? <span className="text-primary font-bold flex items-center gap-1"><span className="material-symbols-outlined text-[12px]" translate="no">public</span> Global (Todos)</span>
+                          : `${cargo.periodos_ids?.length || 0} periodos asignados`}
                     </div>
                   </td>
                   <td className="py-2.5 px-4 font-data-mono font-bold text-primary text-xs">S/ {cargo.montoFormateado}</td>

@@ -1,8 +1,7 @@
 import  { useState, useRef } from 'react';
-import * as XLSX from 'xlsx';
-import ExcelJS from 'exceljs';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
+import { downloadBlob, MIME_TYPES } from '../../utils/downloadFile';
 
 
 
@@ -21,6 +20,7 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
   const fileInputRef = useRef(null);
 
   const downloadTemplate = async () => {
+    const { default: ExcelJS } = await import('exceljs');
     const workbook = new ExcelJS.Workbook();
     const sheet = workbook.addWorksheet('Socios', {
       views: [{ state: 'frozen', ySplit: 1 }]
@@ -112,15 +112,7 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
     }
 
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = "Plantilla_Importacion_Socios.xlsx";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadBlob(buffer, 'Plantilla_Importacion_Socios.xlsx', MIME_TYPES.EXCEL);
   };
 
   const handleFileChange = (e) => {
@@ -140,6 +132,7 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
 
     setIsProcessing(true);
     try {
+      const XLSX = await import('xlsx');
       const data = await file.arrayBuffer();
       const workbook = XLSX.read(data);
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];

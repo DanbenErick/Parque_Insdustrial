@@ -9,13 +9,15 @@ import { YearProvider } from './context/YearContext'
 import './index.css'
 import App from './App.jsx'
 import AppErrorBoundary from './components/ui/AppErrorBoundary.jsx'
+import { NavigationFeedbackProvider } from './context/NavigationFeedbackContext.jsx'
 
-// Desactivar el cambio de valor por scroll en los input[type="number"]
+// Evitar cambios accidentales en inputs numéricos sin bloquear el scroll global.
 document.addEventListener('wheel', (e) => {
-  if (e.target.type === 'number') {
-    e.preventDefault();
+  const target = e.target;
+  if (target instanceof HTMLInputElement && target.type === 'number' && document.activeElement === target) {
+    target.blur();
   }
-}, { passive: false });
+}, { passive: true });
 
 // Crear un cliente de Query con configuraciones por defecto
 const queryClient = new QueryClient({
@@ -32,15 +34,17 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <ThemeProvider>
-          <AuthProvider>
-            <YearProvider>
-              <AppErrorBoundary>
-                <App />
-              </AppErrorBoundary>
-            </YearProvider>
-          </AuthProvider>
-        </ThemeProvider>
+        <NavigationFeedbackProvider>
+          <ThemeProvider>
+            <AuthProvider>
+              <YearProvider>
+                <AppErrorBoundary>
+                  <App />
+                </AppErrorBoundary>
+              </YearProvider>
+            </AuthProvider>
+          </ThemeProvider>
+        </NavigationFeedbackProvider>
       </BrowserRouter>
       {/* Devtools de React Query (solo en desarrollo) */}
       {import.meta.env.DEV && (

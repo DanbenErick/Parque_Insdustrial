@@ -1,16 +1,19 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
-import { createPortal } from 'react-dom';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useLocation } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import { toast } from 'sonner';
 import { useYear } from '../../context/YearContext';
 import PdfPreviewModal from '../../components/ui/PdfPreviewModal';
-import { PaymentDetailRow as DetailRow } from './components/PaymentPresentation';
 import { PaymentHistoryTable, PaymentsDashboard } from './components/PaymentsDashboard';
 import CancelPaymentModal from './components/CancelPaymentModal';
 import EditPaymentModal from './components/EditPaymentModal';
 import { buildFilterParams, fmtCurrency, formatPeriod, getPagoTipoInfo } from './paymentUtils';
+import { useFloatingActionMenu } from '../../hooks/useFloatingActionMenu';
+import { createBlobUrl, downloadBlob, MIME_TYPES, openBlobInNewTab } from '../../utils/downloadFile';
+import { usePaymentsData } from './hooks/usePaymentsData';
+import PaymentActionMenu from './components/PaymentActionMenu';
+import PaymentDetailDrawer from './components/PaymentDetailDrawer';
+import { useAppNavigate } from '../../context/NavigationFeedbackContext';
 
 // ── Constants ────────────────────────────────────────────────────────
 const MODAL_BACKDROP = { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.2 } };
@@ -21,11 +24,9 @@ const PARTIAL_THRESHOLD = 0.02;
 
 // ── Main Component ───────────────────────────────────────────────────
 const Payments = () => {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const location = useLocation();
   const { activeYear } = useYear();
-  const queryClient = useQueryClient();
-
   // ── State ──────────────────────────────────────────────────────────
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,52 +36,16 @@ const Payments = () => {
   const [selectedPaymentForDetails, setSelectedPaymentForDetails] = useState(null);
   const [filterMes, setFilterMes] = useState('ULTIMO');
   const [showAnulados, setShowAnulados] = useState(true);
-  const [actionMenu, setActionMenu] = useState(null);
+  const { actionMenu, setActionMenu, openActionMenu } = useFloatingActionMenu({ menuHeight: 240 });
 
-  // ── React Query — data fetching ────────────────────────────────────
-
-  const filterParams = useMemo(() => {
-    const params = buildFilterParams(filterMes, activeYear);
-    params.includeAnulados = showAnulados;
-    return params;
-  }, [filterMes, activeYear, showAnulados]);
-
-  const { data: fetchedData, isLoading } = useQuery({
-    queryKey: ['pagos-data', filterParams],
-    queryFn: async () => {
-      const [pagosRes, recibosRes, periodosRes, statsRes] = await Promise.all([
-        api.get('/pagos', { params: filterParams }),
-        api.get('/recibos', { params: filterParams }),
-        api.get('/periodos'),
-        api.get('/pagos/stats', { params: filterParams }),
-      ]);
-      return {
-        pagos: pagosRes.data,
-        recibos: recibosRes.data,
-        periodos: periodosRes.data,
-        stats: statsRes.data,
-      };
-    },
-    staleTime: 2 * 60 * 1000,
-    onError: () => toast.error('Error al cargar datos de pagos'),
-  });
-
-  const pagos = useMemo(
-    () => Array.isArray(fetchedData?.pagos) ? fetchedData.pagos : (fetchedData?.pagos?.data ?? []),
-    [fetchedData?.pagos],
-  );
-  const allRecibos = useMemo(
-    () => Array.isArray(fetchedData?.recibos) ? fetchedData.recibos : (fetchedData?.recibos?.data ?? []),
-    [fetchedData?.recibos],
-  );
-  const periodos = useMemo(
-    () => Array.isArray(fetchedData?.periodos) ? fetchedData.periodos : (fetchedData?.periodos?.data ?? []),
-    [fetchedData?.periodos],
-  );
-
-  const refetchAll = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ['pagos-data'] });
-  }, [queryClient]);
+  const {
+    payments: pagos,
+    receipts: allRecibos,
+    periods: periodos,
+    stats,
+    refetchAll,
+    isLoading,
+  } = usePaymentsData({ filterMes, activeYear, showAnulados });
 
   // Form state
   const [selectedRecibo, setSelectedRecibo] = useState('');
@@ -133,7 +98,6 @@ const Payments = () => {
   }, [uniqueMonths, filterMes]);
 
   // KPIs procesados directamente desde la API
-  const stats = fetchedData?.stats || {};
   const totalFacturado = stats.totalFacturado ?? 0;
   const totalRecaudado = stats.totalRecaudado ?? 0;
   const pendienteRecaudar = stats.pendienteRecaudar ?? Math.max(0, totalFacturado - totalRecaudado);
@@ -311,15 +275,7 @@ const Payments = () => {
       if (searchTerm) params.search = searchTerm;
 
       const response = await api.get('/pagos/reporte/excel', { params, responseType: 'blob' });
-      const blob = new Blob([response.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = 'Reporte_Facturacion_Pagos.xlsx';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      downloadBlob(response.data, 'Reporte_Facturacion_Pagos.xlsx', MIME_TYPES.EXCEL);
       toast.success('Excel descargado exitosamente');
     } catch {
       toast.error('Error al descargar el Excel');
@@ -337,7 +293,7 @@ const Payments = () => {
       if (searchTerm) params.search = searchTerm;
 
       const response = await api.get('/pagos/reporte/pdf', { params, responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      const url = createBlobUrl(response.data, MIME_TYPES.PDF);
       // Revoke previous URL before storing new one
       setPdfUrl(prev => {
         if (prev) window.URL.revokeObjectURL(prev);
@@ -361,15 +317,7 @@ const Payments = () => {
       if (searchTerm) params.search = searchTerm;
 
       const response = await api.get('/pagos/export/all', { params, responseType: 'blob' });
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `tickets_masivos_${params.periodo || params.year || 'historico'}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      downloadBlob(response.data, `tickets_masivos_${params.periodo || params.year || 'historico'}.pdf`, MIME_TYPES.PDF);
       toast.success('PDF masivo descargado exitosamente', { id: 'pdfMasivo' });
     } catch (error) {
       toast.error(error.response?.data?.error || 'Error al generar PDF masivo', { id: 'pdfMasivo' });
@@ -406,9 +354,9 @@ const Payments = () => {
   const handlePrintTicket = useCallback(async (pagoId) => {
     try {
       const response = await api.get(`/pagos/${pagoId}/ticket`, { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-      window.open(url, '_blank');
-      // No revoke right away since window.open needs time to load it
+      if (!openBlobInNewTab(response.data, MIME_TYPES.PDF)) {
+        toast.error('El navegador bloqueó la apertura del ticket');
+      }
     } catch {
       toast.error('Error al generar el ticket');
     }
@@ -417,8 +365,9 @@ const Payments = () => {
   const handleViewPdfRecibo = useCallback(async (reciboId) => {
     try {
       const response = await api.get(`/recibos/${reciboId}/pdf`, { responseType: 'blob' });
-      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-      window.open(url, '_blank');
+      if (!openBlobInNewTab(response.data, MIME_TYPES.PDF)) {
+        toast.error('El navegador bloqueó la apertura del recibo');
+      }
     } catch {
       toast.error('Error al generar el recibo PDF');
     }
@@ -445,38 +394,8 @@ const Payments = () => {
   }, [isPdfModalOpen, closePdfModal]);
 
   const handleOpenMenu = useCallback((pago, e) => {
-    e.stopPropagation();
-    if (actionMenu?.pago?.id === pago.id) {
-      setActionMenu(null);
-      return;
-    }
-    const rect = e.currentTarget.getBoundingClientRect();
-    const spaceBelow = window.innerHeight - rect.bottom;
-    const menuHeight = 240;
-    const openUp = spaceBelow < menuHeight && rect.top > menuHeight;
-
-    setActionMenu({
-      pago,
-      top: openUp ? undefined : rect.bottom + 4,
-      bottom: openUp ? window.innerHeight - rect.top + 4 : undefined,
-      right: Math.max(12, window.innerWidth - rect.right),
-    });
-  }, [actionMenu]);
-
-  // Close action dropdown on Escape, scroll or resize
-  useEffect(() => {
-    if (!actionMenu) return;
-    const handleKeyDown = (e) => { if (e.key === 'Escape') setActionMenu(null); };
-    const handleScrollOrResize = () => setActionMenu(null);
-    document.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('scroll', handleScrollOrResize, true);
-    window.addEventListener('resize', handleScrollOrResize);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('scroll', handleScrollOrResize, true);
-      window.removeEventListener('resize', handleScrollOrResize);
-    };
-  }, [actionMenu]);
+    openActionMenu(e, { pago }, pago.id);
+  }, [openActionMenu]);
 
   const handleOpenEditModal = useCallback((pago) => {
     setPagoToEdit(pago);
@@ -873,145 +792,20 @@ const Payments = () => {
 
       {isPdfModalOpen && <PdfPreviewModal pdfBlobUrl={pdfUrl} title="Historial de Pagos" downloadFileName={`Pagos_Parque_Industrial_${new Date().toISOString().slice(0, 10)}.pdf`} onClose={closePdfModal} />}
 
-      {/* Dropdown flotante de Acciones */}
-      {actionMenu && createPortal(
-        <div className="dropdown-portal">
-          <div
-            className="fixed inset-0 z-[80]"
-            onClick={() => setActionMenu(null)}
-            onContextMenu={(e) => { e.preventDefault(); setActionMenu(null); }}
-          />
-          <div
-            style={{
-              top: actionMenu.top !== undefined ? `${actionMenu.top}px` : 'auto',
-              bottom: actionMenu.bottom !== undefined ? `${actionMenu.bottom}px` : 'auto',
-              right: `${actionMenu.right}px`,
-            }}
-            className="fixed z-[85] w-56 bg-white rounded-xl shadow-2xl border border-outline-variant/80 py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-100"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Header del dropdown */}
-            <div className="px-3.5 py-2 mb-1 border-b border-outline-variant/50 flex items-center justify-between bg-surface-container-lowest">
-              <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Acciones</span>
-              <span className="font-data-mono text-[10px] font-bold text-primary">{actionMenu.pago.numero_comprobante || 'S/N'}</span>
-            </div>
-
-            {actionMenu.pago.estado_validacion === 'Anulado' ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const p = actionMenu.pago;
-                    setActionMenu(null);
-                    setSelectedPaymentForDetails(p);
-                  }}
-                  className="w-full px-3.5 py-2 text-left text-xs font-semibold text-error hover:bg-error/10 flex items-center gap-2.5 transition-colors cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[18px]" translate="no">info</span>
-                  <span>Ver Detalle y Motivo</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const p = actionMenu.pago;
-                    setActionMenu(null);
-                    handleViewPdfRecibo(p.recibo_id);
-                  }}
-                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[18px] text-secondary" translate="no">picture_as_pdf</span>
-                  <span>Ver Recibo Original</span>
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const p = actionMenu.pago;
-                    setActionMenu(null);
-                    handlePrintTicket(p.id);
-                  }}
-                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[18px] text-primary" translate="no">receipt_long</span>
-                  <span>Imprimir Ticket</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const p = actionMenu.pago;
-                    setActionMenu(null);
-                    handleWhatsApp(p);
-                  }}
-                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[18px] text-[#25D366]" translate="no">chat</span>
-                  <span>Enviar por WhatsApp</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const p = actionMenu.pago;
-                    setActionMenu(null);
-                    handleViewPdfRecibo(p.recibo_id);
-                  }}
-                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[18px] text-secondary" translate="no">picture_as_pdf</span>
-                  <span>Ver Recibo</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const p = actionMenu.pago;
-                    setActionMenu(null);
-                    handleOpenEditModal(p);
-                  }}
-                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[18px] text-amber-600" translate="no">edit</span>
-                  <span>Modificar Pago</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const p = actionMenu.pago;
-                    setActionMenu(null);
-                    setSelectedPaymentForDetails(p);
-                  }}
-                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-on-surface hover:bg-surface-container flex items-center gap-2.5 transition-colors cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[18px] text-on-surface-variant" translate="no">visibility</span>
-                  <span>Ver Detalle</span>
-                </button>
-
-                <div className="my-1 border-t border-outline-variant/60" />
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    const p = actionMenu.pago;
-                    setActionMenu(null);
-                    setPagoToAnular(p);
-                    setMotivoAnulacion('');
-                    setIsAnularModalOpen(true);
-                  }}
-                  className="w-full px-3.5 py-2 text-left text-xs font-semibold text-error hover:bg-error/10 flex items-center gap-2.5 transition-colors cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-[18px]" translate="no">delete</span>
-                  <span>Anular Pago</span>
-                </button>
-              </>
-            )}
-          </div>
-        </div>,
-        document.body
-      )}
+      <PaymentActionMenu
+        menu={actionMenu}
+        onClose={() => setActionMenu(null)}
+        onViewDetails={setSelectedPaymentForDetails}
+        onPrintTicket={(payment) => handlePrintTicket(payment.id)}
+        onWhatsApp={handleWhatsApp}
+        onViewReceipt={(payment) => handleViewPdfRecibo(payment.recibo_id)}
+        onEdit={handleOpenEditModal}
+        onCancel={(payment) => {
+          setPagoToAnular(payment);
+          setMotivoAnulacion('');
+          setIsAnularModalOpen(true);
+        }}
+      />
 
       {isAnularModalOpen && pagoToAnular && (
         <CancelPaymentModal
@@ -1029,165 +823,14 @@ const Payments = () => {
 
       {isEditModalOpen && pagoToEdit && <EditPaymentModal payment={pagoToEdit} method={editMetodoPago} onMethodChange={setEditMetodoPago} operation={editNumeroOperacion} onOperationChange={setEditNumeroOperacion} date={editFechaPago} onDateChange={setEditFechaPago} onSubmit={handleConfirmEditPago} onClose={handleCloseEditModal} isSubmitting={isSubmittingEdit} formatCurrency={fmtCurrency} backdropProps={MODAL_BACKDROP} contentProps={MODAL_CONTENT} />}
 
-      {/* Drawer de Detalles del Pago (Portal) */}
-
-      {selectedPaymentForDetails && createPortal(
-        <div
-          {...MODAL_BACKDROP}
-          className="fixed inset-0 z-[100] flex justify-end bg-black/50 backdrop-blur-sm"
-          onClick={(e) => { if (e.target === e.currentTarget) closeDetailsDrawer(); }}
-        >
-          <div
-            className="w-full max-w-sm bg-surface h-full shadow-2xl flex flex-col"
-          >
-            <div className="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
-              <h3 className="text-base text-on-surface font-bold flex items-center gap-2">
-                <span className="material-symbols-outlined text-[20px] text-primary" translate="no">receipt_long</span>
-                Detalle del Pago
-              </h3>
-              <button
-                onClick={closeDetailsDrawer}
-                className="w-7 h-7 rounded-full hover:bg-surface-variant flex items-center justify-center text-on-surface-variant transition-colors"
-              >
-                <span className="material-symbols-outlined text-[18px]" translate="no">close</span>
-              </button>
-            </div>
-
-            <div className="p-4 flex-1 overflow-y-auto space-y-4 custom-scrollbar">
-
-              {/* Header/Amount */}
-              <div className="bg-surface-container-low rounded-xl p-4 flex flex-col items-center justify-center border border-outline-variant/50">
-                <span className="text-[10px] text-on-surface-variant font-bold tracking-wider mb-1.5 uppercase">MONTO PAGADO</span>
-                <span className="font-data-mono text-3xl font-bold text-primary">
-                  S/ {fmtCurrency(selectedPaymentForDetails.monto_pagado)}
-                </span>
-                <div className="mt-3 flex flex-col items-center gap-1">
-                  <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                    selectedPaymentForDetails.estado_validacion === 'Anulado'
-                      ? 'bg-error/10 text-error border border-error/20'
-                      : 'bg-[#059669]/10 text-[#059669] border border-[#059669]/20'
-                  }`}>
-                    {selectedPaymentForDetails.estado_validacion || 'Confirmado'}
-                  </span>
-                  {selectedPaymentForDetails.motivo_anulacion && (
-                    <span className="text-[10px] text-error/90 italic bg-error/5 border border-error/10 rounded px-2.5 py-1 text-center mt-1 max-w-xs">
-                      Motivo: {selectedPaymentForDetails.motivo_anulacion}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {/* Socio Info */}
-              <div>
-                <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Información del Cliente</h4>
-                <div className="bg-white border border-outline-variant rounded-lg p-3">
-                  <div className="font-bold text-xs text-on-surface">{selectedPaymentForDetails.socio}</div>
-                  <div className="text-[11px] text-on-surface-variant mt-0.5 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]" translate="no">folder</span>
-                    Recibo Asociado: <span className="font-data-mono font-bold text-xs">{selectedPaymentForDetails.numero_comprobante}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Payment Info */}
-              <div>
-                <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Detalles de la Transacción</h4>
-                <div className="bg-white border border-outline-variant rounded-lg divide-y divide-outline-variant">
-                  <DetailRow icon="calendar_today" label="Fecha y Hora" value={new Date(selectedPaymentForDetails.fecha_pago).toLocaleString('es-PE')} />
-                  <DetailRow icon="payments" label="Método de Pago" value={selectedPaymentForDetails.metodo_pago} />
-                  {selectedPaymentForDetails.numero_operacion && (
-                    <DetailRow icon="tag" label="N° de Operación" value={selectedPaymentForDetails.numero_operacion} valueClassName="font-data-mono text-xs font-bold text-on-surface" />
-                  )}
-                </div>
-              </div>
-
-              {/* Status Info */}
-              {(() => {
-                const fallbackPrev = fallbackPrevioMap.get(selectedPaymentForDetails.id) || 0;
-                const tipoInfo = getPagoTipoInfo(selectedPaymentForDetails, fallbackPrev);
-
-                return (
-                  <div>
-                    <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider mb-2">Detalle del Pago</h4>
-                    <div className={`border rounded-lg p-3 ${tipoInfo.boxClass}`}>
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-bold text-on-surface">Tipo de Abono</span>
-                        <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wide ${tipoInfo.badgeClass}`}>
-                          {tipoInfo.drawerLabel}
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-[11px] text-on-surface-variant">Total del Recibo</span>
-                        <span className="font-data-mono text-xs font-bold">
-                          S/ {fmtCurrency(selectedPaymentForDetails.recibo_total)}
-                        </span>
-                      </div>
-
-                      {tipoInfo.previo > 0 && (
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-[11px] text-on-surface-variant">Pagos Anteriores al Recibo</span>
-                          <span className="font-data-mono text-xs font-medium text-on-surface-variant">
-                            S/ {fmtCurrency(tipoInfo.previo)}
-                          </span>
-                        </div>
-                      )}
-
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-[11px] text-on-surface-variant">Monto de este Pago</span>
-                        <span className="font-data-mono text-xs font-bold text-on-surface">
-                          S/ {fmtCurrency(selectedPaymentForDetails.monto_pagado)}
-                        </span>
-                      </div>
-
-                      {tipoInfo.tipo === 'Parcial' && (
-                        <div className="flex justify-between items-center pt-2 border-t border-amber-200/50">
-                          <span className="text-[11px] text-amber-900 font-bold">Deuda Restante tras este Pago</span>
-                          <span className="font-data-mono text-xs font-bold text-amber-700">
-                            S/ {fmtCurrency(tipoInfo.restante)}
-                          </span>
-                        </div>
-                      )}
-
-                      {tipoInfo.subtextType === 'a_favor' && (
-                        <div className="flex justify-between items-center pt-2 border-t border-emerald-200/50">
-                          <span className="text-[11px] text-emerald-900 font-bold">Saldo a Favor Generado</span>
-                          <span className="font-data-mono text-xs font-bold text-emerald-700">
-                            S/ {fmtCurrency(tipoInfo.aFavor)}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                );
-              })()}
-
-              {/* Actions */}
-              <div className="pt-6 mt-auto space-y-2">
-                {selectedPaymentForDetails.estado_validacion !== 'Anulado' && (
-                  <button
-                    onClick={() => {
-                      handleOpenEditModal(selectedPaymentForDetails);
-                    }}
-                    className="w-full py-1.5 h-8 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-900 text-xs font-bold rounded-md flex items-center justify-center gap-1.5 transition-colors"
-                  >
-                    <span className="material-symbols-outlined text-[16px]" translate="no">edit</span>
-                    Modificar Datos del Pago
-                  </button>
-                )}
-                <button
-                  onClick={handleViewRecibo}
-                  className="w-full py-1.5 h-8 bg-surface-container-low hover:bg-surface-variant border border-outline-variant text-on-surface text-xs font-bold rounded-md flex items-center justify-center gap-1.5 transition-colors"
-                >
-                  <span className="material-symbols-outlined text-[16px]" translate="no">receipt_long</span>
-                  Ver Recibo Completo
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>,
-        document.body,
-      )}
+      <PaymentDetailDrawer
+        payment={selectedPaymentForDetails}
+        previousAmount={selectedPaymentForDetails ? fallbackPrevioMap.get(selectedPaymentForDetails.id) || 0 : 0}
+        onClose={closeDetailsDrawer}
+        onEdit={handleOpenEditModal}
+        onViewReceipt={handleViewRecibo}
+        backdropProps={MODAL_BACKDROP}
+      />
 
 
     </main>

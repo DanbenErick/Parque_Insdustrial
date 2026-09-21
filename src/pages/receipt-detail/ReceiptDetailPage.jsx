@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
-import { useSearchParams, useNavigate, useLocation } from 'react-router-dom';
+import { useSearchParams, useLocation } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import { toast } from 'sonner';
 import HistorialModal from '../billing/HistorialModal';
 import FullScreenLoader from '../../components/ui/FullScreenLoader';
 import { CargoLine, CargoLineConditional, InfoRow, SectionHeader } from './components/ReceiptDetailPrimitives';
+import { downloadBlob, MIME_TYPES } from '../../utils/downloadFile';
+import { useAppNavigate } from '../../context/NavigationFeedbackContext';
 
 // ── Constants ────────────────────────────────────────────────────────
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -48,7 +50,7 @@ const getEstadoConfig = (estado) => ESTADO_CONFIG[estado] || ESTADO_DEFAULT;
 const ReceiptDetail = ({ receiptId, onClose }) => {
   const [searchParams] = useSearchParams();
   const id = receiptId || searchParams.get('id');
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const location = useLocation();
 
   // ── State ──────────────────────────────────────────────────────────
@@ -119,15 +121,7 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
     if (!id || !recibo) return;
     try {
       const response = await api.get(`/recibos/${id}/pdf`, { responseType: 'blob' });
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Recibo_${recibo.periodo}_${(recibo.nombre_razonsocial || '').replace(/\s+/g, '_')}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      downloadBlob(response.data, `Recibo_${recibo.periodo}_${(recibo.nombre_razonsocial || '').replace(/\s+/g, '_')}.pdf`, MIME_TYPES.PDF);
       toast.success('PDF descargado exitosamente');
     } catch (err) {
       console.error(err);
@@ -139,6 +133,12 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
     e.preventDefault();
     if (cargos.descuento > 0 && !cargos.motivo_descuento.trim()) {
       return toast.error('Debes ingresar un sustento/motivo para aplicar el descuento.');
+    }
+    const multaSinSustento = selectedCargosDinamicos.find(cargo =>
+      cargo.tipo === 'Multa' && !cargo.motivo?.trim(),
+    );
+    if (multaSinSustento) {
+      return toast.error(`Ingresa el sustento de la multa: ${multaSinSustento.descripcion}`);
     }
     setIsSaving(true);
     try {
@@ -169,9 +169,26 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
   const handleToggleCargoDinamico = useCallback((cargo, checked) => {
     setSelectedCargosDinamicos(prev =>
       checked
-        ? [...prev, { descripcion: cargo.descripcion, tipo: cargo.tipo, monto: cargo.monto_defecto }]
-        : prev.filter(c => c.descripcion !== cargo.descripcion),
+        ? [...prev, {
+          catalogo_cargo_id: cargo.id,
+          descripcion: cargo.descripcion,
+          tipo: cargo.tipo,
+          monto: cargo.monto_defecto,
+          motivo: '',
+          fecha_infraccion: cargo.tipo === 'Multa' ? new Date().toLocaleDateString('en-CA') : null,
+        }]
+        : prev.filter(c => c.catalogo_cargo_id
+          ? c.catalogo_cargo_id !== cargo.id
+          : c.descripcion !== cargo.descripcion),
     );
+  }, []);
+
+  const handleCargoDinamicoChange = useCallback((cargoId, field, value) => {
+    setSelectedCargosDinamicos(prev => prev.map(cargo =>
+      (cargo.catalogo_cargo_id === cargoId || cargo.id === cargoId)
+        ? { ...cargo, [field]: value }
+        : cargo,
+    ));
   }, []);
 
   // ── Data fetching ──────────────────────────────────────────────────
@@ -219,8 +236,21 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
         try {
           const catRes = await api.get(`/catalogo-cargos/periodo/${r.periodo_id}`);
           if (!cancelled) {
-            setAvailableCargosDinamicos(catRes.data || []);
-            setSelectedCargosDinamicos(r.cargos_dinamicos || []);
+            const disponibles = catRes.data || [];
+            const seleccionados = (r.cargos_dinamicos || []).map(cargoAplicado => {
+              const catalogo = disponibles.find(cargo =>
+                cargo.id === cargoAplicado.catalogo_cargo_id
+                || (!cargoAplicado.catalogo_cargo_id && cargo.descripcion === cargoAplicado.descripcion),
+              );
+              return {
+                ...cargoAplicado,
+                catalogo_cargo_id: cargoAplicado.catalogo_cargo_id || catalogo?.id || null,
+                motivo: cargoAplicado.motivo || '',
+                fecha_infraccion: cargoAplicado.fecha_infraccion?.substring?.(0, 10) || '',
+              };
+            });
+            setAvailableCargosDinamicos(disponibles);
+            setSelectedCargosDinamicos(seleccionados);
           }
         } catch (e) {
           console.error('Error fetching catalogo cargos', e);
@@ -325,30 +355,76 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
                 ) : (
                   <div className="space-y-2">
                     {availableCargosDinamicos.map(cargo => {
-                      const isSelected = selectedCargosDinamicos.some(c => c.descripcion === cargo.descripcion);
+                      const selectedCargo = selectedCargosDinamicos.find(c =>
+                        c.catalogo_cargo_id === cargo.id || (!c.catalogo_cargo_id && c.descripcion === cargo.descripcion),
+                      );
+                      const isSelected = Boolean(selectedCargo);
                       return (
                         <div
                           key={cargo.id}
-                          className={`flex items-center justify-between p-2.5 rounded-lg border ${isSelected ? 'bg-primary/5 border-primary/30' : 'bg-surface border-outline-variant/50 hover:bg-surface-container-highest'} transition-colors cursor-pointer`}
+                          className={`p-2.5 rounded-lg border ${isSelected ? 'bg-primary/5 border-primary/30' : 'bg-surface border-outline-variant/50 hover:bg-surface-container-highest'} transition-colors cursor-pointer`}
                           onClick={() => handleToggleCargoDinamico(cargo, !isSelected)}
                         >
-                          <label className="flex items-center gap-3 cursor-pointer flex-grow pointer-events-none">
-                            <input
-                              type="checkbox"
-                              checked={isSelected}
-                              readOnly
-                              className="rounded text-primary focus:ring-primary w-4 h-4 border-outline-variant"
-                            />
-                            <div>
-                              <span className="text-xs font-bold block text-on-surface">{cargo.descripcion}</span>
-                              <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded ${cargo.tipo === 'Multa' ? 'bg-error/10 text-error' : 'bg-primary/10 text-primary'}`}>
-                                {cargo.tipo}
-                              </span>
+                          <div className="flex items-center justify-between">
+                            <label className="flex items-center gap-3 cursor-pointer flex-grow pointer-events-none">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                readOnly
+                                className="rounded text-primary focus:ring-primary w-4 h-4 border-outline-variant"
+                              />
+                              <div>
+                                <span className="text-xs font-bold block text-on-surface">{cargo.descripcion}</span>
+                                <span className={`text-[9px] uppercase font-bold px-1.5 py-0.5 rounded ${cargo.tipo === 'Multa' ? 'bg-error/10 text-error' : 'bg-primary/10 text-primary'}`}>
+                                  {cargo.tipo}
+                                </span>
+                              </div>
+                            </label>
+                            <span className="text-sm font-data-mono font-bold text-on-surface-variant">
+                              S/ {parseFloat(cargo.monto_defecto).toFixed(2)}
+                            </span>
+                          </div>
+
+                          {cargo.tipo === 'Multa' && selectedCargo && (
+                            <div
+                              className="grid grid-cols-1 sm:grid-cols-[1fr_120px_110px] gap-2 mt-3 pt-3 border-t border-error/15"
+                              onClick={(event) => event.stopPropagation()}
+                            >
+                              <div>
+                                <label className="text-[9px] font-bold uppercase text-error">Sustento obligatorio</label>
+                                <input
+                                  type="text"
+                                  required
+                                  value={selectedCargo.motivo || ''}
+                                  onChange={(event) => handleCargoDinamicoChange(cargo.id, 'motivo', event.target.value)}
+                                  placeholder="Motivo de la infracción"
+                                  className="mt-1 w-full h-8 rounded border border-error/20 bg-surface px-2 text-xs outline-none focus:border-error"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[9px] font-bold uppercase text-on-surface-variant">Fecha</label>
+                                <input
+                                  type="date"
+                                  required
+                                  value={selectedCargo.fecha_infraccion || ''}
+                                  onChange={(event) => handleCargoDinamicoChange(cargo.id, 'fecha_infraccion', event.target.value)}
+                                  className="mt-1 w-full h-8 rounded border border-outline-variant bg-surface px-2 text-[10px] outline-none focus:border-primary"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-[9px] font-bold uppercase text-on-surface-variant">Monto (S/)</label>
+                                <input
+                                  type="number"
+                                  min="0.01"
+                                  step="0.01"
+                                  required
+                                  value={selectedCargo.monto}
+                                  onChange={(event) => handleCargoDinamicoChange(cargo.id, 'monto', event.target.value)}
+                                  className="mt-1 w-full h-8 rounded border border-outline-variant bg-surface px-2 text-xs font-data-mono outline-none focus:border-primary"
+                                />
+                              </div>
                             </div>
-                          </label>
-                          <span className="text-sm font-data-mono font-bold text-on-surface-variant">
-                            S/ {parseFloat(cargo.monto_defecto).toFixed(2)}
-                          </span>
+                          )}
                         </div>
                       );
                     })}
@@ -612,7 +688,18 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
                     <CargoLineConditional value={recibo.instalacion_medidor} label="Instalación Medidor" />
 
                     {recibo.cargos_dinamicos?.map((cd) => (
-                      <CargoLine key={cd.id} label={cd.descripcion} amount={cd.monto} className="text-error font-medium" />
+                      <div key={cd.id}>
+                        <CargoLine
+                          label={cd.descripcion}
+                          amount={cd.monto}
+                          className={cd.tipo === 'Multa' ? 'text-error font-medium' : 'text-on-surface-variant font-medium'}
+                        />
+                        {cd.tipo === 'Multa' && cd.motivo && (
+                          <p className="mt-0.5 text-[9px] leading-snug text-on-surface-variant">
+                            {cd.fecha_infraccion ? `${cd.fecha_infraccion.substring(0, 10)} · ` : ''}{cd.motivo}
+                          </p>
+                        )}
+                      </div>
                     ))}
 
                     <CargoLineConditional value={recibo.deuda_vencida} label="Deuda Anterior" className="text-error font-bold" />

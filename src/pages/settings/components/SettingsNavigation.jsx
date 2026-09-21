@@ -1,6 +1,5 @@
 const SETTINGS_TABS = [
   { id: 'profile', icon: 'person', label: 'Perfil de Usuario' },
-  { id: 'notifications', icon: 'notifications_active', label: 'Notificaciones' },
   { id: 'periodos', icon: 'calendar_month', label: 'Periodos de Facturación' },
   { id: 'tarifas', icon: 'request_quote', label: 'Tarifas y Cobros' }
 ];

@@ -1,6 +1,7 @@
 import  { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
+import { downloadBlob, MIME_TYPES } from '../../utils/downloadFile';
 
 const HistorialModal = ({ isOpen, reciboId, onClose }) => {
   const [historial, setHistorial] = useState([]);
@@ -33,15 +34,7 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
     setDownloadingId(item.id);
     try {
       const response = await api.get(`/recibos/${item.id}/pdf`, { responseType: 'blob' });
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Recibo_${item.numero_comprobante || item.id}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      downloadBlob(response.data, `Recibo_${item.numero_comprobante || item.id}.pdf`, MIME_TYPES.PDF);
     } catch (err) {
       console.error(err);
       toast.error('Error al descargar PDF');

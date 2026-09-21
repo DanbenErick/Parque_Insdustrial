@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useAppNavigate } from '../../context/NavigationFeedbackContext';
 
 const QUICK_ACCESS_ITEMS = [
   {
@@ -33,7 +33,7 @@ const QUICK_ACCESS_ITEMS = [
 ];
 
 const QuickAccessBar = React.memo(() => {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
 
   return (
     <div className="mt-2">

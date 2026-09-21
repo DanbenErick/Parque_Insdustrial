@@ -14,6 +14,10 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
   const [searchTerm, setSearchTerm] = useState('');
   const [isAutocompleteOpen, setIsAutocompleteOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const periodoSeleccionado = useMemo(
+    () => periodos.find((periodo) => periodo.id === parseInt(selectedPeriodoId)),
+    [periodos, selectedPeriodoId],
+  );
 
   // Cerrar el dropdown cuando se hace clic fuera
   useEffect(() => {
@@ -80,14 +84,14 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
   };
 
   useEffect(() => {
-    if (isOpen && selectedPeriodoId) {
+    if (isOpen && selectedPeriodoId && periodoSeleccionado) {
       const fetchData = async () => {
         setIsLoading(true);
         try {
           const [medidoresRes, lecturasRes, usuariosRes] = await Promise.all([
-            api.get('/medidores'),
-            api.get('/lecturas?limit=10000'),
-            api.get('/usuarios?limit=10000')
+            api.get('/medidores', { params: { operativo: true } }),
+            api.get('/lecturas', { params: { periodo: periodoSeleccionado.mes_anio, limit: 10000 } }),
+            api.get('/usuarios', { params: { rol_id: 3, limit: 1000 } })
           ]);
           // Helper for paginated APIs
           const getRawData = (res) => Array.isArray(res.data) ? res.data : (res.data?.data || []);
@@ -104,11 +108,8 @@ const GenerateInvoicesModal = ({ isOpen, onClose, onSuccess, selectedPeriodoId, 
       };
       fetchData();
     }
-  }, [isOpen, selectedPeriodoId]);
+  }, [isOpen, selectedPeriodoId, periodoSeleccionado]);
 
-
-
-  const periodoSeleccionado = periodos.find(p => p.id === parseInt(selectedPeriodoId));
   if (!periodoSeleccionado) {
     return (
       <>

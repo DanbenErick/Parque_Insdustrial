@@ -1,9 +1,10 @@
 import  { useCallback } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useAppNavigate } from '../context/NavigationFeedbackContext';
 
 const SocioSidebar = ({ isMobileMenuOpen, onCloseMobileMenu }) => {
-  const navigate = useNavigate();
+  const navigate = useAppNavigate();
   const location = useLocation();
   const { user, logout } = useAuth();
 
@@ -28,7 +29,7 @@ const SocioSidebar = ({ isMobileMenuOpen, onCloseMobileMenu }) => {
       <div className="h-20 px-6 flex items-center justify-between border-b border-outline-variant/30 bg-surface-container-lowest">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-emerald-50 rounded-xl border border-emerald-100 flex items-center justify-center overflow-hidden shrink-0">
-            <img src="/logo.png" alt="Logo" className="w-full h-full object-contain drop-shadow-sm" />
+            <img src="/logo-192.png" alt="Logo" className="w-full h-full object-contain drop-shadow-sm" />
           </div>
           <div className="flex flex-col mt-1">
             <span className="font-bold text-emerald-900 text-[15px] leading-tight tracking-wide font-headline-sm">Portal Cliente</span>

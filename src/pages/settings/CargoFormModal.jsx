@@ -23,7 +23,9 @@ const CargoFormModal = ({ formData, setFormData, periodos, onClose, onSubmit, is
   // --- Handlers using functional state updates to avoid stale closures ---
   const handleFieldChange = useCallback((field) => (e) => {
     const value = e.target.value;
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => field === 'tipo' && value === 'Multa'
+      ? { ...prev, tipo: value, es_global: false, periodos_ids: [] }
+      : { ...prev, [field]: value });
   }, [setFormData]);
 
   const handleToggleActive = useCallback(() => {
@@ -132,17 +134,24 @@ const CargoFormModal = ({ formData, setFormData, periodos, onClose, onSubmit, is
                   <span className="text-sm font-bold text-on-surface">Activo (Disponible)</span>
                 </label>
 
-                <label className="flex items-center gap-2 cursor-pointer w-fit" onClick={() => setFormData(p => ({...p, es_global: !p.es_global}))}>
-                  <div className={`w-10 h-6 rounded-full relative shadow-inner transition-colors ${formData.es_global ? 'bg-orange-500' : 'bg-surface-container-high'}`}>
-                    <div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow-sm transition-all ${formData.es_global ? 'right-1' : 'left-1'}`}></div>
+                {formData.tipo === 'Costo' ? (
+                  <label className="flex items-center gap-2 cursor-pointer w-fit" onClick={() => setFormData(p => ({...p, es_global: !p.es_global}))}>
+                    <div className={`w-10 h-6 rounded-full relative shadow-inner transition-colors ${formData.es_global ? 'bg-orange-500' : 'bg-surface-container-high'}`}>
+                      <div className={`w-4 h-4 bg-white rounded-full absolute top-1 shadow-sm transition-all ${formData.es_global ? 'right-1' : 'left-1'}`}></div>
+                    </div>
+                    <span className="text-sm font-bold text-on-surface">Cargo Global (Aplica siempre)</span>
+                  </label>
+                ) : (
+                  <div className="rounded-lg border border-error/20 bg-error/5 px-3 py-2">
+                    <p className="text-xs font-bold text-error">Aplicación manual</p>
+                    <p className="text-[10px] text-on-surface-variant">Esta multa solo se cobrará cuando un operador la aplique a un recibo.</p>
                   </div>
-                  <span className="text-sm font-bold text-on-surface">Cargo Global (Aplica siempre)</span>
-                </label>
+                )}
               </div>
             </div>
 
             {/* Periodos section */}
-            {!formData.es_global && (
+            {formData.tipo === 'Costo' && !formData.es_global && (
               <div className="mt-lg pt-lg border-t border-outline-variant">
               <div className="flex justify-between items-end mb-xs">
                 <div>

@@ -3,15 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import api from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
 import FullScreenLoader from '../../components/ui/FullScreenLoader';
-
-const METODO_CONFIG = {
-  Transferencia: { icon: 'account_balance', bg: 'bg-blue-100 text-blue-700' },
-  Efectivo: { icon: 'payments', bg: 'bg-green-100 text-green-700' },
-  'Yape/Plin': { icon: 'send_to_mobile', bg: 'bg-purple-100 text-purple-700' },
-};
-
-const getMetodoConfig = (metodo) =>
-  METODO_CONFIG[metodo] || { icon: 'receipt', bg: 'bg-gray-100 text-gray-700' };
+import { getPaymentMethodConfig } from '../../constants/paymentMethods';
 
 const SocioPaymentsPage = () => {
   const { user } = useAuth();
@@ -55,7 +47,7 @@ const SocioPaymentsPage = () => {
         ) : (
           <div className="space-y-3">
             {pagos.map((pago) => {
-              const { icon, bg } = getMetodoConfig(pago.metodo_pago);
+              const { icon, bg } = getPaymentMethodConfig(pago.metodo_pago);
               return (
                 <div key={pago.id} className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 rounded-xl hover:bg-surface-container-lowest transition-colors border border-transparent hover:border-outline-variant/50 group">
 

@@ -1,4 +1,4 @@
-import ExcelJS from 'exceljs';
+import { downloadBlob, MIME_TYPES } from '../../../utils/downloadFile';
 
 export const exportLecturasToExcel = async (medidores, lecturasMap, periodo) => {
   if (!medidores || medidores.length === 0) {
@@ -9,6 +9,7 @@ export const exportLecturasToExcel = async (medidores, lecturasMap, periodo) => 
     throw new Error('No hay periodo seleccionado.');
   }
 
+  const { default: ExcelJS } = await import('exceljs');
   const workbook = new ExcelJS.Workbook();
   workbook.creator = 'Parque Industrial Jicamarca';
   workbook.created = new Date();
@@ -166,14 +167,6 @@ export const exportLecturasToExcel = async (medidores, lecturasMap, periodo) => 
 
   // Descargar Archivo
   const buffer = await workbook.xlsx.writeBuffer();
-  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  const url = window.URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
   const mesFile = mesNombre.replace(' ', '_');
-  link.download = `Lecturas_Parque_Jicamarca_${mesFile}.xlsx`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  window.URL.revokeObjectURL(url);
+  downloadBlob(buffer, `Lecturas_Parque_Jicamarca_${mesFile}.xlsx`, MIME_TYPES.EXCEL);
 };

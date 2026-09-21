@@ -4,6 +4,7 @@ import api from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
 import { toast } from 'sonner';
 import FullScreenLoader from '../../components/ui/FullScreenLoader';
+import { downloadBlob, MIME_TYPES } from '../../utils/downloadFile';
 
 const STATUS_CONFIG = {
   Pendiente: { bg: 'bg-orange-50', border: 'border-orange-200', text: 'text-orange-700', icon: 'schedule' },
@@ -28,15 +29,7 @@ const SocioBillingPage = () => {
     try {
       toast.loading('Generando PDF...', { id: 'pdf-gen' });
       const response = await api.get(`/recibos/${recibo.id}/pdf`, { responseType: 'blob' });
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Recibo_${recibo.periodo}_${(user?.nombre_razonsocial || '').replace(/\s+/g, '_')}.pdf`;
-      document.body.appendChild(link);
-      link.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(link);
+      downloadBlob(response.data, `Recibo_${recibo.periodo}_${(user?.nombre_razonsocial || '').replace(/\s+/g, '_')}.pdf`, MIME_TYPES.PDF);
       toast.success('PDF descargado exitosamente', { id: 'pdf-gen' });
     } catch (error) {
       console.error('Error al descargar PDF:', error);

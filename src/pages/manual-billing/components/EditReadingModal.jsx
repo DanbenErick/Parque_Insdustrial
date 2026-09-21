@@ -216,6 +216,9 @@ export const EditReadingModal = ({
             </div>
             <textarea
               required value={editJustificacion} onChange={(e) => setEditJustificacion(e.target.value)}
+              onFocus={() => {
+                if (editJustificacion === 'Error de digitación') setEditJustificacion('');
+              }}
               placeholder="Ej. El operario ingresó un cero de más..."
               className="w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 rounded-lg px-3 py-2 text-sm text-on-surface focus:border-primary focus:ring-2 focus:ring-primary/10 outline-none transition-all resize-none h-[60px]"
             />
