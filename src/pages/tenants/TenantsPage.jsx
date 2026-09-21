@@ -49,7 +49,6 @@ const TenantsAndSectors = () => {
     search: debouncedSearch,
     estado: filterEstado === 'Todos' ? '' : (filterEstado === 'Activos' ? 'activos' : 'suspendidos'),
     rubro: filterRubro === 'Todos' ? '' : filterRubro,
-    limit: 10000,
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -60,6 +59,7 @@ const TenantsAndSectors = () => {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [confirmModal, setConfirmModal] = useState({ show: false, user: null, specificMedidor: null, isActivating: false });
   const [resetPasswordModal, setResetPasswordModal] = useState({ show: false, tenant: null });
+  const [temporaryPassword, setTemporaryPassword] = useState(null);
   const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [drawerTenant, setDrawerTenant] = useState(null);
 
@@ -100,9 +100,11 @@ const TenantsAndSectors = () => {
         await api.put(`/usuarios/${editId}`, payload);
         toast.success("Socio actualizado con éxito");
       } else {
-        payload.clave_acceso = '000000';
+        const randomBytes = new Uint8Array(18);
+        window.crypto.getRandomValues(randomBytes);
+        payload.clave_acceso = btoa(String.fromCharCode(...randomBytes)).replace(/\+/g, '-').replace(/\//g, '_');
         await api.post('/usuarios', payload);
-        toast.success("Socio registrado con éxito");
+        setTemporaryPassword({ name: data.nombre_razonsocial, value: payload.clave_acceso });
       }
       setIsModalOpen(false);
       refetchAll(); // Refetch usando React Query
@@ -125,10 +127,8 @@ const TenantsAndSectors = () => {
 
     setIsResettingPassword(true);
     try {
-      await api.post(`/usuarios/${tenant.id}/reset-password`);
-      toast.success('Contraseña restablecida a 123456. El socio debe cambiarla al ingresar.', {
-        duration: 10000,
-      });
+      const { data } = await api.post(`/usuarios/${tenant.id}/reset-password`);
+      setTemporaryPassword({ name: tenant.nombre_razonsocial, value: data.newPassword });
       setResetPasswordModal({ show: false, tenant: null });
     } catch {
       toast.error('Error al restablecer contraseña');
@@ -443,7 +443,7 @@ const TenantsAndSectors = () => {
         <ConfirmActionModal
           title="Restablecer Contraseña"
           message={`¿Estás seguro de que deseas restablecer la contraseña de ${resetPasswordModal.tenant?.nombre_razonsocial}?`}
-          warningText="Se asignará la clave temporal 123456. El socio deberá cambiarla después de ingresar a su cuenta."
+          warningText="Se generará una clave temporal aleatoria que se mostrará una sola vez. Compártela de forma segura con el socio."
           confirmText="Sí, restablecer clave"
           isDestructive={true}
           isLoading={isResettingPassword}
@@ -451,6 +451,27 @@ const TenantsAndSectors = () => {
           onConfirm={executeResetPassword}
           onClose={() => setResetPasswordModal({ show: false, tenant: null })}
         />
+      )}
+
+      {temporaryPassword && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true" aria-labelledby="temporary-password-title">
+          <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
+            <h2 id="temporary-password-title" className="text-xl font-semibold text-on-surface">Clave temporal de {temporaryPassword.name}</h2>
+            <p className="mt-2 text-sm text-on-surface-variant">Copia esta clave ahora. Se muestra una sola vez y debe entregarse al socio de forma segura.</p>
+            <input aria-label="Clave temporal" readOnly value={temporaryPassword.value} className="mt-4 w-full rounded-lg border border-outline px-3 py-2 font-mono text-on-surface" onFocus={(event) => event.target.select()} />
+            <div className="mt-5 flex justify-end gap-3">
+              <button type="button" onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(temporaryPassword.value);
+                  toast.success('Clave copiada');
+                } catch {
+                  toast.error('No se pudo copiar. Selecciona la clave manualmente.');
+                }
+              }} className="rounded-lg border border-outline px-4 py-2 text-on-surface">Copiar</button>
+              <button type="button" onClick={() => setTemporaryPassword(null)} className="rounded-lg bg-primary px-4 py-2 text-on-primary">Cerrar</button>
+            </div>
+          </div>
+        </div>
       )}
 
       {pdfBlobUrl && (

@@ -14,6 +14,7 @@ import { usePaymentsData } from './hooks/usePaymentsData';
 import PaymentActionMenu from './components/PaymentActionMenu';
 import PaymentDetailDrawer from './components/PaymentDetailDrawer';
 import { useAppNavigate } from '../../context/NavigationFeedbackContext';
+import { useAuth } from '../../context/AuthContext';
 
 // ── Constants ────────────────────────────────────────────────────────
 const MODAL_BACKDROP = { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, transition: { duration: 0.2 } };
@@ -24,6 +25,8 @@ const PARTIAL_THRESHOLD = 0.02;
 
 // ── Main Component ───────────────────────────────────────────────────
 const Payments = () => {
+  const { user } = useAuth();
+  const canRegisterPayment = Number(user?.rol_id) === 1;
   const navigate = useAppNavigate();
   const location = useLocation();
   const { activeYear } = useYear();
@@ -489,7 +492,7 @@ const Payments = () => {
         showAnulados={showAnulados}
         onShowAnuladosChange={setShowAnulados}
         onRegister={openModal}
-        canRegister={isFilterSpecific}
+        canRegister={canRegisterPayment && isFilterSpecific}
         metrics={{ totalFacturado, totalRecaudado, facturasPagadas, totalFacturas, pendienteRecaudar, porcentajeRecaudado, recaudadoEfectivo, recaudadoTransferencia }}
         formatCurrency={fmtCurrency}
       />

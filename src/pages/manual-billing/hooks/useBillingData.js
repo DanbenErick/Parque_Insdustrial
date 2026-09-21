@@ -15,7 +15,6 @@ export const useBillingData = (activeYear) => {
 
   const lecturasParams = useMemo(() => ({
     periodo: activePeriodo?.mes_anio,
-    limit: 10000,
   }), [activePeriodo?.mes_anio]);
 
   const { data: periodos = [], isLoading: isLoadingPeriodos, isError: isPeriodosError } = useQuery(periodosQueryOptions);

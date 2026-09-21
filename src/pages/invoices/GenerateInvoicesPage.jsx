@@ -46,7 +46,7 @@ const GenerateInvoices = () => {
   const [selectedPeriodoId, setSelectedPeriodoId] = useState('');
   const { data: periodos = [], isError: isPeriodosError } = useQuery(periodosQueryOptions);
   const { data: lecturas = [], isError: isLecturasError } = useQuery(
-    lecturasQueryOptions({ year: activeYear, limit: 10000 }),
+    lecturasQueryOptions({ year: activeYear }),
   );
 
   useEffect(() => {

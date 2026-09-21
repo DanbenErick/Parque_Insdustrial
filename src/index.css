@@ -3,8 +3,28 @@
 @tailwind utilities;
 
 @layer base {
+  html, body {
+    touch-action: manipulation;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-background font-body-md text-on-surface antialiased;
+  }
+
+  /* Bloqueo estricto cuando un modal/drawer está abierto */
+  body.modal-open,
+  html.modal-open {
+    overflow: hidden !important;
+    touch-action: none !important;
+  }
+
+  body.modal-open #app-main-scroll-container,
+  html.modal-open #app-main-scroll-container,
+  body.modal-open [data-app-scroll="true"],
+  html.modal-open [data-app-scroll="true"] {
+    overflow: hidden !important;
+    touch-action: none !important;
   }
 
   /* Animación global de "presionado" para todos los botones del sistema */
@@ -24,9 +44,26 @@
   input[type="number"] {
     -moz-appearance: textfield; /* Firefox */
   }
+
+  /* Prevenir zoom automático en dispositivos móviles (iOS Safari) al enfocar campos de texto */
+  @media screen and (max-width: 768px) {
+    input:not([type="checkbox"]):not([type="radio"]),
+    select,
+    textarea {
+      font-size: 16px !important;
+    }
+  }
 }
 
 @layer utilities {
+  /* Contenedor de scroll garantizado para modales y drawers en móviles */
+  .modal-scroll-area {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    touch-action: pan-y !important;
+    overscroll-behavior: contain !important;
+  }
+
   @keyframes page-enter {
     0% {
       opacity: 0.35;
@@ -124,8 +161,7 @@
   .chart-gradient {
     background: linear-gradient(180deg, rgba(8, 145, 178, 0.1) 0%, rgba(8, 145, 178, 0) 100%);
   }
-}
-@layer utilities {
+
   .animation-delay-2000 {
     animation-delay: 2s;
   }

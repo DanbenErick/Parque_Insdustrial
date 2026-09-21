@@ -166,7 +166,7 @@ function App() {
           )}
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col pb-[70px] md:pb-0">
+          <div id="app-main-scroll-container" data-app-scroll="true" className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col pb-[70px] md:pb-0">
 
             {navigationTarget && (
               <div className={`fixed left-0 right-0 top-12 z-[70] md:left-[260px] md:top-0 md:bottom-0 ${Number(user?.rol_id) === 3 ? 'bottom-0' : 'bottom-16'}`}>

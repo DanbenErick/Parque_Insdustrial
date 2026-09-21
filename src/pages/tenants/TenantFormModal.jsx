@@ -1,6 +1,8 @@
 import React, { useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
 import api from '../../api/axiosConfig';
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 
 const LABEL_CLASS = 'text-xs font-semibold text-on-surface-variant';
 const INPUT_CLASS = 'border border-outline-variant rounded px-3 py-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all';
@@ -21,6 +23,8 @@ const TenantFormModal = ({
   editId,
   onClose
 }) => {
+  useBodyScrollLock(true);
+
   const { register, control, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm({
     defaultValues: initialData || {
       nombre_razonsocial: '',
@@ -44,6 +48,15 @@ const TenantFormModal = ({
     }
   }, [initialData, reset]);
 
+  // Tecla Escape para cerrar
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === 'Escape' && !isSubmitting) onClose();
+    };
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [isSubmitting, onClose]);
+
   // Al abrir en modo creación, generar DNI temporal automáticamente
   const generarDniTemporal = useCallback(async () => {
     try {
@@ -62,26 +75,53 @@ const TenantFormModal = ({
     }
   }, [editId, generarDniTemporal]);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-0 md:p-4 !m-0">
-      <div className="bg-surface-container-lowest w-full h-full md:h-auto max-w-2xl md:rounded-xl shadow-2xl overflow-hidden border-0 md:border border-outline-variant flex flex-col max-h-screen md:max-h-[90vh]">
-        <div className="flex justify-between items-start px-md py-3 border-b border-outline-variant bg-surface-container-lowest">
-          <div className="flex gap-3">
-            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary mt-0.5 flex-shrink-0">
-              <span className="material-symbols-outlined text-[18px]" translate="no">{editId ? 'edit_document' : 'add_business'}</span>
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-md p-2 sm:p-4 overflow-hidden animate-in fade-in duration-200"
+      style={{ overscrollBehavior: 'contain' }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget && !isSubmitting) onClose();
+      }}
+    >
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modal-tenant-title"
+        className="bg-surface-container-lowest w-full max-w-2xl max-h-[calc(100dvh-1.5rem)] sm:max-h-[90vh] rounded-[24px] shadow-2xl overflow-hidden border border-outline-variant/60 flex flex-col my-auto animate-in zoom-in-95 duration-200"
+        onClick={(e) => e.stopPropagation()}
+        style={{ overscrollBehavior: 'contain' }}
+      >
+        {/* Header - Fijo */}
+        <div className="flex justify-between items-center px-5 sm:px-6 py-3.5 sm:py-4 border-b border-outline-variant/60 bg-surface-container-lowest shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0 border border-primary/20">
+              <span className="material-symbols-outlined text-[20px]" translate="no">{editId ? 'edit_document' : 'add_business'}</span>
             </div>
-            <div>
-              <h3 className="text-base text-on-surface font-bold leading-tight">{editId ? 'Editar Socio' : 'Registrar Nuevo Socio'}</h3>
-              <p className="text-[11px] text-on-surface-variant mt-0.5">{editId ? 'Modifique los datos comerciales o de contacto.' : 'Cree un nuevo registro corporativo y su usuario administrador.'}</p>
+            <div className="min-w-0">
+              <h3 id="modal-tenant-title" className="text-base text-on-surface font-bold leading-tight truncate">
+                {editId ? 'Editar Socio' : 'Registrar Nuevo Socio'}
+              </h3>
+              <p className="text-[11px] text-on-surface-variant mt-0.5 truncate">
+                {editId ? 'Modifique los datos comerciales o de contacto.' : 'Cree un nuevo registro corporativo y su usuario administrador.'}
+              </p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1 hover:bg-surface-container rounded-full transition-colors text-on-surface-variant flex-shrink-0">
+          <button
+            onClick={onClose}
+            disabled={isSubmitting}
+            aria-label="Cerrar"
+            className="w-8 h-8 rounded-full hover:bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors shrink-0 disabled:opacity-50"
+          >
             <span className="material-symbols-outlined text-[20px]" translate="no">close</span>
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-md custom-scrollbar">
-          <form className="space-y-md" id="tenant-form" onSubmit={handleSubmit(onSubmit)}>
+        {/* Form Body - Scrollable */}
+        <div
+          className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 custom-scrollbar modal-scroll-area"
+          style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
+        >
+          <form className="space-y-5" id="tenant-form" onSubmit={handleSubmit(onSubmit)}>
             {/* Section 1: Datos del Socio */}
             <div className="bg-surface rounded-2xl border border-outline-variant/60 shadow-sm overflow-hidden">
               <div className="px-5 py-3 bg-surface-container-lowest border-b border-outline-variant/60 flex items-center gap-3">
@@ -91,7 +131,7 @@ const TenantFormModal = ({
                 <h4 className="font-bold text-on-surface text-sm tracking-wide">DATOS DEL SOCIO</h4>
               </div>
 
-              <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-4 bg-surface">
+              <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-4 bg-surface">
                 <div className="flex flex-col gap-1 md:col-span-2">
                   <label className={LABEL_CLASS}>Nombre del Socio o Razón Social *</label>
                   <input
@@ -182,7 +222,7 @@ const TenantFormModal = ({
                 </button>
               </div>
 
-              <div className="p-5 flex flex-col gap-4 bg-surface">
+              <div className="p-4 sm:p-5 flex flex-col gap-4 bg-surface">
                 {fields.map((field, index) => {
                   const tipoValue = watch(`medidores.${index}.tipo`);
                   const isSinMedidor = tipoValue === 'Sin Medidor';
@@ -211,103 +251,103 @@ const TenantFormModal = ({
                       <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4">
 
                         <div className="flex flex-col gap-1 md:col-span-4">
-                        <label className={LABEL_CLASS}>Número de Serie {index > 0 ? '*' : '(Opcional)'}</label>
-                        <input
-                          {...register(`medidores.${index}.num_serie`, {
-                            required: (!isSinMedidor && index > 0) ? 'Requerido' : false
-                          })}
-                          disabled={isSinMedidor}
-                          className={`${errors.medidores?.[index]?.num_serie ? ERROR_INPUT_CLASS : INPUT_CLASS} font-data-mono ${isSinMedidor ? 'bg-surface-variant/50 text-on-surface-variant/50 cursor-not-allowed' : ''}`}
-                          placeholder={isSinMedidor ? 'No aplica' : 'Ej. MED-00123'}
-                          type="text"
-                        />
-                      </div>
-
-                      <div className="flex flex-col gap-1 md:col-span-3">
-                        <label className={LABEL_CLASS}>Tipo de Medidor *</label>
-                        <div className="relative">
-                          <select
-                            {...register(`medidores.${index}.tipo`)}
-                            className={`${INPUT_CLASS} appearance-none w-full bg-surface`}
-                          >
-                            <option value="Normal">Medidor Normal</option>
-                            <option value="Hora Punta">Hora Punta</option>
-                            <option value="Sin Medidor">Sin Medidor (Solo Cuotas)</option>
-                          </select>
-                          <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[18px]" translate="no">expand_more</span>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-1 md:col-span-5">
-                        <label className={LABEL_CLASS}>Dirección del Medidor *</label>
-                        <input
-                          {...register(`medidores.${index}.direccion`, {
-                            required: !isSinMedidor ? 'Requerido' : false
-                          })}
-                          disabled={isSinMedidor}
-                          className={`${errors.medidores?.[index]?.direccion ? ERROR_INPUT_CLASS : INPUT_CLASS} ${isSinMedidor ? 'bg-surface-variant/50 text-on-surface-variant/50 cursor-not-allowed' : ''}`}
-                          placeholder={isSinMedidor ? 'No aplica' : 'Ej. Av. Principal, Mz A'}
-                          type="text"
-                        />
-                      </div>
-
-                      {!isSinMedidor && (
-                        <div className="flex flex-col gap-1 md:col-span-6">
-                          <label className={LABEL_CLASS}>
-                            Lectura Inicial Fuera de Punta (kWh)
-                          </label>
+                          <label className={LABEL_CLASS}>Número de Serie {index > 0 ? '*' : '(Opcional)'}</label>
                           <input
-                            {...register(`medidores.${index}.lectura_inicial`, { valueAsNumber: true })}
-                            className={`${INPUT_CLASS} font-data-mono text-right`}
-                            placeholder="0.00"
-                            type="number"
-                            step="0.01"
+                            {...register(`medidores.${index}.num_serie`, {
+                              required: (!isSinMedidor && index > 0) ? 'Requerido' : false
+                            })}
+                            disabled={isSinMedidor}
+                            className={`${errors.medidores?.[index]?.num_serie ? ERROR_INPUT_CLASS : INPUT_CLASS} font-data-mono ${isSinMedidor ? 'bg-surface-variant/50 text-on-surface-variant/50 cursor-not-allowed' : ''}`}
+                            placeholder={isSinMedidor ? 'No aplica' : 'Ej. MED-00123'}
+                            type="text"
                           />
-                          <p className="text-[10px] text-on-surface-variant leading-tight">Valor con el que inicia el medidor en el sistema.</p>
                         </div>
-                      )}
 
-                      {tipoValue === 'Hora Punta' && (
-                        <>
-                          <div className="flex flex-col gap-1 md:col-span-6">
-                            <label className={LABEL_CLASS}>Lectura Inicial Hora Punta (kWh)</label>
-                            <input
-                              {...register(`medidores.${index}.lectura_inicial_punta`, { valueAsNumber: true })}
-                              className={`${INPUT_CLASS} font-data-mono text-right border-amber-200`}
-                              placeholder="0.00"
-                              type="number"
-                              step="0.01"
-                            />
-                            <p className="text-[10px] text-on-surface-variant leading-tight">Valor inicial en horario punta.</p>
+                        <div className="flex flex-col gap-1 md:col-span-3">
+                          <label className={LABEL_CLASS}>Tipo de Medidor *</label>
+                          <div className="relative">
+                            <select
+                              {...register(`medidores.${index}.tipo`)}
+                              className={`${INPUT_CLASS} appearance-none w-full bg-surface`}
+                            >
+                              <option value="Normal">Medidor Normal</option>
+                              <option value="Hora Punta">Hora Punta</option>
+                              <option value="Sin Medidor">Sin Medidor (Solo Cuotas)</option>
+                            </select>
+                            <span className="material-symbols-outlined absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant pointer-events-none text-[18px]" translate="no">expand_more</span>
                           </div>
+                        </div>
 
+                        <div className="flex flex-col gap-1 md:col-span-5">
+                          <label className={LABEL_CLASS}>Dirección del Medidor *</label>
+                          <input
+                            {...register(`medidores.${index}.direccion`, {
+                              required: !isSinMedidor ? 'Requerido' : false
+                            })}
+                            disabled={isSinMedidor}
+                            className={`${errors.medidores?.[index]?.direccion ? ERROR_INPUT_CLASS : INPUT_CLASS} ${isSinMedidor ? 'bg-surface-variant/50 text-on-surface-variant/50 cursor-not-allowed' : ''}`}
+                            placeholder={isSinMedidor ? 'No aplica' : 'Ej. Av. Principal, Mz A'}
+                            type="text"
+                          />
+                        </div>
+
+                        {!isSinMedidor && (
                           <div className="flex flex-col gap-1 md:col-span-6">
-                            <label className={LABEL_CLASS}>Máxima Demanda Fuera de Punta (kW)</label>
+                            <label className={LABEL_CLASS}>
+                              Lectura Inicial Fuera de Punta (kWh)
+                            </label>
                             <input
-                              {...register(`medidores.${index}.demanda_maxima_fuera_punta`, { valueAsNumber: true })}
+                              {...register(`medidores.${index}.lectura_inicial`, { valueAsNumber: true })}
                               className={`${INPUT_CLASS} font-data-mono text-right`}
                               placeholder="0.00"
                               type="number"
                               step="0.01"
                             />
-                            <p className="text-[10px] text-on-surface-variant leading-tight">Potencia máxima registrada en horario fuera de punta. (Informativo: no se suma, cada mes tiene su demanda)</p>
+                            <p className="text-[10px] text-on-surface-variant leading-tight">Valor con el que inicia el medidor en el sistema.</p>
                           </div>
+                        )}
 
-                          <div className="flex flex-col gap-1 md:col-span-6">
-                            <label className={LABEL_CLASS}>Máxima Demanda Hora Punta (kW)</label>
-                            <input
-                              {...register(`medidores.${index}.demanda_maxima_punta`, { valueAsNumber: true })}
-                              className={`${INPUT_CLASS} font-data-mono text-right border-amber-200`}
-                              placeholder="0.00"
-                              type="number"
-                              step="0.01"
-                            />
-                            <p className="text-[10px] text-on-surface-variant leading-tight">Potencia máxima registrada en horario punta. (Informativo: no se suma, cada mes tiene su demanda)</p>
-                          </div>
-                        </>
-                      )}
+                        {tipoValue === 'Hora Punta' && (
+                          <>
+                            <div className="flex flex-col gap-1 md:col-span-6">
+                              <label className={LABEL_CLASS}>Lectura Inicial Hora Punta (kWh)</label>
+                              <input
+                                {...register(`medidores.${index}.lectura_inicial_punta`, { valueAsNumber: true })}
+                                className={`${INPUT_CLASS} font-data-mono text-right border-amber-200`}
+                                placeholder="0.00"
+                                type="number"
+                                step="0.01"
+                              />
+                              <p className="text-[10px] text-on-surface-variant leading-tight">Valor inicial en horario punta.</p>
+                            </div>
+
+                            <div className="flex flex-col gap-1 md:col-span-6">
+                              <label className={LABEL_CLASS}>Máxima Demanda Fuera de Punta (kW)</label>
+                              <input
+                                {...register(`medidores.${index}.demanda_maxima_fuera_punta`, { valueAsNumber: true })}
+                                className={`${INPUT_CLASS} font-data-mono text-right`}
+                                placeholder="0.00"
+                                type="number"
+                                step="0.01"
+                              />
+                              <p className="text-[10px] text-on-surface-variant leading-tight">Potencia máxima registrada en horario fuera de punta. (Informativo: no se suma, cada mes tiene su demanda)</p>
+                            </div>
+
+                            <div className="flex flex-col gap-1 md:col-span-6">
+                              <label className={LABEL_CLASS}>Máxima Demanda Hora Punta (kW)</label>
+                              <input
+                                {...register(`medidores.${index}.demanda_maxima_punta`, { valueAsNumber: true })}
+                                className={`${INPUT_CLASS} font-data-mono text-right border-amber-200`}
+                                placeholder="0.00"
+                                type="number"
+                                step="0.01"
+                              />
+                              <p className="text-[10px] text-on-surface-variant leading-tight">Potencia máxima registrada en horario punta. (Informativo: no se suma, cada mes tiene su demanda)</p>
+                            </div>
+                          </>
+                        )}
+                      </div>
                     </div>
-                  </div>
                   );
                 })}
               </div>
@@ -315,17 +355,38 @@ const TenantFormModal = ({
           </form>
         </div>
 
-        <div className="p-4 bg-surface-container-high border-t border-outline-variant grid grid-cols-2 gap-3 w-full">
-          <button type="button" onClick={onClose} className="w-full px-4 py-2.5 text-sm border border-outline text-on-surface font-bold rounded-xl hover:bg-surface transition-colors active:scale-95 duration-150">
+        {/* Footer - Fijo */}
+        <div className="p-3.5 sm:p-4 bg-surface-container-high border-t border-outline-variant grid grid-cols-2 gap-3 w-full shrink-0">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isSubmitting}
+            className="w-full px-4 py-2.5 text-sm border border-outline text-on-surface font-bold rounded-xl hover:bg-surface transition-colors active:scale-95 duration-150 disabled:opacity-50"
+          >
             Cancelar
           </button>
-          <button type="submit" form="tenant-form" disabled={isSubmitting} className="w-full px-4 py-2.5 text-sm bg-primary text-on-primary font-bold rounded-xl shadow-sm hover:opacity-90 disabled:opacity-50 active:scale-95 transition-all duration-150 flex justify-center items-center gap-2">
-            <span className="material-symbols-outlined text-[18px]" translate="no">save</span>
-            {isSubmitting ? 'Guardando...' : (editId ? 'Actualizar Registro' : 'Registrar Conexión')}
+          <button
+            type="submit"
+            form="tenant-form"
+            disabled={isSubmitting}
+            className="w-full px-4 py-2.5 text-sm bg-primary text-on-primary font-bold rounded-xl shadow-sm hover:opacity-90 disabled:opacity-50 active:scale-95 transition-all duration-150 flex justify-center items-center gap-2"
+          >
+            {isSubmitting ? (
+              <>
+                <span className="material-symbols-outlined animate-spin text-[18px]" translate="no">sync</span>
+                Guardando...
+              </>
+            ) : (
+              <>
+                <span className="material-symbols-outlined text-[18px]" translate="no">save</span>
+                {editId ? 'Actualizar Registro' : 'Registrar Conexión'}
+              </>
+            )}
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

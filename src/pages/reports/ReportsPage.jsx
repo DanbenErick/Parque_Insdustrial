@@ -1,6 +1,7 @@
 import  { useState, useEffect, useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import api from '../../api/axiosConfig';
+import { fetchAllPages } from '../../api/fetchAllPages';
 import { lecturasQueryOptions, periodosQueryOptions } from '../../api/queryOptions';
 import { useYear } from '../../context/YearContext';
 import { toast } from 'sonner';
@@ -83,7 +84,7 @@ const Reports = () => {
   const { data: periodos = [], isLoading: isLoadingPeriodos, isError: isPeriodosError, refetch: refetchPeriodos } = useQuery(periodosQueryOptions);
   const { data: recibosResponse, isLoading: isLoadingRecibos, isError: isRecibosError, refetch: refetchRecibos } = useQuery({
     queryKey: ['reportes-recibos', activeYear],
-    queryFn: () => api.get('/recibos', { params: { year: activeYear } }).then((response) => response.data),
+    queryFn: () => fetchAllPages('/recibos', { year: activeYear }),
     staleTime: 2 * 60 * 1000,
   });
   const recibos = useMemo(
@@ -96,7 +97,7 @@ const Reports = () => {
     isError: isLecturasError,
     refetch: refetchLecturas,
   } = useQuery(lecturasQueryOptions(
-    { periodo: selectedPeriod, limit: 10000 },
+    { periodo: selectedPeriod },
     { enabled: Boolean(selectedPeriod) },
   ));
   const { data: chartResponse, isLoading: isLoadingChart, isError: isChartError, refetch: refetchChart } = useQuery({

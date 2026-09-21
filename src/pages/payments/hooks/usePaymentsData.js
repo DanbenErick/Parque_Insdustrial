@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import api from '../../../api/axiosConfig';
+import { fetchAllPages } from '../../../api/fetchAllPages';
 import { periodosQueryOptions } from '../../../api/queryOptions';
 import { buildFilterParams } from '../paymentUtils';
 
@@ -17,13 +18,13 @@ export const usePaymentsData = ({ filterMes, activeYear, showAnulados }) => {
 
   const paymentsQuery = useQuery({
     queryKey: ['pagos', filterParams],
-    queryFn: () => api.get('/pagos', { params: filterParams }).then((response) => response.data),
+    queryFn: () => fetchAllPages('/pagos', filterParams),
     staleTime: QUERY_STALE_TIME,
   });
 
   const receiptsQuery = useQuery({
     queryKey: ['pagos-recibos', filterParams],
-    queryFn: () => api.get('/recibos', { params: filterParams }).then((response) => response.data),
+    queryFn: () => fetchAllPages('/recibos', filterParams),
     staleTime: QUERY_STALE_TIME,
   });
 

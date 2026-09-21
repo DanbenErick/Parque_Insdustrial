@@ -1,9 +1,10 @@
 import { keepPreviousData, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../../../api/axiosConfig';
+import { fetchAllPages } from '../../../api/fetchAllPages';
 
-export const useTenants = ({ search = '', estado = '', rubro = '', limit = 10000 } = {}) => {
+export const useTenants = ({ search = '', estado = '', rubro = '' } = {}) => {
   const queryClient = useQueryClient();
-  const params = { rol_id: 3, search, estado, rubro, page: 1, limit };
+  const params = { rol_id: 3, search, estado, rubro };
 
   const {
     data: tenantsResponse,
@@ -13,8 +14,7 @@ export const useTenants = ({ search = '', estado = '', rubro = '', limit = 10000
   } = useQuery({
     queryKey: ['tenants', params],
     queryFn: async () => {
-      const response = await api.get('/usuarios', { params });
-      const rawData = Array.isArray(response.data) ? response.data : (response.data?.data || []);
+      const rawData = await fetchAllPages('/usuarios', { rol_id: 3, search, estado, rubro });
 
       const data = rawData.map(tenant => {
         let parsedMedidores = [];
@@ -28,7 +28,7 @@ export const useTenants = ({ search = '', estado = '', rubro = '', limit = 10000
         } catch { /* skip */ }
         return { ...tenant, parsedMedidores };
       });
-      return { data, meta: response.data?.meta || { total: data.length, page: 1, totalPages: 1 } };
+      return { data, meta: { total: data.length, page: 1, totalPages: 1 } };
     },
     staleTime: 60 * 1000, // 1 minuto
     placeholderData: keepPreviousData,

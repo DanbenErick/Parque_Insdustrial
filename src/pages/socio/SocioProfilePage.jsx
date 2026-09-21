@@ -94,46 +94,32 @@ const SocioProfilePage = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Nueva Contraseña (PIN)</label>
+              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Nueva Contraseña</label>
               <input
                 type="password"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={6}
-                onKeyPress={(e) => {
-                  if (!/[0-9]/.test(e.key)) {
-                    e.preventDefault();
-                  }
-                }}
+                maxLength={128}
                 {...register('clave_nueva', {
                   required: 'La nueva contraseña es requerida',
-                  pattern: { value: /^\d{6}$/, message: 'Debe ser un PIN exacto de 6 dígitos' }
+                  minLength: { value: 8, message: 'Mínimo 8 caracteres' }
                 })}
                 className={`w-full px-4 py-3 rounded-xl border ${errors.clave_nueva ? 'border-error bg-error/5' : 'border-outline-variant bg-surface-container-lowest'} focus:outline-none focus:border-emerald-500 transition-colors tracking-widest font-data-mono`}
-                placeholder="123456"
+                placeholder="Mínimo 8 caracteres"
               />
               {errors.clave_nueva && <p className="text-error text-xs mt-1.5">{errors.clave_nueva.message}</p>}
-              <p className="text-[11px] text-on-surface-variant mt-2">Su nueva contraseña debe ser un PIN numérico de exactamente 6 dígitos.</p>
+              <p className="text-[11px] text-on-surface-variant mt-2">La nueva contraseña debe tener al menos 8 caracteres.</p>
             </div>
 
             <div>
               <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Confirmar Nueva Contraseña</label>
               <input
                 type="password"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                maxLength={6}
-                onKeyPress={(e) => {
-                  if (!/[0-9]/.test(e.key)) {
-                    e.preventDefault();
-                  }
-                }}
+                maxLength={128}
                 {...register('confirmar_clave', {
                   required: 'Debes confirmar la contraseña',
                   validate: value => value === claveNueva || 'Las contraseñas no coinciden'
                 })}
                 className={`w-full px-4 py-3 rounded-xl border ${errors.confirmar_clave ? 'border-error bg-error/5' : 'border-outline-variant bg-surface-container-lowest'} focus:outline-none focus:border-emerald-500 transition-colors tracking-widest font-data-mono`}
-                placeholder="123456"
+                placeholder="Repite la nueva contraseña"
               />
               {errors.confirmar_clave && <p className="text-error text-xs mt-1.5">{errors.confirmar_clave.message}</p>}
             </div>

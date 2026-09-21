@@ -34,7 +34,7 @@ export default defineConfig({
       workbox: {
         // Los motores de Excel se descargan únicamente cuando el usuario abre
         // una función de importación/exportación; no forman parte del arranque offline.
-        globIgnores: ['**/vendor-exceljs-*.js', '**/vendor-xlsx-*.js']
+        globIgnores: ['**/vendor-exceljs-*.js']
       }
     })
   ],
@@ -51,9 +51,6 @@ export default defineConfig({
             }
             if (id.includes('exceljs')) {
               return 'vendor-exceljs';
-            }
-            if (id.includes('xlsx')) {
-              return 'vendor-xlsx';
             }
             if (id.includes('sonner')) {
               return 'vendor-ui';

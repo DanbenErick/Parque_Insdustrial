@@ -1,5 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
 import api from './axiosConfig';
+import { fetchAllPages } from './fetchAllPages';
 
 export const queryKeys = {
   periodos: ['periodos'],
@@ -24,7 +25,7 @@ export const medidoresQueryOptions = (params = {}) => queryOptions({
 
 export const lecturasQueryOptions = (params = {}, options = {}) => queryOptions({
   queryKey: queryKeys.lecturas(params),
-  queryFn: () => api.get('/lecturas', { params }).then((response) => response.data || []),
+  queryFn: ({ signal }) => fetchAllPages('/lecturas', params, { signal }),
   staleTime: 60 * 1000,
   ...options,
 });

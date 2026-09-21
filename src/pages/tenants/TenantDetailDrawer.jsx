@@ -1,4 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 
 const getInitials = (name) => {
   if (!name) return '??';
@@ -16,27 +18,55 @@ const DataItem = ({ icon, label, value }) => (
 );
 
 const TenantDetailDrawer = ({ drawerTenant, setDrawerTenant, handleOpenEdit }) => {
+  useBodyScrollLock(Boolean(drawerTenant));
+
+  useEffect(() => {
+    if (!drawerTenant) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setDrawerTenant(null);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [drawerTenant, setDrawerTenant]);
+
+  if (!drawerTenant) return null;
+
   const deudaTotal = parseFloat(drawerTenant.deuda_total || 0);
   const hasMedidores = drawerTenant.parsedMedidores && drawerTenant.parsedMedidores.length > 0;
 
-  return (
+  return createPortal(
     <>
       <div
-        className="fixed inset-0 bg-black/20 backdrop-blur-sm z-[100] !m-0 animate-fade-in"
+        className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] !m-0 animate-fade-in"
         onClick={() => setDrawerTenant(null)}
+        style={{ overscrollBehavior: 'contain' }}
       />
-      <div className="fixed inset-y-0 right-0 w-full md:w-[420px] bg-white shadow-2xl z-[110] flex flex-col !m-0 border-l border-outline-variant/30 animate-slide-in-right">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-label="Expediente del Socio"
+        className="fixed inset-y-0 right-0 w-full md:w-[420px] h-[100dvh] max-h-[100dvh] bg-white shadow-2xl z-[110] flex flex-col !m-0 border-l border-outline-variant/30 animate-slide-in-right overflow-hidden"
+        style={{ overscrollBehavior: 'contain' }}
+        onClick={(e) => e.stopPropagation()}
+      >
 
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/30 bg-white">
+        {/* Header - Fijo */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-outline-variant/30 bg-white shrink-0">
           <h3 className="font-bold text-lg text-on-surface">Expediente del Socio</h3>
-          <button onClick={() => setDrawerTenant(null)} className="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-error/10 text-slate-700 hover:text-error rounded-full transition-colors shadow-sm border border-slate-200 hover:border-error/20">
+          <button
+            onClick={() => setDrawerTenant(null)}
+            aria-label="Cerrar expediente"
+            className="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-error/10 text-slate-700 hover:text-error rounded-full transition-colors shadow-sm border border-slate-200 hover:border-error/20 shrink-0"
+          >
             <span className="material-symbols-outlined text-[18px] font-bold" translate="no">close</span>
           </button>
         </div>
 
         {/* Scrollable Body */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar">
+        <div
+          className="flex-1 min-h-0 overflow-y-auto custom-scrollbar modal-scroll-area"
+          style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
+        >
 
           {/* Main Profile Info */}
           <div className="px-6 py-8 border-b border-outline-variant/30 bg-surface-container-lowest flex flex-col items-center text-center">
@@ -123,7 +153,7 @@ const TenantDetailDrawer = ({ drawerTenant, setDrawerTenant, handleOpenEdit }) =
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-outline-variant/30 bg-white">
+        <div className="p-4 border-t border-outline-variant/30 bg-white shrink-0">
           <button
             onClick={() => {
               setDrawerTenant(null);
@@ -136,7 +166,8 @@ const TenantDetailDrawer = ({ drawerTenant, setDrawerTenant, handleOpenEdit }) =
           </button>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 };
 

@@ -5,10 +5,10 @@
   <meta charset="UTF-8" />
   <link rel="icon" type="image/png" href="/logo-192.png" />
   <link rel="apple-touch-icon" href="/logo-192.png" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <meta name="theme-color" content="#515B3A" />
   <title>Parque Industrial Jicamarca</title>
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <!-- Lexend: solo pesos usados (400, 600, 700) con carga no bloqueante -->
@@ -26,17 +26,22 @@
       e.preventDefault();
       window.deferredPWAEvent = e;
     });
+
+    // Deshabilitar gestos de zoom táctil (pinch zoom en iOS Safari)
+    document.addEventListener('gesturestart', (e) => e.preventDefault());
+    document.addEventListener('gesturechange', (e) => e.preventDefault());
+    document.addEventListener('gestureend', (e) => e.preventDefault());
   </script>
-  <script type="module" crossorigin src="/assets/index-LEljoJTr.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-aKtaBQYM.js">
-  <link rel="modulepreload" crossorigin href="/assets/vendor-charts-BaE5bLnp.js">
-  <link rel="modulepreload" crossorigin href="/assets/vendor-react-CcTv1zQa.js">
-  <link rel="modulepreload" crossorigin href="/assets/vendor-ui-PEKmF8vB.js">
-  <link rel="stylesheet" crossorigin href="/assets/index-Dws-QrfN.css">
+  <script type="module" crossorigin src="/assets/index-DfinNDCS.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/rolldown-runtime-Dd_uD5pT.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-charts-DX7ipJ9C.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-react-NC2qDLpx.js">
+  <link rel="modulepreload" crossorigin href="/assets/vendor-ui-fwwW4K7W.js">
+  <link rel="stylesheet" crossorigin href="/assets/index-LZ8BGj8U.css">
 <link rel="manifest" href="/manifest.webmanifest"></head>
 
 <body>
-  <div id="root"></div>
+  <div id="root"></div>
 </body>
 
 </html>

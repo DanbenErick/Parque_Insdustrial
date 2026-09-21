@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from 'sonner';
 import api from '../../../api/axiosConfig';
+import { fetchAllPages } from '../../../api/fetchAllPages';
 import { createBlobUrl, downloadBlob, MIME_TYPES } from '../../../utils/downloadFile';
 
 const INITIAL_FORM = {
@@ -24,8 +25,7 @@ export const useUserManagement = () => {
   const fetchUsers = useCallback(async () => {
     setIsLoading(true);
     try {
-      const response = await api.get('/usuarios?limit=1000');
-      const rawData = Array.isArray(response.data) ? response.data : response.data?.data || [];
+      const rawData = await fetchAllPages('/usuarios');
       setUsersList(rawData.filter((user) => user.rol_id === 1 || user.rol_id === 2 || user.nombre_rol === 'Admin' || user.nombre_rol === 'Operario'));
     } catch (error) {
       toast.error(error.message || 'Error al cargar usuarios');

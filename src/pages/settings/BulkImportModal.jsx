@@ -2,6 +2,7 @@ import  { useState, useRef } from 'react';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 import { downloadBlob, MIME_TYPES } from '../../utils/downloadFile';
+import { parseImportFile } from '../../utils/parseImportFile';
 
 
 
@@ -136,21 +137,15 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
-      if (!selectedFile.name.match(/\.(xlsx|xls|csv)$/)) {
-        toast.error('Solo se permiten archivos Excel (.xlsx, .xls, .csv)');
+      if (!selectedFile.name.match(/\.(xlsx|csv)$/i)) {
+        toast.error('Solo se permiten archivos .xlsx o .csv');
         return;
       }
       setFile(selectedFile);
       setResults(null);
 
       // Parsear inmediatamente
-      const reader = new FileReader();
-      reader.onload = async (evt) => {
-        const XLSX = await import('xlsx');
-        const data = new Uint8Array(evt.target.result);
-        const workbook = XLSX.read(data);
-        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-        const rows = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false });
+      parseImportFile(selectedFile).then((rows) => {
 
         if (rows.length === 0) {
           toast.error('El archivo está vacío.');
@@ -163,8 +158,10 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
           return;
         }
         setParsedRows(rows);
-      };
-      reader.readAsArrayBuffer(selectedFile);
+      }).catch((error) => {
+        toast.error(error.message || 'No se pudo leer el archivo.');
+        setFile(null);
+      });
     }
   };
 
@@ -265,7 +262,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
                     type="file"
                     ref={fileInputRef}
                     className="hidden"
-                    accept=".xlsx, .xls, .csv"
+                    accept=".xlsx,.csv"
                     onChange={handleFileChange}
                   />
 
@@ -295,7 +292,7 @@ const BulkImportModal = ({ isOpen, onClose, onImportSuccess }) => {
                         <span className="material-symbols-outlined text-[32px]" translate="no">note_add</span>
                       </div>
                       <p className="font-bold text-sm text-on-surface">Haz clic para seleccionar el archivo</p>
-                      <p className="text-xs text-on-surface-variant mt-1">Formatos admitidos: .xlsx, .xls o .csv</p>
+                      <p className="text-xs text-on-surface-variant mt-1">Formatos admitidos: .xlsx o .csv</p>
                     </div>
                   )}
                 </div>

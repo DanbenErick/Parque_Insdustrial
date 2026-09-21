@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import api from '../../../api/axiosConfig';
+import { fetchAllPages } from '../../../api/fetchAllPages';
 import { periodosQueryOptions } from '../../../api/queryOptions';
 import { buildFilterParams } from '../billingUtils';
 
@@ -23,8 +24,7 @@ export const useBillingData = ({ filterMes, filterEstado, debouncedSearchTerm, a
   } = useQuery({
     queryKey: ['recibos', filterParams],
     queryFn: async () => {
-      const res = await api.get('/recibos', { params: filterParams });
-      return res.data;
+      return fetchAllPages('/recibos', filterParams);
     },
     staleTime: 2 * 60 * 1000, // 2 min
     onError: () => toast.error('Error al cargar los recibos'),

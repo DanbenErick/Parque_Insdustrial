@@ -1,8 +1,21 @@
-import 'react';
+import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { BadgeType } from './shared/BadgeType';
 import { formatDateLong, fmtVal, parseSafe } from '../utils';
+import { useBodyScrollLock } from '../../../hooks/useBodyScrollLock';
 
 export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClose, onEdit }) => {
+  useBodyScrollLock(Boolean(record));
+
+  useEffect(() => {
+    if (!record) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [record, onClose]);
+
   if (!record) return null;
 
   const isCambioMedidor = Boolean(record.es_cambio_medidor);
@@ -49,7 +62,7 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
 
   const wasModified = Boolean(record.justificacion);
 
-  return (
+  return createPortal(
     <>
       <style>
         {`
@@ -62,54 +75,75 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
             to { opacity: 1; backdrop-filter: blur(4px); }
           }
           .animate-drawer-in {
-            animation: slideInRightDrawer 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: slideInRightDrawer 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
           }
           .animate-backdrop-in {
-            animation: fadeInDrawer 0.3s ease-out forwards;
+            animation: fadeInDrawer 0.25s ease-out forwards;
           }
         `}
       </style>
       <div
-        className="fixed inset-0 z-50 bg-slate-900/40 animate-backdrop-in !m-0"
+        className="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm animate-backdrop-in !m-0 overscroll-contain"
         onClick={onClose}
+        style={{ overscrollBehavior: 'contain' }}
       />
       <div
-        className="fixed inset-y-0 right-0 z-50 w-full max-w-[600px] bg-surface flex flex-col shadow-2xl border-l border-outline-variant animate-drawer-in !m-0"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="drawer-reading-title"
+        className="fixed inset-y-0 right-0 z-[105] w-full max-w-[600px] h-[100dvh] max-h-[100dvh] bg-surface flex flex-col shadow-2xl border-l border-outline-variant animate-drawer-in !m-0 overflow-hidden"
+        style={{ overscrollBehavior: 'contain' }}
+        onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-outline-variant bg-surface-container-low flex justify-between items-center shadow-sm z-10 shrink-0">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+        {/* Header - Fijo */}
+        <div className="px-5 sm:px-6 py-4 border-b border-outline-variant bg-surface-container-low flex justify-between items-center shadow-sm z-10 shrink-0">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
               <span className="material-symbols-outlined text-[20px]" translate="no">analytics</span>
             </div>
-            <div>
-              <h3 className="font-headline-sm text-lg font-bold text-on-surface leading-tight">Detalle de Medición</h3>
-              <p className="text-xs text-on-surface-variant mt-0.5">
+            <div className="min-w-0">
+              <h3 id="drawer-reading-title" className="font-headline-sm text-base sm:text-lg font-bold text-on-surface leading-tight truncate">
+                Detalle de Medición
+              </h3>
+              <p className="text-xs text-on-surface-variant mt-0.5 truncate">
                 {formatDateLong(record.fecha_registro)}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0">
             {onEdit && (
-              <button onClick={() => onEdit(record)} className="px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-bold text-xs flex items-center gap-1.5 border border-primary/20">
+              <button
+                type="button"
+                onClick={() => onEdit(record)}
+                className="px-3 py-1.5 rounded-full bg-primary/10 text-primary hover:bg-primary/20 transition-colors font-bold text-xs flex items-center gap-1.5 border border-primary/20"
+              >
                 <span className="material-symbols-outlined text-[16px]" translate="no">edit</span>
-                Editar
+                <span>Editar</span>
               </button>
             )}
-            <button onClick={onClose} className="p-2 rounded-full hover:bg-surface-variant text-on-surface-variant transition-colors">
-              <span className="material-symbols-outlined" translate="no">close</span>
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Cerrar detalle"
+              className="p-2 rounded-full hover:bg-surface-variant text-on-surface-variant transition-colors"
+            >
+              <span className="material-symbols-outlined text-[20px]" translate="no">close</span>
             </button>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar bg-surface-container-lowest">
+        {/* Scrollable Content */}
+        <div
+          className="flex-1 min-h-0 overflow-y-auto p-4 sm:p-6 space-y-5 sm:space-y-6 custom-scrollbar modal-scroll-area bg-surface-container-lowest"
+          style={{ overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
+        >
 
           {/* Modified Alert */}
           {wasModified && (
             <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex gap-3 items-start shadow-sm relative overflow-hidden">
               <div className="absolute top-0 left-0 w-1 h-full bg-amber-400"></div>
               <span className="material-symbols-outlined text-amber-600 shrink-0 mt-0.5 text-[22px]" translate="no">edit_note</span>
-              <div>
+              <div className="min-w-0">
                 <h4 className="text-amber-800 font-bold text-sm mb-1">Lectura Modificada Manualmente</h4>
                 <p className="text-amber-700/80 text-xs mb-2">Los valores actuales mostrados a continuación son el resultado de una corrección manual. El operario registró el siguiente motivo:</p>
                 <div className="bg-white/60 p-3 rounded-lg border border-amber-200/50 text-sm font-medium text-amber-900 italic mb-3">
@@ -129,11 +163,6 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
                           <span className="text-[10px] uppercase opacity-70">Punta:</span> {fmtVal(record.lectura_actual_punta_original)} kWh
                         </div>
                       )}
-                      {record.factor_potencia_original !== null && (
-                        <div className="flex items-center gap-1.5 bg-white/50 px-2 py-1 rounded text-xs font-data-mono font-bold text-amber-900">
-                          <span className="text-[10px] uppercase opacity-70">E. Reactiva:</span> {fmtVal(record.factor_potencia_original)} kVARh
-                        </div>
-                      )}
                     </div>
                   </div>
                 )}
@@ -141,229 +170,203 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
             </div>
           )}
 
-          {/* Socio & Medidor Info */}
-          <div className="bg-white rounded-2xl border border-outline-variant p-5 shadow-sm">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant mb-1">Socio / Propietario</p>
-                <h4 className="text-lg font-bold text-on-surface">{record.propietario}</h4>
-              </div>
-              <div className="flex flex-col gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="bg-surface-container px-3 py-1 rounded-full text-xs font-data-mono font-bold border border-outline-variant">
+          {/* KPI Header Grid */}
+          <div className="bg-white border border-outline-variant rounded-2xl p-4 sm:p-5 shadow-sm space-y-4">
+            <div className="flex justify-between items-start gap-4">
+              <div className="min-w-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/70 block mb-1">Usuario / Razón Social</span>
+                <h4 className="text-base sm:text-lg font-bold text-on-surface leading-snug break-words">{record.propietario}</h4>
+                <div className="flex flex-wrap items-center gap-2 mt-2">
+                  <span className="font-data-mono text-xs font-bold text-primary bg-primary/10 px-2.5 py-1 rounded-md border border-primary/20 flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[14px]" translate="no">speed</span>
                     {record.num_serie}
                   </span>
-                  {(medidorInfo?.tipo || record.medidor_tipo || record.tipo) && (
-                    <BadgeType tipo={medidorInfo?.tipo || record.medidor_tipo || record.tipo} />
-                  )}
+                  <BadgeType type={tipoMedidor} />
                 </div>
-                {(medidorInfo?.direccion || record.medidor_direccion) && (
-                  <div className="mt-1 bg-indigo-50 border border-indigo-200 rounded-lg p-2.5 flex items-start gap-2.5 shadow-sm max-w-[280px]">
-                    <div className="bg-indigo-100 text-indigo-700 p-1.5 rounded-md shrink-0 flex">
-                      <span className="material-symbols-outlined text-[18px]" translate="no">location_on</span>
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[9px] font-bold uppercase tracking-wider text-indigo-600/80 leading-tight mb-0.5">Dirección del Medidor</span>
-                      <span className="text-[12px] font-bold text-indigo-900 leading-snug">{medidorInfo?.direccion || record.medidor_direccion}</span>
-                    </div>
-                  </div>
-                )}
+              </div>
+              <div className="text-right shrink-0">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/70 block mb-1">Monto Estimado</span>
+                <p className="font-data-mono text-xl sm:text-2xl font-black text-primary">S/ {fmtVal(montoTotal)}</p>
+                <span className="text-[10px] text-on-surface-variant/60 block mt-0.5">Sin impuestos/otros</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-on-surface-variant bg-surface px-3 py-2 rounded-lg border border-outline-variant/50">
-              <span className="material-symbols-outlined text-[16px]" translate="no">account_circle</span>
-              <span>Registrado por: <strong>{record.operario || 'Desconocido'}</strong></span>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-3 border-t border-outline-variant/40">
+              <div className="bg-surface-container-low p-2.5 rounded-xl text-center">
+                <span className="text-[9px] font-bold uppercase text-on-surface-variant block mb-0.5">Factor Mult.</span>
+                <span className="font-data-mono font-bold text-xs text-on-surface">{factor}x</span>
+              </div>
+              <div className="bg-surface-container-low p-2.5 rounded-xl text-center">
+                <span className="text-[9px] font-bold uppercase text-on-surface-variant block mb-0.5">Tarifa Base</span>
+                <span className="font-data-mono font-bold text-xs text-on-surface">S/ {fmtVal(tarifaNormal)}</span>
+              </div>
+              {isPunta && (
+                <div className="bg-surface-container-low p-2.5 rounded-xl text-center">
+                  <span className="text-[9px] font-bold uppercase text-orange-600 block mb-0.5">Tarifa Punta</span>
+                  <span className="font-data-mono font-bold text-xs text-orange-600">S/ {fmtVal(tarifaPunta)}</span>
+                </div>
+              )}
+              <div className="bg-surface-container-low p-2.5 rounded-xl text-center">
+                <span className="text-[9px] font-bold uppercase text-on-surface-variant block mb-0.5">Periodo</span>
+                <span className="font-bold text-xs text-on-surface">{record.periodo}</span>
+              </div>
             </div>
+          </div>
 
-            {isCambioMedidor && (
-              <div className="mt-4 bg-orange-50 text-orange-700 text-xs font-bold px-3 py-2 rounded-lg flex items-center gap-2 border border-orange-200">
-                <span className="material-symbols-outlined text-[16px]" translate="no">swap_horiz</span>
-                Hubo un cambio de medidor en este periodo
+          {/* Bloque: Horario Fuera de Punta / Normal */}
+          <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+            <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary text-[18px]" translate="no">wb_sunny</span>
+                <span className="font-bold text-sm text-on-surface">
+                  {isPunta ? 'Energía Activa Fuera de Punta' : 'Consumo de Energía Activa'}
+                </span>
+              </div>
+              <span className="font-data-mono font-black text-sm text-primary">
+                {fmtVal(consumoNormal)} kWh
+              </span>
+            </div>
+            <div className="p-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+              <div>
+                <p className="text-[10px] font-bold uppercase text-on-surface-variant mb-1">Anterior</p>
+                <p className="font-data-mono font-bold text-base text-on-surface">{fmtVal(record.lectura_anterior)} <span className="text-[10px]">kWh</span></p>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold uppercase text-primary mb-1">Actual</p>
+                <p className="font-data-mono font-bold text-base text-primary">{fmtVal(record.lectura_actual)} <span className="text-[10px]">kWh</span></p>
+              </div>
+              <div className="col-span-2 md:col-span-1 bg-primary/5 rounded-lg p-2 border border-primary/10 flex flex-col justify-center">
+                <p className="text-[10px] font-bold uppercase text-primary mb-0.5">Subtotal</p>
+                <p className="font-data-mono font-black text-sm text-primary">S/ {fmtVal(montoNormal)}</p>
+              </div>
+            </div>
+            {isCambioMedidor && record.lectura_final_viejo !== undefined && (
+              <div className="px-4 pb-4 grid grid-cols-2 gap-4 border-t border-slate-100 pt-3 mt-2 bg-red-50/30">
+                <div>
+                  <p className="text-[9px] font-bold uppercase text-red-600 mb-1">Dañado (Final)</p>
+                  <p className="font-data-mono font-bold text-sm text-red-700">{fmtVal(record.lectura_final_viejo)} <span className="text-[9px]">kWh</span></p>
+                </div>
+                <div>
+                  <p className="text-[9px] font-bold uppercase text-primary mb-1">Nuevo (Inicial)</p>
+                  <p className="font-data-mono font-bold text-sm text-primary">{fmtVal(record.lectura_inicial_nuevo)} <span className="text-[9px]">kWh</span></p>
+                </div>
               </div>
             )}
           </div>
 
-          {/* Consumo y Costos Resumen */}
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-blue-50 border border-blue-100 rounded-2xl p-5 relative overflow-hidden group">
-              <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-[80px] text-blue-500/10 group-hover:scale-110 transition-transform" translate="no">electric_bolt</span>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-blue-700 mb-1 relative z-10">Total Energía</p>
-              <h2 className="font-data-mono font-black text-3xl text-blue-900 relative z-10">
-                {fmtVal(consumoNormal + consumoPunta)} <span className="text-sm font-bold opacity-70">kWh</span>
-              </h2>
-            </div>
-            <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-5 relative overflow-hidden group">
-              <span className="material-symbols-outlined absolute -right-4 -bottom-4 text-[80px] text-emerald-500/10 group-hover:scale-110 transition-transform" translate="no">payments</span>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 mb-1 relative z-10">Costo Estimado</p>
-              <h2 className="font-data-mono font-black text-3xl text-emerald-900 relative z-10">
-                <span className="text-xl font-bold opacity-70">S/</span> {fmtVal(montoTotal)}
-              </h2>
-            </div>
-          </div>
-
-          {/* Desglose de Lecturas */}
-          <div className="space-y-4">
-            <h4 className="text-sm font-bold text-on-surface flex items-center gap-2">
-              <span className="material-symbols-outlined text-[18px]" translate="no">list_alt</span> Desglose de Lecturas
-            </h4>
-
-            {/* Lectura Normal */}
+          {/* Bloque: Horario Punta (Si aplica) */}
+          {isPunta && (
             <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-              <div className="bg-surface-container-lowest px-4 py-3 border-b border-outline-variant flex justify-between items-center">
+              <div className="bg-orange-50/50 px-4 py-3 border-b border-orange-100 flex justify-between items-center">
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[18px]" translate="no">bolt</span>
-                  <span className="font-bold text-sm text-on-surface">Fuera Punta</span>
+                  <span className="material-symbols-outlined text-orange-600 text-[18px]" translate="no">bedtime</span>
+                  <span className="font-bold text-sm text-orange-900">Energía Activa en Horario Punta</span>
                 </div>
-                {tarifaNormal > 0 && (
-                  <span className="text-xs font-bold text-on-surface-variant bg-surface px-2 py-1 rounded border border-outline-variant/50">
-                    S/ {fmtVal(tarifaNormal)} / kWh
-                  </span>
-                )}
+                <span className="font-data-mono font-black text-sm text-orange-600">
+                  {fmtVal(consumoPunta)} kWh
+                </span>
               </div>
               <div className="p-4 grid grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
                   <p className="text-[10px] font-bold uppercase text-on-surface-variant mb-1">Anterior</p>
-                  <p className="font-data-mono font-bold text-lg">{fmtVal(record.lectura_anterior)} <span className="text-[10px]">kWh</span></p>
+                  <p className="font-data-mono font-bold text-base text-on-surface">{fmtVal(record.lectura_anterior_punta)} <span className="text-[10px]">kWh</span></p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-bold uppercase text-primary mb-1">Actual</p>
-                  <p className="font-data-mono font-bold text-lg text-primary">{fmtVal(record.lectura_actual)} <span className="text-[10px]">kWh</span></p>
+                  <p className="text-[10px] font-bold uppercase text-orange-600 mb-1">Actual</p>
+                  <p className="font-data-mono font-bold text-base text-orange-600">{fmtVal(record.lectura_actual_punta)} <span className="text-[10px]">kWh</span></p>
                 </div>
-                <div className="col-span-2 md:col-span-1 bg-primary/5 rounded-lg p-2 border border-primary/10 flex flex-col justify-center">
-                  <p className="text-[10px] font-bold uppercase text-primary-dark mb-0.5">Subtotal</p>
-                  <p className="font-data-mono font-black text-sm text-primary">S/ {fmtVal(montoNormal)}</p>
+                <div className="col-span-2 md:col-span-1 bg-orange-500/5 rounded-lg p-2 border border-orange-500/10 flex flex-col justify-center">
+                  <p className="text-[10px] font-bold uppercase text-orange-800 mb-0.5">Subtotal</p>
+                  <p className="font-data-mono font-black text-sm text-orange-600">S/ {fmtVal(montoPunta)}</p>
                 </div>
               </div>
-              {isCambioMedidor && record.lectura_final_viejo !== undefined && (
-                <div className="px-4 pb-4 grid grid-cols-2 gap-4 border-t border-outline-variant/30 pt-3 mt-2 bg-red-50/30">
+              {isCambioMedidor && record.lectura_final_viejo_punta !== undefined && (
+                <div className="px-4 pb-4 grid grid-cols-2 gap-4 border-t border-orange-100 pt-3 mt-2 bg-red-50/30">
                   <div>
                     <p className="text-[9px] font-bold uppercase text-red-600 mb-1">Dañado (Final)</p>
-                    <p className="font-data-mono font-bold text-sm text-red-700">{fmtVal(record.lectura_final_viejo)} <span className="text-[9px]">kWh</span></p>
+                    <p className="font-data-mono font-bold text-sm text-red-700">{fmtVal(record.lectura_final_viejo_punta)} <span className="text-[9px]">kWh</span></p>
                   </div>
                   <div>
-                    <p className="text-[9px] font-bold uppercase text-primary mb-1">Nuevo (Inicial)</p>
-                    <p className="font-data-mono font-bold text-sm text-primary">{fmtVal(record.lectura_inicial_nuevo)} <span className="text-[9px]">kWh</span></p>
+                    <p className="text-[9px] font-bold uppercase text-orange-600 mb-1">Nuevo (Inicial)</p>
+                    <p className="font-data-mono font-bold text-sm text-orange-600">{fmtVal(record.lectura_inicial_nuevo_punta)} <span className="text-[9px]">kWh</span></p>
                   </div>
                 </div>
               )}
             </div>
+          )}
 
-            {/* Lectura Punta */}
-            {isPunta && (
-              <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-                <div className="bg-orange-50 px-4 py-3 border-b border-orange-100 flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-orange-600 text-[18px]" translate="no">schedule</span>
-                    <span className="font-bold text-sm text-orange-800">Hora Punta</span>
-                  </div>
-                  {tarifaPunta > 0 && (
-                    <span className="text-xs font-bold text-orange-700 bg-white px-2 py-1 rounded border border-orange-200">
-                      S/ {fmtVal(tarifaPunta)} / kWh
-                    </span>
-                  )}
+          {/* Maxima Demanda (if any) */}
+          {(maxDemandaN > 0 || maxDemandaP > 0) && (
+            <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+              <div className="bg-blue-50/50 px-4 py-3 border-b border-blue-100 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-blue-600 text-[18px]" translate="no">speed</span>
+                  <span className="font-bold text-sm text-blue-800">Máxima Demanda</span>
                 </div>
-                <div className="p-4 grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div>
-                    <p className="text-[10px] font-bold uppercase text-on-surface-variant mb-1">Anterior</p>
-                    <p className="font-data-mono font-bold text-lg">{fmtVal(record.lectura_anterior_punta)} <span className="text-[10px]">kWh</span></p>
+              </div>
+              <div className="p-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {maxDemandaN > 0 && (
+                  <div className="flex flex-col">
+                    <p className="text-[10px] font-bold uppercase text-blue-600 mb-1">Fuera Punta (S/ {fmtVal(costoPotenciaFueraPunta)}/kW)</p>
+                    <p className="font-data-mono font-bold text-base text-blue-600">{fmtVal(maxDemandaN)} <span className="text-[10px]">kW</span></p>
+                    <p className="text-xs font-bold text-blue-800 mt-1">Subtotal: S/ {fmtVal(montoDemandaN)}</p>
                   </div>
-                  <div>
-                    <p className="text-[10px] font-bold uppercase text-orange-600 mb-1">Actual</p>
-                    <p className="font-data-mono font-bold text-lg text-orange-600">{fmtVal(record.lectura_actual_punta)} <span className="text-[10px]">kWh</span></p>
-                  </div>
-                  <div className="col-span-2 md:col-span-1 bg-orange-500/5 rounded-lg p-2 border border-orange-500/10 flex flex-col justify-center">
-                    <p className="text-[10px] font-bold uppercase text-orange-800 mb-0.5">Subtotal</p>
-                    <p className="font-data-mono font-black text-sm text-orange-600">S/ {fmtVal(montoPunta)}</p>
-                  </div>
-                </div>
-                {isCambioMedidor && record.lectura_final_viejo_punta !== undefined && (
-                  <div className="px-4 pb-4 grid grid-cols-2 gap-4 border-t border-orange-100 pt-3 mt-2 bg-red-50/30">
-                    <div>
-                      <p className="text-[9px] font-bold uppercase text-red-600 mb-1">Dañado (Final)</p>
-                      <p className="font-data-mono font-bold text-sm text-red-700">{fmtVal(record.lectura_final_viejo_punta)} <span className="text-[9px]">kWh</span></p>
-                    </div>
-                    <div>
-                      <p className="text-[9px] font-bold uppercase text-orange-600 mb-1">Nuevo (Inicial)</p>
-                      <p className="font-data-mono font-bold text-sm text-orange-600">{fmtVal(record.lectura_inicial_nuevo_punta)} <span className="text-[9px]">kWh</span></p>
-                    </div>
+                )}
+                {maxDemandaP > 0 && (
+                  <div className="flex flex-col">
+                    <p className="text-[10px] font-bold uppercase text-orange-600 mb-1">Punta (S/ {fmtVal(costoPotencia)}/kW)</p>
+                    <p className="font-data-mono font-bold text-base text-orange-600">{fmtVal(maxDemandaP)} <span className="text-[10px]">kW</span></p>
+                    <p className="text-xs font-bold text-orange-800 mt-1">Subtotal: S/ {fmtVal(montoDemandaP)}</p>
                   </div>
                 )}
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Maxima Demanda (if any) */}
-            {(maxDemandaN > 0 || maxDemandaP > 0) && (
-              <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-                <div className="bg-blue-50/50 px-4 py-3 border-b border-blue-100 flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-blue-600 text-[18px]" translate="no">speed</span>
-                    <span className="font-bold text-sm text-blue-800">Máxima Demanda</span>
-                  </div>
+          {/* Energia Reactiva Capacitiva */}
+          {isReactiva && (
+            <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+              <div className="bg-purple-50 px-4 py-3 border-b border-purple-100 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-purple-600 text-[18px]" translate="no">electric_meter</span>
+                  <span className="font-bold text-sm text-purple-800">Energía Reactiva Capacitiva</span>
                 </div>
-                <div className="p-4 grid grid-cols-2 md:grid-cols-2 gap-4">
-                  {maxDemandaN > 0 && (
-                    <div className="flex flex-col">
-                      <p className="text-[10px] font-bold uppercase text-blue-600 mb-1">Fuera Punta (S/ {fmtVal(costoPotenciaFueraPunta)}/kW)</p>
-                      <p className="font-data-mono font-bold text-lg text-blue-600">{fmtVal(maxDemandaN)} <span className="text-[10px]">kW</span></p>
-                      <p className="text-xs font-bold text-blue-800 mt-1">Subtotal: S/ {fmtVal(montoDemandaN)}</p>
-                    </div>
-                  )}
-                  {maxDemandaP > 0 && (
-                    <div className="flex flex-col">
-                      <p className="text-[10px] font-bold uppercase text-orange-600 mb-1">Punta (S/ {fmtVal(costoPotencia)}/kW)</p>
-                      <p className="font-data-mono font-bold text-lg text-orange-600">{fmtVal(maxDemandaP)} <span className="text-[10px]">kW</span></p>
-                      <p className="text-xs font-bold text-orange-800 mt-1">Subtotal: S/ {fmtVal(montoDemandaP)}</p>
-                    </div>
-                  )}
+                <span className="text-xs font-bold text-purple-700 bg-white px-2 py-1 rounded border border-purple-200">
+                  Costo: S/ {fmtVal(precioReactiva)}
+                </span>
+              </div>
+              <div className="p-4 grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div className="col-span-2 md:col-span-2">
+                  <p className="text-[10px] font-bold uppercase text-purple-600 mb-1">Energía Registrada</p>
+                  <p className="font-data-mono font-bold text-base text-purple-600">{fmtVal(record.factor_potencia)} <span className="text-[10px]">kVARh</span></p>
+                </div>
+                <div className="col-span-2 md:col-span-1 bg-purple-500/5 rounded-lg p-2 border border-purple-500/10 flex flex-col justify-center">
+                  <p className="text-[10px] font-bold uppercase text-purple-800 mb-0.5">Subtotal</p>
+                  <p className="font-data-mono font-black text-sm text-purple-600">S/ {fmtVal(montoReactiva)}</p>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Energia Reactiva Capacitiva */}
-            {isReactiva && (
-              <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-                <div className="bg-purple-50 px-4 py-3 border-b border-purple-100 flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-purple-600 text-[18px]" translate="no">electric_meter</span>
-                    <span className="font-bold text-sm text-purple-800">Energía Reactiva Capacitiva</span>
-                  </div>
-                  <span className="text-xs font-bold text-purple-700 bg-white px-2 py-1 rounded border border-purple-200">
-                    Costo: S/ {fmtVal(precioReactiva)}
-                  </span>
-                </div>
-                <div className="p-4 grid grid-cols-2 md:grid-cols-3 gap-4">
-                  <div className="col-span-2 md:col-span-2">
-                    <p className="text-[10px] font-bold uppercase text-purple-600 mb-1">Energía Registrada</p>
-                    <p className="font-data-mono font-bold text-lg text-purple-600">{fmtVal(record.factor_potencia)} <span className="text-[10px]">kVARh</span></p>
-                  </div>
-                  <div className="col-span-2 md:col-span-1 bg-purple-500/5 rounded-lg p-2 border border-purple-500/10 flex flex-col justify-center">
-                    <p className="text-[10px] font-bold uppercase text-purple-800 mb-0.5">Subtotal</p>
-                    <p className="font-data-mono font-black text-sm text-purple-600">S/ {fmtVal(montoReactiva)}</p>
-                  </div>
+          {/* Mantenimiento configurado para el periodo */}
+          {montoMantenimiento > 0 && (
+            <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+              <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-slate-600 text-[18px]" translate="no">build</span>
+                  <span className="font-bold text-sm text-slate-800">Cargo por Mantenimiento</span>
                 </div>
               </div>
-            )}
-
-            {/* Mantenimiento configurado para el periodo */}
-            {montoMantenimiento > 0 && (
-              <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
-                <div className="bg-slate-50 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-slate-600 text-[18px]" translate="no">build</span>
-                    <span className="font-bold text-sm text-slate-800">Cargo por Mantenimiento</span>
-                  </div>
-                </div>
-                <div className="p-4 flex items-center justify-between">
-                  <p className="text-[10px] font-bold uppercase text-slate-600">Tarifa del periodo</p>
-                  <p className="font-data-mono font-black text-sm text-slate-800">S/ {fmtVal(montoMantenimiento)}</p>
-                </div>
+              <div className="p-4 flex items-center justify-between">
+                <p className="text-[10px] font-bold uppercase text-slate-600">Tarifa del periodo</p>
+                <p className="font-data-mono font-black text-sm text-slate-800">S/ {fmtVal(montoMantenimiento)}</p>
               </div>
-            )}
+            </div>
+          )}
 
-          </div>
         </div>
       </div>
-    </>
+    </>,
+    document.body
   );
 };

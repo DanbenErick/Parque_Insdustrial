@@ -2,15 +2,16 @@ import  { useState, useRef } from 'react';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 import { downloadBlob, MIME_TYPES } from '../../utils/downloadFile';
+import { parseImportFile } from '../../utils/parseImportFile';
 
 
 
 const MOCK_DATA = [
-  ['10000001', 'Caso 1: Socio normal', 'Comercio', 'test1@mail.com', '999000111', 'Socio', '123456', 'MED-001', 'Normal', 'Avenida Principal 123'],
-  ['20000002', 'Caso 2: Socio con 1 medidor hora punta', 'Manufactura', 'test2@mail.com', '999000222', 'Socio', '123456', 'MED-002', 'Hora Punta', 'Calle Dos 456'],
-  ['30000003', 'Caso 3: Empresa con 2 medidores (Mismo DNI)', 'Industrial', 'test3@mail.com', '999000333', 'Socio', '123456', 'MED-003-A', 'Normal', 'Parque Tres - Almacén A'],
-  ['30000003', 'Caso 3: Empresa con 2 medidores (Mismo DNI)', 'Industrial', 'test3@mail.com', '999000333', 'Socio', '123456', 'MED-003-B', 'Hora Punta', 'Parque Tres - Almacén B'],
-  ['40000004', 'Caso 4: Socio sin medidor (Aún no instalado)', 'General', 'test4@mail.com', '999000444', 'Socio', '123456', '', 'Sin Medidor', ''],
+  ['10000001', 'Caso 1: Socio normal', 'Comercio', 'test1@mail.com', '999000111', 'Socio', '', 'MED-001', 'Normal', 'Avenida Principal 123'],
+  ['20000002', 'Caso 2: Socio con 1 medidor hora punta', 'Manufactura', 'test2@mail.com', '999000222', 'Socio', '', 'MED-002', 'Hora Punta', 'Calle Dos 456'],
+  ['30000003', 'Caso 3: Empresa con 2 medidores (Mismo DNI)', 'Industrial', 'test3@mail.com', '999000333', 'Socio', '', 'MED-003-A', 'Normal', 'Parque Tres - Almacén A'],
+  ['30000003', 'Caso 3: Empresa con 2 medidores (Mismo DNI)', 'Industrial', 'test3@mail.com', '999000333', 'Socio', '', 'MED-003-B', 'Hora Punta', 'Parque Tres - Almacén B'],
+  ['40000004', 'Caso 4: Socio sin medidor (Aún no instalado)', 'General', 'test4@mail.com', '999000444', 'Socio', '', '', 'Sin Medidor', ''],
 ];
 
 const TenantImportModal = ({ onClose, onImportSuccess }) => {
@@ -118,8 +119,8 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
-      if (!selectedFile.name.match(/\.(xlsx|xls|csv)$/)) {
-        toast.error('Solo se permiten archivos Excel (.xlsx, .xls, .csv)');
+      if (!selectedFile.name.match(/\.(xlsx|csv)$/i)) {
+        toast.error('Solo se permiten archivos .xlsx o .csv');
         return;
       }
       setFile(selectedFile);
@@ -132,11 +133,7 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
 
     setIsProcessing(true);
     try {
-      const XLSX = await import('xlsx');
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const rawRows = XLSX.utils.sheet_to_json(worksheet, { defval: '', raw: false });
+      const rawRows = await parseImportFile(file);
 
       // Filtrar filas vacías (donde no hay documento de identidad)
       const rows = rawRows.filter(r => r.documento_identidad && String(r.documento_identidad).trim() !== '');
@@ -167,7 +164,7 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
 
         return {
           ...r,
-          clave_acceso: r.clave_acceso ? String(r.clave_acceso) : '123456',
+          clave_acceso: r.clave_acceso ? String(r.clave_acceso) : '',
           actividad_rubro: r.actividad_rubro || 'General',
           cargo_representante: r.cargo_representante || 'Socio',
           medidor_tipo: tipo,
@@ -245,7 +242,7 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
                     <span className="material-symbols-outlined text-[14px]" translate="no">download</span>
                     Paso 1: Preparar archivo
                   </h4>
-                  <p className="text-on-surface-variant text-xs mt-0.5 leading-tight">Descarga la plantilla oficial con el formato correcto.</p>
+                  <p className="text-on-surface-variant text-xs mt-0.5 leading-tight">Descarga la plantilla y completa clave_acceso con una contraseña única de al menos 8 caracteres para cada socio nuevo. No compartas el archivo sin protección.</p>
                 </div>
                 <button
                   onClick={downloadTemplate}
@@ -272,7 +269,7 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
                     type="file"
                     ref={fileInputRef}
                     className="hidden"
-                    accept=".xlsx, .xls, .csv"
+                    accept=".xlsx,.csv"
                     onChange={handleFileChange}
                   />
 
@@ -296,7 +293,7 @@ const TenantImportModal = ({ onClose, onImportSuccess }) => {
                         <span className="material-symbols-outlined text-[32px]" translate="no">note_add</span>
                       </div>
                       <p className="font-bold text-sm text-on-surface">Haz clic para seleccionar el archivo</p>
-                      <p className="text-xs text-on-surface-variant mt-1">Formatos admitidos: .xlsx, .xls o .csv</p>
+                      <p className="text-xs text-on-surface-variant mt-1">Formatos admitidos: .xlsx o .csv</p>
                     </div>
                   )}
                 </div>
