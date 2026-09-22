@@ -1,4 +1,5 @@
 import  { memo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 /**
  * PdfViewerModal — Full-screen PDF viewer with download capability.
@@ -12,37 +13,38 @@ const PdfViewerModal = memo(({ isOpen, pdfUrl, onDownload, onClose }) => {
     return () => document.removeEventListener('keydown', handler);
   }, [isOpen, onClose]);
 
-  return (
-    <>
-      {isOpen && (
+  if (!isOpen) return null;
+  return createPortal(
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          role="dialog" aria-modal="true" aria-label="Visor de recibo PDF"
+          className="fixed inset-0 z-[100] !m-0 flex items-center justify-center p-2 sm:p-4 bg-black/60 backdrop-blur-sm"
         >
           <div
-            className="bg-surface rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col overflow-hidden"
+            className="bg-surface rounded-2xl shadow-2xl w-full max-w-5xl h-[calc(100dvh-1rem)] sm:h-[min(90dvh,900px)] flex flex-col overflow-hidden border border-outline-variant/40"
           >
-            <div className="flex items-center justify-between p-4 border-b border-outline-variant bg-surface-dim">
-              <h3 className="font-headline-sm font-bold text-on-surface flex items-center gap-2">
+            <div className="flex shrink-0 items-center justify-between gap-2 px-4 py-3 border-b border-outline-variant bg-surface-container-low">
+              <h3 className="font-headline-sm font-bold text-on-surface flex items-center gap-2 min-w-0">
                 <span className="material-symbols-outlined text-error" translate="no">picture_as_pdf</span>
-                Visor de Boleta
+                <span className="truncate">Recibo PDF</span>
               </h3>
-              <div className="flex items-center gap-2">
+              <div className="flex shrink-0 items-center gap-2">
                 <button
                   onClick={onDownload}
-                  className="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg hover:opacity-90 transition-opacity font-bold text-sm shadow-md"
+                  className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-primary text-on-primary rounded-lg hover:opacity-90 transition-opacity font-bold text-sm shadow-sm"
                 >
                   <span className="material-symbols-outlined text-[18px]" translate="no">download</span>
-                  Descargar PDF
+                  <span className="hidden sm:inline">Descargar PDF</span>
                 </button>
                 <button
                   onClick={onClose}
+                  aria-label="Cerrar visor PDF"
                   className="p-2 text-on-surface-variant hover:bg-surface-container-low rounded-lg transition-colors"
                 >
                   <span className="material-symbols-outlined" translate="no">close</span>
                 </button>
               </div>
             </div>
-            <div className="flex-1 bg-surface-container-lowest p-0">
+            <div className="min-h-0 flex-1 bg-surface-container-lowest">
               {pdfUrl ? (
                 <iframe
                   src={pdfUrl}
@@ -57,9 +59,7 @@ const PdfViewerModal = memo(({ isOpen, pdfUrl, onDownload, onClose }) => {
             </div>
           </div>
         </div>
-      )}
-    </>
-  );
+    , document.body);
 });
 
 PdfViewerModal.displayName = 'PdfViewerModal';

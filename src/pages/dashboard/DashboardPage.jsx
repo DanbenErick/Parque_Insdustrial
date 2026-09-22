@@ -23,6 +23,12 @@ import {
   deriveKpiValues,
 } from './';
 import LoadingCurtain from '../../components/ui/LoadingCurtain';
+import MonthlySummary from './MonthlySummary';
+import PeriodInsights from './PeriodInsights';
+import ReceiptStatusChart from './ReceiptStatusChart';
+import ReadingProgress from './ReadingProgress';
+import DashboardStatus from './DashboardStatus';
+import RecentActivity from './RecentActivity';
 
 // --- Register Chart.js once at module level ---
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, ChartTooltip, Legend, Filler);
@@ -66,10 +72,25 @@ const Dashboard = () => {
         queryFn: () => api.get('/dashboard/alerts').then((r) => r.data),
         staleTime: 10 * 60 * 1000,
       },
+      {
+        queryKey: ['dashboard-resumen-mensual', consumoYear],
+        queryFn: () => api.get(`/dashboard/resumen-mensual?year=${consumoYear}`).then((r) => r.data),
+        staleTime: 5 * 60 * 1000,
+      },
+      {
+        queryKey: ['dashboard-detalle-periodo', consumoYear],
+        queryFn: () => api.get(`/dashboard/detalle-periodo?year=${consumoYear}`).then((r) => r.data),
+        staleTime: 60 * 1000,
+      },
+      {
+        queryKey: ['dashboard-actividad-reciente', consumoYear],
+        queryFn: () => api.get(`/dashboard/actividad-reciente?year=${consumoYear}`).then((r) => r.data),
+        staleTime: 60 * 1000,
+      },
     ],
   });
 
-  const [kpisQuery, chartQuery, , recaudacionQuery] = results;
+  const [kpisQuery, chartQuery, , recaudacionQuery, , monthlyQuery, detailQuery, activityQuery] = results;
 
   const isLoading = results.some((r) => r.isLoading);
 
@@ -110,12 +131,13 @@ const Dashboard = () => {
         title="Actualizando el panel"
         subtitle="Calculando indicadores y tendencias del periodo seleccionado."
       />
-      <main className="p-4 md:p-lg space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow">
+      <main className="p-4 md:p-lg space-y-6 max-w-[1600px] mx-auto w-full flex-grow">
       {/* Header + View Mode Tabs */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
         <div className="flex flex-col">
-          <h2 className="text-2xl text-on-surface font-bold leading-tight">Modulo Central</h2>
-          <p className="text-sm text-on-surface-variant">KPIs y gráficas basadas en las lecturas de los medidores.</p>
+          <p className="text-xs font-bold uppercase tracking-widest text-primary mb-1">Panel de administración</p>
+          <h1 className="text-2xl md:text-3xl text-on-surface font-bold leading-tight">Resumen del parque</h1>
+          <p className="text-sm text-on-surface-variant mt-1">Facturación, consumo y actividad en un solo lugar.</p>
         </div>
 
         <div className="flex items-center bg-surface-container-lowest p-0.5 rounded-md border border-outline-variant shadow-sm h-8">
@@ -136,15 +158,34 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* KPI Cards */}
-      <DashboardKPIs kpis={kpiValues} />
+      <QuickAccessBar />
+
+      <section className="space-y-3" aria-label="Resumen de operación">
+        <div>
+          <h2 className="text-lg font-bold text-on-surface">Resumen de operación</h2>
+          <p className="text-sm text-on-surface-variant">Indicadores clave y estado del último período.</p>
+        </div>
+        <DashboardKPIs kpis={kpiValues} />
+        {monthlyQuery.isError ? (
+          <p className="text-error text-sm">No se pudo cargar el estado de facturación mensual.</p>
+        ) : !monthlyQuery.isLoading && (
+          <MonthlySummary summary={monthlyQuery.data} year={consumoYear} />
+        )}
+        <DashboardStatus detail={detailQuery.data} detailError={detailQuery.isError} queries={results} />
+      </section>
 
       {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-lg">
+      <section className="space-y-3" aria-label="Tendencias de consumo y recaudación">
+        <div>
+          <h2 className="text-lg font-bold text-on-surface">Tendencias</h2>
+          <p className="text-sm text-on-surface-variant">Evolución del consumo y los pagos registrados.</p>
+        </div>
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-3 items-stretch">
+      <div className="min-w-0 xl:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-3">
 
         {/* Consumo Chart */}
-        <div className="bg-white border border-outline-variant rounded-lg p-md flex flex-col shadow-md h-[350px] lg:h-[400px]">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-lg">
+        <div className="bg-white border border-outline-variant rounded-xl p-md flex flex-col shadow-sm h-[320px] xl:h-[370px] min-w-0">
+          <div className="flex flex-col gap-2 mb-4">
             <div className="flex flex-col">
               <h2 className="font-headline-sm text-headline-sm text-on-surface font-bold">Consumo Global Mensual</h2>
               <p className="text-body-sm text-on-surface-variant mt-xs">Histórico del consumo acumulado del parque industrial (kWh)</p>
@@ -174,14 +215,14 @@ const Dashboard = () => {
         </div>
 
         {/* Recaudación Chart */}
-        <div className="bg-white border border-outline-variant rounded-lg p-md flex flex-col shadow-md h-[350px] lg:h-[400px]">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-lg">
+        <div className="bg-white border border-outline-variant rounded-xl p-md flex flex-col shadow-sm h-[320px] xl:h-[370px] min-w-0">
+          <div className="flex flex-col gap-2 mb-4">
             <div className="flex flex-col">
               <h2 className="font-headline-sm text-headline-sm text-on-surface font-bold">
                 {chartViewMode === 'global' ? 'Recaudación Histórica (Por Años)' : `Recaudación del Año ${activeYear}`}
               </h2>
               <p className="text-body-sm text-on-surface-variant mt-xs">
-                {chartViewMode === 'global' ? 'Monto cobrado acumulado por años (S/)' : 'Monto cobrado de recibos pagados este año (S/)'}
+                {chartViewMode === 'global' ? 'Pagos registrados acumulados por años (S/)' : 'Pagos registrados para recibos de este año (S/)'}
               </p>
             </div>
             {totalRecaudado > 0 && (
@@ -207,9 +248,33 @@ const Dashboard = () => {
         </div>
 
       </div>
+      <div className="min-w-0 xl:col-span-4 flex flex-col gap-3">
+        {detailQuery.isError ? (
+          <p className="text-error text-sm">No se pudo cargar el estado de recibos y lecturas.</p>
+        ) : !detailQuery.isLoading && detailQuery.data && (
+          <>
+            <ReceiptStatusChart recibos={detailQuery.data.recibos} />
+            <ReadingProgress lecturasPeriodo={detailQuery.data.lecturasPeriodo} />
+          </>
+        )}
+      </div>
+      </div>
+      </section>
 
-      {/* Quick Access */}
-      <QuickAccessBar />
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4 items-start">
+        <div className="min-w-0 xl:col-span-8">
+          {detailQuery.isError ? (
+            <p className="text-error text-sm">No se pudieron cargar los indicadores del período.</p>
+          ) : !detailQuery.isLoading && <PeriodInsights data={detailQuery.data} />}
+        </div>
+        <div className="min-w-0 xl:col-span-4">
+          {activityQuery.isError ? (
+            <p className="text-error text-sm">No se pudo cargar la actividad reciente.</p>
+          ) : !activityQuery.isLoading && (
+            <RecentActivity events={activityQuery.data ?? []} year={consumoYear} />
+          )}
+        </div>
+      </div>
       </main>
     </>
   );

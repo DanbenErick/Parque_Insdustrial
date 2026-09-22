@@ -36,16 +36,17 @@ const QuickAccessBar = React.memo(() => {
   const navigate = useAppNavigate();
 
   return (
-    <div className="mt-2">
-      <h2 className="text-[11px] text-on-surface-variant font-bold mb-2 uppercase tracking-wider">
-        Accesos Rápidos
-      </h2>
+    <section aria-label="Accesos rápidos">
+      <div className="mb-3">
+        <h2 className="text-lg text-on-surface font-bold">Accesos rápidos</h2>
+        <p className="text-sm text-on-surface-variant">Continúa con las tareas más frecuentes.</p>
+      </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {QUICK_ACCESS_ITEMS.map(item => (
           <button
             key={item.view}
             onClick={() => navigate(`/${item.view}`)}
-            className={`flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors border shadow-sm group ${item.color} ${item.hover} bg-white`}
+            className={`flex items-center gap-3 px-3 sm:px-4 py-3.5 rounded-xl transition-colors border shadow-sm group text-left min-w-0 ${item.color} ${item.hover}`}
           >
             <span
               className="material-symbols-outlined text-[20px] group-hover:scale-110 transition-transform" translate="no"
@@ -53,11 +54,11 @@ const QuickAccessBar = React.memo(() => {
             >
               {item.icon}
             </span>
-            <span className="font-bold text-xs leading-tight">{item.name}</span>
+            <span className="font-bold text-xs sm:text-sm leading-tight">{item.name}</span>
           </button>
         ))}
       </div>
-    </div>
+    </section>
   );
 });
 

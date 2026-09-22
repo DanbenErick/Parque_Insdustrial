@@ -16,14 +16,13 @@ const Sidebar = ({  onCloseMobileMenu, screens }) => {
     navigate(`/${view}`);
     onCloseMobileMenu();
   }, [navigate, onCloseMobileMenu]);
-
   return (
     <aside className="fixed left-0 top-0 h-full w-[260px] hidden md:flex flex-col z-50 bg-surface-dim text-white shadow-2xl print:hidden">
       {/* Logo Area */}
       <div className="h-20 px-6 flex items-center justify-between border-b border-white/10 bg-surface-dim">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center overflow-hidden shrink-0">
-            <img src="/logo-192.png" alt="Logo" className="w-full h-full object-contain" />
+          <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0 shadow-md">
+            <img src="/logo-192.png" alt="Logo" className="w-full h-full object-cover rounded-full" />
           </div>
           <div className="flex flex-col mt-1">
             <span className="font-bold text-white text-[15px] leading-tight tracking-wide font-headline-sm">Parque Industrial</span>

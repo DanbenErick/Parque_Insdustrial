@@ -39,7 +39,7 @@ const TenantDirectory = ({
         {tenants.length === 0 && <div className="px-5 py-12 text-center text-sm text-on-surface-variant">No se encontraron socios registrados.</div>}
       </div>
 
-      <div className={`hidden md:block overflow-x-auto custom-scrollbar relative transition-opacity ${isFetching ? 'opacity-60' : ''}`}>
+      <div className={`hidden md:block overflow-auto max-h-[calc(100vh-280px)] custom-scrollbar relative transition-opacity ${isFetching ? 'opacity-60' : ''}`}>
         <table className="w-full min-w-[900px] text-left border-collapse whitespace-nowrap">
           <thead className="sticky top-0 z-10 shadow-sm bg-surface-container-lowest text-on-surface-variant text-[11px] uppercase tracking-wider"><tr className="border-b border-outline-variant"><th className="px-4 py-2 font-semibold bg-surface-container-lowest">Nombres / Documento</th><th className="px-4 py-2 font-semibold bg-surface-container-lowest">Dirección</th><th className="px-4 py-2 font-semibold bg-surface-container-lowest">Medidor</th><th className="px-4 py-2 font-semibold bg-surface-container-lowest">Estado</th><th className="px-4 py-2 font-semibold text-right bg-surface-container-lowest">Acciones</th></tr></thead>
           <tbody className="divide-y divide-outline-variant/50 bg-surface text-body-sm">

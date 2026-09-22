@@ -14,10 +14,13 @@ const pickUser = (raw) => {
     rol_id:               raw.rol_id,
     nombre_rol:           raw.nombre_rol,
     nombre_razonsocial:   raw.nombre_razonsocial,
+    username:             raw.username,
     cargo_representante:  raw.cargo_representante,
     correo:               raw.correo,
     telefono:             raw.telefono,
     documento_identidad:  raw.documento_identidad,
+    direccion:            raw.direccion,
+    actividad_rubro:      raw.actividad_rubro,
     es_activo:            raw.es_activo,
   };
   // Solo agregar rutas y permisos si el servidor realmente los envió
@@ -134,8 +137,16 @@ export const AuthProvider = ({ children }) => {
     clearSession();
   }, [clearSession]);
 
+  const updateUser = useCallback((raw) => {
+    setUser((previous) => {
+      const next = { ...previous, ...pickUser(raw) };
+      localStorage.setItem('luz_user', JSON.stringify(next));
+      return next;
+    });
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, login, logout, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

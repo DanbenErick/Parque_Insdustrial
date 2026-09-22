@@ -1,147 +1,130 @@
-import  { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import api from '../../api/axiosConfig';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
-import { useAppNavigate } from '../../context/NavigationFeedbackContext';
+
+const editableValues = (p) => ({ username: p?.username || '', documento_identidad: p?.documento_identidad || '', telefono: p?.telefono || '', correo: p?.correo || '' });
+
+const Detail = ({ label, value }) => (
+  <div className="min-w-0 rounded-xl border border-outline-variant/60 bg-surface-container-lowest p-4">
+    <dt className="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">{label}</dt>
+    <dd className="mt-1 break-words text-sm font-semibold text-on-surface">{value || 'No registrado'}</dd>
+  </div>
+);
 
 const SocioProfilePage = () => {
-  const { user } = useAuth();
-  const navigate = useAppNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const { user, updateUser } = useAuth();
+  const [profile, setProfile] = useState(user);
+  const [meters, setMeters] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [changingPassword, setChangingPassword] = useState(false);
+  const { register, handleSubmit, reset, formState: { errors } } = useForm({ defaultValues: editableValues(user) });
+  const passwordForm = useForm({ defaultValues: { clave_actual: '', clave_nueva: '', confirmar_clave: '' } });
+  const newPassword = passwordForm.watch('clave_nueva');
 
-  const { register, handleSubmit, formState: { errors }, reset, watch } = useForm({
-    defaultValues: {
-      clave_actual: '',
-      clave_nueva: '',
-      confirmar_clave: ''
-    }
-  });
+  useEffect(() => {
+    let active = true;
+    api.get('/auth/me').then(({ data }) => {
+      if (!active) return;
+      setProfile(data);
+      reset(editableValues(data));
+      updateUser(data);
+    }).catch(() => { if (active) toast.error('No se pudo actualizar la ficha del socio.'); });
+    return () => { active = false; };
+  }, [reset, updateUser]);
 
-  const claveNueva = watch('clave_nueva');
+  useEffect(() => {
+    if (!user?.id) return;
+    let active = true;
+    api.get(`/medidores/usuario/${user.id}`).then(({ data }) => {
+      if (active) setMeters(Array.isArray(data) ? data : []);
+    }).catch(() => { if (active) toast.error('No se pudieron cargar los medidores.'); });
+    return () => { active = false; };
+  }, [user?.id]);
 
-  const onSubmit = async (data) => {
-    setIsLoading(true);
+  const saveProfile = async (values) => {
+    setSaving(true);
     try {
-      await api.put('/auth/change-password', {
-        clave_actual: data.clave_actual,
-        clave_nueva: data.clave_nueva
-      });
-      toast.success('Contraseña actualizada exitosamente');
-      reset();
-      navigate('/dashboard');
+      const { data } = await api.put('/auth/me', Object.fromEntries(Object.entries(values).map(([key, value]) => [key, value.trim()])));
+      setProfile(data);
+      reset(editableValues(data));
+      updateUser(data);
+      toast.success('Datos actualizados.');
     } catch (error) {
-      toast.error(error.response?.data?.error || 'Error al cambiar la contraseña');
-    } finally {
-      setIsLoading(false);
-    }
+      toast.error(error.response?.data?.error || 'No se pudieron guardar los datos.');
+    } finally { setSaving(false); }
   };
 
+  const changePassword = async (values) => {
+    setChangingPassword(true);
+    try {
+      await api.put('/auth/change-password', { clave_actual: values.clave_actual, clave_nueva: values.clave_nueva });
+      passwordForm.reset();
+      toast.success('Contraseña actualizada.');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Error al cambiar la contraseña.');
+    } finally { setChangingPassword(false); }
+  };
+
+  const fieldClass = 'mt-1.5 w-full rounded-xl border border-outline-variant bg-surface-container-lowest px-4 py-3 text-sm text-on-surface outline-none focus:border-primary focus:ring-2 focus:ring-primary/15';
+  const labelClass = 'block text-xs font-bold text-on-surface-variant';
+  const errorText = (error) => error && <span className="mt-1 block text-xs text-error">{error.message}</span>;
+
   return (
-    <main className="p-4 md:p-6 lg:p-8 space-y-6 max-w-[800px] mx-auto w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <main className="mx-auto w-full max-w-[1040px] space-y-6 p-4 md:p-6 lg:p-8">
+      <header><h1 className="text-2xl font-bold text-on-surface">Mi ficha de socio</h1><p className="mt-1 text-sm text-on-surface-variant">Consulta tu información y actualiza tus datos de acceso y contacto.</p></header>
 
-      <div className="flex items-center gap-4 mb-6">
-        <button onClick={() => navigate(-1)} className="p-2 bg-surface-container-low hover:bg-surface-container rounded-xl text-on-surface-variant transition-colors">
-          <span className="material-symbols-outlined text-[20px]" translate="no">arrow_back</span>
-        </button>
-        <div>
-          <h1 className="text-2xl font-bold text-on-surface">Mi Perfil</h1>
-          <p className="text-sm text-on-surface-variant">Gestione la seguridad de su cuenta</p>
+      <section className="overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-sm">
+        <div className="flex items-center gap-4 border-b border-outline-variant/60 bg-primary/5 p-5 md:p-6">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-2xl font-bold text-on-primary">{profile?.nombre_razonsocial?.charAt(0) || 'S'}</div>
+          <div className="min-w-0"><h2 className="break-words text-lg font-bold text-on-surface">{profile?.nombre_razonsocial || 'Socio'}</h2><p className="text-xs font-semibold text-primary">{profile?.es_activo ? 'Cuenta activa' : 'Cuenta inactiva'}</p></div>
         </div>
-      </div>
-
-      <div className="bg-white rounded-2xl border border-outline-variant shadow-sm overflow-hidden">
-
-        {/* Profile Header */}
-        <div className="bg-emerald-50 p-6 md:p-8 border-b border-emerald-100 flex flex-col md:flex-row items-center md:items-start gap-6 text-center md:text-left">
-          <div className="w-24 h-24 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-4xl shadow-md border-4 border-white">
-            {user?.nombre_razonsocial ? user.nombre_razonsocial.substring(0, 1) : 'S'}
-          </div>
-          <div className="flex-1 mt-2">
-            <h2 className="text-xl font-bold text-emerald-950 mb-1">{user?.nombre_razonsocial}</h2>
-            <div className="flex flex-col gap-1 text-sm text-emerald-800">
-              <p className="flex items-center justify-center md:justify-start gap-2">
-                <span className="material-symbols-outlined text-[16px]" translate="no">badge</span>
-                <span className="font-bold">RUC/DNI:</span> {user?.documento_identidad}
-              </p>
-              {user?.correo && (
-                <p className="flex items-center justify-center md:justify-start gap-2">
-                  <span className="material-symbols-outlined text-[16px]" translate="no">mail</span>
-                  {user.correo}
-                </p>
-              )}
-            </div>
-          </div>
+        <div className="p-5 md:p-6"><h3 className="mb-4 font-bold text-on-surface">Información registrada</h3>
+          <dl className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <Detail label="Nombre o razón social" value={profile?.nombre_razonsocial} />
+            <Detail label="Rol" value={profile?.nombre_rol} />
+            <Detail label="Representante" value={profile?.cargo_representante} />
+            <Detail label="Actividad o rubro" value={profile?.actividad_rubro} />
+            <Detail label="Dirección" value={profile?.direccion} />
+            <Detail label="Último acceso" value={profile?.ultimo_acceso ? new Date(profile.ultimo_acceso).toLocaleString('es-PE') : null} />
+          </dl>
         </div>
+      </section>
 
-        {/* Change Password Form */}
-        <div className="p-6 md:p-8">
-          <h3 className="text-lg font-bold text-on-surface mb-6 flex items-center gap-2">
-            <span className="material-symbols-outlined text-emerald-600" translate="no">lock</span>
-            Cambiar Contraseña
-          </h3>
+      <section className="rounded-2xl border border-outline-variant bg-surface p-5 shadow-sm md:p-6">
+        <h3 className="text-lg font-bold text-on-surface">Medidores registrados</h3>
+        {meters.length ? <div className="mt-4 grid gap-3 sm:grid-cols-2">{meters.map((meter) => (
+          <dl key={meter.id} className="grid gap-3 rounded-xl border border-outline-variant/60 bg-surface-container-lowest p-4 sm:grid-cols-2">
+            <div><dt className="text-[11px] font-bold uppercase text-on-surface-variant">Número de serie</dt><dd className="mt-1 text-sm font-semibold text-on-surface">{meter.num_serie}</dd></div>
+            <div><dt className="text-[11px] font-bold uppercase text-on-surface-variant">Tipo</dt><dd className="mt-1 text-sm font-semibold text-on-surface">{meter.tipo || 'No registrado'}</dd></div>
+            <div className="sm:col-span-2"><dt className="text-[11px] font-bold uppercase text-on-surface-variant">Dirección del suministro</dt><dd className="mt-1 text-sm font-semibold text-on-surface">{meter.direccion || 'No registrada'}</dd></div>
+            <div><dt className="text-[11px] font-bold uppercase text-on-surface-variant">Estado</dt><dd className="mt-1 text-sm font-semibold text-on-surface">{meter.operativo ? 'Operativo' : 'Inactivo'}</dd></div>
+          </dl>
+        ))}</div> : <p className="mt-3 text-sm text-on-surface-variant">No hay medidores registrados a tu nombre.</p>}
+      </section>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-md">
-            <div>
-              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Contraseña Actual</label>
-              <input
-                type="password"
-                {...register('clave_actual', { required: 'La contraseña actual es requerida' })}
-                className={`w-full px-4 py-3 rounded-xl border ${errors.clave_actual ? 'border-error bg-error/5' : 'border-outline-variant bg-surface-container-lowest'} focus:outline-none focus:border-emerald-500 transition-colors`}
-                placeholder="••••••••"
-              />
-              {errors.clave_actual && <p className="text-error text-xs mt-1.5">{errors.clave_actual.message}</p>}
-            </div>
+      <section className="rounded-2xl border border-outline-variant bg-surface p-5 shadow-sm md:p-6">
+        <h3 className="text-lg font-bold text-on-surface">Datos editables</h3>
+        <p className="mt-1 text-sm text-on-surface-variant">Puedes cambiar tu usuario, DNI o RUC, teléfono y correo electrónico.</p>
+        <form onSubmit={handleSubmit(saveProfile)} className="mt-5 grid gap-4 sm:grid-cols-2">
+          <label className={labelClass}>Usuario<input className={fieldClass} maxLength={50} autoComplete="username" {...register('username', { pattern: { value: /^[A-Za-z0-9._-]*$/, message: 'Solo letras, números, puntos, guiones y guiones bajos.' } })} />{errorText(errors.username)}</label>
+          <label className={labelClass}>DNI o RUC<input className={fieldClass} inputMode="numeric" maxLength={11} {...register('documento_identidad', { required: 'El documento es obligatorio.', pattern: { value: /^(\d{8}|\d{11})$/, message: 'Ingresa 8 u 11 dígitos.' } })} />{errorText(errors.documento_identidad)}</label>
+          <label className={labelClass}>Teléfono<input className={fieldClass} inputMode="tel" autoComplete="tel" maxLength={9} {...register('telefono', { pattern: { value: /^(|\d{9})$/, message: 'Ingresa 9 dígitos.' } })} />{errorText(errors.telefono)}</label>
+          <label className={labelClass}>Correo electrónico<input className={fieldClass} type="email" autoComplete="email" maxLength={100} {...register('correo', { pattern: { value: /^(|[^\s@]+@[^\s@]+\.[^\s@]+)$/, message: 'Ingresa un correo válido.' } })} />{errorText(errors.correo)}</label>
+          <div className="flex justify-end sm:col-span-2"><button type="submit" disabled={saving} className="rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-on-primary disabled:opacity-50">{saving ? 'Guardando...' : 'Guardar cambios'}</button></div>
+        </form>
+      </section>
 
-            <div>
-              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Nueva Contraseña</label>
-              <input
-                type="password"
-                maxLength={128}
-                {...register('clave_nueva', {
-                  required: 'La nueva contraseña es requerida',
-                  minLength: { value: 8, message: 'Mínimo 8 caracteres' }
-                })}
-                className={`w-full px-4 py-3 rounded-xl border ${errors.clave_nueva ? 'border-error bg-error/5' : 'border-outline-variant bg-surface-container-lowest'} focus:outline-none focus:border-emerald-500 transition-colors tracking-widest font-data-mono`}
-                placeholder="Mínimo 8 caracteres"
-              />
-              {errors.clave_nueva && <p className="text-error text-xs mt-1.5">{errors.clave_nueva.message}</p>}
-              <p className="text-[11px] text-on-surface-variant mt-2">La nueva contraseña debe tener al menos 8 caracteres.</p>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">Confirmar Nueva Contraseña</label>
-              <input
-                type="password"
-                maxLength={128}
-                {...register('confirmar_clave', {
-                  required: 'Debes confirmar la contraseña',
-                  validate: value => value === claveNueva || 'Las contraseñas no coinciden'
-                })}
-                className={`w-full px-4 py-3 rounded-xl border ${errors.confirmar_clave ? 'border-error bg-error/5' : 'border-outline-variant bg-surface-container-lowest'} focus:outline-none focus:border-emerald-500 transition-colors tracking-widest font-data-mono`}
-                placeholder="Repite la nueva contraseña"
-              />
-              {errors.confirmar_clave && <p className="text-error text-xs mt-1.5">{errors.confirmar_clave.message}</p>}
-            </div>
-
-            <div className="pt-2">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full md:w-auto px-8 py-3 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-md hover:shadow-lg"
-              >
-                {isLoading ? (
-                  <span className="material-symbols-outlined animate-spin text-[20px]" translate="no">sync</span>
-                ) : (
-                  <span className="material-symbols-outlined text-[20px]" translate="no">save</span>
-                )}
-                Actualizar Contraseña
-              </button>
-            </div>
-          </form>
-        </div>
-
-      </div>
+      <section className="rounded-2xl border border-outline-variant bg-surface p-5 shadow-sm md:p-6">
+        <h3 className="text-lg font-bold text-on-surface">Seguridad de la cuenta</h3>
+        <form onSubmit={passwordForm.handleSubmit(changePassword)} className="mt-5 grid max-w-xl gap-4">
+          <label className={labelClass}>Contraseña actual<input className={fieldClass} type="password" autoComplete="current-password" {...passwordForm.register('clave_actual', { required: 'La contraseña actual es obligatoria.' })} />{errorText(passwordForm.formState.errors.clave_actual)}</label>
+          <label className={labelClass}>Nueva contraseña<input className={fieldClass} type="password" autoComplete="new-password" maxLength={128} {...passwordForm.register('clave_nueva', { required: 'La nueva contraseña es obligatoria.', minLength: { value: 8, message: 'Mínimo 8 caracteres.' } })} />{errorText(passwordForm.formState.errors.clave_nueva)}</label>
+          <label className={labelClass}>Confirmar nueva contraseña<input className={fieldClass} type="password" autoComplete="new-password" maxLength={128} {...passwordForm.register('confirmar_clave', { required: 'Confirma la contraseña.', validate: value => value === newPassword || 'Las contraseñas no coinciden.' })} />{errorText(passwordForm.formState.errors.confirmar_clave)}</label>
+          <div><button type="submit" disabled={changingPassword} className="rounded-xl border border-primary px-5 py-2.5 text-sm font-bold text-primary disabled:opacity-50">{changingPassword ? 'Actualizando...' : 'Actualizar contraseña'}</button></div>
+        </form>
+      </section>
     </main>
   );
 };

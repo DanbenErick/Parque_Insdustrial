@@ -9,11 +9,7 @@ const KPI_ITEMS = [
     borderHover: 'hover:border-primary/30',
     bgIcon: 'bg-primary/5 border-primary/10',
     textColor: 'text-primary',
-    getBadge: () => (
-      <span className="text-[10px] text-primary flex items-center gap-0.5 font-bold mb-px bg-primary/10 px-1 rounded-sm">
-        <span className="material-symbols-outlined text-[12px]" translate="no">trending_up</span> 2.4%
-      </span>
-    ),
+    getBadge: () => null,
     getValue: (kpis) => typeof kpis.totalConsumo === 'number'
       ? kpis.totalConsumo.toLocaleString('es-PE', { maximumFractionDigits: 1 })
       : kpis.totalConsumo,

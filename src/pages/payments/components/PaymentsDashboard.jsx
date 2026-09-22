@@ -30,9 +30,9 @@ export const PaymentHistoryTable = ({ payments, loading, searchTerm, onSearchCha
     <div className="md:hidden divide-y divide-outline-variant/60 bg-surface">
       {loading ? <div className="p-8 text-center text-on-surface-variant">Cargando pagos...</div> : payments.length === 0 ? <div className="p-8 text-center text-on-surface-variant">No se encontraron pagos</div> : payments.map((payment) => <PaymentMobileCard key={payment.id} payment={payment} previousAmount={fallbackMap.get(payment.id) || 0} onSelect={onSelect} onOpenMenu={onOpenMenu} isMenuOpen={openMenuPaymentId === payment.id} getTypeInfo={getTipoInfo} formatCurrency={formatCurrency} />)}
     </div>
-    <div className="hidden md:block overflow-x-auto">
+    <div className="hidden md:block overflow-auto max-h-[calc(100vh-280px)] custom-scrollbar">
       <table className="w-full text-left border-collapse table-auto whitespace-nowrap">
-        <thead className="bg-surface-container-lowest border-b border-outline-variant text-on-surface-variant text-[11px] uppercase tracking-wider">
+        <thead className="bg-surface-container-lowest border-b border-outline-variant text-on-surface-variant text-[11px] uppercase tracking-wider sticky top-0 z-10 shadow-sm">
           <tr><th className="px-4 py-2 font-semibold">Socio</th><th className="px-4 py-2 font-semibold">Detalle / Fecha</th><th className="px-4 py-2 font-semibold text-center">Estado</th><th className="px-4 py-2 font-semibold text-right">Monto</th><th className="px-4 py-2 font-semibold text-right w-16">Acciones</th></tr>
         </thead>
         <tbody className="divide-y divide-outline-variant/50 bg-surface">

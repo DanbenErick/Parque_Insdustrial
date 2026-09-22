@@ -297,9 +297,9 @@ export const MedidoresTable = ({
           )}
         </div>
 
-        <div className="hidden md:block overflow-x-auto">
+        <div className="hidden md:block overflow-auto max-h-[calc(100vh-280px)] custom-scrollbar">
         <table className="w-full text-left border-collapse min-w-[780px]">
-          <thead>
+          <thead className="sticky top-0 z-10 shadow-sm bg-surface-container-lowest">
             <tr className="border-b border-outline-variant bg-surface-container/30">
               <th className="px-4 py-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Socio / Propietario</th>
               <th className="px-4 py-2 text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Medidor</th>

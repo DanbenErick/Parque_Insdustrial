@@ -313,7 +313,7 @@ const Billing = () => {
         </div>
 
         {/* Desktop table */}
-        <div className="hidden md:block overflow-x-auto custom-scrollbar">
+        <div className="hidden md:block overflow-auto max-h-[calc(100vh-280px)] custom-scrollbar">
           <table className="w-full text-left border-collapse table-auto whitespace-nowrap">
             <thead className="bg-surface-container-lowest border-b border-outline-variant text-on-surface-variant text-[11px] uppercase tracking-wider sticky top-0 z-10 shadow-sm">
               <tr>

@@ -158,7 +158,7 @@ function App() {
         )}
 
         {/* Main Content Area */}
-        <div className="flex-1 ml-0 md:ml-[260px] flex flex-col min-h-0 bg-background dark:bg-[#1a1c1e]">
+        <div className="flex-1 ml-0 md:ml-[260px] flex flex-col min-h-0 min-w-0 bg-background dark:bg-[#1a1c1e]">
           {Number(user?.rol_id) === 3 ? (
             <SocioTopBar />
           ) : (
@@ -166,7 +166,7 @@ function App() {
           )}
 
           {/* Content */}
-          <div id="app-main-scroll-container" data-app-scroll="true" className="flex-1 overflow-y-auto custom-scrollbar relative flex flex-col pb-[70px] md:pb-0">
+          <div id="app-main-scroll-container" data-app-scroll="true" className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar relative flex flex-col pb-[70px] md:pb-0 min-w-0 w-full">
 
             {navigationTarget && (
               <div className={`fixed left-0 right-0 top-12 z-[70] md:left-[260px] md:top-0 md:bottom-0 ${Number(user?.rol_id) === 3 ? 'bottom-0' : 'bottom-16'}`}>
