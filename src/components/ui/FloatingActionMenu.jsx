@@ -20,7 +20,7 @@ const FloatingActionMenu = ({ menu, onClose, className = 'w-56', children }) => 
           bottom: menu.bottom !== undefined ? `${menu.bottom}px` : 'auto',
           right: `${menu.right}px`,
         }}
-        className={`fixed z-[85] bg-white rounded-xl shadow-2xl border border-outline-variant/80 py-1.5 overflow-hidden animate-in fade-in zoom-in-95 duration-100 ${className}`}
+        className={`fixed z-[85] bg-white rounded-xl shadow-2xl border border-outline-variant/80 py-1.5 overflow-y-auto overflow-x-hidden max-h-[75vh] animate-in fade-in zoom-in-95 duration-100 ${className}`}
         onClick={(event) => event.stopPropagation()}
       >
         {children}
