@@ -13,6 +13,7 @@ import {
   BillingTableRow,
   PdfViewerModal,
   RefacturarModal,
+  AnularModal,
   DeudasModal,
   HistorialModal,
   formatPeriod,
@@ -24,6 +25,7 @@ import { DeudaPersonalizadaModal } from '../manual-billing/components/DeudaPerso
 import { useBillingData } from './hooks/useBillingData';
 import { usePdfViewer } from './hooks/usePdfViewer';
 import { useRefacturar } from './hooks/useRefacturar';
+import { useAnular } from './hooks/useAnular';
 import { useExports } from './hooks/useExports';
 import LoadingCurtain from '../../components/ui/LoadingCurtain';
 import { BillingHeader } from './components/BillingWorkspace';
@@ -142,6 +144,7 @@ const Billing = () => {
 
   const pdf = usePdfViewer();
   const refacturar = useRefacturar(refetchAll);
+  const anular = useAnular(refetchAll);
   const exports = useExports({ filterParams, filterMes, activeYear, uniqueMonths, recibos });
 
   const totalRecaudado = useMemo(() => parseFloat(globalStats?.totalRecaudado || 0), [globalStats]);
@@ -412,6 +415,15 @@ const Billing = () => {
         onClose={refacturar.close}
       />
 
+      <AnularModal
+        isOpen={anular.isModalOpen}
+        motivo={anular.motivo}
+        isProcessing={anular.isProcessing}
+        onMotivoChange={anular.setMotivo}
+        onSubmit={anular.submit}
+        onClose={anular.close}
+      />
+
       <DeudaPersonalizadaModal
         isOpen={deudaModalOpen}
         onClose={() => {
@@ -511,6 +523,7 @@ const Billing = () => {
           setDeudaModalOpen(true);
         }}
         onRefacture={(receipt) => refacturar.open(receipt.id)}
+        onAnular={(receipt) => anular.open(receipt.id)}
       />
       </main>
     </>

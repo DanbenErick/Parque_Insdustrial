@@ -1,6 +1,7 @@
 export { default as BillingKPICards } from './BillingKPICards';
 export { default as BillingTableRow } from './BillingTableRow';
 export { default as PdfViewerModal } from './PdfViewerModal';
+export { default as AnularModal } from './AnularModal';
 export { default as RefacturarModal } from './RefacturarModal';
 export { default as DeudasModal } from './DeudasModal';
 export { default as HistorialModal } from './HistorialModal';

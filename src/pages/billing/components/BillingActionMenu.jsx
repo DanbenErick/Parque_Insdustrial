@@ -21,6 +21,7 @@ const BillingActionMenu = ({
   onPending,
   onDebt,
   onRefacture,
+  onAnular,
 }) => {
   if (!menu) return null;
   const receipt = menu.recibo;
@@ -62,6 +63,7 @@ const BillingActionMenu = ({
           <div className="my-1 border-t border-outline-variant/50" />
           <ActionButton icon="payments" label="Añadir Deuda" onClick={() => run(onDebt)} className="text-teal-700 hover:bg-teal-50" iconClass="text-teal-600" />
           <ActionButton icon="autorenew" label="Refacturar" onClick={() => run(onRefacture)} className="text-orange-700 hover:bg-orange-50" iconClass="text-orange-600" />
+          <ActionButton icon="cancel" label="Anular Recibo" onClick={() => run(onAnular)} className="text-error hover:bg-error-container/30" iconClass="text-error" />
         </>
       )}
     </FloatingActionMenu>
