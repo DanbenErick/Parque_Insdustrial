@@ -1,7 +1,7 @@
 import { useCallback } from 'react';
 import api from '../../../api/axiosConfig';
 import { toast } from 'sonner';
-import { MIME_TYPES, downloadBlob } from '../billingUtils';
+import { MIME_TYPES, downloadBlob, buildReceiptPdfFilename } from '../billingUtils';
 
 /**
  * useExports — Centralizes all export handlers (Excel, PDF masivo, etc.)
@@ -134,7 +134,7 @@ Te escribimos para enviarte tu recibo de luz correspondiente al periodo *${recib
       .then((response) => {
         downloadBlob(
           response.data,
-          `Recibo_${recibo.periodo}_${recibo.socio.replace(/\s+/g, '_')}.pdf`,
+          buildReceiptPdfFilename(recibo),
           MIME_TYPES.PDF,
         );
       })

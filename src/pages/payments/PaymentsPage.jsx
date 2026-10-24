@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import api from '../../api/axiosConfig';
 import { toast } from 'sonner';
@@ -7,6 +7,7 @@ import PdfPreviewModal from '../../components/ui/PdfPreviewModal';
 import { PaymentHistoryTable, PaymentsDashboard } from './components/PaymentsDashboard';
 import CancelPaymentModal from './components/CancelPaymentModal';
 import EditPaymentModal from './components/EditPaymentModal';
+import ConfirmPaymentModal from './components/ConfirmPaymentModal';
 import { buildFilterParams, fmtCurrency, formatPeriod, getPagoTipoInfo } from './paymentUtils';
 import { useFloatingActionMenu } from '../../hooks/useFloatingActionMenu';
 import { createBlobUrl, downloadBlob, MIME_TYPES, openBlobInNewTab } from '../../utils/downloadFile';
@@ -62,6 +63,8 @@ const Payments = () => {
     return new Date(Date.now() - tzOffset).toISOString().slice(0, 10);
   });
   const [isAutocompleteOpen, setIsAutocompleteOpen] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const dateInputRef = useRef(null);
 
   // Modal Anular Pago state
   const [isAnularModalOpen, setIsAnularModalOpen] = useState(false);
@@ -182,12 +185,16 @@ const Payments = () => {
     setMetodoPago('Transferencia');
     setNumeroOperacion('');
     setPermitirPagoExtra(false);
+    setIsConfirmModalOpen(false);
     const tzOffset = new Date().getTimezoneOffset() * 60000;
     setFechaPago(new Date(Date.now() - tzOffset).toISOString().slice(0, 10));
   }, []);
 
   const openModal = useCallback(() => setIsModalOpen(true), []);
-  const closeModal = useCallback(() => setIsModalOpen(false), []);
+  const closeModal = useCallback(() => {
+    setIsConfirmModalOpen(false);
+    setIsModalOpen(false);
+  }, []);
   const closePdfModal = useCallback(() => {
     setIsPdfModalOpen(false);
     // Revoke the blob URL after the exit animation to prevent memory leaks
@@ -218,9 +225,26 @@ const Payments = () => {
     setIsAutocompleteOpen(true);
   }, []);
 
-  const handleRegistrarPago = useCallback(async (e) => {
+  const handleOpenConfirmModal = useCallback((e) => {
     e.preventDefault();
-    if (!selectedRecibo || !monto || !metodoPago) {
+    if (!selectedRecibo) {
+      return toast.error('Debe seleccionar un socio o recibo');
+    }
+    const montoNum = parseFloat(monto);
+    if (!monto || isNaN(montoNum) || montoNum <= 0) {
+      return toast.error('Ingrese un monto válido');
+    }
+    if (!metodoPago) {
+      return toast.error('Seleccione un método de pago');
+    }
+    if (!fechaPago) {
+      return toast.error('Seleccione una fecha de pago');
+    }
+    setIsConfirmModalOpen(true);
+  }, [selectedRecibo, monto, metodoPago, fechaPago]);
+
+  const handleConfirmSavePayment = useCallback(async () => {
+    if (!selectedRecibo || !monto || !metodoPago || !fechaPago) {
       return toast.error('Complete los campos obligatorios');
     }
 
@@ -236,6 +260,7 @@ const Payments = () => {
         permitir_pago_adicional: isPagoExtra,
       });
       toast.success(isPagoExtra ? 'Pago adicional registrado exitosamente (saldo a favor acumulado)' : 'Pago registrado exitosamente');
+      setIsConfirmModalOpen(false);
       setIsModalOpen(false);
       resetForm();
       refetchAll();
@@ -245,6 +270,20 @@ const Payments = () => {
       setIsSubmitting(false);
     }
   }, [selectedRecibo, monto, metodoPago, numeroOperacion, fechaPago, resetForm, refetchAll, permitirPagoExtra, selectedReciboObj]);
+
+  const handleRejectConfirm = useCallback(() => {
+    setIsConfirmModalOpen(false);
+    setTimeout(() => {
+      if (dateInputRef.current) {
+        dateInputRef.current.focus();
+        try {
+          dateInputRef.current.showPicker?.();
+        } catch {
+          // ignore if showPicker is unsupported
+        }
+      }
+    }, 100);
+  }, []);
 
   const handleConfirmAnularPago = useCallback(async (e) => {
     e.preventDefault();
@@ -383,10 +422,18 @@ const Payments = () => {
   // Close payment modal with Escape key
   useEffect(() => {
     if (!isModalOpen) return;
-    const handler = (e) => { if (e.key === 'Escape' && !isSubmitting) closeModal(); };
+    const handler = (e) => {
+      if (e.key === 'Escape' && !isSubmitting) {
+        if (isConfirmModalOpen) {
+          handleRejectConfirm();
+        } else {
+          closeModal();
+        }
+      }
+    };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [isModalOpen, isSubmitting, closeModal]);
+  }, [isModalOpen, isSubmitting, isConfirmModalOpen, handleRejectConfirm, closeModal]);
 
   // Close PDF modal with Escape key
   useEffect(() => {
@@ -543,7 +590,7 @@ const Payments = () => {
 
             {/* Content */}
             <div className="p-4">
-              <form id="registrar-pago-form" onSubmit={handleRegistrarPago} className="space-y-4">
+              <form id="registrar-pago-form" onSubmit={handleOpenConfirmModal} className="space-y-4">
 
                 {/* Recibo Pendiente (Autocomplete) */}
                 <div className="bg-surface-container-lowest border border-outline-variant p-3 rounded-lg">
@@ -752,6 +799,7 @@ const Payments = () => {
                     <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider pl-1">Fecha de Pago <span className="text-error">*</span></label>
                     <div className="relative">
                       <input
+                        ref={dateInputRef}
                         type="date"
                         className="w-full border border-outline-variant rounded-md px-3 py-1.5 h-8 bg-white font-data-mono text-xs focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-colors"
                         value={fechaPago}
@@ -825,6 +873,28 @@ const Payments = () => {
       )}
 
       {isEditModalOpen && pagoToEdit && <EditPaymentModal payment={pagoToEdit} method={editMetodoPago} onMethodChange={setEditMetodoPago} operation={editNumeroOperacion} onOperationChange={setEditNumeroOperacion} date={editFechaPago} onDateChange={setEditFechaPago} onSubmit={handleConfirmEditPago} onClose={handleCloseEditModal} isSubmitting={isSubmittingEdit} formatCurrency={fmtCurrency} backdropProps={MODAL_BACKDROP} contentProps={MODAL_CONTENT} />}
+
+      {/* Modal Confirmación de Pago */}
+      <ConfirmPaymentModal
+        isOpen={isConfirmModalOpen}
+        data={{
+          socio: selectedReciboObj?.socio || searchSocio,
+          medidor: selectedReciboObj?.medidor_num_serie,
+          comprobante: selectedReciboObj?.numero_comprobante,
+          monto,
+          metodoPago,
+          numeroOperacion,
+          fechaPago,
+          isPagoExtra: permitirPagoExtra || selectedReciboObj?.estado === 'Pagado',
+          saldoPendiente,
+        }}
+        onAccept={handleConfirmSavePayment}
+        onReject={handleRejectConfirm}
+        isSubmitting={isSubmitting}
+        formatCurrency={fmtCurrency}
+        backdropProps={MODAL_BACKDROP}
+        contentProps={MODAL_CONTENT}
+      />
 
       <PaymentDetailDrawer
         payment={selectedPaymentForDetails}

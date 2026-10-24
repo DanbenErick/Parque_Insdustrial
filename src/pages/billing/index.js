@@ -5,4 +5,4 @@ export { default as AnularModal } from './AnularModal';
 export { default as RefacturarModal } from './RefacturarModal';
 export { default as DeudasModal } from './DeudasModal';
 export { default as HistorialModal } from './HistorialModal';
-export { buildFilterParams, formatPeriod, downloadBlob, MIME_TYPES } from './billingUtils';
+export { buildFilterParams, formatPeriod, buildReceiptPdfFilename, downloadBlob, MIME_TYPES } from './billingUtils';

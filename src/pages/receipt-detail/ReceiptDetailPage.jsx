@@ -7,6 +7,7 @@ import HistorialModal from '../billing/HistorialModal';
 import FullScreenLoader from '../../components/ui/FullScreenLoader';
 import { CargoLine, CargoLineConditional, InfoRow, SectionHeader } from './components/ReceiptDetailPrimitives';
 import { downloadBlob, MIME_TYPES } from '../../utils/downloadFile';
+import { buildReceiptPdfFilename } from '../billing/billingUtils';
 import { useAppNavigate } from '../../context/NavigationFeedbackContext';
 
 // ── Constants ────────────────────────────────────────────────────────
@@ -121,7 +122,7 @@ const ReceiptDetail = ({ receiptId, onClose }) => {
     if (!id || !recibo) return;
     try {
       const response = await api.get(`/recibos/${id}/pdf`, { responseType: 'blob' });
-      downloadBlob(response.data, `Recibo_${recibo.periodo}_${(recibo.nombre_razonsocial || '').replace(/\s+/g, '_')}.pdf`, MIME_TYPES.PDF);
+      downloadBlob(response.data, buildReceiptPdfFilename(recibo), MIME_TYPES.PDF);
       toast.success('PDF descargado exitosamente');
     } catch (err) {
       console.error(err);

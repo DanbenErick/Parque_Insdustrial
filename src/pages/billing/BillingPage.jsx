@@ -513,7 +513,7 @@ const Billing = () => {
         menu={actionMenu}
         onClose={() => setActionMenu(null)}
         onView={(receipt) => setDrawerReceiptId(receipt.id)}
-        onPdf={(receipt) => pdf.openPdf(receipt.id)}
+        onPdf={(receipt) => pdf.openPdf(receipt)}
         onWhatsApp={exports.handleWhatsApp}
         onHistory={(receipt) => setHistorialReceiptId(receipt.id)}
         onPayments={setPagosReciboModal}

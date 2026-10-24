@@ -46,4 +46,45 @@ export const formatPeriod = (periodoStr) => {
   return periodoStr;
 };
 
+/**
+ * Genera el nombre del archivo PDF del recibo según el formato:
+ * APELLIDOS_NOMBRE_{10 ultimos caracteres de la direccion del medidor}_PERIODO.pdf
+ */
+export const buildReceiptPdfFilename = (recibo) => {
+  if (!recibo) return 'recibo.pdf';
+
+  // 1. APELLIDOS_NOMBRE
+  const fullName = (recibo.socio || recibo.nombre_razonsocial || recibo.propietario || '').trim();
+  let apellidosNombre = 'SOCIO';
+  if (fullName) {
+    if (fullName.includes(',')) {
+      const [apellidos, nombres] = fullName.split(',').map((s) => s.trim());
+      const ap = apellidos.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]/g, '').trim().replace(/\s+/g, '_');
+      const nom = nombres ? nombres.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]/g, '').trim().replace(/\s+/g, '_') : '';
+      apellidosNombre = nom ? `${ap}_${nom}` : ap;
+    } else {
+      apellidosNombre = fullName.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]/g, '').trim().replace(/\s+/g, '_');
+    }
+  }
+  apellidosNombre = (apellidosNombre || 'SOCIO').toUpperCase();
+
+  // 2. 10 últimos caracteres de la dirección del medidor
+  const rawDir = (recibo.medidor_direccion || recibo.direccion || recibo.socio_direccion || '').trim();
+  let dirPart = 'SIN_DIR';
+  if (rawDir && rawDir.toLowerCase() !== 'sin dirección' && rawDir !== '-') {
+    const last10 = rawDir.length > 10 ? rawDir.slice(-10) : rawDir;
+    dirPart = last10
+      .replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]/g, '')
+      .trim()
+      .replace(/\s+/g, '_')
+      .toUpperCase();
+  }
+  if (!dirPart) dirPart = 'SIN_DIR';
+
+  // 3. PERIODO
+  const periodo = (recibo.periodo || '').trim().replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase() || 'PERIODO';
+
+  return `${apellidosNombre}_${dirPart}_${periodo}.pdf`;
+};
+
 export { downloadBlob, MIME_TYPES } from '../../utils/downloadFile';
