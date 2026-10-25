@@ -55,15 +55,19 @@ export const buildReceiptPdfFilename = (recibo) => {
 
   // 1. APELLIDOS_NOMBRE
   const fullName = (recibo.socio || recibo.nombre_razonsocial || recibo.propietario || '').trim();
+  // Helper: quita tildes, caracteres especiales y normaliza para nombre de archivo
+  const toSafe = (s) =>
+    s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9\s_-]/g, '').trim().replace(/\s+/g, '_');
+
   let apellidosNombre = 'SOCIO';
   if (fullName) {
     if (fullName.includes(',')) {
       const [apellidos, nombres] = fullName.split(',').map((s) => s.trim());
-      const ap = apellidos.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]/g, '').trim().replace(/\s+/g, '_');
-      const nom = nombres ? nombres.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]/g, '').trim().replace(/\s+/g, '_') : '';
+      const ap = toSafe(apellidos);
+      const nom = nombres ? toSafe(nombres) : '';
       apellidosNombre = nom ? `${ap}_${nom}` : ap;
     } else {
-      apellidosNombre = fullName.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]/g, '').trim().replace(/\s+/g, '_');
+      apellidosNombre = toSafe(fullName);
     }
   }
   apellidosNombre = (apellidosNombre || 'SOCIO').toUpperCase();
@@ -71,18 +75,19 @@ export const buildReceiptPdfFilename = (recibo) => {
   // 2. 10 últimos caracteres de la dirección del medidor
   const rawDir = (recibo.medidor_direccion || recibo.direccion || recibo.socio_direccion || '').trim();
   let dirPart = 'SIN_DIR';
-  if (rawDir && rawDir.toLowerCase() !== 'sin dirección' && rawDir !== '-') {
+  if (rawDir && rawDir.toLowerCase() !== 'sin dirección' && rawDir.toLowerCase() !== 'sin direccion' && rawDir !== '-') {
     const last10 = rawDir.length > 10 ? rawDir.slice(-10) : rawDir;
     dirPart = last10
-      .replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s_-]/g, '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-zA-Z0-9\s_-]/g, '')
       .trim()
       .replace(/\s+/g, '_')
       .toUpperCase();
   }
   if (!dirPart) dirPart = 'SIN_DIR';
 
-  // 3. PERIODO
-  const periodo = (recibo.periodo || '').trim().replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase() || 'PERIODO';
+  // 3. PERIODO — el endpoint /recibos/:id retorna mes_anio; el listado retorna periodo
+  const periodo = (recibo.periodo || recibo.mes_anio || '').trim().replace(/[^a-zA-Z0-9_-]/g, '').toUpperCase() || 'PERIODO';
 
   return `${apellidosNombre}_${dirPart}_${periodo}.pdf`;
 };
