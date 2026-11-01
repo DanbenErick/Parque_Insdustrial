@@ -22,14 +22,14 @@ const BillingTableRow = memo(({ recibo, onViewDetail, onViewHistorial, onViewPag
     <tr className="hover:bg-surface-container-lowest transition-colors group">
       <td className="px-4 py-2">
         <div className="flex flex-col gap-1.5">
-          <button
-            onClick={() => onViewDetail(recibo.id)}
-            className="text-left focus:outline-none w-full group/btn"
-            title="Ver Detalle"
-          >
-            <div className="flex flex-col gap-1">
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => onViewDetail(recibo.id)}
+              className="inline-flex items-center gap-1.5 text-left focus:outline-none group/btn"
+              title="Ver Detalle"
+            >
               {/* Medidor as the primary prominent element */}
-              <div className="flex items-center gap-1.5">
                 <span className={`inline-flex items-center gap-1 w-fit px-2 py-0.5 rounded text-[12px] font-extrabold uppercase tracking-wider ${
                   recibo.medidor_num_serie
                     ? 'bg-primary/10 text-primary border border-primary/20'
@@ -47,40 +47,41 @@ const BillingTableRow = memo(({ recibo, onViewDetail, onViewHistorial, onViewPag
                     {recibo.medidor_tipo === 'Tiempo Real' ? 'Hora Punta' : recibo.medidor_tipo}
                   </span>
                 )}
-                {Number(recibo.cantidad_anulados || 0) > 0 && (
-                  <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onViewHistorial(recibo.id);
-                    }}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wide bg-amber-500/15 text-amber-800 border border-amber-500/30 hover:bg-amber-500/25 transition-all shadow-xs cursor-pointer"
-                    title={`Este periodo tiene ${recibo.cantidad_anulados} comprobante(s) anulado(s). Haz clic para ver detalles del historial.`}
-                  >
-                    <span className="material-symbols-outlined text-[12px] text-amber-600" translate="no">history</span>
-                    <span>{recibo.cantidad_anulados} {Number(recibo.cantidad_anulados) === 1 ? 'Anulada' : 'Anuladas'}</span>
-                  </button>
-                )}
-              </div>
+            </button>
+            {Number(recibo.cantidad_anulados || 0) > 0 && (
+              <button
+                type="button"
+                onClick={() => onViewHistorial(recibo.id)}
+                className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wide bg-amber-500/15 text-amber-800 border border-amber-500/30 hover:bg-amber-500/25 transition-all shadow-xs cursor-pointer"
+                title={`Este periodo tiene ${recibo.cantidad_anulados} comprobante(s) anulado(s). Haz clic para ver detalles del historial.`}
+              >
+                <span className="material-symbols-outlined text-[12px] text-amber-600" translate="no">history</span>
+                <span>{recibo.cantidad_anulados} {Number(recibo.cantidad_anulados) === 1 ? 'Anulada' : 'Anuladas'}</span>
+              </button>
+            )}
+          </div>
 
-              {/* Socio name as secondary text */}
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="truncate max-w-[200px] font-medium text-on-surface-variant text-[11px]">
-                  {recibo.socio || 'Desconocido'}
+          {/* Socio name as secondary text */}
+          <button
+            type="button"
+            onClick={() => onViewDetail(recibo.id)}
+            className="flex items-center gap-1.5 mt-0.5 text-left focus:outline-none group/btn"
+            title="Ver Detalle"
+          >
+            <span className="truncate max-w-[200px] font-medium text-on-surface-variant text-[11px]">
+              {recibo.socio || 'Desconocido'}
+            </span>
+            {recibo.estado === 'Vencido' && (
+              <span className="relative group/risk flex items-center justify-center">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-error"></span>
                 </span>
-                {recibo.estado === 'Vencido' && (
-                  <div className="relative group/risk flex items-center justify-center">
-                    <span className="relative flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-error"></span>
-                    </span>
-                    <span className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-error text-white text-[10px] font-bold rounded opacity-0 group-hover/risk:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-20">
-                      🚨 RIESGO DE CORTE
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
+                <span className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-2 py-1 bg-error text-white text-[10px] font-bold rounded opacity-0 group-hover/risk:opacity-100 pointer-events-none whitespace-nowrap transition-opacity shadow-sm z-20">
+                  🚨 RIESGO DE CORTE
+                </span>
+              </span>
+            )}
           </button>
           <div className="flex flex-col mt-0.5">
             <span className="font-data-mono text-[10px] text-on-surface-variant/70">DNI/RUC: {recibo.documento_identidad}</span>

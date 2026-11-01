@@ -20,7 +20,8 @@ const paymentType = (tipo, badgeLabel, drawerLabel, badgeClass, boxClass, values
 
 export const getPagoTipoInfo = (payment, fallbackPrevious = 0) => {
   if (!payment) return paymentType('Completo', 'Completo', 'Pago Completo', 'bg-indigo-100 text-indigo-800', 'bg-indigo-50/50 border-indigo-200');
-  if (payment.estado_validacion === 'Anulado') return paymentType('Anulado', 'Anulado', 'Pago Anulado', 'bg-error/15 text-error border border-error/30', 'bg-red-50/50 border-red-200');
+  const estado = String(payment.estado_validacion || '').trim().toLowerCase();
+  if (estado === 'anulado' || Boolean(payment.deleted_at)) return paymentType('Anulado', 'Anulado', 'Pago Anulado', 'bg-error/15 text-error border border-error/30', 'bg-red-50/50 border-red-200');
 
   const amount = parseFloat(payment.monto_pagado || 0);
   const receiptTotal = parseFloat(payment.recibo_total || 0);

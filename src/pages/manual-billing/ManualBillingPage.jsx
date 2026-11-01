@@ -89,6 +89,7 @@ const ManualBilling = () => {
           porcentajeAvance={porcentajeAvance}
           dashOffset={dashOffset}
           onExportExcel={() => exportLecturasToExcel(medidores, lecturasPeriodoActivoMap, activePeriodo)}
+          onOpenHistory={() => setIsModalOpen(true)}
         />
 
         <div className={`w-full animate-in fade-in duration-200 ${selectedMember ? 'grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_minmax(420px,480px)] gap-4 items-start' : ''}`}>
@@ -137,6 +138,7 @@ const ManualBilling = () => {
         {isModalOpen && (
           <AllReadingsModal
             activePeriodo={activePeriodo}
+            activeYear={activeYear}
             lecturasPeriodoActivo={lecturasPeriodoActivo}
             medidorMap={medidorMap}
             modalSearchTerm={modalSearchTerm}

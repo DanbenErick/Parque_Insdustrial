@@ -8,6 +8,37 @@ const LABEL_CLASS = 'text-xs font-semibold text-on-surface-variant';
 const INPUT_CLASS = 'border border-outline-variant rounded px-3 py-1.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary/20 bg-white transition-all';
 const ERROR_INPUT_CLASS = 'border rounded px-3 py-1.5 text-sm focus:border-error focus:ring-1 focus:ring-error/20 bg-error/5 border-error';
 
+const buildUsernameSuggestion = (fullName = '') => {
+  const cleanName = String(fullName).trim();
+  if (!cleanName) return '';
+
+  let firstName = '';
+  let surnames = [];
+  if (cleanName.includes(',')) {
+    const [surnamePart, givenNamePart] = cleanName.split(',', 2);
+    surnames = surnamePart.trim().split(/\s+/).filter(Boolean);
+    firstName = givenNamePart.trim().split(/\s+/).filter(Boolean)[0] || '';
+  } else {
+    const words = cleanName.split(/\s+/).filter(Boolean);
+    if (words.length >= 3) {
+      surnames = words.slice(0, 2);
+      firstName = words[2];
+    } else if (words.length === 2) {
+      surnames = [words[0]];
+      firstName = words[1];
+    } else {
+      firstName = words[0];
+    }
+  }
+
+  const initials = surnames.slice(0, 2).map(surname => surname[0] || '').join('');
+  return `${firstName}${initials}`
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^A-Za-z0-9._-]/g, '')
+    .toLowerCase();
+};
+
 const METER_THEMES = [
   { bg: 'bg-blue-50/30', border: 'border-blue-200', text: 'text-blue-700', headerBg: 'bg-blue-100/50', icon: 'electric_meter' },
   { bg: 'bg-emerald-50/30', border: 'border-emerald-200', text: 'text-emerald-700', headerBg: 'bg-emerald-100/50', icon: 'speed' },
@@ -28,6 +59,7 @@ const TenantFormModal = ({
   const { register, control, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm({
     defaultValues: initialData || {
       nombre_razonsocial: '',
+      username: '',
       documento_identidad: '',
       actividad: 'General',
       correo: '',
@@ -42,11 +74,25 @@ const TenantFormModal = ({
     name: 'medidores'
   });
 
+  const generateAccessPassword = useCallback(() => {
+    const range = 90_000_000;
+    const maxAccepted = Math.floor(0x100000000 / range) * range;
+    const randomValue = new Uint32Array(1);
+    do {
+      window.crypto.getRandomValues(randomValue);
+    } while (randomValue[0] >= maxAccepted);
+    setValue('clave_acceso', String(10_000_000 + (randomValue[0] % range)), { shouldValidate: true });
+  }, [setValue]);
+
   useEffect(() => {
     if (initialData) {
       reset(initialData);
     }
   }, [initialData, reset]);
+
+  useEffect(() => {
+    if (!editId) generateAccessPassword();
+  }, [editId, generateAccessPassword]);
 
   // Tecla Escape para cerrar
   useEffect(() => {
@@ -132,6 +178,36 @@ const TenantFormModal = ({
               </div>
 
               <div className="p-4 sm:p-5 grid grid-cols-1 md:grid-cols-2 gap-4 bg-surface">
+                {editId && (
+                  <div className="flex flex-col gap-1 md:col-span-2">
+                    <div className="flex items-center justify-between gap-2">
+                      <label className={LABEL_CLASS}>Usuario del sistema *</label>
+                      <button
+                        type="button"
+                        onClick={() => setValue('username', buildUsernameSuggestion(watch('nombre_razonsocial')), { shouldDirty: true, shouldValidate: true })}
+                        className="inline-flex items-center gap-1 rounded px-2 py-1 text-[10px] font-bold text-primary bg-primary/10 hover:bg-primary/20 transition-colors"
+                        title="Generar con el primer nombre y las iniciales de hasta dos apellidos"
+                      >
+                        <span className="material-symbols-outlined text-[13px]" translate="no">person_add</span>
+                        Asignar usuario
+                      </button>
+                    </div>
+                    <input
+                      {...register('username', {
+                        required: 'El nombre de usuario es obligatorio.',
+                        maxLength: { value: 50, message: 'El usuario admite hasta 50 caracteres.' },
+                        pattern: { value: /^[A-Za-z0-9._-]+$/, message: 'Usa solo letras, números, puntos, guiones o guiones bajos.' }
+                      })}
+                      className={`${errors.username ? ERROR_INPUT_CLASS : INPUT_CLASS} font-data-mono`}
+                      placeholder="usuario.socio"
+                      type="text"
+                      autoComplete="username"
+                      maxLength={50}
+                    />
+                    {errors.username && <span className="text-[10px] text-error font-bold">{errors.username.message}</span>}
+                    <p className="text-[10px] text-on-surface-variant">Este es el usuario que el socio utilizará para ingresar al sistema.</p>
+                  </div>
+                )}
                 <div className="flex flex-col gap-1 md:col-span-2">
                   <label className={LABEL_CLASS}>Nombre del Socio o Razón Social *</label>
                   <input
@@ -204,6 +280,34 @@ const TenantFormModal = ({
                     <option value="Metalmecánica">Metalmecánica</option>
                     <option value="Textil">Textil</option>
                   </select>
+                </div>
+                <div className="flex flex-col gap-1 md:col-span-2">
+                  <div className="flex items-center justify-between gap-3">
+                    <label className={LABEL_CLASS}>Clave de acceso {editId ? '(opcional)' : '(8 dígitos)'}{!editId && ' *'}</label>
+                    <button
+                      type="button"
+                      onClick={generateAccessPassword}
+                      className="inline-flex items-center gap-1 rounded px-2 py-1 text-[10px] font-bold text-primary bg-primary/10 hover:bg-primary/20 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-[13px]" translate="no">casino</span>
+                      Generar número
+                    </button>
+                  </div>
+                  <input
+                    {...register('clave_acceso', {
+                      validate: (value) => (!value && editId) || /^\d{8}$/.test(String(value || '')) || 'La clave debe tener exactamente 8 dígitos.'
+                    })}
+                    className={`${errors.clave_acceso ? ERROR_INPUT_CLASS : INPUT_CLASS} font-data-mono tracking-widest`}
+                    placeholder={editId ? 'Vacío para conservar la clave actual' : '8 dígitos'}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={8}
+                    autoComplete="new-password"
+                  />
+                  {errors.clave_acceso && <span className="text-[10px] text-error font-bold">{errors.clave_acceso.message}</span>}
+                  <p className="text-[10px] text-on-surface-variant">
+                    {editId ? 'Déjala vacía para mantener la clave actual.' : 'Se genera una clave temporal de 8 dígitos y podrás entregarla al socio al terminar el registro.'}
+                  </p>
                 </div>
               </div>
             </div>

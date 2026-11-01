@@ -40,7 +40,7 @@ const Payments = () => {
   const [selectedPaymentForDetails, setSelectedPaymentForDetails] = useState(null);
   const [filterMes, setFilterMes] = useState('ULTIMO');
   const [showAnulados, setShowAnulados] = useState(true);
-  const { actionMenu, setActionMenu, openActionMenu } = useFloatingActionMenu({ menuHeight: 240 });
+  const { actionMenu, setActionMenu, openActionMenu } = useFloatingActionMenu({ menuHeight: 320 });
 
   const {
     payments: pagos,
@@ -251,7 +251,7 @@ const Payments = () => {
     setIsSubmitting(true);
     try {
       const isPagoExtra = permitirPagoExtra || selectedReciboObj?.estado === 'Pagado';
-      await api.post('/pagos', {
+      const paymentResponse = await api.post('/pagos', {
         recibo_id: selectedRecibo,
         monto_pagado: parseFloat(monto),
         metodo_pago: metodoPago,
@@ -259,7 +259,13 @@ const Payments = () => {
         fecha_pago: fechaPago,
         permitir_pago_adicional: isPagoExtra,
       });
-      toast.success(isPagoExtra ? 'Pago adicional registrado exitosamente (saldo a favor acumulado)' : 'Pago registrado exitosamente');
+      if (paymentResponse.data?.aviso_email) {
+        toast.warning(paymentResponse.data.aviso_email);
+      } else if (paymentResponse.data?.email_enviado) {
+        toast.success('Pago registrado y ticket enviado al correo del socio.');
+      } else {
+        toast.success(isPagoExtra ? 'Pago adicional registrado exitosamente (saldo a favor acumulado)' : 'Pago registrado exitosamente');
+      }
       setIsConfirmModalOpen(false);
       setIsModalOpen(false);
       resetForm();
@@ -401,6 +407,16 @@ const Payments = () => {
       }
     } catch {
       toast.error('Error al generar el ticket');
+    }
+  }, []);
+
+  const handleEmailTicket = useCallback(async (payment) => {
+    const toastId = toast.loading('Enviando ticket al correo registrado...');
+    try {
+      const response = await api.post(`/pagos/${payment.id}/ticket/email`);
+      toast.success(response.data?.message || 'Ticket enviado por correo.', { id: toastId });
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'No se pudo enviar el ticket por correo.', { id: toastId });
     }
   }, []);
 
@@ -848,6 +864,7 @@ const Payments = () => {
         onClose={() => setActionMenu(null)}
         onViewDetails={setSelectedPaymentForDetails}
         onPrintTicket={(payment) => handlePrintTicket(payment.id)}
+        onEmailTicket={handleEmailTicket}
         onWhatsApp={handleWhatsApp}
         onViewReceipt={(payment) => handleViewPdfRecibo(payment.recibo_id)}
         onEdit={handleOpenEditModal}

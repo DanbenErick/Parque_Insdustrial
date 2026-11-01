@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
+import { formatPeriod } from '../paymentUtils';
 
 const PaymentMobileCard = ({ payment, previousAmount, onSelect, onOpenMenu, isMenuOpen, getTypeInfo, formatCurrency }) => {
   const typeInfo = useMemo(() => getTypeInfo(payment, previousAmount), [payment, previousAmount, getTypeInfo]);
-  const isCanceled = payment.estado_validacion === 'Anulado';
+  const isCanceled = String(payment.estado_validacion || '').trim().toLowerCase() === 'anulado' || Boolean(payment.deleted_at);
 
   return (
     <article className={`px-4 py-3 transition-colors ${isCanceled ? 'bg-red-500/5' : 'bg-white'}`}>
@@ -10,6 +11,10 @@ const PaymentMobileCard = ({ payment, previousAmount, onSelect, onOpenMenu, isMe
         <button type="button" onClick={() => onSelect(payment)} className="min-w-0 flex-1 text-left">
           <span className="block text-sm font-bold leading-5 text-on-surface break-words">{payment.socio}</span>
           <span className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] text-on-surface-variant">
+            <span className="inline-flex items-center gap-1 rounded-full bg-primary/5 px-2 py-0.5 font-bold text-primary">
+              <span className="material-symbols-outlined text-[12px]" translate="no">calendar_month</span>
+              {formatPeriod(payment.periodo) || 'Sin periodo'}
+            </span>
             <span className="inline-flex items-center gap-1 font-data-mono">
               <span className="material-symbols-outlined text-[13px]" translate="no">electric_meter</span>
               {payment.medidor_num_serie || 'Sin medidor'}
@@ -45,7 +50,7 @@ const PaymentMobileCard = ({ payment, previousAmount, onSelect, onOpenMenu, isMe
       <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
         <span className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wide ${typeInfo.badgeClass}`}>{typeInfo.badgeLabel}</span>
         {payment.saldo_a_favor_socio > 0 && <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-[9px] font-bold text-emerald-700">Saldo a favor: S/ {formatCurrency(payment.saldo_a_favor_socio)}</span>}
-        {payment.motivo_anulacion && <span className="basis-full text-[10px] italic text-error">Motivo: {payment.motivo_anulacion}</span>}
+        {isCanceled && <span className="basis-full break-words text-[10px] leading-tight italic text-error">Motivo: {payment.motivo_anulacion || 'Sin detalle registrado'}</span>}
       </div>
     </article>
   );

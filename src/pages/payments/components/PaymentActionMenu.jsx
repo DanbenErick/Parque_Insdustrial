@@ -16,6 +16,7 @@ const PaymentActionMenu = ({
   onClose,
   onViewDetails,
   onPrintTicket,
+  onEmailTicket,
   onWhatsApp,
   onViewReceipt,
   onEdit,
@@ -43,6 +44,7 @@ const PaymentActionMenu = ({
       ) : (
         <>
           <MenuButton icon="receipt_long" label="Imprimir Ticket" onClick={() => run(onPrintTicket)} />
+          <MenuButton icon="mail" label="Enviar ticket de pago (PDF) por correo" onClick={() => run(onEmailTicket)} iconClass="text-blue-600" />
           <MenuButton icon="chat" label="Enviar por WhatsApp" onClick={() => run(onWhatsApp)} iconClass="text-[#25D366]" />
           <MenuButton icon="picture_as_pdf" label="Ver Recibo" onClick={() => run(onViewReceipt)} iconClass="text-secondary" />
           <MenuButton icon="edit" label="Modificar Pago" onClick={() => run(onEdit)} iconClass="text-amber-600" />

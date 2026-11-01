@@ -33,10 +33,10 @@ export const PaymentHistoryTable = ({ payments, loading, searchTerm, onSearchCha
     <div className="hidden md:block overflow-auto max-h-[calc(100vh-280px)] custom-scrollbar">
       <table className="w-full text-left border-collapse table-auto whitespace-nowrap">
         <thead className="bg-surface-container-lowest border-b border-outline-variant text-on-surface-variant text-[11px] uppercase tracking-wider sticky top-0 z-10 shadow-sm">
-          <tr><th className="px-4 py-2 font-semibold">Socio</th><th className="px-4 py-2 font-semibold">Detalle / Fecha</th><th className="px-4 py-2 font-semibold text-center">Estado</th><th className="px-4 py-2 font-semibold text-right">Monto</th><th className="px-4 py-2 font-semibold text-right w-16">Acciones</th></tr>
+          <tr><th className="px-4 py-2 font-semibold">Socio</th><th className="px-4 py-2 font-semibold">Periodo</th><th className="px-4 py-2 font-semibold">Detalle / Fecha</th><th className="px-4 py-2 font-semibold text-center">Estado</th><th className="px-4 py-2 font-semibold text-right">Monto</th><th className="px-4 py-2 font-semibold text-right w-16">Acciones</th></tr>
         </thead>
         <tbody className="divide-y divide-outline-variant/50 bg-surface">
-          {loading ? <tr><td colSpan="5" className="text-center p-8 text-on-surface-variant">Cargando pagos...</td></tr> : payments.length === 0 ? <tr><td colSpan="5" className="text-center p-8 text-on-surface-variant">No se encontraron pagos</td></tr> : payments.map((payment) => <PaymentTableRow key={payment.id} pago={payment} fallbackPrevio={fallbackMap.get(payment.id) || 0} onSelect={onSelect} onOpenMenu={onOpenMenu} isMenuOpen={openMenuPaymentId === payment.id} getTipoInfo={getTipoInfo} formatCurrency={formatCurrency} />)}
+          {loading ? <tr><td colSpan="6" className="text-center p-8 text-on-surface-variant">Cargando pagos...</td></tr> : payments.length === 0 ? <tr><td colSpan="6" className="text-center p-8 text-on-surface-variant">No se encontraron pagos</td></tr> : payments.map((payment) => <PaymentTableRow key={payment.id} pago={payment} fallbackPrevio={fallbackMap.get(payment.id) || 0} onSelect={onSelect} onOpenMenu={onOpenMenu} isMenuOpen={openMenuPaymentId === payment.id} getTipoInfo={getTipoInfo} formatCurrency={formatCurrency} />)}
         </tbody>
       </table>
     </div>

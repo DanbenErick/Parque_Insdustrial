@@ -15,6 +15,7 @@ const BillingActionMenu = ({
   onClose,
   onView,
   onPdf,
+  onEmail,
   onWhatsApp,
   onHistory,
   onPayments,
@@ -44,6 +45,7 @@ const BillingActionMenu = ({
 
       <ActionButton icon="visibility" label="Ver Detalle" onClick={() => run(onView)} />
       <ActionButton icon="picture_as_pdf" label="Ver Recibo (PDF)" onClick={() => run(onPdf)} iconClass="text-error" />
+      {receipt.estado !== 'Anulado' && <ActionButton icon="mail" label="Enviar recibo por correo" onClick={() => run(onEmail)} iconClass="text-blue-600" />}
       <ActionButton icon="chat" label="Enviar por WhatsApp" onClick={() => run(onWhatsApp)} iconClass="text-[#25D366]" />
       <ActionButton
         icon="history"

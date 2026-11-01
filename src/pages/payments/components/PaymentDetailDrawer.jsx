@@ -5,6 +5,7 @@ import { fmtCurrency, getPagoTipoInfo } from '../paymentUtils';
 const PaymentDetailDrawer = ({ payment, previousAmount = 0, onClose, onEdit, onViewReceipt, backdropProps }) => {
   if (!payment) return null;
   const typeInfo = getPagoTipoInfo(payment, previousAmount);
+  const isAnulado = String(payment.estado_validacion || '').trim().toLowerCase() === 'anulado' || Boolean(payment.deleted_at);
 
   return createPortal(
     <div {...backdropProps} className="fixed inset-0 z-[100] flex justify-end bg-black/50 backdrop-blur-sm" onClick={(event) => event.target === event.currentTarget && onClose()}>
@@ -24,10 +25,10 @@ const PaymentDetailDrawer = ({ payment, previousAmount = 0, onClose, onEdit, onV
             <span className="text-[10px] text-on-surface-variant font-bold tracking-wider mb-1.5 uppercase">Monto pagado</span>
             <span className="font-data-mono text-3xl font-bold text-primary">S/ {fmtCurrency(payment.monto_pagado)}</span>
             <div className="mt-3 flex flex-col items-center gap-1">
-              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${payment.estado_validacion === 'Anulado' ? 'bg-error/10 text-error border border-error/20' : 'bg-[#059669]/10 text-[#059669] border border-[#059669]/20'}`}>
-                {payment.estado_validacion || 'Confirmado'}
+              <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${isAnulado ? 'bg-error/10 text-error border border-error/20' : typeInfo.tipo === 'Parcial' ? 'bg-amber-100 text-amber-800 border border-amber-200' : 'bg-[#059669]/10 text-[#059669] border border-[#059669]/20'}`}>
+                {typeInfo.badgeLabel}
               </span>
-              {payment.motivo_anulacion && <span className="text-[10px] text-error/90 italic bg-error/5 border border-error/10 rounded px-2.5 py-1 text-center mt-1 max-w-xs">Motivo: {payment.motivo_anulacion}</span>}
+              {isAnulado && <span className="text-[10px] text-error/90 italic bg-error/5 border border-error/10 rounded px-2.5 py-1 text-center mt-1 max-w-xs break-words">Motivo: {payment.motivo_anulacion || 'Sin detalle registrado'}</span>}
             </div>
           </div>
 
@@ -67,7 +68,7 @@ const PaymentDetailDrawer = ({ payment, previousAmount = 0, onClose, onEdit, onV
           </section>
 
           <div className="pt-6 mt-auto space-y-2">
-            {payment.estado_validacion !== 'Anulado' && (
+            {!isAnulado && (
               <button type="button" onClick={() => onEdit(payment)} className="w-full py-1.5 h-8 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 text-amber-900 text-xs font-bold rounded-md flex items-center justify-center gap-1.5 transition-colors">
                 <span className="material-symbols-outlined text-[16px]" translate="no">edit</span>
                 Modificar datos del pago

@@ -3,6 +3,8 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
+import { useAuth } from '../../context/AuthContext';
+import { downloadBlob } from '../../utils/downloadFile';
 import ReceiptDetail from '../receipt-detail/ReceiptDetailPage';
 import { useYear } from '../../context/YearContext';
 import GenerateInvoicesModal from '../invoices/GenerateInvoicesModal';
@@ -35,12 +37,16 @@ import BillingActionMenu from './components/BillingActionMenu';
 import BillingMobileCard from './components/BillingMobileCard';
 
 const Billing = () => {
+  const { user } = useAuth();
+  const canEmailAllReceipts = Number(user?.rol_id) === 1;
   const { activeYear } = useYear();
 
 
   // --- UI State ---
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
+  const [isDownloadingMonthlyZip, setIsDownloadingMonthlyZip] = useState(false);
+  const [isEmailingMonthlyReceipts, setIsEmailingMonthlyReceipts] = useState(false);
   const [periodoToGenerate, setPeriodoToGenerate] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showDeudasModal, setShowDeudasModal] = useState(false);
@@ -48,7 +54,7 @@ const Billing = () => {
 
   const [deudaModalOpen, setDeudaModalOpen] = useState(false);
   const [deudaReciboData, setDeudaReciboData] = useState(null);
-  const { actionMenu, setActionMenu, openActionMenu } = useFloatingActionMenu({ menuHeight: 260 });
+  const { actionMenu, setActionMenu, openActionMenu } = useFloatingActionMenu({ menuHeight: 300 });
   const [pagosReciboModal, setPagosReciboModal] = useState(null); // recibo para Ver Pagos
   const [confirmarPendienteRecibo, setConfirmarPendienteRecibo] = useState(null);
   const [isProcessingPendiente, setIsProcessingPendiente] = useState(false);
@@ -76,6 +82,16 @@ const Billing = () => {
     debouncedSearchTerm,
     activeYear,
   });
+
+  const handleEmailReceipt = useCallback(async (receipt) => {
+    const toastId = toast.loading('Enviando recibo al correo registrado...');
+    try {
+      const response = await api.post(`/recibos/${receipt.id}/email`);
+      toast.success(response.data?.message || 'Recibo enviado por correo.', { id: toastId });
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'No se pudo enviar el recibo por correo.', { id: toastId });
+    }
+  }, []);
 
   // --- Manejo para poner recibo en Pendiente ---
   const handleSolicitarPendiente = useCallback(async (r) => {
@@ -208,6 +224,47 @@ const Billing = () => {
     }
   }, [filterMes, uniqueMonths, periodos]);
 
+  const handleDownloadMonthlyReceipts = useCallback(async () => {
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(filterMes || '')) {
+      return toast.error('Selecciona un mes específico para descargar sus recibos.');
+    }
+
+    setIsDownloadingMonthlyZip(true);
+    try {
+      const response = await api.get('/recibos/export/zip', {
+        params: { periodo: filterMes },
+        responseType: 'blob',
+      });
+      const [year, month] = filterMes.split('-');
+      const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      downloadBlob(response.data, `SPIJ_Facturacion_${monthNames[Number(month) - 1]}_${year}.zip`, 'application/zip');
+      toast.success('Se descargaron los recibos del mes.');
+    } catch (error) {
+      toast.error('No se pudo descargar el ZIP de recibos.');
+    } finally {
+      setIsDownloadingMonthlyZip(false);
+    }
+  }, [filterMes]);
+
+  const handleEmailMonthlyReceipts = useCallback(async () => {
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(filterMes || '')) {
+      return toast.error('Selecciona un mes específico para enviar sus recibos.');
+    }
+    setIsEmailingMonthlyReceipts(true);
+    const toastId = toast.loading('Enviando recibos a los socios del periodo...');
+    try {
+      const response = await api.post('/recibos/email/periodo', { periodo: filterMes });
+      const result = response.data;
+      const summary = `${result.message}${result.sin_correo ? ` ${result.sin_correo} recibo(s) sin correo.` : ''}${result.errores ? ` ${result.errores} recibo(s) con error.` : ''}`;
+      if (result.errores || result.sin_correo) toast.warning(summary, { id: toastId });
+      else toast.success(summary, { id: toastId });
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'No se pudieron enviar los recibos.', { id: toastId });
+    } finally {
+      setIsEmailingMonthlyReceipts(false);
+    }
+  }, [filterMes]);
+
 
 
   const handleExportPDF = useCallback(async () => {
@@ -256,8 +313,14 @@ const Billing = () => {
         subtitle="Estamos organizando la información y generando el archivo PDF."
       />
 
+      <LoadingCurtain
+        isOpen={isDownloadingMonthlyZip}
+        title="Preparando los recibos del mes"
+        subtitle="Estamos creando un PDF por recibo y reuniéndolos en un archivo ZIP."
+      />
+
       <main className="p-4 md:p-xl space-y-4 md:space-y-lg max-w-[1600px] mx-auto w-full flex-grow relative">
-        <BillingHeader activeTitle={activeHeaderTitle} filterMes={filterMes} onFilterChange={setFilterMes} year={activeYear} months={uniqueMonths} onGenerate={handleGenerateFromDropdown} />
+        <BillingHeader activeTitle={activeHeaderTitle} filterMes={filterMes} onFilterChange={setFilterMes} year={activeYear} months={uniqueMonths} onGenerate={handleGenerateFromDropdown} onDownloadMonthlyReceipts={handleDownloadMonthlyReceipts} isDownloadingMonthlyZip={isDownloadingMonthlyZip} onEmailMonthlyReceipts={handleEmailMonthlyReceipts} isEmailingMonthlyReceipts={isEmailingMonthlyReceipts} canEmailMonthlyReceipts={canEmailAllReceipts} />
 
         {/* KPI Cards + Progress Bar */}
         <BillingKPICards
@@ -514,6 +577,7 @@ const Billing = () => {
           onClose={() => setActionMenu(null)}
           onView={(receipt) => setDrawerReceiptId(receipt.id)}
           onPdf={(receipt) => pdf.openPdf(receipt)}
+          onEmail={handleEmailReceipt}
           onWhatsApp={exports.handleWhatsApp}
           onHistory={(receipt) => setHistorialReceiptId(receipt.id)}
           onPayments={setPagosReciboModal}

@@ -74,11 +74,11 @@ const TenantsAndSectors = () => {
   const handleRegister = useCallback(async (data) => {
     setIsSubmitting(true);
     try {
+      const originalTenant = editId ? tenants.find(t => Number(t.id) === Number(editId)) : null;
       // Si estamos editando un socio, es posible que estemos viendo solo un medidor en pantalla.
       // Debemos preservar los demás medidores que no están en el formulario para que no se borren en el backend.
       let finalMedidores = data.medidores.map(m => ({ ...m, id: m.medidor_id }));
       if (editId) {
-        const originalTenant = tenants.find(t => t.id === editId);
         if (originalTenant && originalTenant.parsedMedidores) {
            const formIds = finalMedidores.map(m => m.id);
            const hiddenMedidores = originalTenant.parsedMedidores.filter(om => !formIds.includes(om.id));
@@ -99,12 +99,22 @@ const TenantsAndSectors = () => {
         if (!data.clave_acceso) delete payload.clave_acceso;
         await api.put(`/usuarios/${editId}`, payload);
         toast.success("Socio actualizado con éxito");
+        if (data.clave_acceso) {
+          setTemporaryPassword({
+            name: data.nombre_razonsocial,
+            username: data.username || originalTenant?.username || '',
+            phone: data.telefono || originalTenant?.telefono || '',
+            value: data.clave_acceso,
+          });
+        }
       } else {
-        const randomBytes = new Uint8Array(18);
-        window.crypto.getRandomValues(randomBytes);
-        payload.clave_acceso = btoa(String.fromCharCode(...randomBytes)).replace(/\+/g, '-').replace(/\//g, '_');
-        await api.post('/usuarios', payload);
-        setTemporaryPassword({ name: data.nombre_razonsocial, value: payload.clave_acceso });
+        const { data: createdUser } = await api.post('/usuarios', payload);
+        setTemporaryPassword({
+          name: data.nombre_razonsocial,
+          username: createdUser.username || '',
+          phone: data.telefono || '',
+          value: payload.clave_acceso,
+        });
       }
       setIsModalOpen(false);
       refetchAll(); // Refetch usando React Query
@@ -128,7 +138,12 @@ const TenantsAndSectors = () => {
     setIsResettingPassword(true);
     try {
       const { data } = await api.post(`/usuarios/${tenant.id}/reset-password`);
-      setTemporaryPassword({ name: tenant.nombre_razonsocial, value: data.newPassword });
+      setTemporaryPassword({
+        name: tenant.nombre_razonsocial,
+        username: tenant.username || '',
+        phone: tenant.telefono || '',
+        value: data.newPassword,
+      });
       setResetPasswordModal({ show: false, tenant: null });
     } catch {
       toast.error('Error al restablecer contraseña');
@@ -146,6 +161,33 @@ const TenantsAndSectors = () => {
       phone = phone.replace('+', '');
     }
     window.open(`https://api.whatsapp.com/send?phone=${phone}`, '_blank');
+  }, []);
+
+  const handleSendCredentialsWhatsApp = useCallback((credentials) => {
+    const phoneDigits = String(credentials.phone || '').replace(/\D/g, '');
+    const phone = phoneDigits.length === 9 ? `51${phoneDigits}` : phoneDigits;
+    if (!phone || phone.length < 9) {
+      return toast.error('El socio no tiene un teléfono válido registrado.');
+    }
+
+    const systemUrl = import.meta.env.VITE_APP_URL || window.location.origin;
+    const message = [
+      `Hola ${credentials.name}, te compartimos tus datos de acceso al Sistema de Gestión del Parque Industrial:`,
+      '',
+      `Usuario: ${credentials.username || 'No registrado'}`,
+      `Clave temporal: ${credentials.value}`,
+      `Enlace del sistema: ${systemUrl}`,
+      '',
+      'Por seguridad, conserva estos datos y no los compartas con otras personas.',
+    ].join('\n');
+    const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+    const whatsappWindow = window.open(whatsappUrl, '_blank');
+    if (!whatsappWindow) {
+      toast.error('No se pudo abrir WhatsApp. Revisa el bloqueo de ventanas emergentes.');
+      return;
+    }
+    whatsappWindow.opener = null;
+    toast.success('WhatsApp se abrió con el mensaje preparado. Confirma el envío allí.');
   }, []);
 
   const handleOpenNew = useCallback(() => {
@@ -184,6 +226,7 @@ const TenantsAndSectors = () => {
 
     setFormData({
       nombre_razonsocial: tenant.nombre_razonsocial,
+      username: tenant.username || '',
       documento_identidad: tenant.documento_identidad,
       actividad: tenant.actividad_rubro || 'General',
       correo: tenant.correo || '',
@@ -458,8 +501,12 @@ const TenantsAndSectors = () => {
           <div className="w-full max-w-md rounded-2xl bg-surface p-6 shadow-xl">
             <h2 id="temporary-password-title" className="text-xl font-semibold text-on-surface">Clave temporal de {temporaryPassword.name}</h2>
             <p className="mt-2 text-sm text-on-surface-variant">Copia esta clave ahora. Se muestra una sola vez y debe entregarse al socio de forma segura.</p>
+            <div className="mt-4 rounded-lg bg-surface-container-low p-3 text-sm">
+              <p><span className="font-semibold">Usuario:</span> {temporaryPassword.username || 'No registrado'}</p>
+              <p className="mt-1"><span className="font-semibold">Teléfono:</span> {temporaryPassword.phone || 'No registrado'}</p>
+            </div>
             <input aria-label="Clave temporal" readOnly value={temporaryPassword.value} className="mt-4 w-full rounded-lg border border-outline px-3 py-2 font-mono text-on-surface" onFocus={(event) => event.target.select()} />
-            <div className="mt-5 flex justify-end gap-3">
+            <div className="mt-5 flex flex-wrap justify-end gap-3">
               <button type="button" onClick={async () => {
                 try {
                   await navigator.clipboard.writeText(temporaryPassword.value);
@@ -468,6 +515,16 @@ const TenantsAndSectors = () => {
                   toast.error('No se pudo copiar. Selecciona la clave manualmente.');
                 }
               }} className="rounded-lg border border-outline px-4 py-2 text-on-surface">Copiar</button>
+              <button
+                type="button"
+                onClick={() => handleSendCredentialsWhatsApp(temporaryPassword)}
+                disabled={!temporaryPassword.phone}
+                className="inline-flex items-center gap-2 rounded-lg bg-[#25D366] px-4 py-2 font-semibold text-white hover:bg-[#1fb85a] disabled:cursor-not-allowed disabled:opacity-50"
+                title={temporaryPassword.phone ? `Preparar mensaje para ${temporaryPassword.phone}` : 'No hay teléfono registrado para este socio'}
+              >
+                <span className="material-symbols-outlined text-[18px]" translate="no">chat</span>
+                Enviar al WhatsApp
+              </button>
               <button type="button" onClick={() => setTemporaryPassword(null)} className="rounded-lg bg-primary px-4 py-2 text-on-primary">Cerrar</button>
             </div>
           </div>

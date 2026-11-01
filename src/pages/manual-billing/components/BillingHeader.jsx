@@ -13,7 +13,8 @@ export const BillingHeader = ({
   totalMedidores,
   porcentajeAvance,
   dashOffset,
-  onExportExcel
+  onExportExcel,
+  onOpenHistory
 }) => {
   return (
     <div className="mb-4 flex flex-col md:flex-row justify-between md:items-end gap-4 md:gap-md">
@@ -66,17 +67,28 @@ export const BillingHeader = ({
         )}
       </div>
       {/* Actions and KPI Card */}
-      <div className={`w-full md:w-auto grid ${activePeriodo ? 'grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]' : 'grid-cols-1'} gap-2 md:flex md:flex-row md:gap-4 items-stretch md:items-center`}>
+      <div className={`w-full md:w-auto grid ${activePeriodo ? 'grid-cols-2' : 'grid-cols-1'} gap-2 md:flex md:flex-row md:gap-3 items-stretch md:items-center`}>
         {activePeriodo && (
-          <button
-            type="button"
-            onClick={onExportExcel}
-            className="min-w-0 min-h-14 md:min-h-0 flex items-center justify-center gap-2 bg-[#107C41] hover:bg-[#0E6B37] active:bg-[#0A4E28] text-white px-3 md:px-4 py-2 rounded-xl font-bold shadow-md shadow-[#107C41]/25 hover:shadow-lg hover:shadow-[#107C41]/35 md:hover:-translate-y-0.5 transition-all duration-200 text-xs sm:text-sm cursor-pointer select-none"
-            title="Exportar lecturas a Microsoft Excel"
-          >
-            <ExcelIcon className="w-[18px] h-[18px]" />
-            <span>Exportar Excel</span>
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={onOpenHistory}
+              className="min-w-0 min-h-14 md:min-h-0 flex items-center justify-center gap-2 bg-primary/10 hover:bg-primary/15 text-primary border border-primary/20 px-3 md:px-4 py-2 rounded-xl font-bold transition-all duration-200 text-xs sm:text-sm cursor-pointer select-none"
+              title="Consultar lecturas del periodo, año o historial completo"
+            >
+              <span className="material-symbols-outlined text-[19px]" translate="no">history</span>
+              <span>Historial</span>
+            </button>
+            <button
+              type="button"
+              onClick={onExportExcel}
+              className="min-w-0 min-h-14 md:min-h-0 flex items-center justify-center gap-2 bg-[#107C41] hover:bg-[#0E6B37] active:bg-[#0A4E28] text-white px-3 md:px-4 py-2 rounded-xl font-bold shadow-md shadow-[#107C41]/25 hover:shadow-lg hover:shadow-[#107C41]/35 md:hover:-translate-y-0.5 transition-all duration-200 text-xs sm:text-sm cursor-pointer select-none"
+              title="Exportar lecturas a Microsoft Excel"
+            >
+              <ExcelIcon className="w-[18px] h-[18px]" />
+              <span>Exportar Excel</span>
+            </button>
+          </>
         )}
         <div className="relative min-w-0 overflow-hidden bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-xl md:rounded-2xl px-3 sm:px-4 md:px-5 py-2.5 md:py-3 flex items-center justify-between gap-2 md:gap-5 shadow-md md:shadow-lg backdrop-blur-xl md:transition-transform md:hover:scale-[1.02] md:duration-300">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_1px_1px,currentColor_1px,transparent_0)] bg-[size:12px_12px] opacity-[0.03]"></div>

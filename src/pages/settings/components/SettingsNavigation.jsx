@@ -1,7 +1,8 @@
 const SETTINGS_TABS = [
   { id: 'profile', icon: 'person', label: 'Perfil de Usuario' },
   { id: 'periodos', icon: 'calendar_month', label: 'Periodos de Facturación' },
-  { id: 'tarifas', icon: 'request_quote', label: 'Tarifas y Cobros' }
+  { id: 'tarifas', icon: 'request_quote', label: 'Tarifas y Cobros' },
+  { id: 'notificaciones', icon: 'notifications', label: 'Notificaciones por correo' }
 ];
 
 const SettingsButton = ({ activeTab, id, icon, label, onSelect }) => (

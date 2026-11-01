@@ -1,8 +1,8 @@
 import React from 'react';
 import { BadgeType } from './BadgeType';
-import { formatDateShort, formatDateLong, fmtVal, parseSafe } from '../../utils';
+import { formatDateShort, formatDateLong, formatPeriodo, fmtVal, parseSafe } from '../../utils';
 
-export const ReadingTableRow = React.memo(({ record, medidorInfo, onEdit = null, showDateFull = true, onClick = null }) => {
+export const ReadingTableRow = React.memo(({ record, medidorInfo, onEdit = null, showDateFull = true, showPeriodo = false, onClick = null }) => {
   const direccion = (record.medidor_direccion && record.medidor_direccion !== 'Sin dirección' && record.medidor_direccion !== '-')
     ? record.medidor_direccion
     : (medidorInfo?.direccion && medidorInfo.direccion !== 'Sin dirección' && medidorInfo.direccion !== '-')
@@ -60,6 +60,15 @@ export const ReadingTableRow = React.memo(({ record, medidorInfo, onEdit = null,
           </span>
         </div>
       </td>
+
+      {showPeriodo && (
+        <td className="px-4 py-3 align-middle whitespace-nowrap">
+          <span className="inline-flex items-center gap-1.5 rounded-md bg-primary/5 border border-primary/15 px-2.5 py-1 text-xs font-bold text-primary">
+            <span className="material-symbols-outlined text-[14px]" translate="no">calendar_month</span>
+            {formatPeriodo(record.periodo)}
+          </span>
+        </td>
+      )}
 
       {/* 3. Lectura Registrada */}
       <td className="px-4 py-3 align-middle whitespace-nowrap">

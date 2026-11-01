@@ -25,7 +25,7 @@ const Settings = () => {
   const [isEditingAccount, setIsEditingAccount] = useState(false);
   const [isSavingAccount, setIsSavingAccount] = useState(false);
   const [profile, setProfile] = useState({ nombre_razonsocial: '', cargo_representante: '', telefono: '', correo: '' });
-  const [tarifas, setTarifas] = useState({ monto_multa_base: 0, monto_instalacion_base: 0, cuenta_bancaria: '', cuenta_yape: '', titular_cuenta: '' });
+  const [tarifas, setTarifas] = useState({ monto_multa_base: 0, monto_instalacion_base: 0, cuenta_bancaria: '', cuenta_yape: '', titular_cuenta: '', auto_email_ticket_pago: true });
 
   useEffect(() => {
     if (user) {
@@ -52,7 +52,8 @@ const Settings = () => {
         monto_instalacion_base: response.data.monto_instalacion_base || 0,
         cuenta_bancaria: response.data.cuenta_bancaria || '',
         cuenta_yape: response.data.cuenta_yape || '',
-        titular_cuenta: response.data.titular_cuenta || ''
+        titular_cuenta: response.data.titular_cuenta || '',
+        auto_email_ticket_pago: response.data.auto_email_ticket_pago === undefined ? true : Boolean(response.data.auto_email_ticket_pago)
       });
     }).catch(() => {});
   }, [user]);
@@ -107,6 +108,9 @@ const Settings = () => {
       } else if (activeTab === 'tarifas') {
         await api.put('/config', tarifas);
         toast.success('Tarifas globales guardadas exitosamente');
+      } else if (activeTab === 'notificaciones') {
+        await api.put('/config', tarifas);
+        toast.success(tarifas.auto_email_ticket_pago ? 'Envío automático de tickets activado.' : 'Envío automático de tickets desactivado.');
       }
     } catch (error) {
       toast.error(error.response?.data?.error || error.message || 'Ocurrió un error al guardar los cambios');
@@ -135,6 +139,26 @@ const Settings = () => {
                 )}
                 {activeTab === 'tarifas' && <CargosSettingsTab />}
                 {activeTab === 'periodos' && <PeriodosSettingsTab />}
+                {activeTab === 'notificaciones' && (
+                  <section className="max-w-3xl space-y-5">
+                    <div>
+                      <h3 className="text-lg font-bold text-on-surface">Envíos automáticos por correo</h3>
+                      <p className="text-sm text-on-surface-variant mt-1">Controla los comprobantes que se envían al correo registrado del socio.</p>
+                    </div>
+                    <label className="flex items-start gap-3 p-4 rounded-lg border border-outline-variant bg-surface-container-lowest cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(tarifas.auto_email_ticket_pago)}
+                        onChange={(event) => setTarifas((current) => ({ ...current, auto_email_ticket_pago: event.target.checked }))}
+                        className="mt-1 h-4 w-4 accent-primary"
+                      />
+                      <span>
+                        <span className="block text-sm font-bold text-on-surface">Enviar automáticamente el ticket al registrar un pago</span>
+                        <span className="block text-xs text-on-surface-variant mt-1">Al guardar un pago, se enviará al socio un aviso de confirmación con el ticket PDF adjunto. Si no tiene correo registrado o falla el envío, el pago quedará registrado y se mostrará un aviso.</span>
+                      </span>
+                    </label>
+                  </section>
+                )}
                 {activeTab === 'herramientas' && <ImportToolsTab onOpenTenantImport={() => setIsTenantImportOpen(true)} onOpenBillingImport={() => setIsBulkImportOpen(true)} />}
               </div>
             </div>
