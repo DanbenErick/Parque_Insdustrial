@@ -14,6 +14,7 @@ export const EditReadingModal = ({
   editMaxDemandaFueraPunta, setEditMaxDemandaFueraPunta,
   editMaxDemandaPunta, setEditMaxDemandaPunta,
   editJustificacion, setEditJustificacion,
+  editIsCambioMedidor, setEditIsCambioMedidor,
   editLecturaFinalAntiguo, setEditLecturaFinalAntiguo,
   editLecturaInicialNuevo, setEditLecturaInicialNuevo,
   editLecturaFinalAntiguoPunta, setEditLecturaFinalAntiguoPunta,
@@ -45,7 +46,7 @@ export const EditReadingModal = ({
     const errors = [];
     if (!editReadingVal) errors.push(isTR ? "Falta Nueva L. Normal" : "Falta Nueva Lectura");
 
-    const isCambio = editModalData.es_cambio_medidor === 1 || editModalData.es_cambio_medidor === true;
+    const isCambio = editIsCambioMedidor;
 
     if (isCambio) {
       if (!editLecturaFinalAntiguo) errors.push("Falta L. Final Dañado");
@@ -82,6 +83,10 @@ export const EditReadingModal = ({
   };
 
   const validationErrors = getValidationErrors();
+  const consumoNormalAnterior = Math.max(0, parseSafe(editLecturaFinalAntiguo) - parseSafe(editModalData.lectura_anterior));
+  const consumoNormalNuevo = Math.max(0, parseSafe(editReadingVal) - parseSafe(editLecturaInicialNuevo));
+  const consumoPuntaAnterior = Math.max(0, parseSafe(editLecturaFinalAntiguoPunta) - parseSafe(editModalData.lectura_anterior_punta));
+  const consumoPuntaNuevo = Math.max(0, parseSafe(editReadingValPunta) - parseSafe(editLecturaInicialNuevoPunta));
 
   return createPortal(
     <div
@@ -129,6 +134,23 @@ export const EditReadingModal = ({
                 <span className="text-[10px] uppercase tracking-wider font-bold text-on-surface-variant">L. Original</span>
                 <span className="font-data-mono font-bold text-primary bg-white px-2 py-1 rounded border border-primary/20 shadow-sm">{fmtVal(editModalData.lectura_actual)} <span className="text-[10px]">kWh</span></span>
               </div>
+            </div>
+
+            <div className="flex items-center justify-between bg-surface-container-lowest px-3 py-2 rounded-lg border border-outline-variant/50">
+              <span className="text-xs font-bold text-on-surface-variant flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-[16px]" translate="no">swap_horiz</span>
+                ¿Hubo cambio de medidor este mes?
+              </span>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="sr-only peer"
+                  checked={editIsCambioMedidor}
+                  onChange={(event) => setEditIsCambioMedidor(event.target.checked)}
+                  aria-label="Hubo cambio de medidor este mes"
+                />
+                <span className="w-9 h-5 bg-surface-variant rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-primary" />
+              </label>
             </div>
 
             <div className="flex flex-col md:flex-row gap-4">
@@ -202,11 +224,12 @@ export const EditReadingModal = ({
             )}
 
             {/* EDITAR DATOS DE CAMBIO DE MEDIDOR */}
-            {(editModalData.es_cambio_medidor === 1 || editModalData.es_cambio_medidor === true) && (
+            {editIsCambioMedidor && (
               <div className="bg-orange-50/50 p-4 rounded-xl border border-orange-200/50 space-y-4">
                 <h4 className="text-[10px] font-bold text-orange-700 uppercase tracking-wider flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-[14px]" translate="no">swap_horiz</span> Editar Cambio de Medidor
+                  <span className="material-symbols-outlined text-[14px]" translate="no">swap_horiz</span> Datos del cambio de medidor
                 </h4>
+                <p className="text-[10px] text-on-surface-variant">Ingresa la lectura final del medidor retirado y la lectura inicial del medidor nuevo. El consumo se sumará en ambos tramos.</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="text-[9px] font-bold text-error uppercase tracking-wider block mb-1">Final Dañado (Normal)</label>
@@ -241,6 +264,10 @@ export const EditReadingModal = ({
                       </div>
                     </>
                   )}
+                </div>
+                <div className="rounded-lg border border-orange-200 bg-white px-3 py-2 text-xs font-bold text-on-surface-variant">
+                  Consumo normal calculado: {consumoNormalAnterior.toFixed(2)} + {consumoNormalNuevo.toFixed(2)} = {(consumoNormalAnterior + consumoNormalNuevo).toFixed(2)} kWh
+                  {isTR && <div className="mt-1 text-orange-700">Consumo punta calculado: {consumoPuntaAnterior.toFixed(2)} + {consumoPuntaNuevo.toFixed(2)} = {(consumoPuntaAnterior + consumoPuntaNuevo).toFixed(2)} kWh</div>}
                 </div>
               </div>
             )}

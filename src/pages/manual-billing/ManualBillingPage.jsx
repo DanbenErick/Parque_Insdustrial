@@ -66,6 +66,7 @@ const ManualBilling = () => {
     editMaxDemandaFueraPunta, setEditMaxDemandaFueraPunta,
     editMaxDemandaPunta, setEditMaxDemandaPunta,
     editJustificacion, setEditJustificacion,
+    editIsCambioMedidor, setEditIsCambioMedidor,
     editLecturaFinalAntiguo, setEditLecturaFinalAntiguo,
     editLecturaInicialNuevo, setEditLecturaInicialNuevo,
     editLecturaFinalAntiguoPunta, setEditLecturaFinalAntiguoPunta,
@@ -163,6 +164,7 @@ const ManualBilling = () => {
             editMaxDemandaFueraPunta={editMaxDemandaFueraPunta} setEditMaxDemandaFueraPunta={setEditMaxDemandaFueraPunta}
             editMaxDemandaPunta={editMaxDemandaPunta} setEditMaxDemandaPunta={setEditMaxDemandaPunta}
             editJustificacion={editJustificacion} setEditJustificacion={setEditJustificacion}
+            editIsCambioMedidor={editIsCambioMedidor} setEditIsCambioMedidor={setEditIsCambioMedidor}
             editLecturaFinalAntiguo={editLecturaFinalAntiguo} setEditLecturaFinalAntiguo={setEditLecturaFinalAntiguo}
             editLecturaInicialNuevo={editLecturaInicialNuevo} setEditLecturaInicialNuevo={setEditLecturaInicialNuevo}
             editLecturaFinalAntiguoPunta={editLecturaFinalAntiguoPunta} setEditLecturaFinalAntiguoPunta={setEditLecturaFinalAntiguoPunta}

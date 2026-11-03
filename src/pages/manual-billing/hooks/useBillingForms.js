@@ -52,6 +52,7 @@ export const useBillingForms = (dataHook, user) => {
   const [editMaxDemandaPunta, setEditMaxDemandaPunta] = useState('');
   const [editPrecioReactiva, setEditPrecioReactiva] = useState('');
   const [editJustificacion, setEditJustificacion] = useState('Error de digitación');
+  const [editIsCambioMedidor, setEditIsCambioMedidor] = useState(false);
 
   // Edit Cambio de Medidor
   const [editLecturaFinalAntiguo, setEditLecturaFinalAntiguo] = useState('');
@@ -122,6 +123,7 @@ export const useBillingForms = (dataHook, user) => {
 
   const handleEditFromTable = useCallback((record) => {
     setEditModalData(record);
+    setEditIsCambioMedidor(Number(record.es_cambio_medidor) === 1);
     setEditReadingVal(record.lectura_actual);
     setEditReadingValPunta(record.lectura_actual_punta || '');
     setEditFactorPotencia(record.factor_potencia || '');
@@ -131,10 +133,10 @@ export const useBillingForms = (dataHook, user) => {
     setEditJustificacion('Error de digitación');
 
     // Set meter change values if they exist
-    setEditLecturaFinalAntiguo(record.lectura_final_viejo !== null ? record.lectura_final_viejo : '');
-    setEditLecturaInicialNuevo(record.lectura_inicial_nuevo !== null ? record.lectura_inicial_nuevo : '');
-    setEditLecturaFinalAntiguoPunta(record.lectura_final_viejo_punta !== null ? record.lectura_final_viejo_punta : '');
-    setEditLecturaInicialNuevoPunta(record.lectura_inicial_nuevo_punta !== null ? record.lectura_inicial_nuevo_punta : '');
+    setEditLecturaFinalAntiguo(record.lectura_final_viejo ?? '');
+    setEditLecturaInicialNuevo(record.lectura_inicial_nuevo ?? '0');
+    setEditLecturaFinalAntiguoPunta(record.lectura_final_viejo_punta ?? '');
+    setEditLecturaInicialNuevoPunta(record.lectura_inicial_nuevo_punta ?? '0');
 
     setIsModalOpen(false);
   }, []);
@@ -311,8 +313,9 @@ export const useBillingForms = (dataHook, user) => {
 
     setIsSaving(true);
     try {
-      const isCambio = editModalData.es_cambio_medidor === 1 || editModalData.es_cambio_medidor === true;
-      const isTR = editModalData.medidor_tipo === 'Hora Punta' || editModalData.medidor_tipo === 'Tiempo Real';
+      const isCambio = editIsCambioMedidor;
+      const tipoMedidor = editModalData.medidor_tipo || editModalData.tipo || medidores.find((meter) => meter.num_serie === editModalData.num_serie)?.tipo;
+      const isTR = tipoMedidor === 'Hora Punta' || tipoMedidor === 'Tiempo Real';
 
       const calcConsumoNormal = isCambio
         ? Math.max(0, parseSafe(editLecturaFinalAntiguo) - parseSafe(editModalData.lectura_anterior)) + Math.max(0, parseSafe(editReadingVal) - parseSafe(editLecturaInicialNuevo))
@@ -330,16 +333,13 @@ export const useBillingForms = (dataHook, user) => {
         precio_factor_potencia: editPrecioReactiva ? parseSafe(editPrecioReactiva) : 0,
         justificacion: editJustificacion,
         estado: 'Validado',
-        // Preserve meter change
         es_cambio_medidor: isCambio ? 1 : 0,
+        lectura_final_viejo: isCambio ? parseSafe(editLecturaFinalAntiguo) : null,
+        lectura_inicial_nuevo: isCambio ? parseSafe(editLecturaInicialNuevo) : null,
+        lectura_final_viejo_punta: isCambio && isTR ? parseSafe(editLecturaFinalAntiguoPunta) : null,
+        lectura_inicial_nuevo_punta: isCambio && isTR ? parseSafe(editLecturaInicialNuevoPunta) : null,
         ...(isCambio && {
           lectura_anterior: parseSafe(editModalData.lectura_anterior),
-          lectura_final_viejo: parseSafe(editLecturaFinalAntiguo),
-          lectura_inicial_nuevo: parseSafe(editLecturaInicialNuevo),
-          ...(isTR && {
-            lectura_final_viejo_punta: parseSafe(editLecturaFinalAntiguoPunta),
-            lectura_inicial_nuevo_punta: parseSafe(editLecturaInicialNuevoPunta)
-          })
         })
       };
 
@@ -424,6 +424,7 @@ export const useBillingForms = (dataHook, user) => {
     editMaxDemandaPunta, setEditMaxDemandaPunta,
     editPrecioReactiva, setEditPrecioReactiva,
     editJustificacion, setEditJustificacion,
+    editIsCambioMedidor, setEditIsCambioMedidor,
     editLecturaFinalAntiguo, setEditLecturaFinalAntiguo,
     editLecturaInicialNuevo, setEditLecturaInicialNuevo,
     editLecturaFinalAntiguoPunta, setEditLecturaFinalAntiguoPunta,
