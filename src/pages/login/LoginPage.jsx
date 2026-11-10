@@ -36,10 +36,20 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loginError, setLoginError] = useState(null);
+  const [savedUsername, setSavedUsername] = useState(() => {
+    try { return localStorage.getItem('remembered-login-username') || ''; } catch { return ''; }
+  });
+  const [savedName, setSavedName] = useState(() => {
+    try { return localStorage.getItem('remembered-login-name') || ''; } catch { return ''; }
+  });
+  const [usingSavedAccount, setUsingSavedAccount] = useState(() => {
+    try { return Boolean(localStorage.getItem('remembered-login-username')); } catch { return false; }
+  });
+  const [rememberUsername, setRememberUsername] = useState(false);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, setValue, formState: { errors } } = useForm({
     defaultValues: {
-      username: '',
+      username: savedUsername,
       password: ''
     }
   });
@@ -48,7 +58,16 @@ const Login = () => {
     setLoginError(null);
     setIsLoading(true);
     try {
-      await login(data.username.trim(), data.password.trim());
+      const result = await login(data.username.trim(), data.password.trim());
+      try {
+        if (usingSavedAccount || rememberUsername) {
+          localStorage.setItem('remembered-login-username', data.username.trim());
+          localStorage.setItem('remembered-login-name', result.user?.nombre_razonsocial || '');
+        } else {
+          localStorage.removeItem('remembered-login-username');
+          localStorage.removeItem('remembered-login-name');
+        }
+      } catch { /* El acceso sigue funcionando si el almacenamiento no está disponible. */ }
       toast.success('¡Bienvenido!');
       navigate('/dashboard');
     } catch (error) {
@@ -103,7 +122,31 @@ const Login = () => {
 
             {/* Inputs Container */}
             <div className="space-y-3.5">
-              <div className="group">
+              {usingSavedAccount && (
+                <div className="rounded-lg border border-outline-variant bg-surface-container-lowest p-3">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant">Cuenta guardada</p>
+                  <p className="mt-1 break-words text-sm font-bold text-on-surface">{savedName || savedUsername}</p>
+                  <button type="button" className="mt-2 text-xs font-bold text-primary underline" onClick={() => {
+                    setUsingSavedAccount(false);
+                    setValue('username', '');
+                    setValue('password', '');
+                    setLoginError(null);
+                  }}>Ingresar con otra cuenta</button>
+                  <button type="button" className="ml-4 mt-2 text-xs text-on-surface-variant underline" onClick={() => {
+                    try {
+                      localStorage.removeItem('remembered-login-username');
+                      localStorage.removeItem('remembered-login-name');
+                    } catch { /* Sin almacenamiento disponible. */ }
+                    setSavedUsername('');
+                    setSavedName('');
+                    setUsingSavedAccount(false);
+                    setValue('username', '');
+                    setValue('password', '');
+                    setLoginError(null);
+                  }}>Olvidar cuenta</button>
+                </div>
+              )}
+              <div className={`group ${usingSavedAccount ? 'hidden' : ''}`}>
                 <label className="text-[9px] font-bold text-on-surface-variant uppercase tracking-wider mb-1 block ml-1 transition-colors group-focus-within:text-primary" htmlFor="username">
                   Usuario, Correo o DNI/RUC
                 </label>
@@ -125,7 +168,8 @@ const Login = () => {
                       register('username').onBlur(e);
                       setFocusedInput(null);
                     }}
-                    autoFocus
+                    autoFocus={!usingSavedAccount}
+                    autoComplete="username"
                   />
                 </div>
                 {errors.username && <p className="text-error text-[10px] mt-1 ml-1 font-medium">{errors.username.message}</p>}
@@ -148,6 +192,8 @@ const Login = () => {
                     })}
                     className={`w-full h-10 pl-9 pr-10 bg-surface-container-lowest hover:bg-white focus:bg-white border ${errors.password ? 'border-error focus:border-error focus:ring-error' : 'border-outline-variant/80 focus:border-primary focus:ring-primary'} focus:ring-1 rounded-lg outline-none transition-all text-sm font-medium text-on-surface placeholder:text-on-surface-variant/50 shadow-sm tracking-wider`}
                     placeholder="••••••••"
+                    autoComplete="current-password"
+                    autoFocus={usingSavedAccount}
                     onFocus={() => setFocusedInput('password')}
                     onBlur={(e) => {
                       register('password').onBlur(e);
@@ -168,6 +214,13 @@ const Login = () => {
                 {errors.password && <p className="text-error text-[10px] mt-1 ml-1 font-medium">{errors.password.message}</p>}
               </div>
             </div>
+
+            {!usingSavedAccount && (
+              <label className="flex items-center gap-2 text-xs text-on-surface-variant">
+                <input type="checkbox" checked={rememberUsername} onChange={e => setRememberUsername(e.target.checked)} className="accent-primary" />
+                Recordar usuario en este dispositivo
+              </label>
+            )}
 
             {/* Submit Button */}
             <button

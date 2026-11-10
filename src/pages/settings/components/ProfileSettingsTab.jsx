@@ -82,6 +82,7 @@ const ProfileSettingsTab = ({
         <h4 className="text-sm text-on-surface font-bold mb-2">Datos para Recibos y App Móvil</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
           <AccountField label="Cuenta Bancaria Principal (BCP)" name="cuenta_bancaria" placeholder="Ej. BCP: 191-12345678-0-12" value={account.cuenta_bancaria} onChange={onAccountChange} disabled={!isEditingAccount} />
+          <AccountField label="CCI" name="cuenta_cci" placeholder="Código de cuenta interbancario" value={account.cuenta_cci} onChange={onAccountChange} disabled={!isEditingAccount} />
           <AccountField label="Número de Yape / Plin" name="cuenta_yape" placeholder="Ej. 999 888 777" value={account.cuenta_yape} onChange={onAccountChange} disabled={!isEditingAccount} />
           <AccountField label="Nombre del Titular de las Cuentas" name="titular_cuenta" placeholder="Ej. Parque Industrial Jicamarca" value={account.titular_cuenta} onChange={onAccountChange} disabled={!isEditingAccount} wide />
         </div>

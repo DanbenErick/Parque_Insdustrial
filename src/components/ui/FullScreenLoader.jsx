@@ -8,12 +8,12 @@ const FullScreenLoader = ({
 }) => {
   return (
     <div
-      className="absolute inset-0 z-[60] flex min-h-full items-center justify-center overflow-hidden bg-[#252838] p-4 text-white select-none animate-in fade-in duration-200"
+      className="absolute inset-0 z-[60] flex overflow-y-auto bg-[#252838] p-4 text-white select-none animate-in fade-in duration-200"
       role="status"
       aria-live="polite"
       aria-busy="true"
     >
-      <div className="relative flex w-full max-w-[380px] flex-col items-center px-5 py-8 text-center">
+      <div className="relative m-auto flex w-full max-w-[380px] shrink-0 flex-col items-center px-5 py-8 text-center">
         <div className="relative mb-5 flex items-center justify-center">
           <div aria-hidden="true" className="absolute h-24 w-24 rounded-full bg-black/20 blur-xl" />
           <div aria-hidden="true" className="h-24 w-24 rounded-[30px] border border-white/15 bg-black/10 shadow-inner" />

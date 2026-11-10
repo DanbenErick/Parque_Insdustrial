@@ -1,0 +1,1 @@
+var e=e=>{let t=/^(\d{4})-(\d{2})$/.exec(String(e||``));return!t||Number(t[2])<1||Number(t[2])>12?e||`N/A`:`${[`Enero`,`Febrero`,`Marzo`,`Abril`,`Mayo`,`Junio`,`Julio`,`Agosto`,`Septiembre`,`Octubre`,`Noviembre`,`Diciembre`][Number(t[2])-1]} ${t[1]}`};export{e as t};

@@ -1,31 +1,28 @@
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 import api from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
 import CargosSettingsTab from './CargosSettingsTab';
 import PeriodosSettingsTab from './PeriodosSettingsTab';
-import ImportToolsTab from './components/ImportToolsTab';
 import ProfileSettingsTab from './components/ProfileSettingsTab';
 import SettingsNavigation from './components/SettingsNavigation';
 
-const TenantImportModal = lazy(() => import('../tenants/TenantImportModal'));
-const BulkImportModal = lazy(() => import('./BulkImportModal'));
 
 const emptyPasswordForm = { clave_actual: '', clave_nueva: '', clave_confirmar: '' };
 
 const Settings = () => {
   const { user } = useAuth();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const [passwordForm, setPasswordForm] = useState(emptyPasswordForm);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  const [isBulkImportOpen, setIsBulkImportOpen] = useState(false);
-  const [isTenantImportOpen, setIsTenantImportOpen] = useState(false);
   const [isEditingAccount, setIsEditingAccount] = useState(false);
   const [isSavingAccount, setIsSavingAccount] = useState(false);
   const [profile, setProfile] = useState({ nombre_razonsocial: '', cargo_representante: '', telefono: '', correo: '' });
-  const [tarifas, setTarifas] = useState({ monto_multa_base: 0, monto_instalacion_base: 0, cuenta_bancaria: '', cuenta_yape: '', titular_cuenta: '', auto_email_ticket_pago: true });
+  const [tarifas, setTarifas] = useState({ monto_multa_base: 0, monto_instalacion_base: 0, cuenta_bancaria: '', cuenta_cci: '', cuenta_yape: '', titular_cuenta: '', auto_email_ticket_pago: true });
 
   useEffect(() => {
     if (user) {
@@ -51,6 +48,7 @@ const Settings = () => {
         monto_multa_base: response.data.monto_multa_base || 0,
         monto_instalacion_base: response.data.monto_instalacion_base || 0,
         cuenta_bancaria: response.data.cuenta_bancaria || '',
+        cuenta_cci: response.data.cuenta_cci || '',
         cuenta_yape: response.data.cuenta_yape || '',
         titular_cuenta: response.data.titular_cuenta || '',
         auto_email_ticket_pago: response.data.auto_email_ticket_pago === undefined ? true : Boolean(response.data.auto_email_ticket_pago)
@@ -85,6 +83,7 @@ const Settings = () => {
     setIsSavingAccount(true);
     try {
       await api.put('/config', tarifas);
+      await queryClient.invalidateQueries({ queryKey: ['payment-config'] });
       toast.success('Cuenta bancaria actualizada correctamente');
       setIsEditingAccount(false);
     } catch (error) {
@@ -104,6 +103,7 @@ const Settings = () => {
         if (!user?.id) throw new Error('No se pudo identificar al usuario actual.');
         await api.put(`/usuarios/${user.id}`, profile);
         await api.put('/config', { ...tarifas });
+        await queryClient.invalidateQueries({ queryKey: ['payment-config'] });
         toast.success('Perfil y configuración actualizados correctamente');
       } else if (activeTab === 'tarifas') {
         await api.put('/config', tarifas);
@@ -125,7 +125,7 @@ const Settings = () => {
         <div className="flex-grow overflow-y-auto p-4 md:p-6 custom-scrollbar">
           <div className="max-w-6xl mx-auto space-y-4">
             <div className="flex justify-between items-center mb-4">
-              <div><h2 className="text-2xl text-primary font-bold leading-tight">Configuración del Sistema</h2><p className="text-sm text-on-surface-variant">Gestiona tu perfil, facturación, tarifas y herramientas.</p></div>
+              <div><h2 className="text-2xl text-primary font-bold leading-tight">Configuración del Sistema</h2><p className="text-sm text-on-surface-variant">Gestiona tu perfil, facturación, tarifas y notificaciones.</p></div>
               <button type="button" onClick={handleSave} disabled={isSaving} className={`px-4 py-1.5 h-8 text-xs bg-primary text-on-primary font-bold rounded-md shadow-sm transition-all flex items-center gap-1.5 ${isSaving ? 'opacity-70 cursor-not-allowed' : 'hover:opacity-90 active:scale-95'}`}>
                 {isSaving && <span className="material-symbols-outlined animate-spin text-[16px]" translate="no">sync</span>}
                 {isSaving ? 'Guardando...' : 'Guardar Cambios'}
@@ -159,22 +159,11 @@ const Settings = () => {
                     </label>
                   </section>
                 )}
-                {activeTab === 'herramientas' && <ImportToolsTab onOpenTenantImport={() => setIsTenantImportOpen(true)} onOpenBillingImport={() => setIsBulkImportOpen(true)} />}
               </div>
             </div>
           </div>
         </div>
       </main>
-      {isBulkImportOpen && (
-        <Suspense fallback={null}>
-          <BulkImportModal isOpen onClose={() => setIsBulkImportOpen(false)} onImportSuccess={() => toast.success('Datos importados. Revisa las secciones de Lecturas, Facturación y Pagos.')} />
-        </Suspense>
-      )}
-      {isTenantImportOpen && (
-        <Suspense fallback={null}>
-          <TenantImportModal onClose={() => setIsTenantImportOpen(false)} onImportSuccess={() => {}} />
-        </Suspense>
-      )}
     </>
   );
 };

@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import FullScreenLoader from './FullScreenLoader';
 
 /**
@@ -20,13 +21,16 @@ const LoadingCurtain = ({
 }) => {
   if (!isOpen) return null;
 
-  return (
-    <FullScreenLoader
-      title={title}
-      subtitle={subtitle}
-      badgeText={badgeText}
-      logoSrc={logoSrc}
-    />
+  return createPortal(
+    <div className="fixed inset-x-0 top-12 bottom-[calc(4rem+env(safe-area-inset-bottom))] z-[60] md:inset-y-0 md:left-[260px]">
+      <FullScreenLoader
+        title={title}
+        subtitle={subtitle}
+        badgeText={badgeText}
+        logoSrc={logoSrc}
+      />
+    </div>,
+    document.body,
   );
 };
 

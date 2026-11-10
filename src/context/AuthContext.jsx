@@ -134,8 +134,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = useCallback(() => {
+    try {
+      const remembered = localStorage.getItem('remembered-login-username');
+      if (remembered && user?.nombre_razonsocial && [user.username, user.correo, user.documento_identidad].some(value => value && String(value).toLowerCase() === remembered.toLowerCase())) {
+        localStorage.setItem('remembered-login-name', user.nombre_razonsocial);
+      }
+    } catch { /* El cierre de sesión no depende del almacenamiento de la cuenta. */ }
     clearSession();
-  }, [clearSession]);
+  }, [clearSession, user]);
 
   const updateUser = useCallback((raw) => {
     setUser((previous) => {

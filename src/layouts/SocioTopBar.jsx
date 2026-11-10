@@ -37,7 +37,7 @@ const SocioTopBar = () => {
   };
 
   return (
-    <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md hidden md:flex justify-between items-center w-full px-6 h-16 border-b border-outline-variant/30 print:hidden shadow-sm">
+    <header className="sticky top-0 z-40 bg-emerald-50 hidden md:flex justify-between items-center w-full px-6 h-16 border-b border-emerald-200 print:hidden motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-2 motion-safe:duration-500">
       <div className="flex items-center gap-3">
         <h2 className="font-bold text-lg text-emerald-900 tracking-tight">
           {getPageTitle()}
@@ -48,7 +48,8 @@ const SocioTopBar = () => {
 
         <button
           onClick={toggleFullscreen}
-          className="relative p-2 hover:bg-surface-container rounded-full transition-colors text-on-surface-variant hover:text-emerald-600"
+          className="relative p-2 hover:bg-emerald-100 rounded-full transition-colors text-emerald-800 motion-safe:hover:scale-110 motion-safe:transition-transform motion-safe:duration-200"
+          aria-label={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
           title={isFullscreen ? 'Salir de pantalla completa' : 'Pantalla completa'}
         >
           <span className="material-symbols-outlined text-[20px]" translate="no">

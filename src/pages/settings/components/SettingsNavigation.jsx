@@ -22,15 +22,6 @@ const SettingsNavigation = ({ activeTab, onSelect }) => (
       <SettingsButton key={tab.id} {...tab} activeTab={activeTab} onSelect={onSelect} />
     ))}
 
-    <div className="my-2 border-t border-outline-variant/30" />
-    <p className="text-[9px] font-bold text-on-surface-variant/50 uppercase tracking-widest px-3 mb-1">Herramientas</p>
-    <SettingsButton
-      activeTab={activeTab}
-      id="herramientas"
-      icon="build"
-      label="Importar Datos"
-      onSelect={onSelect}
-    />
   </nav>
 );
 

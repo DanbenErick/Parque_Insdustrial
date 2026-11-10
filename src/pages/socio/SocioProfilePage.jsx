@@ -7,7 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 const editableValues = (p) => ({ username: p?.username || '', documento_identidad: p?.documento_identidad || '', telefono: p?.telefono || '', correo: p?.correo || '' });
 
 const Detail = ({ label, value }) => (
-  <div className="min-w-0 rounded-xl border border-outline-variant/60 bg-surface-container-lowest p-4">
+  <div className="min-w-0 rounded-lg border border-emerald-100 bg-white p-3">
     <dt className="text-[11px] font-bold uppercase tracking-wide text-on-surface-variant">{label}</dt>
     <dd className="mt-1 break-words text-sm font-semibold text-on-surface">{value || 'No registrado'}</dd>
   </div>
@@ -72,12 +72,12 @@ const SocioProfilePage = () => {
   const errorText = (error) => error && <span className="mt-1 block text-xs text-error">{error.message}</span>;
 
   return (
-    <main className="mx-auto w-full max-w-[1040px] space-y-6 p-4 md:p-6 lg:p-8">
-      <header><h1 className="text-2xl font-bold text-on-surface">Mi ficha de socio</h1><p className="mt-1 text-sm text-on-surface-variant">Consulta tu información y actualiza tus datos de acceso y contacto.</p></header>
+    <main className="mx-auto w-full max-w-[1040px] space-y-4 p-4 md:p-6 lg:p-8 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-top-4 motion-safe:duration-500">
+      <header className="rounded-xl border border-emerald-200 bg-white px-4 py-4 sm:px-6"><div className="border-l-4 border-emerald-600 pl-4"><p className="text-[10px] font-bold uppercase tracking-widest text-emerald-700">Tu cuenta</p><h1 className="mt-1 text-xl font-bold text-slate-900">Mi ficha de socio</h1><p className="mt-1 text-xs text-slate-600 sm:text-sm">Consulta tu información y actualiza tus datos de acceso y contacto.</p></div></header>
 
-      <section className="overflow-hidden rounded-2xl border border-outline-variant bg-surface shadow-sm">
-        <div className="flex items-center gap-4 border-b border-outline-variant/60 bg-primary/5 p-5 md:p-6">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-primary text-2xl font-bold text-on-primary">{profile?.nombre_razonsocial?.charAt(0) || 'S'}</div>
+      <section className="overflow-hidden rounded-xl border border-emerald-200 bg-white motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-700">
+        <div className="flex items-center gap-4 border-b border-emerald-200 bg-emerald-50 p-5 md:p-6">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-emerald-700 text-2xl font-bold text-white">{profile?.nombre_razonsocial?.charAt(0) || 'S'}</div>
           <div className="min-w-0"><h2 className="break-words text-lg font-bold text-on-surface">{profile?.nombre_razonsocial || 'Socio'}</h2><p className="text-xs font-semibold text-primary">{profile?.es_activo ? 'Cuenta activa' : 'Cuenta inactiva'}</p></div>
         </div>
         <div className="p-5 md:p-6"><h3 className="mb-4 font-bold text-on-surface">Información registrada</h3>
@@ -92,10 +92,10 @@ const SocioProfilePage = () => {
         </div>
       </section>
 
-      <section className="rounded-2xl border border-outline-variant bg-surface p-5 shadow-sm md:p-6">
+      <section className="rounded-xl border border-emerald-200 bg-white p-4 sm:p-5 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-700">
         <h3 className="text-lg font-bold text-on-surface">Medidores registrados</h3>
         {meters.length ? <div className="mt-4 grid gap-3 sm:grid-cols-2">{meters.map((meter) => (
-          <dl key={meter.id} className="grid gap-3 rounded-xl border border-outline-variant/60 bg-surface-container-lowest p-4 sm:grid-cols-2">
+          <dl key={meter.id} className="grid gap-3 rounded-lg border border-emerald-200 bg-white p-4 sm:grid-cols-2 motion-safe:transition-transform motion-safe:duration-300 motion-safe:hover:-translate-y-1">
             <div><dt className="text-[11px] font-bold uppercase text-on-surface-variant">Número de serie</dt><dd className="mt-1 text-sm font-semibold text-on-surface">{meter.num_serie}</dd></div>
             <div><dt className="text-[11px] font-bold uppercase text-on-surface-variant">Tipo</dt><dd className="mt-1 text-sm font-semibold text-on-surface">{meter.tipo || 'No registrado'}</dd></div>
             <div className="sm:col-span-2"><dt className="text-[11px] font-bold uppercase text-on-surface-variant">Dirección del suministro</dt><dd className="mt-1 text-sm font-semibold text-on-surface">{meter.direccion || 'No registrada'}</dd></div>
@@ -104,7 +104,7 @@ const SocioProfilePage = () => {
         ))}</div> : <p className="mt-3 text-sm text-on-surface-variant">No hay medidores registrados a tu nombre.</p>}
       </section>
 
-      <section className="rounded-2xl border border-outline-variant bg-surface p-5 shadow-sm md:p-6">
+      <section className="rounded-xl border border-emerald-200 bg-white p-4 sm:p-5 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-1000">
         <h3 className="text-lg font-bold text-on-surface">Datos editables</h3>
         <p className="mt-1 text-sm text-on-surface-variant">Puedes cambiar tu usuario, DNI o RUC, teléfono y correo electrónico.</p>
         <form onSubmit={handleSubmit(saveProfile)} className="mt-5 grid gap-4 sm:grid-cols-2">
@@ -116,7 +116,7 @@ const SocioProfilePage = () => {
         </form>
       </section>
 
-      <section className="rounded-2xl border border-outline-variant bg-surface p-5 shadow-sm md:p-6">
+      <section className="rounded-xl border border-emerald-200 bg-white p-4 sm:p-5 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-1000">
         <h3 className="text-lg font-bold text-on-surface">Seguridad de la cuenta</h3>
         <form onSubmit={passwordForm.handleSubmit(changePassword)} className="mt-5 grid max-w-xl gap-4">
           <label className={labelClass}>Contraseña actual<input className={fieldClass} type="password" autoComplete="current-password" {...passwordForm.register('clave_actual', { required: 'La contraseña actual es obligatoria.' })} />{errorText(passwordForm.formState.errors.clave_actual)}</label>
