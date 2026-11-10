@@ -1,4 +1,5 @@
 import  { memo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 /**
  * DeudasModal — Modal for selecting debt report scope (monthly vs historic).
@@ -7,27 +8,36 @@ import  { memo, useEffect } from 'react';
 const DeudasModal = memo(({ isOpen, filterMes, onExport, onClose }) => {
   useEffect(() => {
     if (!isOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     const handler = (e) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handler);
+    };
   }, [isOpen, onClose]);
 
-  return (
+  return createPortal(
     <>
       {isOpen && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
         >
           <div
-            className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="deudas-modal-title"
+            className="bg-white rounded-xl shadow-xl w-full max-w-md max-h-[calc(100dvh-2rem)] overflow-y-auto overscroll-contain"
           >
             <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-              <h3 className="font-bold text-slate-800 flex items-center gap-2">
+              <h3 id="deudas-modal-title" className="font-bold text-slate-800 flex items-center gap-2">
                 <span className="material-symbols-outlined text-[#ea580c]" translate="no">request_quote</span>
                 Generar Reporte de Deudas
               </h3>
               <button
                 onClick={onClose}
+                aria-label="Cerrar modal"
                 className="text-slate-400 hover:text-slate-600 transition-colors"
               >
                 <span className="material-symbols-outlined" translate="no">close</span>
@@ -74,7 +84,8 @@ const DeudasModal = memo(({ isOpen, filterMes, onExport, onClose }) => {
           </div>
         </div>
       )}
-    </>
+    </>,
+    document.body
   );
 });
 
