@@ -4,12 +4,11 @@ const PwaInstallPrompt = () => {
   const [showPrompt, setShowPrompt] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [isIOS, setIsIOS] = useState(false);
+  const [mobileDismissed, setMobileDismissed] = useState(() => {
+    try { return localStorage.getItem('pwa_prompt_dismissed') === 'true'; } catch { return false; }
+  });
 
   useEffect(() => {
-    // Detectar si el usuario ya ocultó el prompt anteriormente
-    const hasDismissed = localStorage.getItem('pwa_prompt_dismissed');
-    if (hasDismissed) return;
-
     // Detectar iOS
     const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     // Detectar si ya está en modo standalone (instalado)
@@ -34,20 +33,29 @@ const PwaInstallPrompt = () => {
     }
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    const handleInstalled = () => {
+      setShowPrompt(false);
+      setDeferredPrompt(null);
+      window.deferredPWAEvent = null;
+    };
+    window.addEventListener('appinstalled', handleInstalled);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleInstalled);
     };
   }, []);
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
+      try {
+        await deferredPrompt.prompt();
+        await deferredPrompt.userChoice;
+      } finally {
         setShowPrompt(false);
+        setDeferredPrompt(null);
+        window.deferredPWAEvent = null;
       }
-      setDeferredPrompt(null);
     } else if (isIOS) {
       // Para iOS solo podemos mostrar un tooltip/aviso, ya que no hay API directa
       alert('Para instalar en iOS: Pulsa el ícono de "Compartir" en la barra inferior y selecciona "Agregar a Inicio".');
@@ -56,13 +64,19 @@ const PwaInstallPrompt = () => {
 
   const handleDismiss = () => {
     setShowPrompt(false);
-    localStorage.setItem('pwa_prompt_dismissed', 'true');
+    setMobileDismissed(true);
+    try { localStorage.setItem('pwa_prompt_dismissed', 'true'); } catch { /* La instalación sigue disponible. */ }
   };
 
   if (!showPrompt) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 md:hidden z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+    <>
+    {deferredPrompt && <button type="button" onClick={handleInstallClick} className="hidden md:inline-flex fixed bottom-5 right-5 z-50 items-center gap-2 rounded-lg border border-emerald-800 bg-emerald-700 px-4 py-3 text-sm font-bold text-white hover:bg-emerald-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-700">
+      <span className="material-symbols-outlined text-[20px]" translate="no" aria-hidden="true">install_desktop</span>
+      Instalar aplicación
+    </button>}
+    {!mobileDismissed && <div className="fixed bottom-4 left-4 right-4 md:hidden z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
       <div className="bg-emerald-900 text-white rounded-2xl p-4 shadow-2xl flex items-center gap-4 border border-emerald-700/50">
         <div className="w-12 h-12 bg-white rounded-xl shrink-0 flex items-center justify-center overflow-hidden">
           <img src="/logo-192.png" alt="App Logo" className="w-full h-full object-contain" />
@@ -90,7 +104,8 @@ const PwaInstallPrompt = () => {
           </button>
         </div>
       </div>
-    </div>
+    </div>}
+    </>
   );
 };
 
