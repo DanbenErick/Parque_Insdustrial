@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import { PaymentKpiCard, PaymentTableRow } from './PaymentPresentation';
 import { ExcelIcon } from '../../../components/ui/ExcelIcon';
 import PaymentMobileCard from './PaymentMobileCard';
@@ -15,16 +16,48 @@ export const PaymentsDashboard = ({ filterMes, onFilterChange, year, months, for
   </>;
 };
 
-export const PaymentHistoryTable = ({ payments, loading, searchTerm, onSearchChange, showAnulados, onToggleAnulados, onExportExcel, onExportPDF, onExportTickets, fallbackMap, onSelect, onOpenMenu, openMenuPaymentId, getTipoInfo, formatCurrency }) => (
+export const PaymentHistoryTable = ({ payments, loading, searchTerm, onSearchChange, showAnulados, onToggleAnulados, onExportExcel, onExportPDF, onExportTickets, fallbackMap, onSelect, onOpenMenu, openMenuPaymentId, getTipoInfo, formatCurrency }) => {
+  const [exportsOpen, setExportsOpen] = useState(false);
+  const exportsRef = useRef(null);
+
+  useEffect(() => {
+    if (!exportsOpen) return undefined;
+    const handlePointerDown = (event) => {
+      if (!exportsRef.current?.contains(event.target)) setExportsOpen(false);
+    };
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setExportsOpen(false);
+    };
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [exportsOpen]);
+
+  const runExport = (callback) => {
+    setExportsOpen(false);
+    callback();
+  };
+
+  return (
   <div className="bg-surface-container-lowest border border-outline-variant rounded-lg overflow-hidden shadow-sm">
     <div className="px-4 py-3 border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-surface-container-low">
       <h4 className="text-base font-bold text-on-surface">Historial de Pagos</h4>
       <div className="grid grid-cols-2 md:flex md:flex-wrap items-center gap-2 w-full md:w-auto">
         <div className="relative col-span-2 md:col-auto"><span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">search</span><input type="search" placeholder="Buscar por socio o recibo..." value={searchTerm} onChange={(event) => onSearchChange(event.target.value)} className="pl-8 pr-3 py-1.5 h-8 border border-outline-variant rounded-md text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-full md:w-48 bg-white transition-all" /></div>
         <button type="button" onClick={onToggleAnulados} className={`flex items-center justify-center gap-1.5 px-2.5 py-1.5 h-8 font-bold text-xs rounded-md transition-colors border ${showAnulados ? 'bg-amber-500/15 text-amber-800 border-amber-500/30' : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container'}`}><span className="material-symbols-outlined text-[16px]" translate="no">{showAnulados ? 'visibility_off' : 'visibility'}</span>{showAnulados ? 'Ocultar Anulados' : 'Ver Anulados'}</button>
-        <button type="button" onClick={onExportExcel} className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 h-8 font-bold text-xs rounded-md border border-[#107C41]/20 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 transition-colors"><ExcelIcon className="w-4 h-4" />Excel</button>
-        <button type="button" onClick={onExportPDF} className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 h-8 font-bold text-xs rounded-md border border-outline-variant bg-error/10 text-error hover:bg-error/20 transition-colors"><span className="material-symbols-outlined text-[16px]" translate="no">picture_as_pdf</span>Reporte PDF</button>
-        <button type="button" onClick={onExportTickets} className="flex items-center justify-center gap-1.5 px-2.5 py-1.5 h-8 font-bold text-xs rounded-md border border-outline-variant bg-primary/10 text-primary hover:bg-primary/20 transition-colors"><span className="material-symbols-outlined text-[16px]" translate="no">print</span>Tickets A5</button>
+        <div className="relative" ref={exportsRef}>
+          <button type="button" aria-haspopup="menu" aria-expanded={exportsOpen} onClick={() => setExportsOpen((open) => !open)} className={`flex items-center gap-1.5 px-3 py-1.5 h-8 font-bold text-xs rounded-md transition-colors border ${exportsOpen ? 'bg-primary/10 text-primary border-primary/30' : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container'}`}>
+            <span className="material-symbols-outlined text-[16px]" translate="no">more_vert</span>Acciones<span className="material-symbols-outlined text-[16px]" translate="no">expand_more</span>
+          </button>
+          {exportsOpen && <div role="menu" aria-label="Acciones de pagos" className="absolute right-0 top-full z-30 mt-1 min-w-48 rounded-lg border border-outline-variant bg-white p-1 shadow-lg">
+            <button type="button" role="menuitem" onClick={() => runExport(onExportExcel)} className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-xs font-semibold text-[#107C41] transition-colors hover:bg-[#107C41]/10"><ExcelIcon className="h-4 w-4" /> Excel</button>
+            <button type="button" role="menuitem" onClick={() => runExport(onExportPDF)} className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-xs font-semibold text-error transition-colors hover:bg-error/10"><span className="material-symbols-outlined text-[16px]" translate="no">picture_as_pdf</span> Reporte PDF</button>
+            <button type="button" role="menuitem" onClick={() => runExport(onExportTickets)} className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-xs font-semibold text-primary transition-colors hover:bg-primary/10"><span className="material-symbols-outlined text-[16px]" translate="no">print</span> Tickets A5</button>
+          </div>}
+        </div>
       </div>
     </div>
     <div className="md:hidden divide-y divide-outline-variant/60 bg-surface">
@@ -41,4 +74,5 @@ export const PaymentHistoryTable = ({ payments, loading, searchTerm, onSearchCha
       </table>
     </div>
   </div>
-);
+  );
+};

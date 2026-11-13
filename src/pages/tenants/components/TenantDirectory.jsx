@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from 'react';
 import TenantTableRow from '../TenantTableRow';
 import { ExcelIcon } from '../../../components/ui/ExcelIcon';
 import TenantMobileCard from './TenantMobileCard';
@@ -9,6 +10,30 @@ const TenantDirectory = ({
   isFetching, totalRecords
 }) => {
   const hasFilters = filterEstado !== 'Todos' || filterRubro !== 'Todos';
+  const [exportsOpen, setExportsOpen] = useState(false);
+  const exportsRef = useRef(null);
+
+  useEffect(() => {
+    if (!exportsOpen) return undefined;
+    const handlePointerDown = (event) => {
+      if (!exportsRef.current?.contains(event.target)) setExportsOpen(false);
+    };
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setExportsOpen(false);
+    };
+    document.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [exportsOpen]);
+
+  const runExport = (callback) => {
+    setExportsOpen(false);
+    callback();
+  };
+
   return (
     <section className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-md" aria-busy={isFetching}>
       <div className="px-4 py-3 border-b border-outline-variant flex flex-col md:flex-row justify-between items-start md:items-center gap-3 bg-surface-container-low">
@@ -20,8 +45,15 @@ const TenantDirectory = ({
             {searchQuery && <button type="button" onClick={() => onSearchChange('')} className="absolute right-2 top-1/2 -translate-y-1/2 text-on-surface-variant hover:text-on-surface transition-colors" title="Limpiar búsqueda"><span className="material-symbols-outlined text-[14px]" translate="no">close</span></button>}
           </div>
           <button type="button" onClick={onToggleFilters} className={`flex items-center gap-1.5 px-3 py-1.5 h-8 font-bold text-xs rounded-md transition-colors border ${showFilters ? 'bg-primary/10 text-primary border-primary/20' : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container'}`}><span className="material-symbols-outlined text-[16px]" translate="no">filter_list</span>Filtros {hasFilters && <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse ml-0.5" />}</button>
-          <button type="button" onClick={onExportExcel} className="flex items-center justify-center gap-1.5 px-3 py-1.5 h-8 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/20 font-bold text-xs rounded-md transition-colors border border-[#107C41]/20"><ExcelIcon className="w-4 h-4" />Excel</button>
-          <button type="button" onClick={onExportPDF} disabled={isGeneratingPdf} className="flex items-center justify-center gap-1.5 px-3 py-1.5 h-8 bg-error/10 text-error hover:bg-error/20 font-bold text-xs rounded-md transition-colors border border-error/20 disabled:opacity-50"><span translate="no" className={`material-symbols-outlined text-[16px] ${isGeneratingPdf ? 'animate-spin' : ''}`}>{isGeneratingPdf ? 'sync' : 'picture_as_pdf'}</span>PDF</button>
+          <div className="relative" ref={exportsRef}>
+            <button type="button" aria-haspopup="menu" aria-expanded={exportsOpen} onClick={() => setExportsOpen((open) => !open)} className={`flex items-center gap-1.5 px-3 py-1.5 h-8 font-bold text-xs rounded-md transition-colors border ${exportsOpen ? 'bg-primary/10 text-primary border-primary/30' : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container'}`}>
+              <span className="material-symbols-outlined text-[16px]" translate="no">more_vert</span>Acciones<span className="material-symbols-outlined text-[16px]" translate="no">expand_more</span>
+            </button>
+            {exportsOpen && <div role="menu" aria-label="Acciones de socios" className="absolute right-0 top-full z-30 mt-1 min-w-48 rounded-lg border border-outline-variant bg-white p-1 shadow-lg">
+              <button type="button" role="menuitem" onClick={() => runExport(onExportExcel)} className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-xs font-semibold text-[#107C41] transition-colors hover:bg-[#107C41]/10"><ExcelIcon className="h-4 w-4" /> Reporte de Excel</button>
+              <button type="button" role="menuitem" onClick={() => runExport(onExportPDF)} disabled={isGeneratingPdf} className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-xs font-semibold text-error transition-colors hover:bg-error/10 disabled:opacity-50"><span translate="no" className={`material-symbols-outlined text-[16px] ${isGeneratingPdf ? 'animate-spin' : ''}`}>{isGeneratingPdf ? 'sync' : 'picture_as_pdf'}</span>{isGeneratingPdf ? 'Generando PDF...' : 'PDF'}</button>
+            </div>}
+          </div>
         </div>
       </div>
 

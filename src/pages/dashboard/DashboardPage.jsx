@@ -15,7 +15,6 @@ import api from '../../api/axiosConfig';
 import { useYear } from '../../context/YearContext';
 import {
   DashboardKPIs,
-  QuickAccessBar,
   buildConsumoChartData,
   buildRecaudacionChartData,
   CONSUMO_CHART_OPTIONS,
@@ -157,8 +156,6 @@ const Dashboard = () => {
           </button>
         </div>
       </div>
-
-      <QuickAccessBar />
 
       <section className="space-y-3" aria-label="Resumen de operación">
         <div>

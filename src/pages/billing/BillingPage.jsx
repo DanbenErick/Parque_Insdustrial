@@ -30,6 +30,7 @@ import { useRefacturar } from './hooks/useRefacturar';
 import { useAnular } from './hooks/useAnular';
 import { useExports } from './hooks/useExports';
 import LoadingCurtain from '../../components/ui/LoadingCurtain';
+import FullScreenLoader from '../../components/ui/FullScreenLoader';
 import { BillingHeader } from './components/BillingWorkspace';
 import BillingTableControls from './components/BillingTableControls';
 import { useFloatingActionMenu } from '../../hooks/useFloatingActionMenu';
@@ -47,6 +48,7 @@ const Billing = () => {
   const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
   const [isDownloadingMonthlyZip, setIsDownloadingMonthlyZip] = useState(false);
   const [isEmailingMonthlyReceipts, setIsEmailingMonthlyReceipts] = useState(false);
+  const [fullScreenLoadingMessage, setFullScreenLoadingMessage] = useState(null);
   const [periodoToGenerate, setPeriodoToGenerate] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
   const [showDeudasModal, setShowDeudasModal] = useState(false);
@@ -277,10 +279,24 @@ const Billing = () => {
   const handleExportExcelDeudas = useCallback(
     async (tipo) => {
       setShowDeudasModal(false);
-      await exports.handleExportExcelDeudas(tipo);
+      setFullScreenLoadingMessage('Se está generando el documento...');
+      try {
+        await exports.handleExportExcelDeudas(tipo);
+      } finally {
+        setFullScreenLoadingMessage(null);
+      }
     },
     [exports],
   );
+
+  const handlePrintReceipts = useCallback(async () => {
+    setFullScreenLoadingMessage('Preparando los recibos para imprimir...');
+    try {
+      await exports.handleExportAllPdfV2();
+    } finally {
+      setFullScreenLoadingMessage(null);
+    }
+  }, [exports]);
 
   const handleOpenMenu = useCallback((recibo, e) => {
     openActionMenu(e, { recibo }, recibo.id);
@@ -301,6 +317,16 @@ const Billing = () => {
 
   return (
     <>
+      {fullScreenLoadingMessage && createPortal(
+        <div className="fixed inset-0 z-[200]">
+          <FullScreenLoader
+            title={fullScreenLoadingMessage}
+            subtitle="Espere por favor."
+          />
+        </div>,
+        document.body,
+      )}
+
       <LoadingCurtain
         isOpen={isLoading}
         title="Preparando la facturación"
@@ -351,7 +377,7 @@ const Billing = () => {
             onExportExcel={exports.handleExportExcel}
             onOpenDebts={() => setShowDeudasModal(true)}
             onExportPDF={handleExportPDF}
-            onPrintReceipts={exports.handleExportAllPdfV2}
+            onPrintReceipts={handlePrintReceipts}
           />
 
           {/* Mobile receipt cards */}

@@ -1,5 +1,6 @@
 import  { memo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
+import { formatPeriod } from './billingUtils';
 
 /**
  * DeudasModal — Modal for selecting debt report scope (monthly vs historic).
@@ -59,7 +60,7 @@ const DeudasModal = memo(({ isOpen, filterMes, onExport, onClose }) => {
                       Deudas del Periodo Actual
                     </div>
                     <div className="text-xs text-slate-500 mt-1">
-                      {filterMes === 'Todos' || filterMes === 'TodosHistorico' ? 'Actualmente viendo todos los periodos' : `Periodo: ${filterMes}`}
+                      {filterMes === 'Todos' || filterMes === 'TodosHistorico' ? 'Actualmente viendo todos los periodos' : `Periodo: ${formatPeriod(filterMes)}`}
                     </div>
                   </div>
                   <span className="material-symbols-outlined text-slate-300 group-hover:text-[#ea580c]" translate="no">chevron_right</span>
