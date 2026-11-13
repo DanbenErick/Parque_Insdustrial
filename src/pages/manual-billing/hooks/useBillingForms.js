@@ -201,13 +201,13 @@ export const useBillingForms = (dataHook, user) => {
         })
       };
 
-      await api.post('/lecturas', payload);
+      const response = await api.post('/lecturas', payload);
 
       const consumo_calculado = parseSafe(currentReading) - parseSafe(selectedMember.ultima_lectura);
       const consumo_calculado_punta = currentReadingPunta ? parseSafe(currentReadingPunta) - parseSafe(selectedMember.ultima_lectura_punta || 0) : 0;
 
       const newLectura = {
-        id: Date.now(),
+        id: response.data.id,
         propietario: selectedMember.propietario,
         num_serie: selectedMember.num_serie,
         tipo: selectedMember.tipo,
