@@ -1,6 +1,7 @@
 export const MIME_TYPES = {
   PDF: 'application/pdf',
   EXCEL: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  ZIP: 'application/zip',
 };
 
 export const createBlobUrl = (data, mimeType) => {

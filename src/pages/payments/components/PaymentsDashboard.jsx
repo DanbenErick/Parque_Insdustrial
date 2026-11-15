@@ -16,7 +16,7 @@ export const PaymentsDashboard = ({ filterMes, onFilterChange, year, months, for
   </>;
 };
 
-export const PaymentHistoryTable = ({ payments, loading, searchTerm, onSearchChange, showAnulados, onToggleAnulados, onExportExcel, onExportPDF, onExportTickets, fallbackMap, onSelect, onOpenMenu, openMenuPaymentId, getTipoInfo, formatCurrency }) => {
+export const PaymentHistoryTable = ({ payments, loading, searchTerm, onSearchChange, showAnulados, onToggleAnulados, onExportExcel, onOpenDetailedExcel, onExportPDF, onExportTickets, fallbackMap, onSelect, onOpenMenu, openMenuPaymentId, getTipoInfo, formatCurrency }) => {
   const [exportsOpen, setExportsOpen] = useState(false);
   const exportsRef = useRef(null);
 
@@ -48,6 +48,7 @@ export const PaymentHistoryTable = ({ payments, loading, searchTerm, onSearchCha
       <div className="grid grid-cols-2 md:flex md:flex-wrap items-center gap-2 w-full md:w-auto">
         <div className="relative col-span-2 md:col-auto"><span className="material-symbols-outlined absolute left-2.5 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" translate="no">search</span><input type="search" placeholder="Buscar por socio o recibo..." value={searchTerm} onChange={(event) => onSearchChange(event.target.value)} className="pl-8 pr-3 py-1.5 h-8 border border-outline-variant rounded-md text-xs focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary w-full md:w-48 bg-white transition-all" /></div>
         <button type="button" onClick={onToggleAnulados} className={`flex items-center justify-center gap-1.5 px-2.5 py-1.5 h-8 font-bold text-xs rounded-md transition-colors border ${showAnulados ? 'bg-amber-500/15 text-amber-800 border-amber-500/30' : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container'}`}><span className="material-symbols-outlined text-[16px]" translate="no">{showAnulados ? 'visibility_off' : 'visibility'}</span>{showAnulados ? 'Ocultar Anulados' : 'Ver Anulados'}</button>
+        <button type="button" onClick={onOpenDetailedExcel} className="flex items-center justify-center gap-1.5 px-3 py-1.5 h-8 font-bold text-xs rounded-md transition-colors border border-[#107C41]/30 bg-[#107C41]/10 text-[#107C41] hover:bg-[#107C41]/15"><ExcelIcon className="h-4 w-4" /> Excel detallado</button>
         <div className="relative" ref={exportsRef}>
           <button type="button" aria-haspopup="menu" aria-expanded={exportsOpen} onClick={() => setExportsOpen((open) => !open)} className={`flex items-center gap-1.5 px-3 py-1.5 h-8 font-bold text-xs rounded-md transition-colors border ${exportsOpen ? 'bg-primary/10 text-primary border-primary/30' : 'bg-white text-on-surface-variant border-outline-variant hover:bg-surface-container'}`}>
             <span className="material-symbols-outlined text-[16px]" translate="no">more_vert</span>Acciones<span className="material-symbols-outlined text-[16px]" translate="no">expand_more</span>

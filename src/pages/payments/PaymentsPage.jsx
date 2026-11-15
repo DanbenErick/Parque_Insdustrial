@@ -14,6 +14,7 @@ import { createBlobUrl, downloadBlob, MIME_TYPES, openBlobInNewTab } from '../..
 import { usePaymentsData } from './hooks/usePaymentsData';
 import PaymentActionMenu from './components/PaymentActionMenu';
 import PaymentDetailDrawer from './components/PaymentDetailDrawer';
+import DetailedPaymentsExportModal from './components/DetailedPaymentsExportModal';
 import { useAppNavigate } from '../../context/NavigationFeedbackContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -37,6 +38,10 @@ const Payments = () => {
   const [searchTerm, setSearchTerm] = useState(location.state?.initialSearch || '');
   const [pdfUrl, setPdfUrl] = useState('');
   const [isPdfModalOpen, setIsPdfModalOpen] = useState(false);
+  const [isDetailedExportModalOpen, setIsDetailedExportModalOpen] = useState(false);
+  const [selectedDetailedSocioId, setSelectedDetailedSocioId] = useState('todos');
+  const [isExportingDetailed, setIsExportingDetailed] = useState(false);
+  const [detailedExportProgress, setDetailedExportProgress] = useState('');
   const [selectedPaymentForDetails, setSelectedPaymentForDetails] = useState(null);
   const [filterMes, setFilterMes] = useState('ULTIMO');
   const [showAnulados, setShowAnulados] = useState(true);
@@ -129,6 +134,36 @@ const Payments = () => {
       return new Date(b.fecha_pago || 0) - new Date(a.fecha_pago || 0);
     });
   }, [pagos, searchTerm]);
+
+  const detailedExportSocios = useMemo(() => {
+    const grouped = new Map();
+    const usuarioPorRecibo = new Map();
+    const usuarioPorNombre = new Map();
+    allRecibos.forEach((recibo) => {
+      const usuarioId = Number(recibo.usuario_id);
+      if (!Number.isInteger(usuarioId) || usuarioId <= 0) return;
+      usuarioPorRecibo.set(Number(recibo.id), usuarioId);
+      const nombre = String(recibo.socio || recibo.nombre_razonsocial || '').trim().toLocaleLowerCase('es');
+      if (nombre) usuarioPorNombre.set(nombre, usuarioId);
+    });
+
+    pagos
+      .filter((pago) => pago.estado_validacion !== 'Anulado' && !pago.deleted_at)
+      .forEach((pago) => {
+        const nombreKey = String(pago.socio || '').trim().toLocaleLowerCase('es');
+        const id = Number(
+          pago.usuario_id
+          || usuarioPorRecibo.get(Number(pago.recibo_id))
+          || usuarioPorNombre.get(nombreKey),
+        );
+        if (!Number.isInteger(id) || id <= 0) return;
+        const current = grouped.get(id) || { id, nombre: pago.socio || 'Socio', cantidad: 0, total: 0 };
+        current.cantidad += 1;
+        current.total += Number(pago.monto_pagado || 0);
+        grouped.set(id, current);
+      });
+    return [...grouped.values()].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' }));
+  }, [allRecibos, pagos]);
 
   const selectedReciboObj = useMemo(
     () => allRecibos.find(r => r.id === parseInt(selectedRecibo)),
@@ -329,6 +364,86 @@ const Payments = () => {
       toast.error('Error al descargar el Excel');
     }
   }, [filteredPagos, filterMes, activeYear, searchTerm]);
+
+  const handleOpenDetailedExport = useCallback(() => {
+    setSelectedDetailedSocioId('todos');
+    setIsDetailedExportModalOpen(true);
+  }, []);
+
+  const handleExportDetailedExcel = useCallback(async () => {
+    const isAll = selectedDetailedSocioId === 'todos';
+    setIsExportingDetailed(true);
+    setDetailedExportProgress('');
+    try {
+      const downloadSocioExcel = async (socio) => {
+        const params = {
+          ...buildFilterParams(filterMes, activeYear),
+          search: socio.nombre,
+          usuario_id: String(socio.id),
+          detallado: true,
+          includeAnulados: false,
+        };
+        return api.get('/pagos/reporte/excel', { params, responseType: 'arraybuffer' });
+      };
+
+      if (isAll) {
+        const { default: JSZip } = await import('jszip');
+        const zip = new JSZip();
+        const digits = Math.max(3, String(detailedExportSocios.length).length);
+        let completed = 0;
+        const batchSize = 4;
+
+        for (let start = 0; start < detailedExportSocios.length; start += batchSize) {
+          const batch = detailedExportSocios.slice(start, start + batchSize);
+          const results = await Promise.all(batch.map(async (socio, offset) => {
+            const response = await downloadSocioExcel(socio);
+            const index = start + offset + 1;
+            const safeName = socio.nombre.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ]+/g, '_').replace(/^_+|_+$/g, '') || 'Socio';
+            return { response, filename: `${String(index).padStart(digits, '0')}_${safeName}.xlsx` };
+          }));
+          results.forEach(({ response, filename }) => zip.file(filename, response.data));
+          completed += batch.length;
+          setDetailedExportProgress(`${completed}/${detailedExportSocios.length}`);
+        }
+
+        const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+        downloadBlob(zipBlob, 'Reportes_Pagos_Detallados_Por_Socio.zip', MIME_TYPES.ZIP);
+        toast.success(`ZIP generado con ${detailedExportSocios.length} reportes`);
+      } else {
+        const socio = detailedExportSocios.find((item) => String(item.id) === String(selectedDetailedSocioId));
+        if (!socio) throw new Error('Selecciona un socio válido.');
+        const response = await downloadSocioExcel(socio);
+        const safeName = (socio?.nombre || 'Socio').replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ]+/g, '_');
+        downloadBlob(response.data, `Reporte_Pagos_Detallado_${safeName}.xlsx`, MIME_TYPES.EXCEL);
+        toast.success('Reporte detallado descargado');
+      }
+      setIsDetailedExportModalOpen(false);
+    } catch (error) {
+      let message = error.message || 'No se pudo generar el reporte detallado';
+      const responseData = error.response?.data;
+      if (responseData instanceof Blob) {
+        try {
+          const payload = JSON.parse(await responseData.text());
+          message = payload.error || payload.message || message;
+        } catch {
+          if (error.response?.status === 404) message = 'El servidor todavía no tiene habilitada la descarga detallada. Reinicia o actualiza la API.';
+        }
+      } else if (responseData instanceof ArrayBuffer) {
+        try {
+          const payload = JSON.parse(new TextDecoder().decode(responseData));
+          message = payload.error || payload.message || message;
+        } catch {
+          message = error.response?.status === 404 ? 'No se encontró la ruta de exportación Excel en la API.' : message;
+        }
+      } else {
+        message = responseData?.error || responseData?.message || message;
+      }
+      toast.error(message);
+    } finally {
+      setIsExportingDetailed(false);
+      setDetailedExportProgress('');
+    }
+  }, [activeYear, detailedExportSocios, filterMes, selectedDetailedSocioId]);
 
   const handleExportPDF = useCallback(async () => {
     const pagosActivos = filteredPagos.filter(p => p.estado_validacion !== 'Anulado');
@@ -568,6 +683,7 @@ const Payments = () => {
         showAnulados={showAnulados}
         onToggleAnulados={() => setShowAnulados((current) => !current)}
         onExportExcel={handleExportExcel}
+        onOpenDetailedExcel={handleOpenDetailedExport}
         onExportPDF={handleExportPDF}
         onExportTickets={handleExportAllPdf}
         fallbackMap={fallbackPrevioMap}
@@ -858,6 +974,8 @@ const Payments = () => {
 
 
       {isPdfModalOpen && <PdfPreviewModal pdfBlobUrl={pdfUrl} title="Historial de Pagos" downloadFileName={`Pagos_Parque_Industrial_${new Date().toISOString().slice(0, 10)}.pdf`} onClose={closePdfModal} />}
+
+      {isDetailedExportModalOpen && <DetailedPaymentsExportModal socios={detailedExportSocios} selectedId={selectedDetailedSocioId} onSelectedIdChange={setSelectedDetailedSocioId} onClose={() => { if (!isExportingDetailed) setIsDetailedExportModalOpen(false); }} onDownload={handleExportDetailedExcel} isExporting={isExportingDetailed} progress={detailedExportProgress} formatCurrency={fmtCurrency} />}
 
       <PaymentActionMenu
         menu={actionMenu}
