@@ -47,7 +47,7 @@ const BillingTableControls = ({ searchTerm, onSearchChange, showFilters, onToggl
             Acciones
             <span className="material-symbols-outlined text-[16px]" translate="no">expand_more</span>
           </button>
-          {actionsOpen && <div role="menu" aria-label="Acciones de facturación" className="absolute right-0 top-full z-30 mt-1 min-w-52 rounded-lg border border-outline-variant bg-white p-1 shadow-lg">
+          {actionsOpen && <div role="menu" aria-label="Acciones de facturación" className="absolute left-0 top-full z-30 mt-1 min-w-52 max-w-[calc(100vw-2rem)] rounded-lg border border-outline-variant bg-white p-1 shadow-lg sm:left-auto sm:right-0">
             <button type="button" role="menuitem" onClick={() => runAction(onExportExcel)} className="flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-xs font-semibold text-[#107C41] transition-colors hover:bg-[#107C41]/10">
               <ExcelIcon className="h-4 w-4" /> Reporte de Excel
             </button>
