@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
-import { formatPeriod } from '../paymentUtils';
+import { formatPeriod, isPaymentCanceled } from '../paymentUtils';
 
 const PaymentMobileCard = ({ payment, previousAmount, onSelect, onOpenMenu, isMenuOpen, getTypeInfo, formatCurrency }) => {
   const typeInfo = useMemo(() => getTypeInfo(payment, previousAmount), [payment, previousAmount, getTypeInfo]);
-  const isCanceled = String(payment.estado_validacion || '').trim().toLowerCase() === 'anulado' || Boolean(payment.deleted_at);
+  const isCanceled = isPaymentCanceled(payment);
 
   return (
     <article className={`px-4 py-3 transition-colors ${isCanceled ? 'bg-red-500/5' : 'bg-white'}`}>

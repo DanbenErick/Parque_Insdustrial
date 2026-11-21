@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { formatPeriod } from '../paymentUtils';
+import { formatPeriod, isPaymentCanceled } from '../paymentUtils';
 
 const KPI_COLORS = {
   primary: { bg: 'bg-primary/10 text-primary border-primary/20', val: 'text-on-surface' },
@@ -20,7 +20,7 @@ export const PaymentDetailRow = memo(({ icon, label, value, valueClassName = 'te
 
 export const PaymentTableRow = memo(({ pago, fallbackPrevio, onSelect, onOpenMenu, isMenuOpen, getTipoInfo, formatCurrency }) => {
   const tipoInfo = useMemo(() => getTipoInfo(pago, fallbackPrevio), [pago, fallbackPrevio, getTipoInfo]);
-  const isAnulado = String(pago.estado_validacion || '').trim().toLowerCase() === 'anulado' || Boolean(pago.deleted_at);
+  const isAnulado = isPaymentCanceled(pago);
   return (
     <tr className={`hover:bg-surface-container-lowest transition-colors group ${isAnulado ? 'bg-red-500/5 hover:bg-red-500/10' : ''}`}>
       <td className="px-4 py-2"><button type="button" onClick={() => onSelect(pago)} className="font-bold text-on-surface text-[11px] hover:text-primary transition-colors text-left focus:outline-none block mb-0.5" title="Ver Detalles del Pago">{pago.socio}</button>{pago.medidor_num_serie ? <span className="text-[10px] text-on-surface-variant flex items-center gap-1 mt-0.5"><span className="material-symbols-outlined text-[12px]" translate="no">speed</span>{pago.medidor_num_serie}</span> : <span className="text-[10px] text-on-surface-variant italic mt-0.5 block">Sin Medidor</span>}{pago.saldo_a_favor_socio > 0 && <span className="text-[9px] text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded font-bold mt-1 inline-block">Saldo a favor: S/ {formatCurrency(pago.saldo_a_favor_socio)}</span>}</td>

@@ -1,11 +1,11 @@
 import { createPortal } from 'react-dom';
 import { PaymentDetailRow as DetailRow } from './PaymentPresentation';
-import { fmtCurrency, getPagoTipoInfo } from '../paymentUtils';
+import { fmtCurrency, getPagoTipoInfo, isPaymentCanceled } from '../paymentUtils';
 
 const PaymentDetailDrawer = ({ payment, previousAmount = 0, onClose, onEdit, onViewReceipt, backdropProps }) => {
   if (!payment) return null;
   const typeInfo = getPagoTipoInfo(payment, previousAmount);
-  const isAnulado = String(payment.estado_validacion || '').trim().toLowerCase() === 'anulado' || Boolean(payment.deleted_at);
+  const isAnulado = isPaymentCanceled(payment);
 
   return createPortal(
     <div {...backdropProps} className="fixed inset-0 z-[100] flex justify-end bg-black/50 backdrop-blur-sm" onClick={(event) => event.target === event.currentTarget && onClose()}>

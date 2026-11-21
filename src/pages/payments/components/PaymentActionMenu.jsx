@@ -1,4 +1,5 @@
 import FloatingActionMenu from '../../../components/ui/FloatingActionMenu';
+import { isPaymentCanceled } from '../paymentUtils';
 
 const MenuButton = ({ icon, label, onClick, tone = 'text-on-surface', iconClass = 'text-primary', strong = false }) => (
   <button
@@ -24,6 +25,7 @@ const PaymentActionMenu = ({
 }) => {
   if (!menu) return null;
   const payment = menu.pago;
+  const isCanceled = isPaymentCanceled(payment);
   const run = (callback) => {
     onClose();
     callback(payment);
@@ -36,7 +38,7 @@ const PaymentActionMenu = ({
         <span className="font-data-mono text-[10px] font-bold text-primary">{payment.numero_comprobante || 'S/N'}</span>
       </div>
 
-      {payment.estado_validacion === 'Anulado' ? (
+      {isCanceled ? (
         <>
           <MenuButton icon="info" label="Ver Detalle y Motivo" onClick={() => run(onViewDetails)} tone="text-error" iconClass="text-error" strong />
           <MenuButton icon="picture_as_pdf" label="Ver Recibo Original" onClick={() => run(onViewReceipt)} iconClass="text-secondary" />

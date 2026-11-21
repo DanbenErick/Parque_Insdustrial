@@ -8,7 +8,7 @@ import { PaymentHistoryTable, PaymentsDashboard } from './components/PaymentsDas
 import CancelPaymentModal from './components/CancelPaymentModal';
 import EditPaymentModal from './components/EditPaymentModal';
 import ConfirmPaymentModal from './components/ConfirmPaymentModal';
-import { buildFilterParams, fmtCurrency, formatPeriod, getPagoTipoInfo } from './paymentUtils';
+import { buildFilterParams, fmtCurrency, formatPeriod, getPagoTipoInfo, isPaymentCanceled } from './paymentUtils';
 import { useFloatingActionMenu } from '../../hooks/useFloatingActionMenu';
 import { createBlobUrl, downloadBlob, MIME_TYPES, openBlobInNewTab } from '../../utils/downloadFile';
 import { usePaymentsData } from './hooks/usePaymentsData';
@@ -148,7 +148,7 @@ const Payments = () => {
     });
 
     pagos
-      .filter((pago) => pago.estado_validacion !== 'Anulado' && !pago.deleted_at)
+      .filter((pago) => !isPaymentCanceled(pago))
       .forEach((pago) => {
         const nombreKey = String(pago.socio || '').trim().toLocaleLowerCase('es');
         const id = Number(
@@ -200,7 +200,7 @@ const Payments = () => {
   const fallbackPrevioMap = useMemo(() => {
     const map = new Map();
     const sorted = [...pagos]
-      .filter(p => p.estado_validacion !== 'Anulado')
+      .filter(p => !isPaymentCanceled(p))
       .sort((a, b) => new Date(a.fecha_pago).getTime() - new Date(b.fecha_pago).getTime() || a.id - b.id);
 
     const reciboAcumulado = new Map();
@@ -349,7 +349,7 @@ const Payments = () => {
   }, [pagoToAnular, motivoAnulacion, refetchAll]);
 
   const handleExportExcel = useCallback(async () => {
-    const pagosActivos = filteredPagos.filter(p => p.estado_validacion !== 'Anulado');
+    const pagosActivos = filteredPagos.filter(p => !isPaymentCanceled(p));
     if (!pagosActivos.length) {
       return toast.error('No hay pagos activos para exportar');
     }
@@ -446,7 +446,7 @@ const Payments = () => {
   }, [activeYear, detailedExportSocios, filterMes, selectedDetailedSocioId]);
 
   const handleExportPDF = useCallback(async () => {
-    const pagosActivos = filteredPagos.filter(p => p.estado_validacion !== 'Anulado');
+    const pagosActivos = filteredPagos.filter(p => !isPaymentCanceled(p));
     if (!pagosActivos.length) {
       return toast.error('No hay pagos activos para exportar');
     }
@@ -470,7 +470,7 @@ const Payments = () => {
   }, [filteredPagos, filterMes, activeYear, searchTerm]);
 
   const handleExportAllPdf = useCallback(async () => {
-    const pagosActivos = filteredPagos.filter(p => p.estado_validacion !== 'Anulado');
+    const pagosActivos = filteredPagos.filter(p => !isPaymentCanceled(p));
     if (!pagosActivos.length) {
       return toast.error('No hay pagos activos para exportar');
     }
