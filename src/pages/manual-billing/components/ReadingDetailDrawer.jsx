@@ -1,10 +1,14 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { BadgeType } from './shared/BadgeType';
 import { formatDateLong, fmtVal, parseSafe } from '../utils';
 import { useBodyScrollLock } from '../../../hooks/useBodyScrollLock';
+import api from '../../../api/axiosConfig';
+import AuditTimeline from '../../../components/AuditTimeline';
 
 export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClose, onEdit }) => {
+  const [auditEvents, setAuditEvents] = useState([]);
+  const [auditLoading, setAuditLoading] = useState(false);
   useBodyScrollLock(Boolean(record));
 
   useEffect(() => {
@@ -15,6 +19,20 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [record, onClose]);
+
+  useEffect(() => {
+    let active = true;
+    if (!record?.id) {
+      setAuditEvents([]);
+      return undefined;
+    }
+    setAuditLoading(true);
+    api.get(`/lecturas/${record.id}/auditoria`)
+      .then((response) => active && setAuditEvents(response.data || []))
+      .catch(() => active && setAuditEvents([]))
+      .finally(() => active && setAuditLoading(false));
+    return () => { active = false; };
+  }, [record?.id]);
 
   if (!record) return null;
 
@@ -363,6 +381,17 @@ export const ReadingDetailDrawer = ({ record, medidorInfo, activePeriodo, onClos
               </div>
             </div>
           )}
+
+          <section className="bg-white border border-outline-variant rounded-xl p-4 shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <span className="material-symbols-outlined text-primary text-[19px]" translate="no">manage_history</span>
+              <div>
+                <h4 className="font-bold text-sm text-on-surface">Historial de la lectura</h4>
+                <p className="text-[10px] text-on-surface-variant">Quién la registró, modificó o anuló y cuándo lo hizo</p>
+              </div>
+            </div>
+            <AuditTimeline events={auditEvents} loading={auditLoading} />
+          </section>
 
         </div>
       </div>

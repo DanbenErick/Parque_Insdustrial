@@ -3,9 +3,11 @@ import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 import { downloadBlob, MIME_TYPES } from '../../utils/downloadFile';
 import { buildReceiptPdfFilename } from './billingUtils';
+import AuditTimeline from '../../components/AuditTimeline';
 
 const HistorialModal = ({ isOpen, reciboId, onClose }) => {
   const [historial, setHistorial] = useState([]);
+  const [auditoria, setAuditoria] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [downloadingId, setDownloadingId] = useState(null);
 
@@ -13,7 +15,13 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
     setIsLoading(true);
     try {
       const response = await api.get(`/recibos/${reciboId}/historial`);
-      setHistorial(response.data);
+      if (Array.isArray(response.data)) {
+        setHistorial(response.data);
+        setAuditoria([]);
+      } else {
+        setHistorial(response.data?.versiones || []);
+        setAuditoria(response.data?.auditoria || []);
+      }
     } catch (error) {
       toast.error('Error al obtener el historial del recibo.');
       onClose();
@@ -27,6 +35,7 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
       fetchHistorial();
     } else {
       setHistorial([]);
+      setAuditoria([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, reciboId]);
@@ -48,7 +57,7 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-scrim/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-surface rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-elevation-3 overflow-hidden animate-in zoom-in-95 duration-200">
+      <div className="bg-surface rounded-2xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-elevation-3 overflow-hidden animate-in zoom-in-95 duration-200">
 
         {/* Header */}
         <div className="px-6 py-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-lowest">
@@ -57,8 +66,8 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
               <span className="material-symbols-outlined text-[20px]" translate="no">history</span>
             </div>
             <div>
-              <h2 className="text-lg font-bold text-on-surface leading-tight">Historial de Refacturaciones</h2>
-              <p className="text-sm text-on-surface-variant font-medium">Auditoría de comprobantes para este socio y periodo</p>
+              <h2 className="text-lg font-bold text-on-surface leading-tight">Historial del Recibo</h2>
+              <p className="text-sm text-on-surface-variant font-medium">Responsables, fechas, cambios y versiones del comprobante</p>
             </div>
           </div>
           <button
@@ -76,12 +85,33 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
               <span className="material-symbols-outlined animate-spin text-[32px] mb-4 text-primary" translate="no">sync</span>
               <p className="font-bold">Cargando historial...</p>
             </div>
-          ) : historial.length === 0 ? (
+          ) : historial.length === 0 && auditoria.length === 0 ? (
             <div className="text-center py-12 text-on-surface-variant">
               <p>No se encontró historial para este recibo.</p>
             </div>
           ) : (
-            <div className="relative border-l-2 border-outline-variant ml-4 space-y-8 pb-4">
+            <div className="space-y-7">
+              <section>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="material-symbols-outlined text-primary text-[20px]" translate="no">manage_history</span>
+                  <div>
+                    <h3 className="text-sm font-bold text-on-surface">Auditoría de operaciones</h3>
+                    <p className="text-[11px] text-on-surface-variant">Quién modificó, anuló o cambió el estado y cuándo lo hizo</p>
+                  </div>
+                </div>
+                <AuditTimeline events={auditoria} />
+              </section>
+
+              {historial.length > 0 && (
+                <section>
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="material-symbols-outlined text-on-surface-variant text-[20px]" translate="no">receipt_long</span>
+                    <div>
+                      <h3 className="text-sm font-bold text-on-surface">Versiones del comprobante</h3>
+                      <p className="text-[11px] text-on-surface-variant">Recibos generados para el mismo socio y periodo</p>
+                    </div>
+                  </div>
+                  <div className="relative border-l-2 border-outline-variant ml-4 space-y-8 pb-4">
               {historial.map((item, index) => {
                 const isLatest = index === 0;
                 const isAnulado = item.estado === 'Anulado';
@@ -167,6 +197,9 @@ const HistorialModal = ({ isOpen, reciboId, onClose }) => {
                   </div>
                 );
               })}
+                  </div>
+                </section>
+              )}
             </div>
           )}
         </div>

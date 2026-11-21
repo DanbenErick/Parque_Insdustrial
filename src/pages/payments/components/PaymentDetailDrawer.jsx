@@ -1,8 +1,28 @@
 import { createPortal } from 'react-dom';
+import { useEffect, useState } from 'react';
 import { PaymentDetailRow as DetailRow } from './PaymentPresentation';
 import { fmtCurrency, getPagoTipoInfo, isPaymentCanceled } from '../paymentUtils';
+import api from '../../../api/axiosConfig';
+import AuditTimeline from '../../../components/AuditTimeline';
 
 const PaymentDetailDrawer = ({ payment, previousAmount = 0, onClose, onEdit, onViewReceipt, backdropProps }) => {
+  const [auditEvents, setAuditEvents] = useState([]);
+  const [auditLoading, setAuditLoading] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    if (!payment?.id) {
+      setAuditEvents([]);
+      return undefined;
+    }
+    setAuditLoading(true);
+    api.get(`/pagos/${payment.id}/auditoria`)
+      .then((response) => active && setAuditEvents(response.data || []))
+      .catch(() => active && setAuditEvents([]))
+      .finally(() => active && setAuditLoading(false));
+    return () => { active = false; };
+  }, [payment?.id]);
+
   if (!payment) return null;
   const typeInfo = getPagoTipoInfo(payment, previousAmount);
   const isAnulado = isPaymentCanceled(payment);
@@ -65,6 +85,17 @@ const PaymentDetailDrawer = ({ payment, previousAmount = 0, onClose, onEdit, onV
               {typeInfo.tipo === 'Parcial' && <AmountRow label="Deuda restante tras este pago" value={typeInfo.restante} accent="amber" bordered />}
               {typeInfo.subtextType === 'a_favor' && <AmountRow label="Saldo a favor generado" value={typeInfo.aFavor} accent="emerald" bordered />}
             </div>
+          </section>
+
+          <section>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="material-symbols-outlined text-primary text-[17px]" translate="no">manage_history</span>
+              <div>
+                <h4 className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">Historial del pago</h4>
+                <p className="text-[9px] text-on-surface-variant">Responsable, fecha, motivo y valores modificados</p>
+              </div>
+            </div>
+            <AuditTimeline events={auditEvents} loading={auditLoading} />
           </section>
 
           <div className="pt-6 mt-auto space-y-2">

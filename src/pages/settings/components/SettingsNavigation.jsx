@@ -2,6 +2,7 @@ const SETTINGS_TABS = [
   { id: 'profile', icon: 'person', label: 'Perfil de Usuario' },
   { id: 'periodos', icon: 'calendar_month', label: 'Periodos de Facturación' },
   { id: 'tarifas', icon: 'request_quote', label: 'Tarifas y Cobros' },
+  { id: 'comprobante', icon: 'ink_pen', label: 'Firma y Sello', adminOnly: true },
   { id: 'notificaciones', icon: 'notifications', label: 'Notificaciones por correo' }
 ];
 
@@ -16,9 +17,9 @@ const SettingsButton = ({ activeTab, id, icon, label, onSelect }) => (
   </button>
 );
 
-const SettingsNavigation = ({ activeTab, onSelect }) => (
+const SettingsNavigation = ({ activeTab, onSelect, isAdmin }) => (
   <nav className="w-full md:w-72 space-y-1" aria-label="Secciones de configuración">
-    {SETTINGS_TABS.map((tab) => (
+    {SETTINGS_TABS.filter((tab) => !tab.adminOnly || isAdmin).map((tab) => (
       <SettingsButton key={tab.id} {...tab} activeTab={activeTab} onSelect={onSelect} />
     ))}
 

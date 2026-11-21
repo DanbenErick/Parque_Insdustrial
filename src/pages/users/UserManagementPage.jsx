@@ -1,6 +1,7 @@
 import ConfirmActionModal from '../../components/ui/ConfirmActionModal';
 import PdfPreviewModal from '../../components/ui/PdfPreviewModal';
 import LoginHistoryTab from './LoginHistoryTab';
+import SessionHistoryTab from './SessionHistoryTab';
 import UserFormModal from './UserFormModal';
 import UserDirectory from './components/UserDirectory';
 import UserManagementHeader from './components/UserManagementHeader';
@@ -24,7 +25,8 @@ const UserManagement = () => {
           isLoading={users.isLoading}
         />
       )}
-      {users.activeTab === 'sesiones' && <LoginHistoryTab />}
+      {users.activeTab === 'actividad' && <LoginHistoryTab />}
+      {users.activeTab === 'sesiones' && <SessionHistoryTab />}
 
       {users.showAddModal && (
         <UserFormModal initialData={users.formData} onSubmit={users.handleCreateSubmit} onClose={users.closeAddModal} isSaving={users.isSaving} isEdit={false} />

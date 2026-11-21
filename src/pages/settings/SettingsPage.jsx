@@ -7,6 +7,7 @@ import CargosSettingsTab from './CargosSettingsTab';
 import PeriodosSettingsTab from './PeriodosSettingsTab';
 import ProfileSettingsTab from './components/ProfileSettingsTab';
 import SettingsNavigation from './components/SettingsNavigation';
+import TicketAssetsSettingsTab from './components/TicketAssetsSettingsTab';
 
 
 const emptyPasswordForm = { clave_actual: '', clave_nueva: '', clave_confirmar: '' };
@@ -14,6 +15,7 @@ const emptyPasswordForm = { clave_actual: '', clave_nueva: '', clave_confirmar: 
 const Settings = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const isAdmin = user?.nombre_rol === 'Admin' || Number(user?.rol_id) === 1;
   const [activeTab, setActiveTab] = useState('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
@@ -125,20 +127,23 @@ const Settings = () => {
         <div className="flex-grow overflow-y-auto p-4 md:p-6 custom-scrollbar">
           <div className="max-w-6xl mx-auto space-y-4">
             <div className="flex justify-between items-center mb-4">
-              <div><h2 className="text-2xl text-primary font-bold leading-tight">Configuración del Sistema</h2><p className="text-sm text-on-surface-variant">Gestiona tu perfil, facturación, tarifas y notificaciones.</p></div>
-              <button type="button" onClick={handleSave} disabled={isSaving} className={`px-4 py-1.5 h-8 text-xs bg-primary text-on-primary font-bold rounded-md shadow-sm transition-all flex items-center gap-1.5 ${isSaving ? 'opacity-70 cursor-not-allowed' : 'hover:opacity-90 active:scale-95'}`}>
-                {isSaving && <span className="material-symbols-outlined animate-spin text-[16px]" translate="no">sync</span>}
-                {isSaving ? 'Guardando...' : 'Guardar Cambios'}
-              </button>
+              <div><h2 className="text-2xl text-primary font-bold leading-tight">Configuración del Sistema</h2><p className="text-sm text-on-surface-variant">Gestiona tu perfil, facturación, comprobantes y notificaciones.</p></div>
+              {activeTab !== 'comprobante' && (
+                <button type="button" onClick={handleSave} disabled={isSaving} className={`px-4 py-1.5 h-8 text-xs bg-primary text-on-primary font-bold rounded-md shadow-sm transition-all flex items-center gap-1.5 ${isSaving ? 'opacity-70 cursor-not-allowed' : 'hover:opacity-90 active:scale-95'}`}>
+                  {isSaving && <span className="material-symbols-outlined animate-spin text-[16px]" translate="no">sync</span>}
+                  {isSaving ? 'Guardando...' : 'Guardar Cambios'}
+                </button>
+              )}
             </div>
             <div className="flex flex-col md:flex-row gap-4">
-              <SettingsNavigation activeTab={activeTab} onSelect={setActiveTab} />
+              <SettingsNavigation activeTab={activeTab} onSelect={setActiveTab} isAdmin={isAdmin} />
               <div className="flex-grow bg-surface border border-outline-variant rounded-lg shadow-sm p-4 md:p-6 min-h-[500px]">
                 {activeTab === 'profile' && (
                   <ProfileSettingsTab user={user} profile={profile} onProfileChange={handleProfileChange} account={tarifas} onAccountChange={handleAccountChange} isEditingAccount={isEditingAccount} setIsEditingAccount={setIsEditingAccount} isSavingAccount={isSavingAccount} onSaveAccount={handleSaveAccount} showPasswordForm={showPasswordForm} setShowPasswordForm={setShowPasswordForm} passwordForm={passwordForm} setPasswordForm={setPasswordForm} onPasswordChange={handlePasswordInputChange} onPasswordSave={handlePasswordSave} isChangingPassword={isChangingPassword} />
                 )}
                 {activeTab === 'tarifas' && <CargosSettingsTab />}
                 {activeTab === 'periodos' && <PeriodosSettingsTab />}
+                {activeTab === 'comprobante' && isAdmin && <TicketAssetsSettingsTab />}
                 {activeTab === 'notificaciones' && (
                   <section className="max-w-3xl space-y-5">
                     <div>
