@@ -1,5 +1,6 @@
 import  { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import api from '../api/axiosConfig';
+import { clearQueryCache } from '../api/queryClient';
 
 const AuthContext = createContext(null);
 
@@ -35,6 +36,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const clearSession = useCallback(() => {
+    clearQueryCache();
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem('luz_user');
@@ -124,6 +126,8 @@ export const AuthProvider = ({ children }) => {
     if (rutas)    minimalUser.rutas    = rutas;
     if (permisos) minimalUser.permisos = permisos;
 
+    // No conservar datos en memoria de una sesión anterior en el mismo navegador.
+    clearQueryCache();
     setUser(minimalUser);
     setIsAuthenticated(true);
 

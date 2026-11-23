@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { toast } from 'sonner';
+import { clearQueryCache } from './queryClient';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5001/api',
@@ -58,6 +59,7 @@ api.interceptors.response.use(
       }
 
       // Limpiamos todo
+      clearQueryCache();
       localStorage.removeItem('luz_token');
       localStorage.removeItem('luz_user');
     }
