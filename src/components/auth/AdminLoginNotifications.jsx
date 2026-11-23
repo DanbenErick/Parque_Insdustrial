@@ -14,6 +14,53 @@ const formatLoginTime = (value) => {
   });
 };
 
+const showLoginNotification = (session, currentUserId) => {
+  const isSameAccount = Number(session.usuario_id) === Number(currentUserId);
+  const accountName = session.nombre_razonsocial || 'Usuario del sistema';
+  const roleAndTime = `${session.nombre_rol || 'Usuario'} · ${formatLoginTime(session.fecha_ingreso)}`;
+
+  toast.custom((toastId) => (
+    <div
+      role="status"
+      aria-live="polite"
+      className="w-[min(92vw,400px)] overflow-hidden rounded-lg border border-outline-variant bg-surface text-on-surface shadow-2xl"
+    >
+      <div className="flex items-start gap-3 border-l-4 border-l-primary px-4 py-3.5">
+        <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+          <span className="material-symbols-outlined text-[20px]" translate="no">login</span>
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-on-surface-variant">
+            Nuevo inicio de sesión
+          </p>
+          <p className="mt-1 truncate text-sm font-bold text-on-surface" title={accountName}>
+            {isSameAccount ? 'Tu cuenta' : accountName}
+          </p>
+          <p className="mt-0.5 text-xs text-on-surface-variant">
+            {isSameAccount ? 'Se inició una sesión adicional.' : 'Se conectó al sistema.'}
+          </p>
+          <p className="mt-2 font-data-mono text-[10px] font-semibold text-primary">
+            {roleAndTime}
+          </p>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => toast.dismiss(toastId)}
+          aria-label="Cerrar notificación"
+          className="-mr-1 -mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-on-surface-variant transition-colors hover:bg-surface-container hover:text-on-surface"
+        >
+          <span className="material-symbols-outlined text-[18px]" translate="no">close</span>
+        </button>
+      </div>
+    </div>
+  ), {
+    duration: 7000,
+    position: 'top-right',
+  });
+};
+
 export default function AdminLoginNotifications() {
   const { user, isAuthenticated } = useAuth();
   const lastSessionIdRef = useRef(0);
@@ -43,15 +90,7 @@ export default function AdminLoginNotifications() {
         if (initializedRef.current) {
           sessions
             .forEach((session) => {
-              const isSameAccount = Number(session.usuario_id) === Number(user?.id);
-              const title = isSameAccount
-                ? `Se ha iniciado una nueva sesión con tu cuenta`
-                : `${session.nombre_razonsocial || 'Un usuario'} se ha conectado al sistema`;
-              toast.info(title, {
-                description: `${session.nombre_rol || 'Usuario'} · ${formatLoginTime(session.fecha_ingreso)}`,
-                duration: 7000,
-                icon: '👤',
-              });
+              showLoginNotification(session, user?.id);
             });
         }
 
