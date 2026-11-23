@@ -52,7 +52,7 @@ api.interceptors.response.use(
 
       // Evitar redireccionar si ya estamos en la ruta de login
       if (window.location.pathname !== '/login') {
-        toast.error('Tu sesión ha expirado o es inválida. Por favor, inicia sesión nuevamente.');
+        toast.error(customMessage || 'Tu sesión ha expirado o es inválida. Por favor, inicia sesión nuevamente.');
         setTimeout(() => {
           window.location.href = '/login';
         }, 1500);

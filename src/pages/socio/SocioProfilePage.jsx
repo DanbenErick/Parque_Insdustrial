@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import api from '../../api/axiosConfig';
 import { toast } from 'sonner';
 import { useAuth } from '../../context/AuthContext';
+import ActiveSessionsCard from '../../components/auth/ActiveSessionsCard';
 
 const editableValues = (p) => ({ username: p?.username || '', documento_identidad: p?.documento_identidad || '', telefono: p?.telefono || '', correo: p?.correo || '' });
 
@@ -125,6 +126,8 @@ const SocioProfilePage = () => {
           <div><button type="submit" disabled={changingPassword} className="rounded-xl border border-primary px-5 py-2.5 text-sm font-bold text-primary disabled:opacity-50">{changingPassword ? 'Actualizando...' : 'Actualizar contraseña'}</button></div>
         </form>
       </section>
+
+      <ActiveSessionsCard />
     </main>
   );
 };

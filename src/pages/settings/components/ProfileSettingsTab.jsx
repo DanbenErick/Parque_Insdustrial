@@ -1,3 +1,5 @@
+import ActiveSessionsCard from '../../../components/auth/ActiveSessionsCard';
+
 const inputClassName = 'w-full bg-surface-container-lowest border border-outline-variant/50 hover:border-primary/50 focus:border-primary rounded-lg px-3 py-1.5 text-xs h-8 outline-none transition-colors shadow-sm';
 const emptyPasswordForm = { clave_actual: '', clave_nueva: '', clave_confirmar: '' };
 
@@ -133,6 +135,8 @@ const ProfileSettingsTab = ({
           </form>
         )}
       </section>
+
+      <ActiveSessionsCard embedded />
     </div>
   );
 };

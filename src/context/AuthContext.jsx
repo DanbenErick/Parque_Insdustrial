@@ -138,12 +138,18 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = useCallback(() => {
+    const token = localStorage.getItem('luz_token');
     try {
       const remembered = localStorage.getItem('remembered-login-username');
       if (remembered && user?.nombre_razonsocial && [user.username, user.correo, user.documento_identidad].some(value => value && String(value).toLowerCase() === remembered.toLowerCase())) {
         localStorage.setItem('remembered-login-name', user.nombre_razonsocial);
       }
     } catch { /* El cierre de sesión no depende del almacenamiento de la cuenta. */ }
+    if (token) {
+      void api.post('/auth/logout', null, {
+        headers: { Authorization: `Bearer ${token}` }
+      }).catch(() => { /* El cierre local debe completarse aunque la API no responda. */ });
+    }
     clearSession();
   }, [clearSession, user]);
 
