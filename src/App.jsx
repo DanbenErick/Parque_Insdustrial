@@ -16,6 +16,7 @@ import MobileBottomNav from './components/layout/MobileBottomNav';
 import PageTransition from './components/ui/PageTransition';
 import ReloadPrompt from './components/ui/ReloadPrompt';
 import FullScreenLoader from './components/ui/FullScreenLoader';
+import AdminLoginNotifications from './components/auth/AdminLoginNotifications';
 import { useNavigationFeedback } from './context/NavigationFeedbackContext';
 
 // Componente de carga para Lazy Pages
@@ -100,6 +101,7 @@ function App() {
           style: { padding: '18px 24px' }
         }}
       />
+      <AdminLoginNotifications />
       <ReloadPrompt />
       <div className="bg-surface font-body-md text-on-surface antialiased flex flex-col md:flex-row h-[100dvh] w-full overflow-hidden relative">
 

@@ -7,7 +7,10 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
-      registerType: 'autoUpdate',
+      // Mantener la versión activa hasta que el usuario acepte actualizar.
+      // Activar un SW nuevo a mitad de sesión puede dejar a React apuntando a
+      // chunks con hash de la versión anterior y provocar errores al navegar.
+      registerType: 'prompt',
       includeAssets: ['logo-192.png', 'logo-512.png'],
       manifest: {
         name: 'Sistema Luz Jicamarca',
@@ -32,6 +35,7 @@ export default defineConfig({
         ]
       },
       workbox: {
+        cleanupOutdatedCaches: true,
         // Los motores de Excel se descargan únicamente cuando el usuario abre
         // una función de importación/exportación; no forman parte del arranque offline.
         globIgnores: ['**/vendor-exceljs-*.js']
