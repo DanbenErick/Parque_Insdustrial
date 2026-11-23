@@ -42,9 +42,12 @@ export default function AdminLoginNotifications() {
 
         if (initializedRef.current) {
           sessions
-            .filter((session) => Number(session.usuario_id) !== Number(user?.id))
             .forEach((session) => {
-              toast.info(`${session.nombre_razonsocial || 'Un usuario'} se ha conectado al sistema`, {
+              const isSameAccount = Number(session.usuario_id) === Number(user?.id);
+              const title = isSameAccount
+                ? `Se ha iniciado una nueva sesión con tu cuenta`
+                : `${session.nombre_razonsocial || 'Un usuario'} se ha conectado al sistema`;
+              toast.info(title, {
                 description: `${session.nombre_rol || 'Usuario'} · ${formatLoginTime(session.fecha_ingreso)}`,
                 duration: 7000,
                 icon: '👤',
