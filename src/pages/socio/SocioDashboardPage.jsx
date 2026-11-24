@@ -1,4 +1,4 @@
-import  { useMemo, useState } from 'react';
+import  { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Bar } from 'react-chartjs-2';
 import {
@@ -14,6 +14,8 @@ import api from '../../api/axiosConfig';
 import { useAuth } from '../../context/AuthContext';
 import FullScreenLoader from '../../components/ui/FullScreenLoader';
 import { useAppNavigate } from '../../context/NavigationFeedbackContext';
+import { toast } from 'sonner';
+import { downloadBlob, MIME_TYPES } from '../../utils/downloadFile';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -21,6 +23,8 @@ const SocioDashboardPage = () => {
   const { user } = useAuth();
   const navigate = useAppNavigate();
   const [selectedChartMedidor, setSelectedChartMedidor] = useState('Todos');
+  const [selectedReportMedidor, setSelectedReportMedidor] = useState('');
+  const [downloadingReport, setDownloadingReport] = useState(null);
   const [showPaymentInfo, setShowPaymentInfo] = useState(false);
 
   const { data: paymentConfig, isLoading: isLoadingPaymentConfig, isError: isPaymentConfigError, refetch: refetchPaymentConfig } = useQuery({
@@ -44,6 +48,52 @@ const SocioDashboardPage = () => {
   });
 
   const isLoading = isLoadingRecibos || isLoadingMedidores;
+
+  useEffect(() => {
+    if (!selectedReportMedidor && medidores.length > 0) {
+      setSelectedReportMedidor(String(medidores[0].id));
+    }
+  }, [medidores, selectedReportMedidor]);
+
+  const downloadReport = async (type) => {
+    const medidor = medidores.find((item) => String(item.id) === selectedReportMedidor);
+    if (!medidor) {
+      toast.error('Selecciona un medidor para generar el reporte.');
+      return;
+    }
+
+    const isPayments = type === 'payments';
+    const toastId = `socio-${type}-report`;
+    setDownloadingReport(type);
+    toast.loading(`Generando reporte de ${isPayments ? 'pagos' : 'facturación'}...`, { id: toastId });
+
+    try {
+      const endpoint = isPayments ? '/pagos/reporte/socio/excel' : '/recibos/reporte/socio/excel';
+      const response = await api.get(endpoint, {
+        params: { medidor_id: medidor.id },
+        responseType: 'blob',
+      });
+      const serieSegura = String(medidor.num_serie || medidor.id).replace(/[^a-zA-Z0-9_-]+/g, '_');
+      const filename = isPayments
+        ? `Reporte_Pagos_Medidor_${serieSegura}.xlsx`
+        : `Reporte_Facturacion_Medidor_${serieSegura}.xlsx`;
+      downloadBlob(response.data, filename, MIME_TYPES.EXCEL);
+      toast.success('Reporte descargado correctamente.', { id: toastId });
+    } catch (error) {
+      let message = error.message || 'No se pudo generar el reporte.';
+      if (error.response?.data instanceof Blob) {
+        try {
+          const payload = JSON.parse(await error.response.data.text());
+          message = payload.error || payload.message || message;
+        } catch {
+          // Conserva el mensaje disponible cuando la respuesta no es JSON.
+        }
+      }
+      toast.error(message, { id: toastId });
+    } finally {
+      setDownloadingReport(null);
+    }
+  };
 
   const kpis = useMemo(() => {
     if (!recibos.length) return { deudaTotal: 0, ultimoRecibo: null, estadoUltimo: 'N/A' };
@@ -256,6 +306,63 @@ const SocioDashboardPage = () => {
         </div>
 
       </div>
+
+      <section className="rounded-xl border border-emerald-200 bg-white p-4 sm:p-5 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-700" aria-labelledby="socio-reports-title">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-emerald-700" translate="no" aria-hidden="true">download</span>
+              <h2 id="socio-reports-title" className="text-lg font-bold text-on-surface">Reportes por medidor</h2>
+            </div>
+            <p className="mt-1 text-xs text-on-surface-variant sm:text-sm">
+              Descarga el historial del medidor seleccionado. El archivo incluye únicamente información de tu cuenta.
+            </p>
+          </div>
+
+          <div className="grid w-full gap-3 sm:grid-cols-[minmax(220px,1fr)_auto_auto] lg:w-auto">
+            <label className="flex min-w-0 flex-col gap-1.5 text-xs font-bold text-on-surface-variant">
+              Medidor
+              <select
+                value={selectedReportMedidor}
+                onChange={(event) => setSelectedReportMedidor(event.target.value)}
+                disabled={medidores.length === 0 || downloadingReport !== null}
+                className="min-h-11 w-full rounded-lg border border-outline-variant bg-white px-3 text-sm font-semibold text-on-surface outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+              >
+                {medidores.length === 0 && <option value="">Sin medidores disponibles</option>}
+                {medidores.map((medidor) => (
+                  <option key={medidor.id} value={String(medidor.id)}>
+                    {medidor.num_serie}{medidor.direccion ? ` · ${medidor.direccion}` : ''}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            <button
+              type="button"
+              onClick={() => downloadReport('payments')}
+              disabled={!selectedReportMedidor || downloadingReport !== null}
+              className="inline-flex min-h-11 items-center justify-center gap-2 self-end rounded-lg border border-emerald-700 bg-white px-4 text-sm font-bold text-emerald-800 transition-colors hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <span className={`material-symbols-outlined text-[19px] ${downloadingReport === 'payments' ? 'animate-spin' : ''}`} translate="no" aria-hidden="true">
+                {downloadingReport === 'payments' ? 'progress_activity' : 'payments'}
+              </span>
+              Reporte de pagos
+            </button>
+
+            <button
+              type="button"
+              onClick={() => downloadReport('billing')}
+              disabled={!selectedReportMedidor || downloadingReport !== null}
+              className="inline-flex min-h-11 items-center justify-center gap-2 self-end rounded-lg bg-emerald-700 px-4 text-sm font-bold text-white transition-colors hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              <span className={`material-symbols-outlined text-[19px] ${downloadingReport === 'billing' ? 'animate-spin' : ''}`} translate="no" aria-hidden="true">
+                {downloadingReport === 'billing' ? 'progress_activity' : 'receipt_long'}
+              </span>
+              Reporte de facturación
+            </button>
+          </div>
+        </div>
+      </section>
 
       {/* SECCIÓN PRINCIPAL: Mis Medidores (Mobile First Grid) */}
       <div className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 motion-safe:duration-1000">
