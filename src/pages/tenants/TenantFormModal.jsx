@@ -1,6 +1,7 @@
-import React, { useEffect, useCallback } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useForm, useFieldArray } from 'react-hook-form';
+import { toast } from 'sonner';
 import api from '../../api/axiosConfig';
 import { useBodyScrollLock } from '../../hooks/useBodyScrollLock';
 
@@ -12,7 +13,7 @@ const buildUsernameSuggestion = (fullName = '') => {
   const cleanName = String(fullName).trim();
   if (!cleanName) return '';
 
-  let firstName = '';
+  let firstName;
   let surnames = [];
   if (cleanName.includes(',')) {
     const [surnamePart, givenNamePart] = cleanName.split(',', 2);
@@ -56,7 +57,10 @@ const TenantFormModal = ({
 }) => {
   useBodyScrollLock(true);
 
-  const { register, control, handleSubmit, formState: { errors }, reset, watch, setValue } = useForm({
+  const [isLookingUpDni, setIsLookingUpDni] = useState(false);
+  const [dniLookupMessage, setDniLookupMessage] = useState(null);
+
+  const { register, control, handleSubmit, formState: { errors }, reset, watch, setValue, getValues } = useForm({
     defaultValues: initialData || {
       nombre_razonsocial: '',
       username: '',
@@ -105,6 +109,7 @@ const TenantFormModal = ({
 
   // Al abrir en modo creación, generar DNI temporal automáticamente
   const generarDniTemporal = useCallback(async () => {
+    setDniLookupMessage(null);
     try {
       const { data } = await api.get('/usuarios/generar-dni-temporal');
       setValue('documento_identidad', data.dni, { shouldValidate: true });
@@ -114,6 +119,32 @@ const TenantFormModal = ({
       setValue('documento_identidad', `99${aleatorio}`, { shouldValidate: true });
     }
   }, [setValue]);
+
+  const consultarDni = useCallback(async () => {
+    const dni = String(getValues('documento_identidad') || '').trim();
+    if (!/^\d{8}$/.test(dni)) {
+      setDniLookupMessage({ type: 'error', text: 'Ingrese un DNI válido de 8 dígitos.' });
+      return;
+    }
+
+    setIsLookingUpDni(true);
+    setDniLookupMessage(null);
+    try {
+      const { data } = await api.get(`/usuarios/consultar-dni/${dni}`);
+      setValue('nombre_razonsocial', data.nombre_completo, {
+        shouldDirty: true,
+        shouldTouch: true,
+        shouldValidate: true
+      });
+      setDniLookupMessage({ type: 'success', text: 'Datos encontrados y nombre completado.' });
+      toast.success('Datos del socio encontrados');
+    } catch (error) {
+      const message = error.message || 'No se pudo consultar el DNI.';
+      setDniLookupMessage({ type: 'error', text: message });
+    } finally {
+      setIsLookingUpDni(false);
+    }
+  }, [getValues, setValue]);
 
   useEffect(() => {
     if (!editId) {
@@ -219,19 +250,34 @@ const TenantFormModal = ({
                   {errors.nombre_razonsocial && <span className="text-[10px] text-error font-bold">{errors.nombre_razonsocial.message}</span>}
                 </div>
                 <div className="flex flex-col gap-1">
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <label className={LABEL_CLASS}>RUC o DNI *</label>
-                    {!editId && (
+                    <div className="flex items-center justify-end gap-1.5 flex-wrap">
                       <button
                         type="button"
-                        onClick={generarDniTemporal}
-                        className="text-[10px] font-bold text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-2 py-0.5 rounded transition-colors flex items-center gap-1"
-                        title="Genera un DNI temporal de 8 dígitos. Podrás cambiarlo después."
+                        onClick={consultarDni}
+                        disabled={isLookingUpDni}
+                        className="text-[10px] font-bold text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-2 py-0.5 rounded transition-colors inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-wait"
+                        title="Consulta manualmente los datos del socio usando un DNI de 8 dígitos"
                       >
-                        <span className="material-symbols-outlined text-[12px]" translate="no">casino</span>
-                        Generar temporal
+                        <span className={`material-symbols-outlined text-[12px] ${isLookingUpDni ? 'animate-spin' : ''}`} translate="no">
+                          {isLookingUpDni ? 'progress_activity' : 'person_search'}
+                        </span>
+                        {isLookingUpDni ? 'Consultando...' : 'Consultar DNI'}
                       </button>
-                    )}
+                      {!editId && (
+                        <button
+                          type="button"
+                          onClick={generarDniTemporal}
+                          disabled={isLookingUpDni}
+                          className="text-[10px] font-bold text-primary hover:text-primary/80 bg-primary/10 hover:bg-primary/20 px-2 py-0.5 rounded transition-colors flex items-center gap-1"
+                          title="Genera un DNI temporal de 8 dígitos. Podrás cambiarlo después."
+                        >
+                          <span className="material-symbols-outlined text-[12px]" translate="no">casino</span>
+                          Generar temporal
+                        </button>
+                      )}
+                    </div>
                   </div>
                   <input
                     {...register('documento_identidad', {
@@ -241,8 +287,20 @@ const TenantFormModal = ({
                     className={`${errors.documento_identidad ? ERROR_INPUT_CLASS : INPUT_CLASS} font-data-mono`}
                     placeholder="8 u 11 dígitos"
                     type="text"
+                    inputMode="numeric"
+                    maxLength={11}
+                    readOnly={isLookingUpDni}
+                    onInput={() => setDniLookupMessage(null)}
                   />
                   {errors.documento_identidad && <span className="text-[10px] text-error font-bold">{errors.documento_identidad.message}</span>}
+                  {dniLookupMessage && (
+                    <span
+                      role="status"
+                      className={`text-[10px] font-bold ${dniLookupMessage.type === 'success' ? 'text-emerald-700' : 'text-error'}`}
+                    >
+                      {dniLookupMessage.text}
+                    </span>
+                  )}
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className={LABEL_CLASS}>Teléfono de Contacto *</label>

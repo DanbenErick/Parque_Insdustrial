@@ -172,7 +172,7 @@ const TenantsAndSectors = () => {
 
     const systemUrl = import.meta.env.VITE_APP_URL || window.location.origin;
     const message = [
-      `Hola ${credentials.name}, te compartimos tus datos de acceso al Sistema de Gestión del Parque Industrial:`,
+      `Hola ${credentials.name}, te compartimos tus datos de acceso al Sistema de Gestión de Electrificación del Parque Industrial:`,
       '',
       `Usuario: ${credentials.username || 'No registrado'}`,
       `Clave temporal: ${credentials.value}`,
